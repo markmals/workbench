@@ -1,4 +1,4 @@
-# Agent Instructions
+# Contributor Guidelines
 
 This document provides instructions for AI coding agents working on this project.
 
@@ -8,21 +8,21 @@ This document provides instructions for AI coding agents working on this project
 - **Type**: {{ .Kind }}
 {{- if eq .Kind "website" }}
 - **Stack**: TypeScript, React, React Router, TanStack Query, Tailwind CSS
-{{- if and .Website .Website.Convex }}
+{{- if .Website }}{{- if .Website.Convex }}
 - **Backend**: Convex (real-time data, functions, auth)
-{{- end }}
-{{- if and .Website .Website.Deployment }}
+{{- end }}{{- end }}
+{{- if .Website }}{{- if .Website.Deployment }}
 - **Deployment**: {{ .Website.Deployment | title }}
-{{- end }}
+{{- end }}{{- end }}
 {{- end }}
 {{- if eq .Kind "tui" }}
 - **Stack**: Go, Bubble Tea, Bubbles, Lip Gloss, Huh
 {{- end }}
 {{- if eq .Kind "ios" }}
 - **Stack**: Swift, UIKit, @Observable, Diffable Collection View
-{{- if and .IOS .IOS.Tuist }}
+{{- if .IOS }}{{- if .IOS.Tuist }}
 - **Build System**: Tuist
-{{- end }}
+{{- end }}{{- end }}
 {{- end }}
 
 ## Code Style
@@ -67,9 +67,9 @@ src/
   routes/       # React Router routes
   lib/          # Utilities and helpers
   hooks/        # Custom React hooks
-{{- if and .Website .Website.Convex }}
+{{- if .Website }}{{- if .Website.Convex }}
 convex/         # Convex functions and schema
-{{- end }}
+{{- end }}{{- end }}
 {{- end }}
 {{- if eq .Kind "tui" }}
 cmd/{{ lower .Name }}/  # CLI entrypoint
@@ -87,27 +87,27 @@ internal/
 {{- end }}
 ```
 
-{{- if and .Agents .Agents.Claude }}
+{{- if .Agents }}{{- if .Agents.Claude }}
 
 ## Claude Code Specific
 
 - Use `/compact` periodically to manage context
 - Prefer editing existing files over creating new ones
 - Ask clarifying questions when requirements are ambiguous
-{{- end }}
+{{- end }}{{- end }}
 
-{{- if and .Agents .Agents.Codex }}
+{{- if .Agents }}{{- if .Agents.Codex }}
 
 ## Codex Specific
 
 - Keep responses concise and code-focused
 - Provide complete, runnable code snippets
-{{- end }}
+{{- end }}{{- end }}
 
-{{- if and .Agents .Agents.Gemini }}
+{{- if .Agents }}{{- if .Agents.Gemini }}
 
 ## Gemini CLI Specific
 
 - Follow project conventions strictly
 - Reference existing patterns in the codebase
-{{- end }}
+{{- end }}{{- end }}

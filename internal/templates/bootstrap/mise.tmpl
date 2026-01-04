@@ -1,4 +1,4 @@
-{{- if eq .Kind "website" }}
+{{- if eq .Kind "website" -}}
 [tools]
 node = "24"
 pnpm = "latest"
@@ -28,9 +28,9 @@ sources = [
     "vite.config.ts",
     "tsconfig.json",
     "tsconfig.*.json",
-{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
     "worker-configuration.d.ts",
-{{- end }}
+{{- end }}{{- end }}
     "app/**/*.{ts,tsx,css,json,md}",
 ]
 outputs = ["build"]
@@ -41,14 +41,14 @@ description = "Preview the built application"
 depends = "build"
 run = "vite preview"
 
-{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
 
 [tasks.deploy]
 description = "Deploy to Cloudflare Workers"
 depends = "build"
 confirm = "Are you sure you want to deploy to Cloudflare Workers?"
 run = "wrangler deploy"
-{{- end }}
+{{- end }}{{- end }}
 
 [tasks.fmt]
 description = "Format the project with Prettier"
@@ -62,14 +62,14 @@ run = "biome check --write --unsafe ."
 description = "Format and lint the project"
 depends = ["fmt", "lint"]
 
-{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
 
 [tasks."typegen:cloudflare"]
 description = "Generate types for Cloudflare bindings"
 sources = ["wrangler.jsonc"]
 outputs = ["worker-configuration.d.ts"]
 run = "wrangler types"
-{{- end }}
+{{- end }}{{- end }}
 
 [tasks."typegen:react-router"]
 description = "Generate types for React Router routes"

@@ -6,8 +6,18 @@ run = "go build -o bin/wb ./cmd/wb"
 description = "Build the wb binary"
 
 [tasks.dev]
-run = "go run ./cmd/wb"
-description = "Run wb in development mode"
+description = "Run wb in a temporary directory"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -e
+DIR=$(mktemp -d)
+echo "Running in $DIR"
+cd "$DIR"
+{{config_root}}/bin/wb "$@"
+echo ""
+echo "Working directory: $DIR"
+"""
 
 [tasks.test]
 run = "go test ./..."

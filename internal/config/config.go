@@ -24,11 +24,11 @@ type Config struct {
 	// Kind is the project type: website, tui, ios, monorepo.
 	Kind string `json:"kind"`
 
-	// Name is the project name.
+	// Name is the project name (inferred from path).
 	Name string `json:"name"`
 
-	// Description is a short project description.
-	Description string `json:"description,omitempty"`
+	// Path is the project directory path (used during init, not persisted).
+	Path string `json:"-"`
 
 	// Features is the list of enabled feature names.
 	Features []string `json:"features"`

@@ -10,12 +10,12 @@ node_modules/
 .react-router/
 build/
 
-{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
 # Cloudflare
 .mf
 .wrangler
 .dev.vars*
-{{- end }}
+{{- end }}{{- end }}
 {{- end }}
 
 {{- if eq .Kind "tui" }}

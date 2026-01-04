@@ -150,9 +150,8 @@ func (r *Renderer) List() ([]string, error) {
 // RenderContext holds data passed to templates during rendering.
 type RenderContext struct {
 	// Project info
-	Name        string
-	Kind        string
-	Description string
+	Name string
+	Kind string
 
 	// Features
 	Features []string
