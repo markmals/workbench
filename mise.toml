@@ -1,5 +1,10 @@
 [tools]
 go = "1.24"
+node = "24"
+pnpm = "latest"
+
+[env]
+_.path = ["{{config_root}}/node_modules/.bin", "./bin"]
 
 [tasks.build]
 run = "go build -o bin/wb ./cmd/wb"
@@ -38,3 +43,12 @@ description = "Format and lint the project"
 [tasks.tidy]
 run = "go mod tidy"
 description = "Tidy go.mod"
+
+[tasks."docs:dev"]
+run = "vitepress dev docs"
+
+[tasks."docs:build"]
+run = "vitepress build docs"
+
+[tasks."docs:preview"]
+run = "vitepress preview docs"

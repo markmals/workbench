@@ -24,3 +24,8 @@ go.work.sum
 
 # macOS files
 .DS_Store
+
+# VitePress docs
+node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
