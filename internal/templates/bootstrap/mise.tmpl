@@ -1,83 +1,152 @@
-[env]
-# Project environment variables
-
 {{- if eq .Kind "website" }}
-
 [tools]
-node = "22"
+node = "24"
+pnpm = "latest"
+
+[env]
+_.path = ['{{ "{{config_root}}" }}/node_modules/.bin']
+
+[hooks]
+postinstall = """
+if [ "$CI" = "true" ]; then
+  exit 0
+fi
+
+pnpm install
+mise run typegen:*
+"""
 
 [tasks.dev]
-run = "npm run dev"
-description = "Start development server"
+description = "Run the development server"
+run = "vite dev --host"
 
 [tasks.build]
-run = "npm run build"
-description = "Build for production"
+description = "Build the app"
+sources = [
+    "pnpm-lock.yaml",
+    "react-router.config.ts",
+    "vite.config.ts",
+    "tsconfig.json",
+    "tsconfig.*.json",
+{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+    "worker-configuration.d.ts",
+{{- end }}
+    "app/**/*.{ts,tsx,css,json,md}",
+]
+outputs = ["build"]
+run = "vite build"
 
-[tasks.test]
-run = "npm test"
-description = "Run tests"
+[tasks.preview]
+description = "Preview the built application"
+depends = "build"
+run = "vite preview"
+
+{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+
+[tasks.deploy]
+description = "Deploy to Cloudflare Workers"
+depends = "build"
+confirm = "Are you sure you want to deploy to Cloudflare Workers?"
+run = "wrangler deploy"
+{{- end }}
+
+[tasks.fmt]
+description = "Format the project with Prettier"
+run = "prettier --write ."
 
 [tasks.lint]
-run = "npm run lint"
-description = "Run linter"
+description = "Lint the project with Biome"
+run = "biome check --write --unsafe ."
+
+[tasks.check]
+description = "Format and lint the project"
+depends = ["fmt", "lint"]
+
+{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+
+[tasks."typegen:cloudflare"]
+description = "Generate types for Cloudflare bindings"
+sources = ["wrangler.jsonc"]
+outputs = ["worker-configuration.d.ts"]
+run = "wrangler types"
+{{- end }}
+
+[tasks."typegen:react-router"]
+description = "Generate types for React Router routes"
+sources = ["react-router.config.ts", "vite.config.ts", "app/**/*.{ts,tsx}"]
+outputs = [".react-router"]
+run = "react-router typegen"
+
+[tasks.typecheck]
+description = "Typecheck the project"
+depends = "typegen:*"
+run = "tsc --noEmit"
+
+[tasks.test]
+description = "Run tests"
+run = "vitest run"
 {{- end }}
 
 {{- if eq .Kind "tui" }}
-
 [tools]
 go = "1.24"
 
 [tasks.dev]
-run = "go run ./cmd/{{ lower .Name }}"
 description = "Run the application"
+run = "go run ./cmd/{{ lower .Name }}"
 
 [tasks.build]
-run = "go build -o bin/{{ lower .Name }} ./cmd/{{ lower .Name }}"
 description = "Build the binary"
+run = "go build -o bin/{{ lower .Name }} ./cmd/{{ lower .Name }}"
 
-[tasks.test]
-run = "go test ./..."
-description = "Run tests"
+[tasks.fmt]
+description = "Format Go code"
+run = "go fmt ./..."
 
 [tasks.lint]
-run = "go vet ./..."
 description = "Run linter"
+run = "go vet ./..."
+
+[tasks.check]
+description = "Format and lint the project"
+depends = ["fmt", "lint"]
+
+[tasks.test]
+description = "Run tests"
+run = "go test ./..."
+
+[tasks.tidy]
+description = "Tidy go.mod"
+run = "go mod tidy"
 {{- end }}
 
 {{- if eq .Kind "ios" }}
-
 [tools]
-# iOS tooling managed by Xcode
-
-[tasks.build]
-run = "tuist generate && xcodebuild build -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }}"
-description = "Build the app"
-
-[tasks.test]
-run = "xcodebuild test -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }} -destination 'platform=iOS Simulator,name=iPhone 16'"
-description = "Run tests"
+# iOS tooling managed by Xcode/Tuist
 
 [tasks.generate]
+description = "Generate Xcode project with Tuist"
 run = "tuist generate"
-description = "Generate Xcode project"
-{{- end }}
-
-{{- if eq .Kind "monorepo" }}
-
-[tools]
-node = "22"
-go = "1.24"
-
-[tasks.dev]
-run = "npm run dev"
-description = "Start development"
 
 [tasks.build]
-run = "npm run build"
-description = "Build all packages"
+description = "Build the app"
+depends = "generate"
+run = "xcodebuild build -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }}"
 
 [tasks.test]
-run = "npm test"
-description = "Run all tests"
+description = "Run tests in simulator"
+depends = "generate"
+run = "xcodebuild test -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }} -destination 'platform=iOS Simulator,name=iPhone 16'"
+
+[tasks.fmt]
+description = "Format Swift code"
+run = "swift-format format -i -r Sources Tests"
+
+[tasks.lint]
+description = "Lint Swift code"
+run = "swift-format lint -r Sources Tests"
+
+[tasks.check]
+description = "Format and lint the project"
+depends = ["fmt", "lint"]
 {{- end }}

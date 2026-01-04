@@ -13,9 +13,17 @@ description = "Run wb in development mode"
 run = "go test ./..."
 description = "Run all tests"
 
+[tasks.fmt]
+run = "go fmt ./..."
+description = "Format Go code"
+
 [tasks.lint]
 run = "go vet ./..."
 description = "Run linter"
+
+[tasks.check]
+depends = ["fmt", "lint"]
+description = "Format and lint the project"
 
 [tasks.tidy]
 run = "go mod tidy"
