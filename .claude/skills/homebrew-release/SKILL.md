@@ -22,10 +22,18 @@ Ask the user what version to release, or infer from context. Follow semver (vX.Y
 
 ### 2. Create GitHub release
 
-Use `gh release create` which creates both the tag and release:
+Use `gh release create` which creates both the tag and release.
+
+The `--generate-notes` flag auto-generates release notes from PR titles and commits since the last release.
+
+For pre-1.0.0 versions, add `--prerelease` to mark as a prerelease:
 
 ```bash
+# For v1.0.0+
 gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
+
+# For v0.x.x (prerelease)
+gh release create v0.X.Y --title "v0.X.Y" --generate-notes --prerelease
 ```
 
 ### 3. Get the SHA256
