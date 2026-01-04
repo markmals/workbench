@@ -44,18 +44,40 @@ type Config struct {
 
 	// IOS contains iOS-specific configuration.
 	IOS *IOSConfig `json:"ios,omitempty"`
+}
 
-	// Agents contains agent-specific configuration.
-	Agents *AgentsConfig `json:"agents,omitempty"`
+// HasFeature returns true if the given feature is enabled.
+func (c *Config) HasFeature(name string) bool {
+	for _, f := range c.Features {
+		if f == name {
+			return true
+		}
+	}
+	return false
+}
+
+// AddFeature adds a feature if not already present.
+func (c *Config) AddFeature(name string) {
+	if !c.HasFeature(name) {
+		c.Features = append(c.Features, name)
+	}
+}
+
+// RemoveFeature removes a feature if present.
+func (c *Config) RemoveFeature(name string) {
+	features := make([]string, 0, len(c.Features))
+	for _, f := range c.Features {
+		if f != name {
+			features = append(features, f)
+		}
+	}
+	c.Features = features
 }
 
 // WebsiteConfig holds website-specific options.
 type WebsiteConfig struct {
 	// Deployment target: cloudflare, railway.
-	Deployment string `json:"deployment"`
-
-	// Convex indicates whether Convex is enabled.
-	Convex bool `json:"convex"`
+	Deployment string `json:"deployment,omitempty"`
 
 	// Mode is the rendering mode: spa, ssr, static.
 	Mode string `json:"mode,omitempty"`
@@ -74,18 +96,6 @@ type IOSConfig struct {
 
 	// DataBackend is the data backend: sqlite, convex.
 	DataBackend string `json:"dataBackend,omitempty"`
-}
-
-// AgentsConfig holds agent-specific options.
-type AgentsConfig struct {
-	// Codex indicates whether Codex agent support is enabled.
-	Codex bool `json:"codex,omitempty"`
-
-	// Claude indicates whether Claude Code agent support is enabled.
-	Claude bool `json:"claude,omitempty"`
-
-	// Gemini indicates whether Gemini CLI agent support is enabled.
-	Gemini bool `json:"gemini,omitempty"`
 }
 
 // ConfigPath returns the path to the config file in the given directory.

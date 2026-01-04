@@ -33,10 +33,12 @@ func (c *InitCmd) Run(ctx *Context) error {
 			Path: c.Path,
 			Kind: c.Kind,
 		}
+		if c.Convex {
+			defaults.AddFeature("convex")
+		}
 		if c.Kind == "website" {
 			defaults.Website = &config.WebsiteConfig{
 				Deployment: c.Deployment,
-				Convex:     c.Convex,
 			}
 		}
 	}
@@ -103,15 +105,6 @@ func (c *InitCmd) Run(ctx *Context) error {
 	if cfg.Website != nil {
 		renderCtx.Website = &templates.WebsiteContext{
 			Deployment: cfg.Website.Deployment,
-			Convex:     cfg.Website.Convex,
-		}
-	}
-
-	if cfg.Agents != nil {
-		renderCtx.Agents = &templates.AgentsContext{
-			Claude: cfg.Agents.Claude,
-			Codex:  cfg.Agents.Codex,
-			Gemini: cfg.Agents.Gemini,
 		}
 	}
 

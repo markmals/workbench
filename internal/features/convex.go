@@ -51,14 +51,8 @@ export default defineSchema({
 		return fmt.Errorf("creating schema.ts: %w", err)
 	}
 
-	// Update config
-	if ctx.Config.Website == nil {
-		ctx.Config.Website = &config.WebsiteConfig{}
-	}
-	ctx.Config.Website.Convex = true
-
 	// Add to features list
-	ctx.Config.Features = appendUnique(ctx.Config.Features, "convex")
+	ctx.Config.AddFeature("convex")
 
 	// Save config
 	if err := config.Save(ctx.Dir, ctx.Config); err != nil {
@@ -80,13 +74,8 @@ func (f *ConvexFeature) Remove(ctx *Context) error {
 		return fmt.Errorf("removing convex directory: %w", err)
 	}
 
-	// Update config
-	if ctx.Config.Website != nil {
-		ctx.Config.Website.Convex = false
-	}
-
 	// Remove from features list
-	ctx.Config.Features = removeItem(ctx.Config.Features, "convex")
+	ctx.Config.RemoveFeature("convex")
 
 	// Save config
 	if err := config.Save(ctx.Dir, ctx.Config); err != nil {
@@ -96,22 +85,3 @@ func (f *ConvexFeature) Remove(ctx *Context) error {
 	return nil
 }
 
-// Helper functions
-func appendUnique(slice []string, item string) []string {
-	for _, s := range slice {
-		if s == item {
-			return slice
-		}
-	}
-	return append(slice, item)
-}
-
-func removeItem(slice []string, item string) []string {
-	result := make([]string, 0, len(slice))
-	for _, s := range slice {
-		if s != item {
-			result = append(result, s)
-		}
-	}
-	return result
-}

@@ -165,14 +165,11 @@ type RenderContext struct {
 	// iOS config
 	IOS *IOSContext
 
-	// Agent config
-	Agents *AgentsContext
 }
 
 // WebsiteContext holds website-specific template data.
 type WebsiteContext struct {
 	Deployment string
-	Convex     bool
 	Mode       string
 }
 
@@ -185,13 +182,6 @@ type TUIContext struct {
 type IOSContext struct {
 	Tuist       bool
 	DataBackend string
-}
-
-// AgentsContext holds agent-specific template data.
-type AgentsContext struct {
-	Codex  bool
-	Claude bool
-	Gemini bool
 }
 
 // HasFeature returns true if the given feature is enabled.

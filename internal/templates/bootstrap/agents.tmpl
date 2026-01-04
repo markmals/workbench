@@ -8,9 +8,9 @@ This document provides instructions for AI coding agents working on this project
 - **Type**: {{ .Kind }}
 {{- if eq .Kind "website" }}
 - **Stack**: TypeScript, React, React Router, TanStack Query, Tailwind CSS
-{{- if .Website }}{{- if .Website.Convex }}
+{{- if .HasFeature "convex" }}
 - **Backend**: Convex (real-time data, functions, auth)
-{{- end }}{{- end }}
+{{- end }}
 {{- if .Website }}{{- if .Website.Deployment }}
 - **Deployment**: {{ .Website.Deployment | title }}
 {{- end }}{{- end }}
@@ -67,9 +67,9 @@ src/
   routes/       # React Router routes
   lib/          # Utilities and helpers
   hooks/        # Custom React hooks
-{{- if .Website }}{{- if .Website.Convex }}
+{{- if .HasFeature "convex" }}
 convex/         # Convex functions and schema
-{{- end }}{{- end }}
+{{- end }}
 {{- end }}
 {{- if eq .Kind "tui" }}
 cmd/{{ lower .Name }}/  # CLI entrypoint
@@ -87,27 +87,27 @@ internal/
 {{- end }}
 ```
 
-{{- if .Agents }}{{- if .Agents.Claude }}
+{{- if .HasFeature "claude" }}
 
 ## Claude Code Specific
 
 - Use `/compact` periodically to manage context
 - Prefer editing existing files over creating new ones
 - Ask clarifying questions when requirements are ambiguous
-{{- end }}{{- end }}
+{{- end }}
 
-{{- if .Agents }}{{- if .Agents.Codex }}
+{{- if .HasFeature "codex" }}
 
 ## Codex Specific
 
 - Keep responses concise and code-focused
 - Provide complete, runnable code snippets
-{{- end }}{{- end }}
+{{- end }}
 
-{{- if .Agents }}{{- if .Agents.Gemini }}
+{{- if .HasFeature "gemini" }}
 
 ## Gemini CLI Specific
 
 - Follow project conventions strictly
 - Reference existing patterns in the codebase
-{{- end }}{{- end }}
+{{- end }}

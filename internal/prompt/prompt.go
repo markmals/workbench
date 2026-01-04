@@ -29,13 +29,8 @@ type Result struct {
 	Deployment string
 	Convex     bool
 
-	// Agent selection (populated from Agents slice)
-	Claude bool
-	Codex  bool
-	Gemini bool
-
-	// Raw agent selection from multi-select
-	Agents []string
+	// Features selected (agents, convex, etc.)
+	Features []string
 }
 
 // ToConfig converts prompt results to a Config.
@@ -43,18 +38,17 @@ func (r *Result) ToConfig() *config.Config {
 	cfg := config.New("", r.Kind) // Name will be set by init command from path
 	cfg.Path = r.Path
 
+	// Add selected features
+	cfg.Features = append(cfg.Features, r.Features...)
+
+	// Add convex if selected
+	if r.Convex {
+		cfg.AddFeature("convex")
+	}
+
 	if r.Kind == "website" {
 		cfg.Website = &config.WebsiteConfig{
 			Deployment: r.Deployment,
-			Convex:     r.Convex,
-		}
-	}
-
-	if r.Claude || r.Codex || r.Gemini {
-		cfg.Agents = &config.AgentsConfig{
-			Claude: r.Claude,
-			Codex:  r.Codex,
-			Gemini: r.Gemini,
 		}
 	}
 
@@ -76,19 +70,14 @@ func runNonInteractive(opts Options) (*Result, error) {
 
 	d := opts.Defaults
 	result := &Result{
-		Path: d.Path,
-		Kind: d.Kind,
+		Path:     d.Path,
+		Kind:     d.Kind,
+		Features: d.Features,
+		Convex:   d.HasFeature("convex"),
 	}
 
 	if d.Website != nil {
 		result.Deployment = d.Website.Deployment
-		result.Convex = d.Website.Convex
-	}
-
-	if d.Agents != nil {
-		result.Claude = d.Agents.Claude
-		result.Codex = d.Agents.Codex
-		result.Gemini = d.Agents.Gemini
 	}
 
 	return result, nil
@@ -153,7 +142,7 @@ func runInteractive(opts Options) (*Result, error) {
 				huh.NewOption("Codex", "codex"),
 				huh.NewOption("Gemini CLI", "gemini"),
 			).
-			Value(&result.Agents),
+			Value(&result.Features),
 	)
 
 	form := huh.NewForm(basicGroup, websiteGroup, agentGroup).
@@ -168,18 +157,6 @@ func runInteractive(opts Options) (*Result, error) {
 	if result.Kind == "website" {
 		if result.Deployment == "" {
 			result.Deployment = "cloudflare"
-		}
-	}
-
-	// Convert agent selection to booleans
-	for _, agent := range result.Agents {
-		switch agent {
-		case "claude":
-			result.Claude = true
-		case "codex":
-			result.Codex = true
-		case "gemini":
-			result.Gemini = true
 		}
 	}
 
