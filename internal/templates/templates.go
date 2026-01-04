@@ -47,7 +47,7 @@ func defaultFuncMap() template.FuncMap {
 		"split": strings.Split,
 
 		// Conditionals
-		"contains": strings.Contains,
+		"contains":  strings.Contains,
 		"hasPrefix": strings.HasPrefix,
 		"hasSuffix": strings.HasSuffix,
 
@@ -150,8 +150,9 @@ func (r *Renderer) List() ([]string, error) {
 // RenderContext holds data passed to templates during rendering.
 type RenderContext struct {
 	// Project info
-	Name string
-	Kind string
+	Name        string
+	Kind        string
+	Description string
 
 	// Features
 	Features []string

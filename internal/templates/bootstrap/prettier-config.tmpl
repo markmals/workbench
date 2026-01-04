@@ -1,0 +1,23 @@
+import type { Config } from "prettier";
+
+export default {
+    printWidth: 100,
+    tabWidth: 4,
+    arrowParens: "avoid",
+
+    plugins: [
+        "prettier-plugin-pkg",
+        "prettier-plugin-sh",
+        "prettier-plugin-tailwindcss",
+        "prettier-plugin-toml",
+    ],
+
+    overrides: [
+        {
+            files: ["*.jsonc"],
+            options: {
+                trailingComma: "none",
+            },
+        },
+    ],
+} satisfies Config;

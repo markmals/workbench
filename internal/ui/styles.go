@@ -21,7 +21,7 @@ var (
 		Foreground(Primary)
 
 	Subtitle = lipgloss.NewStyle().
-		Foreground(Secondary)
+			Foreground(Secondary)
 
 	Bold = lipgloss.NewStyle().
 		Bold(true)
@@ -30,13 +30,13 @@ var (
 		Foreground(Muted)
 
 	SuccessText = lipgloss.NewStyle().
-		Foreground(Success)
+			Foreground(Success)
 
 	WarningText = lipgloss.NewStyle().
-		Foreground(Warning)
+			Foreground(Warning)
 
 	ErrorText = lipgloss.NewStyle().
-		Foreground(Error)
+			Foreground(Error)
 )
 
 // Container styles.
@@ -56,12 +56,12 @@ var (
 // List styles.
 var (
 	ListItem = lipgloss.NewStyle().
-		PaddingLeft(2)
+			PaddingLeft(2)
 
 	SelectedItem = lipgloss.NewStyle().
-		Foreground(Primary).
-		Bold(true).
-		PaddingLeft(2)
+			Foreground(Primary).
+			Bold(true).
+			PaddingLeft(2)
 )
 
 // Help text style.
@@ -71,11 +71,11 @@ var (
 		Bold(true)
 
 	HelpText = lipgloss.NewStyle().
-		Foreground(Muted)
+			Foreground(Muted)
 
 	HelpSeparator = lipgloss.NewStyle().
-		Foreground(Muted).
-		SetString(" • ")
+			Foreground(Muted).
+			SetString(" • ")
 )
 
 // Spinner style.

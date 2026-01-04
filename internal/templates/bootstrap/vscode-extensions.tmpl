@@ -1,22 +1,23 @@
 {
-  "recommendations": [
+    "recommendations": [
 {{- if eq .Kind "website" }}
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "bradlc.vscode-tailwindcss",
-    "dsznajder.es7-react-js-snippets",
+        "biomejs.biome",
+        "bradlc.vscode-tailwindcss",
+        "christian-kohler.npm-intellisense",
 {{- end }}
 {{- if eq .Kind "tui" }}
-    "golang.go",
+        "golang.go",
 {{- end }}
 {{- if eq .Kind "ios" }}
-    "vknabel.vscode-apple-swift-format",
-    "sswg.swift-lang",
+        "vknabel.vscode-apple-swift-format",
+        "sswg.swift-lang",
 {{- end }}
-{{- if and .Agents .Agents.Claude }}
-    "anthropic.claude-code",
+        "hverlin.mise-vscode",
+        "planet57.vscode-beads",
+{{- if eq .Kind "website" }}
+        "prettier.prettier-vscode",
+        "tamasfe.even-better-toml",
 {{- end }}
-    "mikestead.dotenv",
-    "EditorConfig.EditorConfig"
-  ]
+        "wayou.vscode-todo-highlight"
+    ]
 }

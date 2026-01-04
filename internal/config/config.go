@@ -27,6 +27,9 @@ type Config struct {
 	// Name is the project name.
 	Name string `json:"name"`
 
+	// Description is a short project description.
+	Description string `json:"description,omitempty"`
+
 	// Features is the list of enabled feature names.
 	Features []string `json:"features"`
 

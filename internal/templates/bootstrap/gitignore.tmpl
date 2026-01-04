@@ -1,65 +1,55 @@
-# Dependencies
+.DS_Store
+{{- if eq .Kind "website" }}
+
 node_modules/
-vendor/
+*.tsbuildinfo
+.env
+
+# React Router
+.cache/
+.react-router/
+build/
+
+{{- if and .Website (eq .Website.Deployment "cloudflare") }}
+# Cloudflare
+.mf
+.wrangler
+.dev.vars*
+{{- end }}
+{{- end }}
+
+{{- if eq .Kind "tui" }}
 
 # Build output
-dist/
-build/
 bin/
 *.exe
 *.dll
 *.so
 *.dylib
 
-# IDE/Editor
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Testing
-coverage/
-.nyc_output/
-
-# Workbench
-.workbench/
-
-{{- if eq .Kind "website" }}
-
-# TypeScript/Node
-*.tsbuildinfo
-.turbo/
-{{- end }}
-
-{{- if eq .Kind "tui" }}
-
-# Go
+# Test artifacts
 *.test
 *.out
+coverage.*
+
+# Go
+go.work
+go.work.sum
 {{- end }}
 
 {{- if eq .Kind "ios" }}
 
 # Xcode
 xcuserdata/
-*.xcworkspace
 DerivedData/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Tuist
+Tuist/.build/
+
+# Dependencies
+Carthage/
+Pods/
 {{- end }}
