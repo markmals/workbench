@@ -33,7 +33,7 @@ func (f *ConvexFeature) Apply(ctx *Context) error {
 	if ctx.DryRun {
 		fmt.Println("Would add Convex to project:")
 		fmt.Println("  - Install convex package")
-		fmt.Println("  - Run pnpm dlx convex init")
+		fmt.Println("  - Run convex dev --once --configure=new")
 		return nil
 	}
 
@@ -46,10 +46,10 @@ func (f *ConvexFeature) Apply(ctx *Context) error {
 		return fmt.Errorf("installing convex: %w", err)
 	}
 
-	// Run convex init (creates convex/ directory with starter files)
+	// Run convex dev to create convex/ directory with starter files
 	fmt.Println("Initializing convex...")
-	if err := runner.Run(bgCtx, "pnpm", "dlx", "convex", "init"); err != nil {
-		return fmt.Errorf("running convex init: %w", err)
+	if err := runner.Run(bgCtx, "pnpm", "dlx", "convex", "dev", "--once", "--configure=new"); err != nil {
+		return fmt.Errorf("running convex dev: %w", err)
 	}
 
 	// Add to features list

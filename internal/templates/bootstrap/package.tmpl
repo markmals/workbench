@@ -2,17 +2,5 @@
   "name": "{{ .Name }}",
   "type": "module",
   "private": true,
-  "sideEffects": false,
-  "pnpm": {
-    "overrides": {
-      "vite": "npm:rolldown-vite@latest"
-    },
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "workerd",
-      "@tailwindcss/oxide",
-      "sharp",
-      "unrs-resolver"
-    ]
-  }
+  "sideEffects": false
 }
