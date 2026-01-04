@@ -88,3 +88,8 @@ Tell the user:
 - Description must not start with an article ("A", "An", "The")
 - SHA256 must be lowercase, 64 characters
 - Use env vars in workflows to avoid script injection
+- If binary name differs from formula name, use `output:` parameter:
+  ```ruby
+  # Formula is "workbench.rb" but binary is "wb"
+  system "go", "build", *std_go_args(ldflags:, output: bin/"wb"), "./cmd/wb"
+  ```
