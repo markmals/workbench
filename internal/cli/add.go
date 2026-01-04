@@ -50,8 +50,6 @@ func (c *AddCmd) Run(ctx *Context) error {
 		return fmt.Errorf("feature %s does not apply to %s projects", c.Feature, cfg.Kind)
 	}
 
-	ctx.Logger.Info("adding feature", "feature", c.Feature)
-
 	// Apply feature
 	fctx := &features.Context{
 		Dir:    dir,

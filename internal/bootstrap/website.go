@@ -2,11 +2,10 @@ package bootstrap
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/charmbracelet/log"
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/shell"
+	"github.com/markmals/workbench/internal/ui"
 )
 
 // WebsiteDeps are the runtime dependencies for a website project.
@@ -56,7 +55,6 @@ var CloudflareDevDeps = []string{
 type Website struct {
 	Dir    string
 	Config *config.Config
-	Logger *log.Logger
 }
 
 // InstallDependencies installs npm dependencies using pnpm.
@@ -79,18 +77,22 @@ func (w *Website) InstallDependencies(ctx context.Context) error {
 		}
 	}
 
-	// Install runtime dependencies
-	w.Logger.Info("installing dependencies")
+	// Install runtime dependencies with spinner
 	args := append([]string{"add"}, deps...)
-	if err := runner.Run(ctx, "pnpm", args...); err != nil {
-		return fmt.Errorf("installing dependencies: %w", err)
+	err := ui.RunWithSpinner(ctx, "Installing dependencies", func() error {
+		return runner.Run(ctx, "pnpm", args...)
+	})
+	if err != nil {
+		return err
 	}
 
-	// Install dev dependencies
-	w.Logger.Info("installing dev dependencies")
+	// Install dev dependencies with spinner
 	devArgs := append([]string{"add", "-D"}, devDeps...)
-	if err := runner.Run(ctx, "pnpm", devArgs...); err != nil {
-		return fmt.Errorf("installing dev dependencies: %w", err)
+	err = ui.RunWithSpinner(ctx, "Installing dev dependencies", func() error {
+		return runner.Run(ctx, "pnpm", devArgs...)
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil

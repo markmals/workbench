@@ -166,6 +166,22 @@ Prefer Bubbles for common interactions rather than inventing new widgets:
 
 Wrap them in small adapters so domain logic never depends on UI types.
 
+## Long-running operations (spinners)
+
+Any operation that may take >500ms MUST use a spinner for user feedback:
+
+```go
+err := ui.RunWithSpinner(ctx, "Installing dependencies", func() error {
+    return runner.Run(ctx, "pnpm", "add", "some-package")
+})
+```
+
+Rules:
+- Use `ui.RunWithSpinner()` from `internal/ui/spinner.go`
+- Never show raw log output (INFO, WARN) during long operations
+- Spinners show ✓ on success, ✗ on failure automatically
+- Non-TTY environments get simple text output instead
+
 ## Output rules (important)
 
 - CLI output intended for piping must go to stdout and be stable.

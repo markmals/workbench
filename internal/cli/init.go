@@ -77,7 +77,6 @@ func (c *InitCmd) Run(ctx *Context) error {
 	cfg.Name = filepath.Base(absDir)
 
 	ctx.Logger.Debug("initializing project", "dir", absDir, "name", cfg.Name)
-	ctx.Logger.Info("creating project", "name", cfg.Name, "kind", cfg.Kind)
 
 	// Validate
 	if err := config.Validate(cfg); err != nil {
@@ -144,7 +143,6 @@ func (c *InitCmd) Run(ctx *Context) error {
 		wb := &bootstrap.Website{
 			Dir:    absDir,
 			Config: cfg,
-			Logger: ctx.Logger,
 		}
 		if err := wb.InstallDependencies(context.Background()); err != nil {
 			return fmt.Errorf("installing dependencies: %w", err)

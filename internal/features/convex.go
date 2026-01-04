@@ -8,6 +8,7 @@ import (
 
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/shell"
+	"github.com/markmals/workbench/internal/ui"
 )
 
 func init() {
@@ -33,23 +34,18 @@ func (f *ConvexFeature) Apply(ctx *Context) error {
 	if ctx.DryRun {
 		fmt.Println("Would add Convex to project:")
 		fmt.Println("  - Install convex package")
-		fmt.Println("  - Run convex dev --once --configure=new")
 		return nil
 	}
 
 	runner := shell.New(ctx.Dir)
 	bgCtx := context.Background()
 
-	// Install convex package
-	fmt.Println("Installing convex...")
-	if err := runner.Run(bgCtx, "pnpm", "add", "convex"); err != nil {
-		return fmt.Errorf("installing convex: %w", err)
-	}
-
-	// Run convex dev to create convex/ directory with starter files
-	fmt.Println("Initializing convex...")
-	if err := runner.Run(bgCtx, "pnpm", "dlx", "convex", "dev", "--once", "--configure=new"); err != nil {
-		return fmt.Errorf("running convex dev: %w", err)
+	// Install convex package with spinner
+	err := ui.RunWithSpinner(bgCtx, "Installing convex", func() error {
+		return runner.Run(bgCtx, "pnpm", "add", "convex")
+	})
+	if err != nil {
+		return err
 	}
 
 	// Add to features list
@@ -59,6 +55,9 @@ func (f *ConvexFeature) Apply(ctx *Context) error {
 	if err := config.Save(ctx.Dir, ctx.Config); err != nil {
 		return fmt.Errorf("saving config: %w", err)
 	}
+
+	fmt.Println("\nTo complete Convex setup, run:")
+	fmt.Println("  convex dev")
 
 	return nil
 }
@@ -80,12 +79,11 @@ func (f *ConvexFeature) Remove(ctx *Context) error {
 		return fmt.Errorf("removing convex directory: %w", err)
 	}
 
-	// Uninstall convex package
-	fmt.Println("Removing convex package...")
-	if err := runner.Run(bgCtx, "pnpm", "remove", "convex"); err != nil {
-		// Don't fail if package wasn't installed
-		fmt.Printf("Note: %v\n", err)
-	}
+	// Uninstall convex package with spinner
+	_ = ui.RunWithSpinner(bgCtx, "Removing convex package", func() error {
+		return runner.Run(bgCtx, "pnpm", "remove", "convex")
+	})
+	// Don't fail if package wasn't installed
 
 	// Remove from features list
 	ctx.Config.RemoveFeature("convex")

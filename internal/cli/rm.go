@@ -34,8 +34,6 @@ func (c *RmCmd) Run(ctx *Context) error {
 		return fmt.Errorf("unknown feature: %s", c.Feature)
 	}
 
-	ctx.Logger.Info("removing feature", "feature", c.Feature)
-
 	// Remove feature
 	fctx := &features.Context{
 		Dir:    dir,

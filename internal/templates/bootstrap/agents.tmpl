@@ -41,6 +41,8 @@ This document provides instructions for AI coding agents working on this project
 - Keep Update pure; use Commands for I/O
 - Use charmbracelet/log for logging (never fmt.Printf for diagnostics)
 - Use Go's "testing" package for tests
+- Use spinners for any operation that may take >500ms (see internal/ui/spinner.go)
+- Never show raw log output during long operations; wrap with ui.RunWithSpinner()
 {{- end }}
 
 {{- if eq .Kind "ios" }}
