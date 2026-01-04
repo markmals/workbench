@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
+	"github.com/markmals/workbench/internal/assets"
 	"github.com/markmals/workbench/internal/cli"
 	"github.com/markmals/workbench/internal/logx"
 )
@@ -14,6 +15,10 @@ func main() {
 		kong.Name("wb"),
 		kong.Description("A personal CLI to bootstrap, evolve, and archive/restore projects."),
 		kong.UsageOnError(),
+		kong.Help(func(options kong.HelpOptions, ctx *kong.Context) error {
+			assets.PrintLogo()
+			return kong.DefaultHelpPrinter(options, ctx)
+		}),
 	)
 
 	// Set up logger based on flags

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/markmals/workbench/internal/assets"
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/prompt"
 	"github.com/markmals/workbench/internal/templates"
@@ -22,6 +23,9 @@ type InitCmd struct {
 }
 
 func (c *InitCmd) Run(ctx *Context) error {
+	// Show logo
+	assets.PrintLogo()
+
 	// Build defaults from flags
 	var defaults *config.Config
 	if c.Path != "" || c.Kind != "" {
@@ -45,6 +49,10 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	result, err := prompt.Run(opts)
 	if err != nil {
+		// Silent exit on user abort (ctrl+c)
+		if err.Error() == "user aborted" {
+			return nil
+		}
 		return fmt.Errorf("gathering input: %w", err)
 	}
 
@@ -143,7 +151,9 @@ func (c *InitCmd) Run(ctx *Context) error {
 		fmt.Printf("\n✓ Created %s project: %s\n", cfg.Kind, cfg.Name)
 		fmt.Printf("  Location: %s\n", absDir)
 		fmt.Println("\nNext steps:")
-		fmt.Println("  cd", projectPath)
+		if projectPath != "." {
+			fmt.Println("  cd", projectPath)
+		}
 		fmt.Println("  mise install")
 		fmt.Println("  mise run dev")
 	}

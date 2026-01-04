@@ -12,6 +12,7 @@ type CLI struct {
 	Verbose bool   `help:"Enable verbose logging" short:"v"`
 
 	// Commands
+	Home    HomeCmd    `cmd:"" default:"withargs" hidden:""`
 	Init    InitCmd    `cmd:"" help:"Create a new project"`
 	Archive ArchiveCmd `cmd:"" help:"Archive repo to GitHub org"`
 	Restore RestoreCmd `cmd:"" help:"Restore repo from archive org"`
