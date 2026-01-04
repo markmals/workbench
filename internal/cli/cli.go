@@ -18,7 +18,7 @@ type CLI struct {
 	Restore RestoreCmd `cmd:"" help:"Restore repo from archive org"`
 	Add     AddCmd     `cmd:"" help:"Add a feature to the project"`
 	Rm      RmCmd      `cmd:"" help:"Remove a feature from the project"`
-	Update  UpdateCmd  `cmd:"" help:"Update managed files from templates"`
+	// Update  UpdateCmd  `cmd:"" help:"Update managed files from templates"` // TODO: Implement
 	Version VersionCmd `cmd:"" help:"Show version information"`
 }
 
