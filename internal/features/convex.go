@@ -1,11 +1,13 @@
 package features
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/markmals/workbench/internal/config"
+	"github.com/markmals/workbench/internal/shell"
 )
 
 func init() {
@@ -29,26 +31,25 @@ func (f *ConvexFeature) Applies(cfg *config.Config) bool {
 
 func (f *ConvexFeature) Apply(ctx *Context) error {
 	if ctx.DryRun {
-		fmt.Println("Would add Convex to project")
+		fmt.Println("Would add Convex to project:")
+		fmt.Println("  - Install convex package")
+		fmt.Println("  - Run pnpm dlx convex init")
 		return nil
 	}
 
-	// Create convex directory
-	convexDir := filepath.Join(ctx.Dir, "convex")
-	if err := os.MkdirAll(convexDir, 0755); err != nil {
-		return fmt.Errorf("creating convex directory: %w", err)
+	runner := shell.New(ctx.Dir)
+	bgCtx := context.Background()
+
+	// Install convex package
+	fmt.Println("Installing convex...")
+	if err := runner.Run(bgCtx, "pnpm", "add", "convex"); err != nil {
+		return fmt.Errorf("installing convex: %w", err)
 	}
 
-	// Create schema.ts
-	schemaPath := filepath.Join(convexDir, "schema.ts")
-	schemaContent := `import { defineSchema } from "convex/server";
-
-export default defineSchema({
-  // Define your tables here
-});
-`
-	if err := os.WriteFile(schemaPath, []byte(schemaContent), 0644); err != nil {
-		return fmt.Errorf("creating schema.ts: %w", err)
+	// Run convex init (creates convex/ directory with starter files)
+	fmt.Println("Initializing convex...")
+	if err := runner.Run(bgCtx, "pnpm", "dlx", "convex", "init"); err != nil {
+		return fmt.Errorf("running convex init: %w", err)
 	}
 
 	// Add to features list
@@ -64,14 +65,26 @@ export default defineSchema({
 
 func (f *ConvexFeature) Remove(ctx *Context) error {
 	if ctx.DryRun {
-		fmt.Println("Would remove Convex from project")
+		fmt.Println("Would remove Convex from project:")
+		fmt.Println("  - Remove convex directory")
+		fmt.Println("  - Uninstall convex package")
 		return nil
 	}
+
+	runner := shell.New(ctx.Dir)
+	bgCtx := context.Background()
 
 	// Remove convex directory
 	convexDir := filepath.Join(ctx.Dir, "convex")
 	if err := os.RemoveAll(convexDir); err != nil {
 		return fmt.Errorf("removing convex directory: %w", err)
+	}
+
+	// Uninstall convex package
+	fmt.Println("Removing convex package...")
+	if err := runner.Run(bgCtx, "pnpm", "remove", "convex"); err != nil {
+		// Don't fail if package wasn't installed
+		fmt.Printf("Note: %v\n", err)
 	}
 
 	// Remove from features list

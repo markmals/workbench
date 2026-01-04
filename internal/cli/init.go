@@ -1,11 +1,13 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/markmals/workbench/internal/assets"
+	"github.com/markmals/workbench/internal/bootstrap"
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/prompt"
 	"github.com/markmals/workbench/internal/templates"
@@ -135,6 +137,18 @@ func (c *InitCmd) Run(ctx *Context) error {
 			continue
 		}
 		ctx.Logger.Debug("rendered", "file", dest)
+	}
+
+	// Install dependencies for website projects
+	if cfg.Kind == "website" {
+		wb := &bootstrap.Website{
+			Dir:    absDir,
+			Config: cfg,
+			Logger: ctx.Logger,
+		}
+		if err := wb.InstallDependencies(context.Background()); err != nil {
+			return fmt.Errorf("installing dependencies: %w", err)
+		}
 	}
 
 	// Print success message
