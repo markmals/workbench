@@ -40,7 +40,11 @@ func (c *AddCmd) Run(ctx *Context) error {
 		}
 		fmt.Printf("Unknown feature: %s\n\nAvailable features for %s projects:\n", c.Feature, cfg.Kind)
 		for _, f := range available {
-			fmt.Printf("  %-12s  %s\n", f.Name(), f.Description())
+			status := ""
+			if cfg.HasFeature(f.Name()) {
+				status = " (installed)"
+			}
+			fmt.Printf("  %-12s  %s%s\n", f.Name(), f.Description(), status)
 		}
 		return nil
 	}
