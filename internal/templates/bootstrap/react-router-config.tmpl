@@ -1,0 +1,8 @@
+import type { Config } from "@react-router/dev/config";
+import { flatRoutes } from "@react-router/fs-routes";
+
+export default {
+  appDirectory: "app",
+  ssr: true,
+  routes: (defineRoutes) => flatRoutes("routes", defineRoutes),
+} satisfies Config;

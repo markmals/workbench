@@ -124,6 +124,9 @@ func (c *InitCmd) Run(ctx *Context) error {
 	// Add website-specific templates
 	if cfg.Kind == "website" {
 		templateFiles["bootstrap/package.tmpl"] = "package.json"
+		templateFiles["bootstrap/tsconfig.tmpl"] = "tsconfig.json"
+		templateFiles["bootstrap/vite-config.tmpl"] = "vite.config.ts"
+		templateFiles["bootstrap/react-router-config.tmpl"] = "react-router.config.ts"
 		templateFiles["bootstrap/biome.tmpl"] = "biome.jsonc"
 		templateFiles["bootstrap/prettierignore.tmpl"] = ".prettierignore"
 		templateFiles["bootstrap/prettier-config.tmpl"] = "prettier.config.ts"
