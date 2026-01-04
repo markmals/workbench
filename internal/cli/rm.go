@@ -2,24 +2,54 @@ package cli
 
 import (
 	"fmt"
+	"path/filepath"
+
+	"github.com/markmals/workbench/internal/config"
+	"github.com/markmals/workbench/internal/features"
 )
 
 // RmCmd removes a feature from the project.
 type RmCmd struct {
-	Feature string `arg:"" help:"Feature to remove (e.g., agents.codex, vscode.base)"`
-	Pkg     string `help:"Target package in monorepo" name:"pkg"`
+	Feature string `arg:"" help:"Feature to remove (e.g., convex)"`
+	DryRun  bool   `help:"Show what would be done without making changes" name:"dry-run"`
 	Yes     bool   `help:"Skip confirmation" short:"y"`
 }
 
 func (c *RmCmd) Run(ctx *Context) error {
-	ctx.Logger.Info("removing feature", "feature", c.Feature, "pkg", c.Pkg)
+	// Resolve project directory
+	dir, err := filepath.Abs(ctx.CLI.CWD)
+	if err != nil {
+		return fmt.Errorf("resolving directory: %w", err)
+	}
 
-	// TODO: Implement rm
-	// 1. Load config
-	// 2. Look up feature in registry
-	// 3. Remove/disable feature
-	// 4. Update config
+	// Load config
+	cfg, err := config.Load(dir)
+	if err != nil {
+		return fmt.Errorf("loading config: %w", err)
+	}
 
-	fmt.Println("wb rm is not yet implemented")
+	// Look up feature
+	feature := features.Get(c.Feature)
+	if feature == nil {
+		return fmt.Errorf("unknown feature: %s", c.Feature)
+	}
+
+	ctx.Logger.Info("removing feature", "feature", c.Feature)
+
+	// Remove feature
+	fctx := &features.Context{
+		Dir:    dir,
+		Config: cfg,
+		DryRun: c.DryRun,
+	}
+	if err := feature.Remove(fctx); err != nil {
+		return fmt.Errorf("removing feature: %w", err)
+	}
+
+	if c.DryRun {
+		fmt.Println("Dry run complete.")
+	} else {
+		fmt.Printf("✓ Removed %s\n", c.Feature)
+	}
 	return nil
 }
