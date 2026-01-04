@@ -68,6 +68,8 @@ Edit `Formula/workbench.rb`:
 
 ### 5. Create PR for bottle builds
 
+**Important**: The PR must contain actual formula changes (version, sha256, etc.) for `brew test-bot` to build bottles. Empty commits or PRs without formula changes will not trigger bottle builds.
+
 ```bash
 git add Formula/workbench.rb
 git commit -m "workbench vX.Y.Z"
