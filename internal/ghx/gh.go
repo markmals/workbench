@@ -50,7 +50,7 @@ func CreateRepo(ctx context.Context, name string, private bool, opts Options) (*
 		return &Repo{Name: name}, nil
 	}
 
-	args := []string{"repo", "create", name, "--json", "name,nameWithOwner,url,sshUrl,isPrivate"}
+	args := []string{"repo", "create", name}
 	if private {
 		args = append(args, "--private")
 	} else {
@@ -58,20 +58,14 @@ func CreateRepo(ctx context.Context, name string, private bool, opts Options) (*
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", args...)
-	out, err := cmd.Output()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			return nil, fmt.Errorf("gh repo create: %s", string(exitErr.Stderr))
 		}
 		return nil, fmt.Errorf("gh repo create: %w", err)
 	}
 
-	var repo Repo
-	if err := json.Unmarshal(out, &repo); err != nil {
-		return nil, fmt.Errorf("parsing response: %w", err)
-	}
-
-	return &repo, nil
+	return &Repo{Name: name, FullName: name}, nil
 }
 
 // DeleteRepo deletes a GitHub repository.
@@ -117,21 +111,15 @@ func ForkRepo(ctx context.Context, nameWithOwner string, opts Options) (*Repo, e
 		return &Repo{FullName: nameWithOwner}, nil
 	}
 
-	cmd := exec.CommandContext(ctx, "gh", "repo", "fork", nameWithOwner, "--clone=false", "--json", "name,nameWithOwner,url,sshUrl,isPrivate")
-	out, err := cmd.Output()
-	if err != nil {
+	cmd := exec.CommandContext(ctx, "gh", "repo", "fork", nameWithOwner, "--clone=false")
+	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			return nil, fmt.Errorf("gh repo fork: %s", string(exitErr.Stderr))
 		}
 		return nil, fmt.Errorf("gh repo fork: %w", err)
 	}
 
-	var repo Repo
-	if err := json.Unmarshal(out, &repo); err != nil {
-		return nil, fmt.Errorf("parsing response: %w", err)
-	}
-
-	return &repo, nil
+	return &Repo{FullName: nameWithOwner}, nil
 }
 
 // ArchiveRepo archives a repository.
