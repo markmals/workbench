@@ -41,8 +41,46 @@ This document provides instructions for AI coding agents working on this project
 - Keep Update pure; use Commands for I/O
 - Use charmbracelet/log for logging (never fmt.Printf for diagnostics)
 - Use Go's "testing" package for tests
-- Use spinners for any operation that may take >500ms (see internal/ui/spinner.go)
-- Never show raw log output during long operations; wrap with ui.RunWithSpinner()
+
+### Spinners for long operations
+Any operation that may take >500ms MUST use a spinner:
+
+```go
+err := ui.RunWithSpinner(ctx, "Installing dependencies", func() error {
+    return runner.Run(ctx, "pnpm", "add", "some-package")
+})
+```
+
+- Never show raw log output during long operations
+- Spinners show ✓ on success, ✗ on failure automatically
+
+### External CLI wrappers
+When wrapping external CLIs (git, gh, etc.):
+
+```go
+cmd := exec.CommandContext(ctx, "gh", "repo", "view", repo)
+out, err := cmd.CombinedOutput()  // Always capture stderr!
+if err != nil {
+    return fmt.Errorf("gh repo view: %s", strings.TrimSpace(string(out)))
+}
+```
+
+- Always use `CombinedOutput()` to capture stderr for error messages
+- Support `DryRun` option for destructive operations
+- Check prerequisites before executing (e.g., is gh authenticated?)
+
+### Safe filesystem operations
+For user-facing deletions, use confirmation prompts:
+
+```go
+err := ops.Remove(path, ops.RemoveOptions{
+    Force:  c.Yes,     // Skip confirmation with -y flag
+    DryRun: c.DryRun,  // Show what would happen
+})
+```
+
+- Never use `os.RemoveAll` directly for user-facing deletions
+- Always support `--dry-run` and `-y/--yes` flags
 {{- end }}
 
 {{- if eq .Kind "ios" }}
@@ -78,7 +116,10 @@ cmd/{{ lower .Name }}/  # CLI entrypoint
 internal/
   cli/          # Kong commands
   tui/          # Bubble Tea models
-  ui/           # Lip Gloss styles
+  ui/           # Lip Gloss styles, spinners
+  ops/          # Safe filesystem operations
+  shell/        # Shell command runner
+  config/       # Config loading
 {{- end }}
 {{- if eq .Kind "ios" }}
 {{ .Name }}/

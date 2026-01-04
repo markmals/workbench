@@ -63,9 +63,13 @@ If you think we need something else, stop and discuss with me why you think so b
 - `cmd/<app>/main.go` — entrypoint (wire CLI, logging, config)
 - `internal/cli/` — Kong command structs + Run() methods
 - `internal/tui/` — Bubble Tea programs, models, components, styles
-- `internal/workbench/` — core domain logic (file ops, templating, git, github, etc.)
 - `internal/config/` — config loading, defaults, env vars
-- `internal/ui/` — shared UI helpers (Lip Gloss styles, tables, rendering utils)
+- `internal/ui/` — shared UI helpers (Lip Gloss styles, tables, spinners)
+- `internal/ops/` — safe filesystem operations with confirmations
+- `internal/shell/` — shell command runner with context support
+- `internal/gitx/` — git CLI wrapper utilities
+- `internal/ghx/` — GitHub CLI wrapper utilities
+- `internal/projectdef/` — declarative TOML project definitions
 
 Keep domain logic out of `cmd/` and out of the Bubble Tea model where possible.
 
@@ -165,6 +169,57 @@ Prefer Bubbles for common interactions rather than inventing new widgets:
 - table rendering for structured data
 
 Wrap them in small adapters so domain logic never depends on UI types.
+
+## External CLI wrappers
+
+When wrapping external CLIs (git, gh, pnpm, etc.), follow this pattern:
+
+```go
+// In internal/ghx/gh.go or similar
+func SomeOperation(ctx context.Context, args string, opts Options) error {
+    if opts.DryRun {
+        fmt.Printf("Would do X with %s\n", args)
+        return nil
+    }
+
+    cmd := exec.CommandContext(ctx, "gh", "repo", "create", args)
+    out, err := cmd.CombinedOutput()  // Always capture stderr!
+    if err != nil {
+        return fmt.Errorf("gh repo create: %s", strings.TrimSpace(string(out)))
+    }
+    return nil
+}
+```
+
+Rules:
+- Always use `CombinedOutput()` to capture stderr for error messages
+- Support `DryRun` option for all destructive operations
+- Use `context.Context` for cancellation
+- Check prerequisites before executing (e.g., `ghx.IsAuthenticated()`)
+- Wrap operations with `ui.RunWithSpinner()` if they may take >500ms
+
+## Safe filesystem operations
+
+Use `internal/ops` for filesystem operations that need safety rails:
+
+```go
+// Deletes with confirmation prompt
+err := ops.Remove(path, ops.RemoveOptions{
+    Force:  skipConfirmation,
+    DryRun: dryRun,
+})
+
+// Moves with overwrite confirmation
+err := ops.Move(src, dst, ops.MoveOptions{
+    Force:  skipConfirmation,
+    DryRun: dryRun,
+})
+```
+
+Rules:
+- Never use `os.RemoveAll` directly for user-facing deletions
+- Always support `--dry-run` and `-y/--yes` flags
+- Show what will happen before doing it
 
 ## Long-running operations (spinners)
 
