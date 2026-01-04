@@ -9,6 +9,7 @@ import (
 	"github.com/markmals/workbench/internal/assets"
 	"github.com/markmals/workbench/internal/bootstrap"
 	"github.com/markmals/workbench/internal/config"
+	"github.com/markmals/workbench/internal/projectdef"
 	"github.com/markmals/workbench/internal/prompt"
 	"github.com/markmals/workbench/internal/templates"
 )
@@ -95,7 +96,7 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	ctx.Logger.Debug("saved config", "path", config.ConfigPath(absDir))
 
-	// Render templates
+	// Render templates from project definition
 	renderer := templates.Bootstrap()
 	renderCtx := &templates.RenderContext{
 		Name:     cfg.Name,
@@ -109,30 +110,13 @@ func (c *InitCmd) Run(ctx *Context) error {
 		}
 	}
 
-	// Render common templates
-	templateFiles := map[string]string{
-		"bootstrap/gitignore.tmpl": ".gitignore",
-		"bootstrap/readme.tmpl":    "README.md",
-		"bootstrap/mise.tmpl":      "mise.toml",
-		"bootstrap/agents.tmpl":    "AGENTS.md",
+	// Load template mappings from project definition
+	def, err := projectdef.Get(cfg.Kind)
+	if err != nil {
+		return fmt.Errorf("loading project definition: %w", err)
 	}
 
-	// Add vscode templates
-	templateFiles["bootstrap/vscode-settings.tmpl"] = ".vscode/settings.json"
-	templateFiles["bootstrap/vscode-extensions.tmpl"] = ".vscode/extensions.json"
-
-	// Add website-specific templates
-	if cfg.Kind == "website" {
-		templateFiles["bootstrap/package.tmpl"] = "package.json"
-		templateFiles["bootstrap/tsconfig.tmpl"] = "tsconfig.json"
-		templateFiles["bootstrap/vite-config.tmpl"] = "vite.config.ts"
-		templateFiles["bootstrap/react-router-config.tmpl"] = "react-router.config.ts"
-		templateFiles["bootstrap/biome.tmpl"] = "biome.jsonc"
-		templateFiles["bootstrap/prettierignore.tmpl"] = ".prettierignore"
-		templateFiles["bootstrap/prettier-config.tmpl"] = "prettier.config.ts"
-	}
-
-	for tmpl, dest := range templateFiles {
+	for dest, tmpl := range def.Templates {
 		destPath := filepath.Join(absDir, dest)
 		if err := renderer.RenderTo(tmpl, renderCtx, destPath); err != nil {
 			ctx.Logger.Warn("failed to render template", "template", tmpl, "error", err)

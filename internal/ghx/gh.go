@@ -58,11 +58,9 @@ func CreateRepo(ctx context.Context, name string, private bool, opts Options) (*
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", args...)
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("gh repo create: %s", string(exitErr.Stderr))
-		}
-		return nil, fmt.Errorf("gh repo create: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("gh repo create: %s", strings.TrimSpace(string(out)))
 	}
 
 	return &Repo{Name: name, FullName: name}, nil
@@ -76,11 +74,9 @@ func DeleteRepo(ctx context.Context, nameWithOwner string, opts Options) error {
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", "repo", "delete", nameWithOwner, "--yes")
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("gh repo delete: %s", string(exitErr.Stderr))
-		}
-		return fmt.Errorf("gh repo delete: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gh repo delete: %s", strings.TrimSpace(string(out)))
 	}
 
 	return nil
@@ -94,11 +90,9 @@ func CloneRepo(ctx context.Context, nameWithOwner, dest string, opts Options) er
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", "repo", "clone", nameWithOwner, dest)
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("gh repo clone: %s", string(exitErr.Stderr))
-		}
-		return fmt.Errorf("gh repo clone: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gh repo clone: %s", strings.TrimSpace(string(out)))
 	}
 
 	return nil
@@ -112,11 +106,9 @@ func ForkRepo(ctx context.Context, nameWithOwner string, opts Options) (*Repo, e
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", "repo", "fork", nameWithOwner, "--clone=false")
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return nil, fmt.Errorf("gh repo fork: %s", string(exitErr.Stderr))
-		}
-		return nil, fmt.Errorf("gh repo fork: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("gh repo fork: %s", strings.TrimSpace(string(out)))
 	}
 
 	return &Repo{FullName: nameWithOwner}, nil
@@ -130,11 +122,9 @@ func ArchiveRepo(ctx context.Context, nameWithOwner string, opts Options) error 
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", "repo", "archive", nameWithOwner, "--yes")
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("gh repo archive: %s", string(exitErr.Stderr))
-		}
-		return fmt.Errorf("gh repo archive: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gh repo archive: %s", strings.TrimSpace(string(out)))
 	}
 
 	return nil
@@ -148,11 +138,9 @@ func UnarchiveRepo(ctx context.Context, nameWithOwner string, opts Options) erro
 	}
 
 	cmd := exec.CommandContext(ctx, "gh", "repo", "unarchive", nameWithOwner, "--yes")
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("gh repo unarchive: %s", string(exitErr.Stderr))
-		}
-		return fmt.Errorf("gh repo unarchive: %w", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gh repo unarchive: %s", strings.TrimSpace(string(out)))
 	}
 
 	return nil

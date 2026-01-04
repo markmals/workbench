@@ -1,0 +1,63 @@
+[project]
+kind = "website"
+description = "React website with Vite and React Router"
+
+[dependencies]
+runtime = [
+  "@react-router/fs-routes",
+  "@tailwindcss/vite",
+  "clsx",
+  "isbot",
+  "react",
+  "react-dom",
+  "react-router",
+  "zod",
+]
+
+dev = [
+  "@biomejs/biome",
+  "@prettier/plugin-oxc",
+  "@react-router/dev",
+  "@types/node",
+  "@types/react",
+  "@types/react-dom",
+  "@typescript/native-preview",
+  "babel-plugin-react-compiler",
+  "prettier",
+  "prettier-plugin-pkg",
+  "prettier-plugin-sh",
+  "prettier-plugin-tailwindcss",
+  "prettier-plugin-toml",
+  "tailwindcss",
+  "vite",
+  "vite-plugin-babel",
+  "vitest",
+]
+
+[dependencies.when.cloudflare]
+runtime = ["@cloudflare/vite-plugin"]
+dev = ["wrangler"]
+
+[templates]
+".gitignore" = "bootstrap/gitignore.tmpl"
+"README.md" = "bootstrap/readme.tmpl"
+"mise.toml" = "bootstrap/mise.tmpl"
+"AGENTS.md" = "bootstrap/agents.tmpl"
+".vscode/settings.json" = "bootstrap/vscode-settings.tmpl"
+".vscode/extensions.json" = "bootstrap/vscode-extensions.tmpl"
+"package.json" = "bootstrap/package.tmpl"
+"tsconfig.json" = "bootstrap/tsconfig.tmpl"
+"vite.config.ts" = "bootstrap/vite-config.tmpl"
+"react-router.config.ts" = "bootstrap/react-router-config.tmpl"
+"biome.jsonc" = "bootstrap/biome.tmpl"
+".prettierignore" = "bootstrap/prettierignore.tmpl"
+"prettier.config.ts" = "bootstrap/prettier-config.tmpl"
+
+[features.convex]
+description = "Convex real-time backend with functions and auth"
+packages = ["convex"]
+post_message = "Run 'convex dev' to complete setup"
+
+[features.convex.remove]
+packages = ["convex"]
+directories = ["convex"]
