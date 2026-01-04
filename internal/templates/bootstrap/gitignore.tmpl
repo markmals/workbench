@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE/Editor
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Workbench
+.workbench/
+
+{{- if eq .Kind "website" }}
+
+# TypeScript/Node
+*.tsbuildinfo
+.turbo/
+{{- end }}
+
+{{- if eq .Kind "tui" }}
+
+# Go
+*.test
+*.out
+{{- end }}
+
+{{- if eq .Kind "ios" }}
+
+# Xcode
+xcuserdata/
+*.xcworkspace
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+{{- end }}

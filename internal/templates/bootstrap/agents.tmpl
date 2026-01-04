@@ -1,0 +1,113 @@
+# Agent Instructions
+
+This document provides instructions for AI coding agents working on this project.
+
+## Project Overview
+
+- **Name**: {{ .Name }}
+- **Type**: {{ .Kind }}
+{{- if eq .Kind "website" }}
+- **Stack**: TypeScript, React, React Router, TanStack Query, Tailwind CSS
+{{- if and .Website .Website.Convex }}
+- **Backend**: Convex (real-time data, functions, auth)
+{{- end }}
+{{- if and .Website .Website.Deployment }}
+- **Deployment**: {{ .Website.Deployment | title }}
+{{- end }}
+{{- end }}
+{{- if eq .Kind "tui" }}
+- **Stack**: Go, Bubble Tea, Bubbles, Lip Gloss, Huh
+{{- end }}
+{{- if eq .Kind "ios" }}
+- **Stack**: Swift, UIKit, @Observable, Diffable Collection View
+{{- if and .IOS .IOS.Tuist }}
+- **Build System**: Tuist
+{{- end }}
+{{- end }}
+
+## Code Style
+
+{{- if eq .Kind "website" }}
+- Use TypeScript strict mode
+- Prefer functional components with hooks
+- Use TanStack Query for server state
+- Use Tailwind CSS for styling (no CSS modules)
+- Use Vitest for testing
+{{- end }}
+
+{{- if eq .Kind "tui" }}
+- Use Go standard library unless a dependency is explicitly allowed
+- Follow Elm architecture for TUI components (Model, Update, View)
+- Keep Update pure; use Commands for I/O
+- Use charmbracelet/log for logging (never fmt.Printf for diagnostics)
+- Use Go's "testing" package for tests
+{{- end }}
+
+{{- if eq .Kind "ios" }}
+- Use UIKit (not SwiftUI)
+- Use @Observable for reactive state management
+- Use Diffable Collection View for lists
+- Use Swift Testing framework for tests
+- Never require opening Xcode; use CLI commands
+{{- end }}
+
+## Task Workflow
+
+1. Read and understand the existing code before making changes
+2. Make minimal, focused changes
+3. Run tests after changes: `mise run test`
+4. Run linter before committing: `mise run lint`
+
+## File Structure
+
+```
+{{- if eq .Kind "website" }}
+src/
+  components/   # React components
+  routes/       # React Router routes
+  lib/          # Utilities and helpers
+  hooks/        # Custom React hooks
+{{- if and .Website .Website.Convex }}
+convex/         # Convex functions and schema
+{{- end }}
+{{- end }}
+{{- if eq .Kind "tui" }}
+cmd/{{ lower .Name }}/  # CLI entrypoint
+internal/
+  cli/          # Kong commands
+  tui/          # Bubble Tea models
+  ui/           # Lip Gloss styles
+{{- end }}
+{{- if eq .Kind "ios" }}
+{{ .Name }}/
+  App/          # App delegate, scenes
+  Views/        # View controllers
+  Models/       # Data models
+  Services/     # Business logic
+{{- end }}
+```
+
+{{- if and .Agents .Agents.Claude }}
+
+## Claude Code Specific
+
+- Use `/compact` periodically to manage context
+- Prefer editing existing files over creating new ones
+- Ask clarifying questions when requirements are ambiguous
+{{- end }}
+
+{{- if and .Agents .Agents.Codex }}
+
+## Codex Specific
+
+- Keep responses concise and code-focused
+- Provide complete, runnable code snippets
+{{- end }}
+
+{{- if and .Agents .Agents.Gemini }}
+
+## Gemini CLI Specific
+
+- Follow project conventions strictly
+- Reference existing patterns in the codebase
+{{- end }}

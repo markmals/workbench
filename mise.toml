@@ -1,0 +1,22 @@
+[tools]
+go = "1.24"
+
+[tasks.build]
+run = "go build -o bin/wb ./cmd/wb"
+description = "Build the wb binary"
+
+[tasks.dev]
+run = "go run ./cmd/wb"
+description = "Run wb in development mode"
+
+[tasks.test]
+run = "go test ./..."
+description = "Run all tests"
+
+[tasks.lint]
+run = "go vet ./..."
+description = "Run linter"
+
+[tasks.tidy]
+run = "go mod tidy"
+description = "Tidy go.mod"

@@ -1,0 +1,83 @@
+[env]
+# Project environment variables
+
+{{- if eq .Kind "website" }}
+
+[tools]
+node = "22"
+
+[tasks.dev]
+run = "npm run dev"
+description = "Start development server"
+
+[tasks.build]
+run = "npm run build"
+description = "Build for production"
+
+[tasks.test]
+run = "npm test"
+description = "Run tests"
+
+[tasks.lint]
+run = "npm run lint"
+description = "Run linter"
+{{- end }}
+
+{{- if eq .Kind "tui" }}
+
+[tools]
+go = "1.24"
+
+[tasks.dev]
+run = "go run ./cmd/{{ lower .Name }}"
+description = "Run the application"
+
+[tasks.build]
+run = "go build -o bin/{{ lower .Name }} ./cmd/{{ lower .Name }}"
+description = "Build the binary"
+
+[tasks.test]
+run = "go test ./..."
+description = "Run tests"
+
+[tasks.lint]
+run = "go vet ./..."
+description = "Run linter"
+{{- end }}
+
+{{- if eq .Kind "ios" }}
+
+[tools]
+# iOS tooling managed by Xcode
+
+[tasks.build]
+run = "tuist generate && xcodebuild build -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }}"
+description = "Build the app"
+
+[tasks.test]
+run = "xcodebuild test -workspace {{ .Name }}.xcworkspace -scheme {{ .Name }} -destination 'platform=iOS Simulator,name=iPhone 16'"
+description = "Run tests"
+
+[tasks.generate]
+run = "tuist generate"
+description = "Generate Xcode project"
+{{- end }}
+
+{{- if eq .Kind "monorepo" }}
+
+[tools]
+node = "22"
+go = "1.24"
+
+[tasks.dev]
+run = "npm run dev"
+description = "Start development"
+
+[tasks.build]
+run = "npm run build"
+description = "Build all packages"
+
+[tasks.test]
+run = "npm test"
+description = "Run all tests"
+{{- end }}

@@ -1,0 +1,22 @@
+{
+  "recommendations": [
+{{- if eq .Kind "website" }}
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "dsznajder.es7-react-js-snippets",
+{{- end }}
+{{- if eq .Kind "tui" }}
+    "golang.go",
+{{- end }}
+{{- if eq .Kind "ios" }}
+    "vknabel.vscode-apple-swift-format",
+    "sswg.swift-lang",
+{{- end }}
+{{- if and .Agents .Agents.Claude }}
+    "anthropic.claude-code",
+{{- end }}
+    "mikestead.dotenv",
+    "EditorConfig.EditorConfig"
+  ]
+}
