@@ -81,6 +81,42 @@ err := ops.Remove(path, ops.RemoveOptions{
 
 - Never use `os.RemoveAll` directly for user-facing deletions
 - Always support `--dry-run` and `-y/--yes` flags
+
+### Homebrew release process
+
+If distributing via Homebrew tap:
+
+1. **Tag the release:**
+   ```bash
+   git tag vX.Y.Z && git push --tags
+   ```
+
+2. **Get SHA256:**
+   ```bash
+   curl -sL https://github.com/OWNER/REPO/archive/refs/tags/vX.Y.Z.tar.gz | shasum -a 256
+   ```
+
+3. **Update formula and create PR:**
+   ```bash
+   cd /path/to/homebrew-tap
+   git checkout -b bump-vX.Y.Z
+   # Edit Formula/NAME.rb: update url version and sha256
+   git commit -am "NAME vX.Y.Z"
+   git push -u origin bump-vX.Y.Z
+   gh pr create --title "NAME vX.Y.Z" --body "Version bump"
+   ```
+
+4. **Wait for CI** (test-bot builds bottles on PR)
+
+5. **Merge with bottles:**
+   ```bash
+   gh pr edit <PR#> --add-label pr-pull
+   ```
+
+Formula conventions:
+- Description must not start with "A", "An", "The"
+- SHA256 must be lowercase, 64 characters
+- Use env vars in workflows to avoid script injection
 {{- end }}
 
 {{- if eq .Kind "ios" }}

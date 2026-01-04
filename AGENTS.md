@@ -249,6 +249,57 @@ Rules:
 - Prefer simple goroutines + channels; keep ownership clear.
 - Ensure every goroutine has a clear shutdown path.
 
+## Homebrew Release Process
+
+This project is distributed via a Homebrew tap at `markmals/homebrew-tap`.
+
+### Tap structure
+
+```
+homebrew-tap/
+  Formula/workbench.rb    # Formula that builds from source
+  .github/workflows/
+    tests.yml             # Runs brew test-bot on PRs (builds bottles)
+    publish.yml           # Merges bottles via pr-pull label
+```
+
+### Releasing a new version
+
+1. **Tag the release in workbench repo:**
+   ```bash
+   git tag vX.Y.Z
+   git push --tags
+   ```
+
+2. **Get the SHA256 of the tarball:**
+   ```bash
+   curl -sL https://github.com/markmals/workbench/archive/refs/tags/vX.Y.Z.tar.gz | shasum -a 256
+   ```
+
+3. **Update the formula:**
+   ```bash
+   cd /path/to/homebrew-tap
+   git checkout -b bump-vX.Y.Z
+   # Edit Formula/workbench.rb: update url version and sha256
+   git commit -am "workbench vX.Y.Z"
+   git push -u origin bump-vX.Y.Z
+   gh pr create --title "workbench vX.Y.Z" --body "Version bump"
+   ```
+
+4. **Wait for CI to build bottles** (test-bot runs on PR, builds bottles for each platform)
+
+5. **Merge with bottles:**
+   ```bash
+   gh pr edit <PR#> --repo markmals/homebrew-tap --add-label pr-pull
+   ```
+   The `pr-pull` label triggers the publish workflow which downloads bottle artifacts, adds bottle blocks to the formula, and merges.
+
+### Formula conventions
+
+- Description must not start with an article ("A", "An", "The")
+- SHA256 must be lowercase, 64 characters
+- Use env vars in workflows to avoid script injection (never inline `${{ github.event.* }}` in shell commands)
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
