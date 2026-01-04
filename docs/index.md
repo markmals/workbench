@@ -1,27 +1,38 @@
 ---
-# https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
 hero:
     name: "Workbench"
-    text: "Documentation for the Workbench CLI"
-    tagline: My great project tagline
+    text: "Project Scaffolding CLI"
+    tagline: Bootstrap, evolve, and archive your projects with a single command
     image:
         src: /workbench-icon.png
-        alt: Workbench Icon
+        alt: Workbench
     actions:
         - theme: brand
-          text: Markdown Examples
-          link: /markdown-examples
+          text: Get Started
+          link: /guide/getting-started
         - theme: alt
-          text: API Examples
-          link: /api-examples
+          text: View on GitHub
+          link: https://github.com/markmals/workbench
 
 features:
-    - title: Feature A
-      details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-    - title: Feature B
-      details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-    - title: Feature C
-      details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    - icon: ⚡
+      title: Instant Project Setup
+      details: Create fully-configured projects with a single command. Workbench handles the boilerplate so you can focus on building.
+    - icon: 🧩
+      title: Modular Features
+      details: Add or remove features like Convex, deployment configs, and more. Your project evolves with your needs.
+    - icon: 📦
+      title: Archive & Restore
+      details: Safely archive projects to GitHub when you're done. Restore them instantly when you need them again.
+    - icon: 🎯
+      title: Multiple Project Types
+      details: Support for websites, TUI applications, iOS apps, and more. Each template is carefully crafted for its ecosystem.
+    - icon: 🔧
+      title: mise-Powered
+      details: Built on mise for reproducible development environments. Every project includes the right tool versions.
+    - icon: 🤖
+      title: AI-Ready
+      details: Optional Claude Code and Codex integrations with pre-configured skills for automated workflows.
 ---

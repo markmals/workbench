@@ -1,64 +1,143 @@
 import { defineConfig } from "vitepress";
 
-// https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Workbench",
-    description: "Documentation for the Workbench CLI",
-    // Base path for GitHub Pages
-    base: "/workbench",
+    description:
+        "A personal CLI to bootstrap, evolve, and archive/restore projects",
+    base: "/workbench/",
+
+    lastUpdated: true,
+    cleanUrls: true,
+
     markdown: {
         theme: {
             dark: "github-dark",
             light: "github-light",
         },
     },
+
     head: [
-        // TODO: Add favicon
+        ["link", { rel: "icon", href: "/workbench/favicon.ico" }],
+        [
+            "link",
+            {
+                rel: "icon",
+                type: "image/png",
+                sizes: "32x32",
+                href: "/workbench/workbench-icon.png",
+            },
+        ],
         ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
         [
             "link",
-            { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-        ],
-        [
-            "link",
             {
-                rel: "stylesheet",
-                href: "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap",
+                rel: "preconnect",
+                href: "https://fonts.gstatic.com",
+                crossorigin: "",
             },
         ],
         [
             "link",
             {
                 rel: "stylesheet",
-                href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap",
+                href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap",
             },
         ],
         [
             "link",
             {
                 rel: "stylesheet",
-                href: "https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap",
+                href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap",
+            },
+        ],
+        [
+            "link",
+            {
+                rel: "stylesheet",
+                href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+            },
+        ],
+        [
+            "meta",
+            {
+                name: "og:title",
+                content: "Workbench - Project Scaffolding CLI",
+            },
+        ],
+        [
+            "meta",
+            {
+                name: "og:description",
+                content: "Bootstrap, evolve, and archive your projects with ease",
             },
         ],
     ],
+
     themeConfig: {
         logo: "/workbench-icon.png",
-        // https://vitepress.dev/reference/default-theme-config
-        nav: [
-            { text: "Home", link: "/" },
-            { text: "Examples", link: "/markdown-examples" },
-        ],
+        siteTitle: "Workbench",
 
-        sidebar: [
+        nav: [
+            { text: "Guide", link: "/guide/getting-started" },
+            { text: "Commands", link: "/commands/init" },
             {
-                text: "Examples",
+                text: "v0.1.0",
                 items: [
-                    { text: "Markdown Examples", link: "/markdown-examples" },
-                    { text: "Runtime API Examples", link: "/api-examples" },
+                    {
+                        text: "Changelog",
+                        link: "https://github.com/markmals/workbench/releases",
+                    },
                 ],
             },
         ],
 
-        socialLinks: [{ icon: "github", link: "https://github.com/vuejs/vitepress" }],
+        sidebar: {
+            "/guide/": [
+                {
+                    text: "Introduction",
+                    items: [
+                        { text: "What is Workbench?", link: "/guide/what-is-workbench" },
+                        { text: "Getting Started", link: "/guide/getting-started" },
+                        { text: "Installation", link: "/guide/installation" },
+                    ],
+                },
+                {
+                    text: "Core Concepts",
+                    items: [
+                        { text: "Project Types", link: "/guide/project-types" },
+                        { text: "Features", link: "/guide/features" },
+                        { text: "Configuration", link: "/guide/configuration" },
+                    ],
+                },
+                {
+                    text: "Workflows",
+                    items: [
+                        { text: "Archiving Projects", link: "/guide/archiving" },
+                        { text: "Restoring Projects", link: "/guide/restoring" },
+                    ],
+                },
+            ],
+            "/commands/": [
+                {
+                    text: "Commands",
+                    items: [
+                        { text: "wb init", link: "/commands/init" },
+                        { text: "wb add", link: "/commands/add" },
+                        { text: "wb rm", link: "/commands/rm" },
+                        { text: "wb archive", link: "/commands/archive" },
+                        { text: "wb restore", link: "/commands/restore" },
+                        { text: "wb version", link: "/commands/version" },
+                    ],
+                },
+            ],
+        },
+
+        socialLinks: [
+            { icon: "github", link: "https://github.com/markmals/workbench" },
+        ],
+
+        search: {
+            provider: "local",
+        },
     },
 });
