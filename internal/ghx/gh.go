@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/markmals/workbench/internal/i18n"
 )
 
 // Options configures gh operations.
@@ -27,6 +29,18 @@ func IsAuthenticated() bool {
 	return cmd.Run() == nil
 }
 
+// EnsureAuth checks that gh is installed and authenticated.
+// Returns a user-friendly error if not.
+func EnsureAuth() error {
+	if !IsInstalled() {
+		return fmt.Errorf(i18n.T("ErrGhNotInstalled"))
+	}
+	if !IsAuthenticated() {
+		return fmt.Errorf(i18n.T("ErrGhNotAuthenticated"))
+	}
+	return nil
+}
+
 // Repo represents a GitHub repository.
 type Repo struct {
 	Name        string `json:"name"`
@@ -34,7 +48,6 @@ type Repo struct {
 	Description string `json:"description"`
 	URL         string `json:"url"`
 	SSHURL      string `json:"sshUrl"`
-	CloneURL    string `json:"url"`
 	IsPrivate   bool   `json:"isPrivate"`
 	IsArchived  bool   `json:"isArchived"`
 }
@@ -46,7 +59,7 @@ func CreateRepo(ctx context.Context, name string, private bool, opts Options) (*
 		if private {
 			visibility = "private"
 		}
-		fmt.Printf("Would create %s repository: %s\n", visibility, name)
+		fmt.Println(i18n.T("WouldCreateRepo", i18n.M{"Visibility": visibility, "Repo": name}))
 		return &Repo{Name: name}, nil
 	}
 
@@ -69,7 +82,7 @@ func CreateRepo(ctx context.Context, name string, private bool, opts Options) (*
 // DeleteRepo deletes a GitHub repository.
 func DeleteRepo(ctx context.Context, nameWithOwner string, opts Options) error {
 	if opts.DryRun {
-		fmt.Printf("Would delete repository: %s\n", nameWithOwner)
+		fmt.Println(i18n.T("WouldDeleteRepo", i18n.M{"Repo": nameWithOwner}))
 		return nil
 	}
 
@@ -85,7 +98,7 @@ func DeleteRepo(ctx context.Context, nameWithOwner string, opts Options) error {
 // CloneRepo clones a GitHub repository.
 func CloneRepo(ctx context.Context, nameWithOwner, dest string, opts Options) error {
 	if opts.DryRun {
-		fmt.Printf("Would clone %s to %s\n", nameWithOwner, dest)
+		fmt.Println(i18n.T("WouldCloneRepo", i18n.M{"Repo": nameWithOwner, "Dest": dest}))
 		return nil
 	}
 
@@ -101,7 +114,7 @@ func CloneRepo(ctx context.Context, nameWithOwner, dest string, opts Options) er
 // ForkRepo forks a repository.
 func ForkRepo(ctx context.Context, nameWithOwner string, opts Options) (*Repo, error) {
 	if opts.DryRun {
-		fmt.Printf("Would fork repository: %s\n", nameWithOwner)
+		fmt.Println(i18n.T("WouldForkRepo", i18n.M{"Repo": nameWithOwner}))
 		return &Repo{FullName: nameWithOwner}, nil
 	}
 
@@ -117,7 +130,7 @@ func ForkRepo(ctx context.Context, nameWithOwner string, opts Options) (*Repo, e
 // ArchiveRepo archives a repository.
 func ArchiveRepo(ctx context.Context, nameWithOwner string, opts Options) error {
 	if opts.DryRun {
-		fmt.Printf("Would archive repository: %s\n", nameWithOwner)
+		fmt.Println(i18n.T("WouldArchiveRepo", i18n.M{"Repo": nameWithOwner}))
 		return nil
 	}
 
@@ -133,7 +146,7 @@ func ArchiveRepo(ctx context.Context, nameWithOwner string, opts Options) error 
 // UnarchiveRepo unarchives a repository.
 func UnarchiveRepo(ctx context.Context, nameWithOwner string, opts Options) error {
 	if opts.DryRun {
-		fmt.Printf("Would unarchive repository: %s\n", nameWithOwner)
+		fmt.Println(i18n.T("WouldUnarchiveRepo", i18n.M{"Repo": nameWithOwner}))
 		return nil
 	}
 
@@ -198,7 +211,7 @@ func ListRepos(ctx context.Context, owner string, limit int) ([]Repo, error) {
 // TransferRepo transfers a repository to a new owner.
 func TransferRepo(ctx context.Context, nameWithOwner, newOwner string, opts Options) error {
 	if opts.DryRun {
-		fmt.Printf("Would transfer %s to %s\n", nameWithOwner, newOwner)
+		fmt.Println(i18n.T("WouldTransferRepo", i18n.M{"Repo": nameWithOwner, "NewOwner": newOwner}))
 		return nil
 	}
 

@@ -38,11 +38,8 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 	archiveRepo := fmt.Sprintf("%s/%s", c.Org, c.Repo)
 
 	// 1. Check if gh is available and authenticated
-	if !ghx.IsInstalled() {
-		return fmt.Errorf(i18n.T("ErrGhNotInstalled"))
-	}
-	if !ghx.IsAuthenticated() {
-		return fmt.Errorf(i18n.T("ErrGhNotAuthenticated"))
+	if err := ghx.EnsureAuth(); err != nil {
+		return err
 	}
 
 	// 2. Check if repo exists in archive

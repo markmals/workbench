@@ -66,11 +66,8 @@ func (c *ArchiveCmd) Run(ctx *Context) error {
 	}
 
 	// 4. Check if gh is available and authenticated
-	if !ghx.IsInstalled() {
-		return fmt.Errorf(i18n.T("ErrGhNotInstalled"))
-	}
-	if !ghx.IsAuthenticated() {
-		return fmt.Errorf(i18n.T("ErrGhNotAuthenticated"))
+	if err := ghx.EnsureAuth(); err != nil {
+		return err
 	}
 
 	// 5. Create repo in archive org (or use existing)
