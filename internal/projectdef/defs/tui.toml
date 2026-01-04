@@ -1,0 +1,33 @@
+[project]
+kind = "tui"
+description = "Go CLI/TUI with Bubble Tea, Bubbles, Lip Gloss, and Huh"
+
+# TUI projects use go modules, not npm packages
+[dependencies]
+
+[templates]
+".gitignore" = "bootstrap/gitignore.tmpl"
+"README.md" = "bootstrap/readme.tmpl"
+"mise.toml" = "bootstrap/mise.tmpl"
+"AGENTS.md" = "bootstrap/agents.tmpl"
+".vscode/settings.json" = "bootstrap/vscode-settings.tmpl"
+".vscode/extensions.json" = "bootstrap/vscode-extensions.tmpl"
+
+# Conditional templates based on features
+[templates.when.claude]
+".claude/skills/homebrew-release/SKILL.md" = "skills/homebrew-release.tmpl"
+
+[templates.when.codex]
+".codex/skills/homebrew-release/SKILL.md" = "skills/homebrew-release.tmpl"
+
+[features.claude]
+description = "Claude Code agent support with skills"
+
+[features.claude.remove]
+directories = [".claude"]
+
+[features.codex]
+description = "OpenAI Codex CLI agent support with skills"
+
+[features.codex.remove]
+directories = [".codex"]

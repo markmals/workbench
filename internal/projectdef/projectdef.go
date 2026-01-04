@@ -16,8 +16,55 @@ var defsFS embed.FS
 type Definition struct {
 	Project      Project              `toml:"project"`
 	Dependencies Dependencies         `toml:"dependencies"`
-	Templates    map[string]string    `toml:"templates"`
+	Templates    TemplateConfig       `toml:"templates"`
 	Features     map[string]Feature   `toml:"features"`
+}
+
+// TemplateConfig holds both static and conditional templates.
+type TemplateConfig struct {
+	// Static templates (parsed from inline key-value pairs)
+	Static map[string]string
+	// Conditional templates keyed by feature name
+	When map[string]map[string]string
+}
+
+// UnmarshalTOML implements custom TOML unmarshaling for TemplateConfig.
+func (t *TemplateConfig) UnmarshalTOML(data any) error {
+	t.Static = make(map[string]string)
+	t.When = make(map[string]map[string]string)
+
+	m, ok := data.(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	for k, v := range m {
+		if k == "when" {
+			// Handle conditional templates
+			whenMap, ok := v.(map[string]any)
+			if !ok {
+				continue
+			}
+			for feature, templates := range whenMap {
+				templatesMap, ok := templates.(map[string]any)
+				if !ok {
+					continue
+				}
+				t.When[feature] = make(map[string]string)
+				for dest, tmpl := range templatesMap {
+					if tmplStr, ok := tmpl.(string); ok {
+						t.When[feature][dest] = tmplStr
+					}
+				}
+			}
+		} else {
+			// Static template
+			if tmplStr, ok := v.(string); ok {
+				t.Static[k] = tmplStr
+			}
+		}
+	}
+	return nil
 }
 
 // Project holds basic project metadata.

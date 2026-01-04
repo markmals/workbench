@@ -117,13 +117,29 @@ func (c *InitCmd) Run(ctx *Context) error {
 		return fmt.Errorf("loading project definition: %w", err)
 	}
 
-	for dest, tmpl := range def.Templates {
+	// Render static templates
+	for dest, tmpl := range def.Templates.Static {
 		destPath := filepath.Join(absDir, dest)
 		if err := renderer.RenderTo(tmpl, renderCtx, destPath); err != nil {
 			ctx.Logger.Warn("failed to render template", "template", tmpl, "error", err)
 			continue
 		}
 		ctx.Logger.Debug("rendered", "file", dest)
+	}
+
+	// Render conditional templates based on enabled features
+	for feature, templates := range def.Templates.When {
+		if !cfg.HasFeature(feature) {
+			continue
+		}
+		for dest, tmpl := range templates {
+			destPath := filepath.Join(absDir, dest)
+			if err := renderer.RenderTo(tmpl, renderCtx, destPath); err != nil {
+				ctx.Logger.Warn("failed to render conditional template", "feature", feature, "template", tmpl, "error", err)
+				continue
+			}
+			ctx.Logger.Debug("rendered conditional", "feature", feature, "file", dest)
+		}
 	}
 
 	// Install dependencies for website projects
