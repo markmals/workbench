@@ -57,18 +57,39 @@ export default defineConfig({
                 href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
             },
         ],
+        // Open Graph
+        ["meta", { property: "og:type", content: "website" }],
+        ["meta", { property: "og:title", content: "Workbench" }],
         [
             "meta",
             {
-                name: "og:title",
-                content: "Workbench - Project Scaffolding CLI",
+                property: "og:description",
+                content: "A personal CLI to bootstrap, evolve, and archive/restore projects",
             },
         ],
         [
             "meta",
             {
-                name: "og:description",
-                content: "Bootstrap, evolve, and archive your projects with ease",
+                property: "og:image",
+                content: "https://markmals.github.io/workbench/workbench-hero.png",
+            },
+        ],
+        ["meta", { property: "og:url", content: "https://markmals.github.io/workbench/" }],
+        // Twitter Card
+        ["meta", { name: "twitter:card", content: "summary_large_image" }],
+        ["meta", { name: "twitter:title", content: "Workbench" }],
+        [
+            "meta",
+            {
+                name: "twitter:description",
+                content: "A personal CLI to bootstrap, evolve, and archive/restore projects",
+            },
+        ],
+        [
+            "meta",
+            {
+                name: "twitter:image",
+                content: "https://markmals.github.io/workbench/workbench-hero.png",
             },
         ],
     ],
