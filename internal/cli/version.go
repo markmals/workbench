@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+
+	"github.com/markmals/workbench/internal/i18n"
 )
 
 // Version information set at build time.
@@ -43,9 +45,9 @@ func (c *VersionCmd) Run(ctx *Context) error {
 		return enc.Encode(v)
 	}
 
-	fmt.Printf("wb %s\n", v.Version)
-	fmt.Printf("  commit:  %s\n", v.Commit)
-	fmt.Printf("  built:   %s\n", v.BuildDate)
-	fmt.Printf("  go:      %s\n", v.GoVersion)
+	fmt.Println(i18n.T("VersionOutput", i18n.M{"Version": v.Version}))
+	fmt.Println(i18n.T("VersionCommit", i18n.M{"Commit": v.Commit}))
+	fmt.Println(i18n.T("VersionBuilt", i18n.M{"BuildDate": v.BuildDate}))
+	fmt.Println(i18n.T("VersionGo", i18n.M{"GoVersion": v.GoVersion}))
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/markmals/workbench/internal/assets"
 	"github.com/markmals/workbench/internal/bootstrap"
 	"github.com/markmals/workbench/internal/config"
+	"github.com/markmals/workbench/internal/i18n"
 	"github.com/markmals/workbench/internal/projectdef"
 	"github.com/markmals/workbench/internal/prompt"
 	"github.com/markmals/workbench/internal/templates"
@@ -140,14 +141,16 @@ func (c *InitCmd) Run(ctx *Context) error {
 	if ctx.CLI.JSON {
 		// JSON output handled by caller
 	} else {
-		fmt.Printf("\n✓ Created %s project: %s\n", cfg.Kind, cfg.Name)
-		fmt.Printf("  Location: %s\n", absDir)
-		fmt.Println("\nNext steps:")
+		fmt.Println()
+		fmt.Println(i18n.T("InitCreatedProject", i18n.M{"Kind": cfg.Kind, "Name": cfg.Name}))
+		fmt.Println(i18n.T("InitLocation", i18n.M{"Dir": absDir}))
+		fmt.Println()
+		fmt.Println(i18n.T("InitNextSteps"))
 		if projectPath != "." {
-			fmt.Println("  cd", projectPath)
+			fmt.Println(i18n.T("InitCdHint", i18n.M{"Path": projectPath}))
 		}
-		fmt.Println("  mise install")
-		fmt.Println("  mise run dev")
+		fmt.Println(i18n.T("InitMiseInstall"))
+		fmt.Println(i18n.T("InitMiseRunDev"))
 	}
 
 	return nil

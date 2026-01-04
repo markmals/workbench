@@ -6,6 +6,7 @@ import (
 
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/features"
+	"github.com/markmals/workbench/internal/i18n"
 	// Import features to register them
 	_ "github.com/markmals/workbench/internal/features"
 )
@@ -36,13 +37,15 @@ func (c *AddCmd) Run(ctx *Context) error {
 		// List available features
 		available := features.ListApplicable(cfg)
 		if len(available) == 0 {
-			return fmt.Errorf("unknown feature: %s (no features available for %s projects)", c.Feature, cfg.Kind)
+			return fmt.Errorf(i18n.T("ErrNoFeaturesAvailable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
 		}
-		fmt.Printf("Unknown feature: %s\n\nAvailable features for %s projects:\n", c.Feature, cfg.Kind)
+		fmt.Println(i18n.T("UnknownFeature", i18n.M{"Feature": c.Feature}))
+		fmt.Println()
+		fmt.Println(i18n.T("AvailableFeaturesHeader", i18n.M{"Kind": cfg.Kind}))
 		for _, f := range available {
 			status := ""
 			if cfg.HasFeature(f.Name()) {
-				status = " (installed)"
+				status = i18n.T("FeatureInstalledSuffix")
 			}
 			fmt.Printf("  %-12s  %s%s\n", f.Name(), f.Description(), status)
 		}
@@ -51,7 +54,7 @@ func (c *AddCmd) Run(ctx *Context) error {
 
 	// Check if applicable
 	if !feature.Applies(cfg) {
-		return fmt.Errorf("feature %s does not apply to %s projects", c.Feature, cfg.Kind)
+		return fmt.Errorf(i18n.T("ErrFeatureNotApplicable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
 	}
 
 	// Apply feature
@@ -65,9 +68,9 @@ func (c *AddCmd) Run(ctx *Context) error {
 	}
 
 	if c.DryRun {
-		fmt.Println("Dry run complete.")
+		fmt.Println(i18n.T("DryRunComplete"))
 	} else {
-		fmt.Printf("✓ Added %s\n", c.Feature)
+		fmt.Println(i18n.T("FeatureAdded", i18n.M{"Feature": c.Feature}))
 	}
 	return nil
 }

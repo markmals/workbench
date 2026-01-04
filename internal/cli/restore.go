@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/markmals/workbench/internal/ghx"
+	"github.com/markmals/workbench/internal/i18n"
 	"github.com/markmals/workbench/internal/ui"
 )
 
@@ -38,16 +39,16 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 
 	// 1. Check if gh is available and authenticated
 	if !ghx.IsInstalled() {
-		return fmt.Errorf("GitHub CLI (gh) is not installed")
+		return fmt.Errorf(i18n.T("ErrGhNotInstalled"))
 	}
 	if !ghx.IsAuthenticated() {
-		return fmt.Errorf("not logged in to GitHub (run: gh auth login)")
+		return fmt.Errorf(i18n.T("ErrGhNotAuthenticated"))
 	}
 
 	// 2. Check if repo exists in archive
 	repo, err := ghx.GetRepo(bgCtx, archiveRepo)
 	if err != nil {
-		return fmt.Errorf("repository not found: %s", archiveRepo)
+		return fmt.Errorf(i18n.T("ErrRepoNotFound", i18n.M{"Repo": archiveRepo}))
 	}
 
 	// 3. Confirm restore
@@ -62,17 +63,17 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 
 		var confirm bool
 		err := huh.NewConfirm().
-			Title("Restore this project?").
+			Title(i18n.T("RestoreConfirmTitle")).
 			Description(desc).
-			Affirmative("Yes, restore").
-			Negative("Cancel").
+			Affirmative(i18n.T("RestoreConfirmYes")).
+			Negative(i18n.T("RestoreConfirmNo")).
 			Value(&confirm).
 			Run()
 		if err != nil {
 			return err
 		}
 		if !confirm {
-			fmt.Println("Cancelled.")
+			fmt.Println(i18n.T("Cancelled"))
 			return nil
 		}
 	}
@@ -81,7 +82,7 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 
 	// 4. Unarchive on GitHub if requested (before clone so we can push changes later)
 	if c.Unarchive && repo.IsArchived {
-		err = ui.RunWithSpinner(bgCtx, "Unarchiving on GitHub", func() error {
+		err = ui.RunWithSpinner(bgCtx, i18n.T("RestoreUnarchiving"), func() error {
 			return ghx.UnarchiveRepo(bgCtx, archiveRepo, ghOpts)
 		})
 		if err != nil {
@@ -90,7 +91,7 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 	}
 
 	// 5. Clone the repo
-	err = ui.RunWithSpinner(bgCtx, fmt.Sprintf("Cloning %s", archiveRepo), func() error {
+	err = ui.RunWithSpinner(bgCtx, i18n.T("RestoreCloning", i18n.M{"Repo": archiveRepo}), func() error {
 		return ghx.CloneRepo(bgCtx, archiveRepo, destDir, ghOpts)
 	})
 	if err != nil {
@@ -99,7 +100,7 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 
 	// 6. Delete from archive if requested
 	if c.Rm {
-		err = ui.RunWithSpinner(bgCtx, "Deleting from archive", func() error {
+		err = ui.RunWithSpinner(bgCtx, i18n.T("RestoreDeleting"), func() error {
 			return ghx.DeleteRepo(bgCtx, archiveRepo, ghOpts)
 		})
 		if err != nil {
@@ -108,9 +109,10 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 	}
 
 	if !c.DryRun {
-		fmt.Printf("\n✓ Restored %s to %s\n", c.Repo, destDir)
+		fmt.Println()
+		fmt.Println(i18n.T("RestoreSuccess", i18n.M{"Repo": c.Repo, "Dir": destDir}))
 		if c.Rm {
-			fmt.Printf("✓ Deleted %s from archive\n", archiveRepo)
+			fmt.Println(i18n.T("RestoreDeletedFromArchive", i18n.M{"Repo": archiveRepo}))
 		}
 	}
 

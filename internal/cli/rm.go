@@ -6,6 +6,7 @@ import (
 
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/features"
+	"github.com/markmals/workbench/internal/i18n"
 )
 
 // RmCmd removes a feature from the project.
@@ -31,7 +32,7 @@ func (c *RmCmd) Run(ctx *Context) error {
 	// Look up feature
 	feature := features.Get(c.Feature)
 	if feature == nil {
-		return fmt.Errorf("unknown feature: %s", c.Feature)
+		return fmt.Errorf(i18n.T("ErrUnknownFeature", i18n.M{"Feature": c.Feature}))
 	}
 
 	// Remove feature
@@ -45,9 +46,9 @@ func (c *RmCmd) Run(ctx *Context) error {
 	}
 
 	if c.DryRun {
-		fmt.Println("Dry run complete.")
+		fmt.Println(i18n.T("DryRunComplete"))
 	} else {
-		fmt.Printf("✓ Removed %s\n", c.Feature)
+		fmt.Println(i18n.T("FeatureRemoved", i18n.M{"Feature": c.Feature}))
 	}
 	return nil
 }

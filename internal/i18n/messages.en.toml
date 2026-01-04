@@ -1,0 +1,274 @@
+# Workbench CLI Messages
+# Edit this file to change user-facing text without modifying Go code.
+
+# =============================================================================
+# General / Home
+# =============================================================================
+
+[AppTagline]
+other = "A personal CLI to bootstrap, evolve, and archive/restore projects."
+
+[RunHelpHint]
+other = "Run 'wb --help' for usage information."
+
+[Cancelled]
+other = "Cancelled."
+
+[DryRunComplete]
+other = "Dry run complete."
+
+# =============================================================================
+# Version Command
+# =============================================================================
+
+[VersionOutput]
+other = "wb {{.Version}}"
+
+[VersionCommit]
+other = "  commit:  {{.Commit}}"
+
+[VersionBuilt]
+other = "  built:   {{.BuildDate}}"
+
+[VersionGo]
+other = "  go:      {{.GoVersion}}"
+
+# =============================================================================
+# Init Command
+# =============================================================================
+
+[InitCreatedProject]
+other = "✓ Created {{.Kind}} project: {{.Name}}"
+
+[InitLocation]
+other = "  Location: {{.Dir}}"
+
+[InitNextSteps]
+other = "Next steps:"
+
+[InitCdHint]
+other = "  cd {{.Path}}"
+
+[InitMiseInstall]
+other = "  mise install"
+
+[InitMiseRunDev]
+other = "  mise run dev"
+
+# =============================================================================
+# Add/Remove Feature Commands
+# =============================================================================
+
+[FeatureAdded]
+other = "✓ Added {{.Feature}}"
+
+[FeatureRemoved]
+other = "✓ Removed {{.Feature}}"
+
+[UnknownFeature]
+other = "Unknown feature: {{.Feature}}"
+
+[AvailableFeaturesHeader]
+other = "Available features for {{.Kind}} projects:"
+
+[FeatureInstalledSuffix]
+other = " (installed)"
+
+[WouldAddFeature]
+other = "Would add {{.Feature}} to project:"
+
+[WouldRemoveFeature]
+other = "Would remove {{.Feature}} from project:"
+
+[WouldInstallPackages]
+other = "  - Install packages: {{.Packages}}"
+
+[WouldInstallDevPackages]
+other = "  - Install dev packages: {{.Packages}}"
+
+[WouldRemoveDirectories]
+other = "  - Remove directories: {{.Directories}}"
+
+[WouldUninstallPackages]
+other = "  - Uninstall packages: {{.Packages}}"
+
+[WouldUninstallDevPackages]
+other = "  - Uninstall dev packages: {{.Packages}}"
+
+# =============================================================================
+# Archive Command
+# =============================================================================
+
+[ArchiveConfirmTitle]
+other = "Archive this project?"
+
+[ArchiveConfirmDesc]
+other = "Will push to {{.Repo}} and delete local copy"
+
+[ArchiveConfirmYes]
+other = "Yes, archive"
+
+[ArchiveConfirmNo]
+other = "Cancel"
+
+[ArchiveCreatingRepo]
+other = "Creating {{.Repo}}"
+
+[ArchivePushing]
+other = "Pushing to archive"
+
+[ArchiveMarking]
+other = "Marking as archived on GitHub"
+
+[ArchiveWouldPush]
+other = "Would push all branches and tags to {{.Repo}}"
+
+[ArchiveSuccess]
+other = "✓ Archived to {{.Repo}}"
+
+# =============================================================================
+# Restore Command
+# =============================================================================
+
+[RestoreConfirmTitle]
+other = "Restore this project?"
+
+[RestoreConfirmYes]
+other = "Yes, restore"
+
+[RestoreConfirmNo]
+other = "Cancel"
+
+[RestoreCloning]
+other = "Cloning {{.Repo}}"
+
+[RestoreUnarchiving]
+other = "Unarchiving on GitHub"
+
+[RestoreDeleting]
+other = "Deleting from archive"
+
+[RestoreSuccess]
+other = "✓ Restored {{.Repo}} to {{.Dir}}"
+
+[RestoreDeletedFromArchive]
+other = "✓ Deleted {{.Repo}} from archive"
+
+# =============================================================================
+# GitHub CLI (ghx)
+# =============================================================================
+
+[WouldCreateRepo]
+other = "Would create {{.Visibility}} repository: {{.Repo}}"
+
+[WouldDeleteRepo]
+other = "Would delete repository: {{.Repo}}"
+
+[WouldCloneRepo]
+other = "Would clone {{.Repo}} to {{.Dest}}"
+
+[WouldForkRepo]
+other = "Would fork repository: {{.Repo}}"
+
+[WouldArchiveRepo]
+other = "Would archive repository: {{.Repo}}"
+
+[WouldUnarchiveRepo]
+other = "Would unarchive repository: {{.Repo}}"
+
+[WouldTransferRepo]
+other = "Would transfer {{.Repo}} to {{.NewOwner}}"
+
+# =============================================================================
+# Filesystem Operations (ops)
+# =============================================================================
+
+[WouldRemove]
+other = "Would remove {{.Type}}: {{.Path}}"
+
+[WouldMoveOverwrite]
+other = "Would move {{.Src}} -> {{.Dst}} (overwriting)"
+
+[WouldMove]
+other = "Would move {{.Src}} -> {{.Dst}}"
+
+[RemoveConfirmTitle]
+other = "Remove {{.Type}}?"
+
+[RemoveConfirmYes]
+other = "Yes, delete"
+
+[RemoveConfirmNo]
+other = "No, keep"
+
+[OverwriteConfirmTitle]
+other = "Overwrite existing destination?"
+
+[OverwriteConfirmYes]
+other = "Yes, overwrite"
+
+[OverwriteConfirmNo]
+other = "No, cancel"
+
+# =============================================================================
+# Spinner / Progress
+# =============================================================================
+
+[InstallingDeps]
+other = "Installing dependencies"
+
+[InstallingDevDeps]
+other = "Installing dev dependencies"
+
+[Installing]
+other = "Installing {{.Name}}"
+
+[InstallingDevDepsFor]
+other = "Installing {{.Name}} dev deps"
+
+[Removing]
+other = "Removing {{.Name}} packages"
+
+# =============================================================================
+# Error Messages
+# =============================================================================
+
+[ErrNotGitRepo]
+other = "not a git repository: {{.Path}}"
+
+[ErrDirtyWorkingTree]
+other = "working tree has uncommitted changes"
+
+[ErrGhNotInstalled]
+other = "GitHub CLI (gh) is not installed"
+
+[ErrGhNotAuthenticated]
+other = "not logged in to GitHub (run: gh auth login)"
+
+[ErrRepoNotFound]
+other = "repository not found: {{.Repo}}"
+
+[ErrUnknownProjectKind]
+other = "unknown project kind: {{.Kind}}"
+
+[ErrUnknownFeature]
+other = "unknown feature: {{.Feature}}"
+
+[ErrFeatureNotApplicable]
+other = "feature {{.Feature}} does not apply to {{.Kind}} projects"
+
+[ErrNoFeaturesAvailable]
+other = "unknown feature: {{.Feature}} (no features available for {{.Kind}} projects)"
+
+[ErrInvalidKind]
+other = "invalid kind: {{.Kind}} (must be website, tui, ios, or monorepo)"
+
+[ErrInvalidDeployment]
+other = "invalid deployment: {{.Deployment}} (must be cloudflare or railway)"
+
+# =============================================================================
+# Update Command (placeholder)
+# =============================================================================
+
+[UpdateNotImplemented]
+other = "wb update is not yet implemented"

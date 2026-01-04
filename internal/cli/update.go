@@ -2,6 +2,8 @@ package cli
 
 import (
 	"fmt"
+
+	"github.com/markmals/workbench/internal/i18n"
 )
 
 // UpdateCmd updates managed files from templates.
@@ -22,6 +24,6 @@ func (c *UpdateCmd) Run(ctx *Context) error {
 	// 5. If --check, exit non-zero if changes
 	// 6. If --diff, print diffs
 
-	fmt.Println("wb update is not yet implemented")
+	fmt.Println(i18n.T("UpdateNotImplemented"))
 	return nil
 }

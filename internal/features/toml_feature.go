@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/markmals/workbench/internal/config"
+	"github.com/markmals/workbench/internal/i18n"
 	"github.com/markmals/workbench/internal/projectdef"
 	"github.com/markmals/workbench/internal/shell"
 	"github.com/markmals/workbench/internal/ui"
@@ -54,12 +55,12 @@ func (f *TOMLFeature) Applies(cfg *config.Config) bool {
 
 func (f *TOMLFeature) Apply(ctx *Context) error {
 	if ctx.DryRun {
-		fmt.Printf("Would add %s to project:\n", f.name)
+		fmt.Println(i18n.T("WouldAddFeature", i18n.M{"Feature": f.name}))
 		if len(f.definition.Packages) > 0 {
-			fmt.Printf("  - Install packages: %v\n", f.definition.Packages)
+			fmt.Println(i18n.T("WouldInstallPackages", i18n.M{"Packages": fmt.Sprintf("%v", f.definition.Packages)}))
 		}
 		if len(f.definition.DevPackages) > 0 {
-			fmt.Printf("  - Install dev packages: %v\n", f.definition.DevPackages)
+			fmt.Println(i18n.T("WouldInstallDevPackages", i18n.M{"Packages": fmt.Sprintf("%v", f.definition.DevPackages)}))
 		}
 		return nil
 	}
@@ -70,7 +71,7 @@ func (f *TOMLFeature) Apply(ctx *Context) error {
 	// Install runtime packages
 	if len(f.definition.Packages) > 0 {
 		args := append([]string{"add"}, f.definition.Packages...)
-		err := ui.RunWithSpinner(bgCtx, fmt.Sprintf("Installing %s", f.name), func() error {
+		err := ui.RunWithSpinner(bgCtx, i18n.T("Installing", i18n.M{"Name": f.name}), func() error {
 			return runner.Run(bgCtx, "pnpm", args...)
 		})
 		if err != nil {
@@ -81,7 +82,7 @@ func (f *TOMLFeature) Apply(ctx *Context) error {
 	// Install dev packages
 	if len(f.definition.DevPackages) > 0 {
 		args := append([]string{"add", "-D"}, f.definition.DevPackages...)
-		err := ui.RunWithSpinner(bgCtx, fmt.Sprintf("Installing %s dev deps", f.name), func() error {
+		err := ui.RunWithSpinner(bgCtx, i18n.T("InstallingDevDepsFor", i18n.M{"Name": f.name}), func() error {
 			return runner.Run(bgCtx, "pnpm", args...)
 		})
 		if err != nil {
@@ -109,15 +110,15 @@ func (f *TOMLFeature) Remove(ctx *Context) error {
 	remove := f.definition.Remove
 
 	if ctx.DryRun {
-		fmt.Printf("Would remove %s from project:\n", f.name)
+		fmt.Println(i18n.T("WouldRemoveFeature", i18n.M{"Feature": f.name}))
 		if len(remove.Directories) > 0 {
-			fmt.Printf("  - Remove directories: %v\n", remove.Directories)
+			fmt.Println(i18n.T("WouldRemoveDirectories", i18n.M{"Directories": fmt.Sprintf("%v", remove.Directories)}))
 		}
 		if len(remove.Packages) > 0 {
-			fmt.Printf("  - Uninstall packages: %v\n", remove.Packages)
+			fmt.Println(i18n.T("WouldUninstallPackages", i18n.M{"Packages": fmt.Sprintf("%v", remove.Packages)}))
 		}
 		if len(remove.DevPackages) > 0 {
-			fmt.Printf("  - Uninstall dev packages: %v\n", remove.DevPackages)
+			fmt.Println(i18n.T("WouldUninstallDevPackages", i18n.M{"Packages": fmt.Sprintf("%v", remove.DevPackages)}))
 		}
 		return nil
 	}
@@ -137,7 +138,7 @@ func (f *TOMLFeature) Remove(ctx *Context) error {
 	allPackages := append(remove.Packages, remove.DevPackages...)
 	if len(allPackages) > 0 {
 		args := append([]string{"remove"}, allPackages...)
-		_ = ui.RunWithSpinner(bgCtx, fmt.Sprintf("Removing %s packages", f.name), func() error {
+		_ = ui.RunWithSpinner(bgCtx, i18n.T("Removing", i18n.M{"Name": f.name}), func() error {
 			return runner.Run(bgCtx, "pnpm", args...)
 		})
 		// Don't fail if packages weren't installed
