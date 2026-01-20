@@ -4,6 +4,7 @@ package ghx
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -33,10 +34,10 @@ func IsAuthenticated() bool {
 // Returns a user-friendly error if not.
 func EnsureAuth() error {
 	if !IsInstalled() {
-		return fmt.Errorf(i18n.T("ErrGhNotInstalled"))
+		return errors.New(i18n.T("ErrGhNotInstalled"))
 	}
 	if !IsAuthenticated() {
-		return fmt.Errorf(i18n.T("ErrGhNotAuthenticated"))
+		return errors.New(i18n.T("ErrGhNotAuthenticated"))
 	}
 	return nil
 }

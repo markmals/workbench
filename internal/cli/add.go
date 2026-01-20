@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -37,7 +38,7 @@ func (c *AddCmd) Run(ctx *Context) error {
 		// List available features
 		available := features.ListApplicable(cfg)
 		if len(available) == 0 {
-			return fmt.Errorf(i18n.T("ErrNoFeaturesAvailable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
+			return errors.New(i18n.T("ErrNoFeaturesAvailable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
 		}
 		fmt.Println(i18n.T("UnknownFeature", i18n.M{"Feature": c.Feature}))
 		fmt.Println()
@@ -54,7 +55,7 @@ func (c *AddCmd) Run(ctx *Context) error {
 
 	// Check if applicable
 	if !feature.Applies(cfg) {
-		return fmt.Errorf(i18n.T("ErrFeatureNotApplicable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
+		return errors.New(i18n.T("ErrFeatureNotApplicable", i18n.M{"Feature": c.Feature, "Kind": cfg.Kind}))
 	}
 
 	// Apply feature

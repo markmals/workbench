@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -16,11 +17,11 @@ import (
 
 // ArchiveCmd archives a repo to the GitHub Archive org.
 type ArchiveCmd struct {
-	Dir        string `arg:"" optional:"" help:"Directory to archive" default:"." type:"path"`
-	Org        string `help:"GitHub org to archive to" default:"markmals-archive" name:"org"`
-	KeepLocal  bool   `help:"Don't delete local directory after archiving" name:"keep-local"`
-	Yes        bool   `help:"Skip confirmation" short:"y"`
-	DryRun     bool   `help:"Show what would happen without doing it" name:"dry-run"`
+	Dir       string `arg:"" optional:"" help:"Directory to archive" default:"." type:"path"`
+	Org       string `help:"GitHub org to archive to" default:"markmals-archive" name:"org"`
+	KeepLocal bool   `help:"Don't delete local directory after archiving" name:"keep-local"`
+	Yes       bool   `help:"Skip confirmation" short:"y"`
+	DryRun    bool   `help:"Show what would happen without doing it" name:"dry-run"`
 }
 
 func (c *ArchiveCmd) Run(ctx *Context) error {
@@ -34,12 +35,12 @@ func (c *ArchiveCmd) Run(ctx *Context) error {
 
 	// 1. Verify target is a git repo
 	if !gitx.IsRepo(dir) {
-		return fmt.Errorf(i18n.T("ErrNotGitRepo", i18n.M{"Path": dir}))
+		return errors.New(i18n.T("ErrNotGitRepo", i18n.M{"Path": dir}))
 	}
 
 	// 2. Verify git tree is clean
 	if !gitx.IsClean(dir) {
-		return fmt.Errorf(i18n.T("ErrDirtyWorkingTree"))
+		return errors.New(i18n.T("ErrDirtyWorkingTree"))
 	}
 
 	// Get repo name from directory

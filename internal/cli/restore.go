@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -45,7 +46,7 @@ func (c *RestoreCmd) Run(ctx *Context) error {
 	// 2. Check if repo exists in archive
 	repo, err := ghx.GetRepo(bgCtx, archiveRepo)
 	if err != nil {
-		return fmt.Errorf(i18n.T("ErrRepoNotFound", i18n.M{"Repo": archiveRepo}))
+		return errors.New(i18n.T("ErrRepoNotFound", i18n.M{"Repo": archiveRepo}))
 	}
 
 	// 3. Confirm restore

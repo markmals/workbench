@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -32,7 +33,7 @@ func (c *RmCmd) Run(ctx *Context) error {
 	// Look up feature
 	feature := features.Get(c.Feature)
 	if feature == nil {
-		return fmt.Errorf(i18n.T("ErrUnknownFeature", i18n.M{"Feature": c.Feature}))
+		return errors.New(i18n.T("ErrUnknownFeature", i18n.M{"Feature": c.Feature}))
 	}
 
 	// Remove feature
