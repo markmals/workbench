@@ -4,39 +4,46 @@ description = "React website with Vite and React Router"
 
 [dependencies]
 runtime = [
-  "@react-router/fs-routes",
-  "@tailwindcss/vite",
-  "clsx",
+  "@withsprinkles/react-router-route-map",
+  "cva",
   "isbot",
   "react",
   "react-dom",
   "react-router",
+  "react-concurrent-store",
+  "drizzle-orm",
+  "drizzle-zod",
   "zod",
 ]
 
 dev = [
-  "@biomejs/biome",
-  "@prettier/plugin-oxc",
+  "@babel/core",
+  "@babel/preset-typescript",
   "@react-router/dev",
+  "@tailwindcss/vite",
   "@types/node",
   "@types/react",
   "@types/react-dom",
-  "@typescript/native-preview",
-  "babel-plugin-react-compiler",
+  "@prettier/plugin-oxc",
+  "drizzle-kit",
+  "oxlint",
   "prettier",
   "prettier-plugin-pkg",
   "prettier-plugin-sh",
+  "prettier-plugin-sort-imports",
   "prettier-plugin-tailwindcss",
   "prettier-plugin-toml",
+  "babel-plugin-react-compiler",
   "tailwindcss",
+  "typescript",
   "vite",
   "vite-plugin-babel",
-  "vitest",
+  "vite-plugin-devtools-json",
 ]
 
 [dependencies.when.cloudflare]
-runtime = ["@cloudflare/vite-plugin"]
-dev = ["wrangler"]
+runtime = []
+dev = ["@cloudflare/vite-plugin", "wrangler"]
 
 [templates]
 ".gitignore" = "bootstrap/gitignore.tmpl"
@@ -45,13 +52,19 @@ dev = ["wrangler"]
 "AGENTS.md" = "bootstrap/agents.tmpl"
 ".vscode/settings.json" = "bootstrap/vscode-settings.tmpl"
 ".vscode/extensions.json" = "bootstrap/vscode-extensions.tmpl"
-"package.json" = "bootstrap/package.tmpl"
 "tsconfig.json" = "bootstrap/tsconfig.tmpl"
 "vite.config.ts" = "bootstrap/vite-config.tmpl"
 "react-router.config.ts" = "bootstrap/react-router-config.tmpl"
-"biome.jsonc" = "bootstrap/biome.tmpl"
+".oxlintrc.json" = "bootstrap/oxlint.tmpl"
 ".prettierignore" = "bootstrap/prettierignore.tmpl"
 "prettier.config.ts" = "bootstrap/prettier-config.tmpl"
+"components.json" = "bootstrap/components.tmpl"
+"drizzle.config.ts" = "bootstrap/drizzle-config.tmpl"
+"react-compiler.plugin.ts" = "bootstrap/react-compiler-plugin.tmpl"
+"wrangler.jsonc" = "bootstrap/wrangler-jsonc.tmpl"
+"app/routes.ts" = "bootstrap/app-routes.tmpl"
+"app/styles/app.css" = "bootstrap/app-styles.tmpl"
+"app/root.tsx" = "bootstrap/app-root.tmpl"
 
 [features.convex]
 description = "Convex real-time backend with functions and auth"

@@ -1,23 +1,23 @@
+import { defineConfig } from "vite";
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
-import babel from "vite-plugin-babel";
-import { defineConfig } from "vite";
-{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
+import devtoolsJson from "vite-plugin-devtools-json";
+import { reactCompiler } from "./react-compiler.plugin";
+{{- if eq .Website.Deployment "cloudflare" }}
 import { cloudflare } from "@cloudflare/vite-plugin";
-{{- end }}{{- end }}
+{{- end }}
 
 export default defineConfig({
   plugins: [
-{{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
+{{- if eq .Website.Deployment "cloudflare" }}
     cloudflare({ viteEnvironment: { name: "ssr" } }),
-{{- end }}{{- end }}
+{{- end }}
     tailwindcss(),
-    babel({
-      filter: /\.[jt]sx?$/,
-      babelConfig: {
-        plugins: ["babel-plugin-react-compiler"],
-      },
-    }),
+    reactCompiler(),
     reactRouter(),
+    devtoolsJson(),
   ],
+  css: {
+    transformer: "lightningcss",
+  },
 });

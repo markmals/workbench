@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "{{ kebab .Name }}",
+  "main": "./workers/app.ts",
+  "compatibility_date": "{{ default "2026-01-20" .Config.Website.Deployment.Cloudflare.CompatibilityDate }}",
+  "compatibility_flags": [
+  {{- $flags := default (list) .Config.Website.Deployment.Cloudflare.CompatibilityFlags -}}
+  {{- range $i, $flag := $flags -}}
+    {{- if $i }},{{ end -}}
+    "{{ $flag }}"
+  {{- end }}
+  ],
+  "workers_dev": {{ default true .Config.Website.Deployment.Cloudflare.WorkersDev }},
+  "assets": {
+    "directory": "{{ default "./build/client" .Config.Website.Deployment.Cloudflare.AssetsDir }}"
+  },
+  "observability": {
+    "logs": {
+      "enabled": {{ default true .Config.Website.Deployment.Cloudflare.Logs.Enabled }},
+      "head_sampling_rate": {{ default 1 .Config.Website.Deployment.Cloudflare.Logs.Sampling }},
+      "invocation_logs": {{ default true .Config.Website.Deployment.Cloudflare.Logs.Invocation }},
+      "persist": {{ default true .Config.Website.Deployment.Cloudflare.Logs.Persist }}
+    }
+  }
+}

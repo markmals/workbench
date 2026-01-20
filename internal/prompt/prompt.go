@@ -47,10 +47,10 @@ func (r *Result) ToConfig() *config.Config {
 	}
 
 	if r.Kind == "website" {
-		cfg.Website = &config.WebsiteConfig{
-			Deployment: r.Deployment,
-		}
+		cfg.Website.Deployment.Target = r.Deployment
 	}
+
+	cfg.ApplyDefaults()
 
 	return cfg
 }
@@ -77,7 +77,7 @@ func runNonInteractive(opts Options) (*Result, error) {
 	}
 
 	if d.Website != nil {
-		result.Deployment = d.Website.Deployment
+		result.Deployment = d.Website.Deployment.Target
 	}
 
 	return result, nil

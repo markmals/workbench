@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/markmals/workbench/internal/assets"
 	"github.com/markmals/workbench/internal/bootstrap"
@@ -32,18 +33,15 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	// Build defaults from flags
 	var defaults *config.Config
-	if c.Path != "" || c.Kind != "" {
-		defaults = &config.Config{
-			Path: c.Path,
-			Kind: c.Kind,
-		}
+	if c.Path != "" || c.Kind != "" || c.Deployment != "" || c.Convex {
+		defaults = config.New("", c.Kind)
+		defaults.Path = c.Path
+		defaults.Project.Kind = c.Kind
 		if c.Convex {
 			defaults.AddFeature("convex")
 		}
 		if c.Kind == "website" {
-			defaults.Website = &config.WebsiteConfig{
-				Deployment: c.Deployment,
-			}
+			defaults.Website.Deployment.Target = c.Deployment
 		}
 	}
 
@@ -65,6 +63,14 @@ func (c *InitCmd) Run(ctx *Context) error {
 	// Convert to config
 	cfg := result.ToConfig()
 
+	// Template ref (ref or path) recorded for reproducibility.
+	ref := c.Templates
+	if ref == "" {
+		ref = "main"
+	}
+	cfg.TemplateRef = ref
+	cfg.Project.TemplateRef = ref
+
 	// Resolve path and infer name
 	projectPath := cfg.Path
 	if projectPath == "" {
@@ -77,6 +83,7 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	// Infer name from directory
 	cfg.Name = filepath.Base(absDir)
+	cfg.Project.Name = cfg.Name
 
 	ctx.Logger.Debug("initializing project", "dir", absDir, "name", cfg.Name)
 
@@ -97,17 +104,39 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	ctx.Logger.Debug("saved config", "path", config.ConfigPath(absDir))
 
+	// For website projects, hydrate upstream React Router template first.
+	if cfg.Kind == "website" {
+		templateName := bootstrap.ReactRouterTemplateName(cfg)
+		refresh := ref == "" || strings.EqualFold(ref, "main") || strings.EqualFold(ref, "latest")
+
+		upstreamPath, err := bootstrap.FetchReactRouterTemplate(context.Background(), ref, templateName, refresh)
+		if err != nil {
+			return fmt.Errorf("fetching React Router template: %w", err)
+		}
+
+		if err := bootstrap.CopyTemplate(upstreamPath, absDir); err != nil {
+			return fmt.Errorf("copying upstream template: %w", err)
+		}
+
+		ctx.Logger.Info("fetched upstream template", "template", templateName, "ref", ref)
+	}
+
 	// Render templates from project definition
 	renderer := templates.Bootstrap()
 	renderCtx := &templates.RenderContext{
 		Name:     cfg.Name,
 		Kind:     cfg.Kind,
 		Features: cfg.Features,
+		Config:   cfg,
 	}
 
 	if cfg.Website != nil {
 		renderCtx.Website = &templates.WebsiteContext{
-			Deployment: cfg.Website.Deployment,
+			Deployment: cfg.Website.Deployment.Target,
+			Framework:  cfg.Website.Framework,
+			Rendering:  cfg.Website.Rendering,
+			RouteMap:   cfg.Website.RouteMap,
+			Future:     cfg.Website.ReactRouter.FutureFlags,
 		}
 	}
 
@@ -119,6 +148,9 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	// Render static templates
 	for dest, tmpl := range def.Templates.Static {
+		if cfg.Kind == "website" && dest == "wrangler.jsonc" && !strings.EqualFold(cfg.Website.Deployment.Target, "cloudflare") {
+			continue
+		}
 		destPath := filepath.Join(absDir, dest)
 		if err := renderer.RenderTo(tmpl, renderCtx, destPath); err != nil {
 			ctx.Logger.Warn("failed to render template", "template", tmpl, "error", err)
@@ -133,6 +165,9 @@ func (c *InitCmd) Run(ctx *Context) error {
 			continue
 		}
 		for dest, tmpl := range templates {
+			if cfg.Kind == "website" && dest == "wrangler.jsonc" && !strings.EqualFold(cfg.Website.Deployment.Target, "cloudflare") {
+				continue
+			}
 			destPath := filepath.Join(absDir, dest)
 			if err := renderer.RenderTo(tmpl, renderCtx, destPath); err != nil {
 				ctx.Logger.Warn("failed to render conditional template", "feature", feature, "template", tmpl, "error", err)
@@ -144,6 +179,10 @@ func (c *InitCmd) Run(ctx *Context) error {
 
 	// Install dependencies for website projects
 	if cfg.Kind == "website" {
+		if err := bootstrap.ApplyPackagePreferences(absDir, cfg); err != nil {
+			return fmt.Errorf("applying package defaults: %w", err)
+		}
+
 		wb := &bootstrap.Website{
 			Dir:    absDir,
 			Config: cfg,

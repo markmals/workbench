@@ -1,8 +1,12 @@
 import type { Config } from "@react-router/dev/config";
-import { flatRoutes } from "@react-router/fs-routes";
 
 export default {
-  appDirectory: "app",
-  ssr: true,
-  routes: (defineRoutes) => flatRoutes("routes", defineRoutes),
+  ssr: {{ if eq .Website.Rendering "spa" }}false{{ else }}true{{ end }},
+  future: {
+  {{- if .Website.Future }}
+  {{- range $key, $value := .Website.Future }}
+    {{ $key }}: {{ $value }},
+  {{- end }}
+  {{- end }}
+  },
 } satisfies Config;

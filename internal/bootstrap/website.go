@@ -2,6 +2,8 @@ package bootstrap
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 
 	"github.com/markmals/workbench/internal/config"
 	"github.com/markmals/workbench/internal/projectdef"
@@ -24,10 +26,17 @@ func (w *Website) InstallDependencies(ctx context.Context) error {
 
 	runner := shell.New(w.Dir)
 
-	// Determine conditions based on config
+	// If a package.json exists, prefer honoring it directly to preserve upstream scripts.
+	if _, err := os.Stat(filepath.Join(w.Dir, "package.json")); err == nil {
+		return ui.RunWithSpinner(ctx, "Installing dependencies", func() error {
+			return runner.Run(ctx, "pnpm", "install")
+		})
+	}
+
+	// Determine conditions based on config (fallback path)
 	var conditions []string
-	if w.Config.Website != nil && w.Config.Website.Deployment != "" {
-		conditions = append(conditions, w.Config.Website.Deployment)
+	if w.Config.Website != nil && w.Config.Website.Deployment.Target != "" {
+		conditions = append(conditions, w.Config.Website.Deployment.Target)
 	}
 
 	// Get all dependencies

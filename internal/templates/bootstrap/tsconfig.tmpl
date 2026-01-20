@@ -1,23 +1,26 @@
 {
   "include": [
-    "**/*",
-    ".react-router/types/**/*"
+    "**/*.ts",
+    "**/*.tsx",
+    "./.react-router/types/**/*"{{- if eq .Website.Deployment "cloudflare" }},
+    "worker-configuration.d.ts",
+    "workers/**/*"{{- end }}
   ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "strict": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "rootDirs": [".", ".react-router/types"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "@types/node"],
+    "jsx": "react-jsx",
+    "rootDirs": [".", "./.react-router/types"],
     "paths": {
       "~/*": ["./app/*"]
     }

@@ -1,7 +1,7 @@
 {{- if eq .Kind "website" -}}
 [tools]
-node = "24"
-pnpm = "latest"
+node = "{{ default "24" .Config.Tooling.Node }}"
+pnpm = "{{ default "latest" .Config.Tooling.Pnpm }}"
 
 [env]
 _.path = ['{{ "{{config_root}}" }}/node_modules/.bin']
@@ -9,16 +9,16 @@ _.path = ['{{ "{{config_root}}" }}/node_modules/.bin']
 [hooks]
 postinstall = """
 if [ "$CI" = "true" ]; then
+  echo '✅ Skipping typegen in CI'
   exit 0
 fi
 
-pnpm install
 mise run typegen:*
 """
 
 [tasks.dev]
 description = "Run the development server"
-run = "vite dev --host"
+run = "pnpm dev -- --host"
 
 [tasks.build]
 description = "Build the app"
@@ -27,19 +27,19 @@ sources = [
     "react-router.config.ts",
     "vite.config.ts",
     "tsconfig.json",
-    "tsconfig.*.json",
 {{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
     "worker-configuration.d.ts",
 {{- end }}{{- end }}
     "app/**/*.{ts,tsx,css,json,md}",
+    "workers/**/*.{ts,tsx,js}",
 ]
 outputs = ["build"]
-run = "vite build"
+run = "pnpm build"
 
 [tasks.preview]
 description = "Preview the built application"
 depends = "build"
-run = "vite preview"
+run = "pnpm preview"
 
 {{- if .Website }}{{- if eq .Website.Deployment "cloudflare" }}
 
@@ -47,16 +47,16 @@ run = "vite preview"
 description = "Deploy to Cloudflare Workers"
 depends = "build"
 confirm = "Are you sure you want to deploy to Cloudflare Workers?"
-run = "wrangler deploy"
+run = "pnpm deploy"
 {{- end }}{{- end }}
 
 [tasks.fmt]
 description = "Format the project with Prettier"
-run = "prettier --write ."
+run = "pnpm fmt"
 
 [tasks.lint]
-description = "Lint the project with Biome"
-run = "biome check --write --unsafe ."
+description = "Lint the project with oxlint"
+run = "pnpm lint"
 
 [tasks.check]
 description = "Format and lint the project"
@@ -68,23 +68,19 @@ depends = ["fmt", "lint"]
 description = "Generate types for Cloudflare bindings"
 sources = ["wrangler.jsonc"]
 outputs = ["worker-configuration.d.ts"]
-run = "wrangler types"
+run = "pnpm exec wrangler types"
 {{- end }}{{- end }}
 
 [tasks."typegen:react-router"]
 description = "Generate types for React Router routes"
 sources = ["react-router.config.ts", "vite.config.ts", "app/**/*.{ts,tsx}"]
 outputs = [".react-router"]
-run = "react-router typegen"
+run = "pnpm exec react-router typegen"
 
 [tasks.typecheck]
 description = "Typecheck the project"
 depends = "typegen:*"
-run = "tsc --noEmit"
-
-[tasks.test]
-description = "Run tests"
-run = "vitest run"
+run = "pnpm typecheck"
 {{- end }}
 
 {{- if eq .Kind "tui" }}

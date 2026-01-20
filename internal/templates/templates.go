@@ -6,8 +6,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/markmals/workbench/internal/config"
 )
 
 // Renderer handles template rendering with a func map and template source.
@@ -35,12 +38,24 @@ func NewWithFuncs(fsys fs.FS, funcs template.FuncMap) *Renderer {
 
 // defaultFuncMap returns the default template helper functions.
 func defaultFuncMap() template.FuncMap {
+	slugger := regexp.MustCompile(`[^a-z0-9]+`)
+
 	return template.FuncMap{
 		// String manipulation
 		"lower": strings.ToLower,
 		"upper": strings.ToUpper,
 		"title": strings.Title,
 		"trim":  strings.TrimSpace,
+		// Prefix/suffix helpers
+		"trimPrefix": strings.TrimPrefix,
+		"trimSuffix": strings.TrimSuffix,
+
+		// Slugify/kebab-case helper
+		"kebab": func(s string) string {
+			slug := strings.ToLower(strings.TrimSpace(s))
+			slug = slugger.ReplaceAllString(slug, "-")
+			return strings.Trim(slug, "-")
+		},
 
 		// String joining/splitting
 		"join":  strings.Join,
@@ -70,8 +85,23 @@ func defaultFuncMap() template.FuncMap {
 
 		// Default values
 		"default": func(def, val any) any {
-			if val == nil || val == "" {
+			switch v := val.(type) {
+			case nil:
 				return def
+			case string:
+				if v == "" {
+					return def
+				}
+			case *bool:
+				if v == nil {
+					return def
+				}
+				return *v
+			case *float64:
+				if v == nil {
+					return def
+				}
+				return *v
 			}
 			return val
 		},
@@ -156,6 +186,9 @@ type RenderContext struct {
 	// Features
 	Features []string
 
+	// Full config (for templates that need detailed options).
+	Config *config.Config
+
 	// Website config
 	Website *WebsiteContext
 
@@ -164,13 +197,16 @@ type RenderContext struct {
 
 	// iOS config
 	IOS *IOSContext
-
 }
 
 // WebsiteContext holds website-specific template data.
 type WebsiteContext struct {
 	Deployment string
 	Mode       string
+	Framework  string
+	Rendering  string
+	RouteMap   bool
+	Future     map[string]bool
 }
 
 // TUIContext holds TUI-specific template data.
