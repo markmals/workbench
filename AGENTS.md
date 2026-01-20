@@ -192,6 +192,7 @@ func SomeOperation(ctx context.Context, args string, opts Options) error {
 ```
 
 Rules:
+
 - Always use `CombinedOutput()` to capture stderr for error messages
 - Support `DryRun` option for all destructive operations
 - Use `context.Context` for cancellation
@@ -217,6 +218,7 @@ err := ops.Move(src, dst, ops.MoveOptions{
 ```
 
 Rules:
+
 - Never use `os.RemoveAll` directly for user-facing deletions
 - Always support `--dry-run` and `-y/--yes` flags
 - Show what will happen before doing it
@@ -232,6 +234,7 @@ err := ui.RunWithSpinner(ctx, "Installing dependencies", func() error {
 ```
 
 Rules:
+
 - Use `ui.RunWithSpinner()` from `internal/ui/spinner.go`
 - Never show raw log output (INFO, WARN) during long operations
 - Spinners show ✓ on success, ✗ on failure automatically
@@ -266,33 +269,36 @@ homebrew-tap/
 ### Releasing a new version
 
 1. **Tag the release in workbench repo:**
-   ```bash
-   git tag vX.Y.Z
-   git push --tags
-   ```
+
+    ```bash
+    git tag vX.Y.Z
+    git push --tags
+    ```
 
 2. **Get the SHA256 of the tarball:**
-   ```bash
-   curl -sL https://github.com/markmals/workbench/archive/refs/tags/vX.Y.Z.tar.gz | shasum -a 256
-   ```
+
+    ```bash
+    curl -sL https://github.com/markmals/workbench/archive/refs/tags/vX.Y.Z.tar.gz | shasum -a 256
+    ```
 
 3. **Update the formula:**
-   ```bash
-   cd /path/to/homebrew-tap
-   git checkout -b bump-vX.Y.Z
-   # Edit Formula/workbench.rb: update url version and sha256
-   git commit -am "workbench vX.Y.Z"
-   git push -u origin bump-vX.Y.Z
-   gh pr create --title "workbench vX.Y.Z" --body "Version bump"
-   ```
+
+    ```bash
+    cd /path/to/homebrew-tap
+    git checkout -b bump-vX.Y.Z
+    # Edit Formula/workbench.rb: update url version and sha256
+    git commit -am "workbench vX.Y.Z"
+    git push -u origin bump-vX.Y.Z
+    gh pr create --title "workbench vX.Y.Z" --body "Version bump"
+    ```
 
 4. **Wait for CI to build bottles** (test-bot runs on PR, builds bottles for each platform)
 
 5. **Merge with bottles:**
-   ```bash
-   gh pr edit <PR#> --repo markmals/homebrew-tap --add-label pr-pull
-   ```
-   The `pr-pull` label triggers the publish workflow which downloads bottle artifacts, adds bottle blocks to the formula, and merges.
+    ```bash
+    gh pr edit <PR#> --repo markmals/homebrew-tap --add-label pr-pull
+    ```
+    The `pr-pull` label triggers the publish workflow which downloads bottle artifacts, adds bottle blocks to the formula, and merges.
 
 ### Formula conventions
 
@@ -310,18 +316,23 @@ homebrew-tap/
 2. **Run quality gates** (if code changed) - Tests, linters, builds
 3. **Update issue status** - Close finished work, update in-progress items
 4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd sync
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
+    ```bash
+    git pull --rebase
+    bd sync
+    git push
+    git status  # MUST show "up to date with origin"
+    ```
 5. **Clean up** - Clear stashes, prune remote branches
 6. **Verify** - All changes committed AND pushed
 7. **Hand off** - Provide context for next session
 
 **CRITICAL RULES:**
+
 - Work is NOT complete until `git push` succeeds
 - NEVER stop before pushing - that leaves work stranded locally
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
+
+## Documentation
+
+Make sure to update the documentation in this project (found in various forms, such as the AGENTS.md, PLAN.md, README.md, and .vitepress/\* files) anytime any code changing the way this tool functions is committed. We need to keep the documentation up to date with the implementation.
