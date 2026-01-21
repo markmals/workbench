@@ -14,10 +14,10 @@ var defsFS embed.FS
 
 // Definition represents a complete project type definition.
 type Definition struct {
-	Project      Project              `toml:"project"`
-	Dependencies Dependencies         `toml:"dependencies"`
-	Templates    TemplateConfig       `toml:"templates"`
-	Features     map[string]Feature   `toml:"features"`
+	Project      Project            `toml:"project"`
+	Dependencies Dependencies       `toml:"dependencies"`
+	Templates    TemplateConfig     `toml:"templates"`
+	Features     map[string]Feature `toml:"features"`
 }
 
 // TemplateConfig holds both static and conditional templates.
@@ -75,9 +75,9 @@ type Project struct {
 
 // Dependencies defines packages to install.
 type Dependencies struct {
-	Runtime []string                    `toml:"runtime"`
-	Dev     []string                    `toml:"dev"`
-	When    map[string]ConditionalDeps  `toml:"when"`
+	Runtime []string                   `toml:"runtime"`
+	Dev     []string                   `toml:"dev"`
+	When    map[string]ConditionalDeps `toml:"when"`
 }
 
 // ConditionalDeps are dependencies added when a condition is met.
