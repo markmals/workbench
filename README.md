@@ -34,6 +34,27 @@ Lots of templates can be _used with_ an AI assistant. This one is _designed for_
 
 You can absolutely work in this repo without Claude — the specs, tests, and code are all human-readable, the docs site renders the spec library, and `mise` runs everything from the terminal. But the workflows assume Claude is doing a lot of the typing.
 
+## Native everywhere: spec-as-framework, not lowest-common-denominator
+
+The other half of this template's thesis: **each platform is built in its own native language, framework, and tooling — and the spec is what holds them together instead of a shared runtime.**
+
+The conventional way to ship "the same app" on web, iOS, and Android is to pick a cross-platform framework — React Native, Flutter, Capacitor, Kotlin Multiplatform — and accept the trade-offs that come with it: a thin abstraction over each platform's UI layer, generic interaction patterns, a JS/Dart/Kotlin runtime layered on top of the OS, and a shared codebase that is structurally biased toward whatever the framework finds easy to express. You ship faster initially, you ship more uniformly forever, and the app feels approximately right on every platform.
+
+This template makes the opposite bet:
+
+- **Web is TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform.
+- **iOS is SwiftUI + `@Observable` + Swift Testing.** Native navigation, native gestures, native accessibility, the Apple HIG as a real constraint.
+- **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow.** Material You theming, predictive back, the real Android system behaviors.
+- **Backend is Convex.** A schema-as-protocol backend the web app talks to directly, and the mobile clients can mirror via their native HTTP/realtime stacks.
+
+There is no shared package between any of these. There is no transpilation step, no bridge layer, no abstracted UI primitive. Each app ships the platform's native idioms — the kind of detail that distinguishes "an app" from "a website wrapped in a chrome." When something is genuinely different between platforms (a swipe gesture, a system share sheet, a context menu, a haptic), the platform implements it the platform's way, marked `// SPEC: <id> (deviates: <reason>)` so that divergence is explicit rather than smuggled.
+
+**The spec is what fills the role a shared framework usually plays.** It is the contract that says "all three apps must support _these_ states, _these_ transitions, _these_ errors, _these_ acceptance criteria." Each platform satisfies the contract idiomatically. The spec is the framework — written in markdown, enforced by reverse pointers and Gherkin scenarios, kept honest by `/sdd-drift` and `/sdd-verify`.
+
+Why is this tractable now when historically it wasn't? Because **agents close the cost gap**. Implementing a feature three times in three native stacks used to be prohibitively expensive — three times the engineering effort, three sources of bugs, three drift trajectories. With Claude doing most of the per-platform translation from a shared spec, the cost flattens dramatically. You write the spec once, dispatch `/sdd-apply <spec-id> <platform>` for each target, and the agent produces idiomatic native code on each platform that satisfies the same behavioral contract. Drift is detected mechanically; reconciliation is a command, not a project.
+
+The result: an app that feels at home on every platform — not a uniform skin over a uniform runtime — without paying the historical cost of writing and maintaining three apps by hand.
+
 ## Why this template invents its own skills, agents, hooks, and conventions
 
 There are several mature ecosystems for AI-assisted development — [**Superpowers**](https://github.com/obra/superpowers) (a curated skill library) and [**Beads**](https://github.com/steveyegge/beads) (an issue tracker designed for AI workflows) being two we drew inspiration from. We deliberately don't depend on either. Here's why.
