@@ -1,0 +1,164 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "attribution": {
+        "commit": ""
+    },
+    "permissions": {
+        "defaultMode": "auto",
+        "allow": [
+            "Bash(mise:*)",
+            "Bash(pnpm:*)",
+            "Bash(node:*)",
+            "Bash(oxfmt:*)",
+            "Bash(oxlint:*)",
+            "Bash(tsgo:*)",
+            "Bash(vite:*)",
+            "Bash(vitest:*)",
+            "Bash(git status:*)",
+            "Bash(git diff:*)",
+            "Bash(git log:*)",
+            "Bash(git show:*)",
+            "Bash(git branch:*)",
+            "Bash(git ls-files:*)",
+            "Bash(git stash list:*)",
+            "Bash(rg:*)",
+            "Bash(grep:*)",
+            "Bash(fd:*)",
+            "Bash(find:*)",
+            "Bash(ls:*)",
+            "Bash(cat:*)",
+            "Bash(head:*)",
+            "Bash(tail:*)",
+            "Bash(wc:*)",
+            "Bash(tree:*)",
+            "Bash(jq:*)",
+            "Bash(file:*)",
+            "Bash(which:*)",
+            "Bash(env:*)",
+            "Bash(echo:*)",
+            "Bash(printf:*)",
+            "Bash(true)",
+            "Bash(false)",
+            "Bash(test:*)",
+            "Bash(xcrun simctl list*)",
+            "Bash(xcrun simctl boot*)",
+            "Bash(xcrun simctl shutdown*)",
+            "Bash(xcrun simctl io*)",
+            "Bash(xcrun simctl spawn*)",
+            "Bash(xcrun simctl launch*)",
+            "Bash(xcrun simctl terminate*)",
+            "Bash(xcodebuild:*)",
+            "Bash(swiftformat:*)",
+            "Bash(idb:*)",
+            "Bash(adb devices:*)",
+            "Bash(adb shell:*)",
+            "Bash(adb logcat:*)",
+            "Bash(adb install:*)",
+            "Bash(adb pull:*)",
+            "Bash(adb push:*)",
+            "Bash(emulator:*)",
+            "Bash(./gradlew:*)",
+            "Bash(gradle:*)",
+            "Bash(ktlint:*)"
+        ],
+        "ask": [
+            "Bash(git push:*)",
+            "Bash(git reset --hard:*)",
+            "Bash(git clean:*)",
+            "Bash(git rebase:*)",
+            "Bash(convex deploy*)",
+            "Bash(npx convex deploy*)",
+            "Bash(pnpx convex deploy*)",
+            "Bash(rm -rf:*)"
+        ],
+        "deny": []
+    },
+    "env": {
+        "DISABLE_TELEMETRY": "0"
+    },
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Edit|Write|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/block-generated.sh",
+                        "timeout": 5
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "if": "Bash(git commit*)",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/conventional-commits.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/tuist-regen.sh",
+                        "timeout": 60
+                    },
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/convex-codegen.sh",
+                        "timeout": 60
+                    },
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh",
+                        "timeout": 30
+                    },
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/spec-reconcile.sh",
+                        "timeout": 10
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/stop-lint.sh",
+                        "timeout": 120
+                    }
+                ]
+            }
+        ],
+        "UserPromptSubmit": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-context.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
+        "Notification": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/notify-long-task.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ]
+    }
+}

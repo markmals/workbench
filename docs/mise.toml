@@ -1,0 +1,22 @@
+[tools]
+node = "24"
+pnpm = "11"
+
+[env]
+_.path = ['{{config_root}}/node_modules/.bin']
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.dev]
+description = "Run the docs dev server"
+run = "vitepress dev ."
+
+[tasks.build]
+description = "Build the static docs site"
+run = "vitepress build ."
+
+[tasks.preview]
+description = "Preview the production build locally"
+depends = ["build"]
+run = "vitepress preview ."

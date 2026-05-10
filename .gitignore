@@ -1,0 +1,65 @@
+# macOS
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.iml
+xcuserdata/
+DerivedData/
+build/
+
+# iOS (Tuist generates the Xcode project on demand)
+*.xcodeproj/
+*.xcworkspace/
+.derived-data/
+.build/
+apps/ios/Derived/
+apps/ios/Tuist/.build/
+apps/ios/Tuist/Dependencies/
+
+# Web
+node_modules/
+.pnpm-store/
+.cache/
+.output/
+.nitro/
+.tanstack/
+.wrangler/
+dist/
+
+# Convex
+.convex/
+
+# Docs site (VitePress)
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# Android
+.gradle/
+local.properties
+*.keystore
+captures/
+.cxx/
+release/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs and temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.pid
+*.tmp
+
+# Tests
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db

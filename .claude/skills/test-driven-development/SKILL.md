@@ -1,0 +1,199 @@
+---
+name: test-driven-development
+description: Use when writing any production code in this repo — features, bug fixes, refactors, behavior changes. Write the failing test first, watch it fail, write minimal code to pass, refactor green. Tagged with the spec ID and scenario sub-ID per the platform's test conventions.
+---
+
+# Test-Driven Development
+
+Write the test first. Watch it fail. Write the minimal code to pass it. Refactor while green.
+
+**Core principle:** if you didn't watch the test fail, you don't know if it tests the right thing.
+
+**Lifted from superpowers' TDD skill.** Slimmed for this repo and adapted to our spec-tagging convention.
+
+## The Iron Law
+
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+```
+
+If you wrote code before the test, **delete it** and start over. Don't keep it as "reference". Don't "adapt it" while writing the test. Delete means delete.
+
+## When to use
+
+**Always:**
+
+- New features (every spec implementation)
+- Bug fixes (write a failing regression test first)
+- Behavior changes
+- Refactors that change observable behavior
+
+**Exceptions (ask first):**
+
+- Generated code
+- Configuration files
+- Throwaway prototypes that will be deleted, not kept
+
+If you're thinking "skip TDD just this once" — stop. That's rationalization.
+
+## Red → Green → Refactor
+
+```
+1. RED      Write one failing test for one behavior.
+2. Verify   Run the test. Confirm it fails — for the right reason.
+3. GREEN    Write the minimal code to make it pass.
+4. Verify   Run the test. Confirm it passes. Confirm other tests still pass.
+5. Refactor Clean up while staying green.
+6. Repeat   Next failing test for next behavior.
+```
+
+### RED — write one failing test
+
+- One behavior per test.
+- Clear name: `[scenario.<id>] <what the user observes>`.
+- Test real code; mock only what you can't control (network, time, randomness).
+
+```ts
+// Vitest, web
+describe("vm.items.list", () => {
+    it("[scenario.items.list.empty] shows empty state when no items exist", () => {
+        const vm = createItemsListViewModel({ initialItems: [] });
+        expect(vm.state.value).toEqual({ status: "empty", items: [] });
+    });
+});
+```
+
+```swift
+// Swift Testing, iOS
+@Suite("vm.items.list")
+struct ItemsListViewModelTests {
+    @Test("[scenario.items.list.empty] shows empty state when no items exist")
+    func emptyState() async {
+        let vm = ItemsListViewModel(client: MockClient(returning: []))
+        await vm.load()
+        #expect(vm.status == .empty)
+    }
+}
+```
+
+```kt
+// kotlin.test, Android
+@Tag("spec:vm.items.list")
+class ItemsListViewModelTest {
+    @Test
+    @DisplayName("[scenario.items.list.empty] shows empty state when no items exist")
+    fun emptyState() = runTest {
+        val vm = ItemsListViewModel(MockClient(returning = emptyList()))
+        vm.load()
+        assertEquals(UiState.Empty, vm.state.value)
+    }
+}
+```
+
+### Verify RED — watch it fail
+
+**Mandatory. Never skip.** Run the test command. Confirm:
+
+- It **fails**, not errors out (failing assertion ≠ undefined symbol).
+- The failure message matches what you expect.
+- It fails because the **feature is missing**, not because of a typo or import error.
+
+If the test passes immediately, you're testing existing behavior — fix the test.
+If the test errors, fix the error and re-run until it fails for the right reason.
+
+### GREEN — minimal code
+
+Write the simplest code that makes the failing test pass.
+
+- No defensive `if` for cases not yet tested.
+- No options objects, configuration, or hooks for future flexibility (YAGNI).
+- No "while I'm here" refactors of unrelated code.
+
+### Verify GREEN — watch it pass
+
+Run the test. Confirm:
+
+- It passes.
+- All other tests in the suite still pass.
+- Output is pristine — no warnings, no leaked logs, no "test passed but skipped".
+
+### Refactor
+
+Now that you're green, clean up. Remove duplication, improve names, extract helpers. Keep tests green throughout — every change should leave the suite passing. Do not add new behavior.
+
+## Why order matters
+
+> "I'll write tests after to verify it works."
+
+Tests written after the implementation **pass immediately**. That proves nothing:
+
+- Might test the wrong thing
+- Might test what you implemented, not what's required
+- Might miss edge cases you forgot
+- You never saw it catch a bug
+
+Test-first forces you to **see the test fail**, which proves the test actually tests something.
+
+## Tagging discipline
+
+Every test in this repo carries the spec ID it verifies. The exact form per platform is in `apps/<platform>/CLAUDE.md` and `specs/CONVENTIONS.md`. Summary:
+
+| Platform              | Where the spec ID lives                     | Where the scenario sub-ID lives              |
+| --------------------- | ------------------------------------------- | -------------------------------------------- |
+| Web (Vitest)          | `describe('vm.items.list', ...)` block name | `it('[scenario.<id>] ...')` test name prefix |
+| iOS (Swift Testing)   | `@Suite("vm.items.list")`                   | `@Test("[scenario.<id>] ...")` display name  |
+| Android (kotlin.test) | `@Tag("spec:vm.items.list")`                | `@DisplayName("[scenario.<id>] ...")`        |
+
+If a test doesn't carry these tags, drift detection can't find it. Don't skip the tags.
+
+## Common rationalizations
+
+| Excuse                       | Reality                                                 |
+| ---------------------------- | ------------------------------------------------------- |
+| "Too simple to test"         | Simple code still breaks. The test takes 30 seconds.    |
+| "I'll test after"            | Tests passing immediately prove nothing.                |
+| "Already manually tested"    | Manual ≠ automated. No record, can't re-run.            |
+| "Deleting work is wasteful"  | Sunk cost. Keeping unverified code is technical debt.   |
+| "Need to explore first"      | Fine — throw the exploration away, then start with TDD. |
+| "Test hard = design unclear" | Listen to the test. Hard to test means hard to use.     |
+
+## Red flags — stop and start over
+
+- Code before the test
+- Test added "after we ship"
+- Test passes immediately
+- Can't explain why the test failed
+- "Just this once"
+- "Keep as reference, write tests, then adapt"
+
+All of these mean: **delete the code, start with TDD**.
+
+## When stuck
+
+| Problem                | Solution                                             |
+| ---------------------- | ---------------------------------------------------- |
+| Don't know how to test | Write the wished-for API. Write the assertion first. |
+| Test too complicated   | Design too complicated. Simplify the interface.      |
+| Must mock everything   | Code too coupled. Use dependency injection.          |
+| Test setup huge        | Extract helpers. Still big? Simplify the design.     |
+
+## Verification checklist
+
+Before marking work complete:
+
+- [ ] Every behavior has at least one test
+- [ ] Watched each test fail before implementing
+- [ ] Each test failed for the expected reason
+- [ ] Wrote minimal code to pass each test
+- [ ] All tests pass
+- [ ] Output pristine (no warnings, no leaked logs)
+- [ ] Tests use real code (mocks only when unavoidable)
+- [ ] Tags are correct (spec ID + scenario sub-ID)
+
+Can't tick every box? You skipped TDD. Start over.
+
+## Related skills
+
+- `implementing-a-spec` — the workflow that invokes this skill
+- `verification-before-completion` — the gate before claiming the work is done
+- `systematic-debugging` — for when a test fails for a reason you don't yet understand

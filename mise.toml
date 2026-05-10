@@ -1,0 +1,34 @@
+# Root mise config — orchestrates docs and per-platform tasks.
+# Per-platform tools (node, jdk, etc.) live in their respective mise.toml files
+# under apps/<platform>/ and services/<service>/, which you create when starting
+# that platform.
+#
+# Run `mise tasks` from any directory to see what's available.
+
+[settings]
+experimental = true
+
+[tools]
+"npm:oxfmt" = "latest"
+
+[hooks]
+postinstall = "cd docs && pnpm install"
+
+[tasks.fmt]
+description = "Format the entire project"
+run = "oxfmt"
+
+[tasks."docs:dev"]
+description = "Run the docs site (VitePress) dev server"
+dir = "docs"
+run = "mise run dev"
+
+[tasks."docs:build"]
+description = "Build the static docs site"
+dir = "docs"
+run = "mise run build"
+
+[tasks."docs:preview"]
+description = "Preview the built docs site locally"
+dir = "docs"
+run = "mise run preview"
