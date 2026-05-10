@@ -1,4 +1,8 @@
-# Workbench — A Claude-Native SDD Template
+# Workbench
+
+![Workbench hero image](./docs/public/workbench-hero.png)
+
+> A Claude-Native Spec-Driven Development Template
 
 A GitHub template for building **spec-driven multiplatform apps with Claude Code** as your primary collaborator. Specs are the source of truth; every platform implements them natively. There is no shared code — reconciliation across platforms happens through agent-mediated regeneration, not through a shared library.
 
