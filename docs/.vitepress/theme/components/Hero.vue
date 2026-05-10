@@ -1,7 +1,7 @@
 <template>
     <div class="sdd-hero">
         <div class="sdd-hero__content">
-            <h1 class="sdd-hero__title">Spec-Driven Development</h1>
+            <h1 class="sdd-hero__title">Workbench</h1>
             <p class="sdd-hero__tagline">
                 A spec-driven multiplatform app harness. One set of specs; native implementations on
                 web, iOS, and Android.
@@ -116,7 +116,7 @@ const firstFeatureLink = computed(() => {
 
 .sdd-hero__button--primary {
     background-color: var(--vp-c-brand-1);
-    color: #1c1917;
+    color: #fff;
     border-color: var(--vp-c-brand-1);
 }
 

@@ -8,17 +8,24 @@ img[src*="multivac-logo"] {
     width: auto;
 }
 
-/* Brand: amber accent against the chrome/silver Multivac palette.
-   amber-500 #f59e0b is the canonical brand hue; lighten in dark mode for
-   contrast, deepen in light mode. */
+/* Nav bar logo — overrides the theme's default Tailwind `h-4` (16px) with a
+   larger size so the workbench icon reads as a brand mark in the header. */
+img[src*="workbench-icon"] {
+    height: 40px;
+    width: auto;
+}
+
+/* Brand: red accent matching the workbench toolbox icon (dominant ~#bc2222).
+   Light mode uses a saturated red; dark mode lifts to red-400 for contrast. */
 :root {
-    --color-brand: #d97706;
+    --color-brand: #c81e1e;
     --color-grey: #9ca3af;
 
-    --vp-c-brand-1: #d97706;
-    --vp-c-brand-2: #b45309;
-    --vp-c-brand-3: #f59e0b;
+    --vp-c-brand-1: #c81e1e;
+    --vp-c-brand-2: #991b1b;
+    --vp-c-brand-3: #ef4444;
 
+    --vp-nav-logo-height: 40px;
     --vp-sidebar-width: 320px;
 
     --vp-font-family-base:
@@ -29,20 +36,21 @@ img[src*="multivac-logo"] {
         Consolas, Monaco, "Liberation Mono", "Lucida Console", monospace;
 }
 
-/* Dark mode — lighter amber for sufficient contrast against deep backgrounds. */
+/* Dark mode — saturated red that still reads against deep backgrounds without
+   going pink. red-500 is the sweet spot; red-600 anchors filled CTAs. */
 :root.dark:not([data-theme]),
 :root[data-theme="dark"] {
-    --color-brand: #fbbf24;
-    --vp-c-brand-1: #fbbf24;
-    --vp-c-brand-2: #f59e0b;
-    --vp-c-brand-3: #fcd34d;
-    --vp-code-color: #fbbf24;
+    --color-brand: #ef4444;
+    --vp-c-brand-1: #ef4444;
+    --vp-c-brand-2: #dc2626;
+    --vp-c-brand-3: #f87171;
+    --vp-code-color: #ef4444;
 }
 
 :root[data-theme="light"] {
-    --color-brand: #d97706;
-    --vp-c-brand-1: #d97706;
-    --vp-code-color: #b45309;
+    --color-brand: #c81e1e;
+    --vp-c-brand-1: #c81e1e;
+    --vp-code-color: #991b1b;
 }
 
 /* Typography */
