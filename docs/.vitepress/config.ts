@@ -8,7 +8,7 @@ import { clarificationMarkerPlugin } from "./markdown/clarification";
 const sidebar = generateSidebar();
 
 const config = defineConfig({
-    title: "Spec-Driven Development",
+    title: "Workbench",
     description: "A spec-driven multiplatform app harness — web, iOS, Android.",
     srcDir: "..",
     srcExclude: [

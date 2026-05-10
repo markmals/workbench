@@ -1,5 +1,5 @@
 ---
-title: Spec-Driven Development
+title: Workbench
 titleTemplate: A spec-driven multiplatform app harness
 layout: home
 theme: dark

@@ -17,7 +17,7 @@ export default {
         ctx.app.provide(themeContextKey, {
             logoDark: logo,
             logoLight: logo,
-            logoAlt: "Spec-Driven Development",
+            logoAlt: "Workbench",
             footerBg,
             monoIcon,
         });
