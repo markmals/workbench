@@ -68,7 +68,7 @@ function buildFeaturesSidebar(): DefaultTheme.SidebarItem[] {
         if (featureItems.length === 0) continue;
 
         items.push({
-            text: titleCase(entry),
+            text: featureFolderTitle(entry),
             collapsed: false,
             items: featureItems,
         });
@@ -76,14 +76,36 @@ function buildFeaturesSidebar(): DefaultTheme.SidebarItem[] {
     return items;
 }
 
+// Top-level files in a feature folder map to fixed sidebar labels in a fixed
+// order. Anything not in this list falls back to deriving from `# heading`.
+const KNOWN_TOP_FILES: Array<{ stem: string; title: string }> = [
+    { stem: "README", title: "Overview" },
+    { stem: "NARRATIVE", title: "Narrative" },
+];
+
 function walkFeatureFolder(absDir: string, urlPrefix: string): DefaultTheme.SidebarItem[] {
     const items: DefaultTheme.SidebarItem[] = [];
 
-    // Top-level files like NARRATIVE.md, README.md
+    const entries = readdirSyncSafe(absDir);
     const topFiles: DefaultTheme.SidebarItem[] = [];
     const subdirs: DefaultTheme.SidebarItem[] = [];
 
-    for (const entry of readdirSyncSafe(absDir)) {
+    const knownStems = new Set(KNOWN_TOP_FILES.map((f) => f.stem));
+    const presentMd = new Set(
+        entries.filter((e) => extname(e) === ".md").map((e) => e.slice(0, -3)),
+    );
+
+    // Known top files first, in declared order
+    for (const { stem, title } of KNOWN_TOP_FILES) {
+        if (!presentMd.has(stem)) continue;
+        topFiles.push({
+            text: title,
+            link: `${urlPrefix}${stem}`,
+        });
+    }
+
+    // Other top-level files alphabetically; then subdirs
+    for (const entry of entries) {
         const fullPath = join(absDir, entry);
         const isDir = statSync(fullPath).isDirectory();
 
@@ -98,6 +120,7 @@ function walkFeatureFolder(absDir: string, urlPrefix: string): DefaultTheme.Side
             }
         } else if (extname(entry) === ".md") {
             const stem = entry.slice(0, -3);
+            if (knownStems.has(stem)) continue;
             topFiles.push({
                 text: deriveTitle(fullPath, stem),
                 link: `${urlPrefix}${stem}`,
@@ -108,6 +131,14 @@ function walkFeatureFolder(absDir: string, urlPrefix: string): DefaultTheme.Side
     items.push(...topFiles);
     items.push(...subdirs);
     return items;
+}
+
+// "0001-managing-contacts" → "0001: Managing Contacts"
+function featureFolderTitle(slug: string): string {
+    const match = slug.match(/^(\d+)-(.+)$/);
+    if (!match) return titleCase(slug);
+    const [, num, rest] = match;
+    return `${num}: ${titleCase(rest)}`;
 }
 
 // ---- helpers ----
@@ -170,12 +201,12 @@ function firstFeatureLink(): string | null {
         .sort();
     if (entries.length === 0) return null;
     const first = entries[0];
-    // Prefer NARRATIVE.md inside it; fall back to README; fall back to the folder index
-    if (exists(join(featuresDir, first, "NARRATIVE.md"))) {
-        return `/features/${first}/NARRATIVE`;
-    }
+    // Prefer README (Overview); fall back to NARRATIVE; fall back to the folder index
     if (exists(join(featuresDir, first, "README.md"))) {
         return `/features/${first}/README`;
+    }
+    if (exists(join(featuresDir, first, "NARRATIVE.md"))) {
+        return `/features/${first}/NARRATIVE`;
     }
     return `/features/${first}/`;
 }
