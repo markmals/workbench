@@ -45,7 +45,7 @@ This template makes the opposite bet:
 - **Web is TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform.
 - **iOS is SwiftUI + `@Observable` + Swift Testing.** Native navigation, native gestures, native accessibility, the Apple HIG as a real constraint.
 - **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow.** Material You theming, predictive back, the real Android system behaviors.
-- **Backend is Convex.** A schema-as-protocol backend the web app talks to directly, and the mobile clients can mirror via their native HTTP/realtime stacks.
+- **Backend is Convex, and every app uses Convex's official native client.** The web app uses the official TypeScript client; iOS uses Convex's first-party Swift client; Android uses Convex's first-party Kotlin client. No platform hand-rolls its own HTTP/WebSocket layer or "mirrors" Convex via a custom transport — reactive subscriptions, mutations, auth, and codegen-driven types all flow through the official client on every platform.
 
 There is no shared package between any of these. There is no transpilation step, no bridge layer, no abstracted UI primitive. Each app ships the platform's native idioms — the kind of detail that distinguishes "an app" from "a website wrapped in a chrome." When something is genuinely different between platforms (a swipe gesture, a system share sheet, a context menu, a haptic), the platform implements it the platform's way, marked `// SPEC: <id> (deviates: <reason>)` so that divergence is explicit rather than smuggled.
 

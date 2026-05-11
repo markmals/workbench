@@ -20,7 +20,7 @@ This skill covers **how to write iOS code** in this repo. For the _workflow_ of 
 | Package manager    | Swift Package Manager                                | [swift.org/package-manager](https://www.swift.org/package-manager/)                                                       |
 | Linter / formatter | swift-format                                         | [github.com/swiftlang/swift-format](https://github.com/swiftlang/swift-format)                                            |
 | Project generation | Tuist (Swift manifests, no checked-in `.xcodeproj`)  | [docs.tuist.dev](https://docs.tuist.dev)                                                                                  |
-| Convex client      | Thin wrapper over Convex's HTTP/WebSocket protocol   | (see `services/convex/CLAUDE.md`)                                                                                         |
+| Convex client      | Convex's official Swift client (do **not** hand-roll a transport over HTTP/WebSocket) | (see `services/convex/CLAUDE.md`)                                                                        |
 
 Apple doesn't publish a `/llms.txt` for any of these. Use WebFetch against the canonical doc URLs above when you need to look something up.
 

@@ -21,7 +21,7 @@ This skill covers **how to write Android code** in this repo. For the _workflow_
 | Tests               | `kotlin.test` (JUnit5 backend)                                  | [kotlinlang.org/api/latest/kotlin.test](https://kotlinlang.org/api/latest/kotlin.test/)                                                        |
 | Linter / formatter  | ktlint                                                          | [pinterest.github.io/ktlint](https://pinterest.github.io/ktlint/)                                                                              |
 | Build system        | Gradle (Kotlin DSL)                                             | [docs.gradle.org/current/userguide/kotlin_dsl.html](https://docs.gradle.org/current/userguide/kotlin_dsl.html)                                 |
-| Convex client       | Official Convex Kotlin client (or thin wrapper)                 | (see `services/convex/CLAUDE.md`)                                                                                                              |
+| Convex client       | Convex's official Kotlin client (do **not** hand-roll a transport over HTTP/WebSocket) | (see `services/convex/CLAUDE.md`)                                                                                       |
 
 Kotlin publishes `/llms.txt`; Google and Android do not. Use WebFetch against canonical URLs when looking things up.
 

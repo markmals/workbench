@@ -34,7 +34,7 @@ Each client application follows the same conceptual layering, even though the la
 ├──────────────────────────────────────┤
 │  Domain                              │  spec: domain.<entity>
 ├──────────────────────────────────────┤
-│  Client (Convex wrapper)             │  spec: implicit; mirrors Convex schema
+│  Client (Convex official client)     │  spec: implicit; mirrors Convex schema
 └──────────────────────────────────────┘
                   │
                   ▼
@@ -46,7 +46,7 @@ Each client application follows the same conceptual layering, even though the la
 - **View** is platform-native. Tests are minimal — just enough to catch wiring mistakes.
 - **View Model** is the primary spec target. State, actions, transitions, derived values. Behavioral tests live here.
 - **Domain** is the data shape and invariants. Pure types and validation, no I/O.
-- **Client** wraps Convex. Web uses Convex's generated TS client directly. iOS uses a thin Swift wrapper around Convex's HTTP/WebSocket protocol or the community Swift client. Android uses the official Kotlin client where available, or a thin wrapper.
+- **Client** wraps Convex's **official native client** on every platform — no hand-rolled HTTP/WebSocket transports. Web uses Convex's generated TypeScript client directly; iOS uses Convex's first-party Swift client; Android uses Convex's first-party Kotlin client. The wrapper exists only to expose idiomatic call sites (typed query/mutation methods, platform-native reactive primitives) on top of the official client — not to reimplement the protocol.
 
 ## Data flow
 
