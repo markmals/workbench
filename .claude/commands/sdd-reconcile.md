@@ -36,6 +36,15 @@ This is **not for fixing bugs that were already in the spec**. Just edit the imp
 - Spec IDs (always stable).
 - Architecture or design system documents (those need a deliberate edit, not reconciliation).
 
+## Commit boundaries
+
+Reconciliation produces several independent commits. Land them in order:
+
+1. **Spec update** — after the user approves the markdown diff. Subject: `spec: reconcile <spec-id> with <source-platform> behavior`. Body explains what the source platform now does that the spec didn't capture.
+2. **Per-platform realignment** — one commit per other platform that gets regenerated via `/sdd-apply`. Subject: `feat: align <platform> <spec-id> impl with reconciled spec` (or `refactor:` / `fix:` as appropriate).
+
+Never bundle the spec edit with an implementation change — the spec change must be reviewable in isolation. See `.claude/rules/commit-discipline.md`.
+
 ## Implementation status
 
 Manual until tooling lands. The agent can drive each step with the existing read/edit tools and `git diff`.

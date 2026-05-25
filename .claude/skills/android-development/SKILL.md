@@ -152,3 +152,13 @@ apps/android/app/src/main/kotlin/com/sdd/app/
 - Booting the emulator, screenshotting, tapping? → `android-emulator-control`
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec`
+
+## Commit
+
+Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per ViewModel + its tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
+
+Android-specific notes:
+
+- **Gradle changes go alone.** Edits to `build.gradle.kts`, `settings.gradle.kts`, or `libs.versions.toml` belong in their own commit (`chore: bump <dependency>` or `chore: add <module>`). Don't bundle with feature code.
+- **Don't commit generated build outputs.** `apps/android/**/build/` is gitignored.
+- **Resource additions are separate.** New drawables, strings, or theme entries belong in their own commit so the diff is reviewable.

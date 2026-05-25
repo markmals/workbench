@@ -130,3 +130,13 @@ apps/web/src/
 - Verifying visually in a browser? → `web-verification`
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec` (this skill supports that workflow with idiom knowledge)
+
+## Commit
+
+Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per view-model + its tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
+
+Web-specific notes:
+
+- **Schema changes go alone.** A Convex `services/convex/schema.ts` edit (with its codegen output) belongs in its own commit — `feat: add <table> schema`. Don't bundle with view-model code that consumes it.
+- **Generated files (`services/convex/_generated/`) ride with the schema commit** that produced them; never commit them out of sync.
+- **Don't bundle dependency bumps** (e.g. Tailwind, TanStack) with feature work. Separate `chore:` commit.

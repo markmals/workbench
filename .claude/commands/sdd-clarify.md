@@ -54,6 +54,15 @@ When done, summarize:
 - M markers deferred (with file + line + reason)
 - Suggested next action (typically `/sdd-analyze <feature>` or proceeding to implementation)
 
+## Commit
+
+After resolving the markers, commit the edits. See `.claude/rules/commit-discipline.md` for style.
+
+Natural boundaries:
+
+- **One commit per coherent topic of clarifications.** If five markers in one feature all clarify duplicate-email handling, that's one commit (`spec: clarify duplicate-email handling in <feature>`). If they clarify unrelated concerns, split.
+- **Spec edits only.** This command does not touch code or tests, so the commit should contain only files under `features/` or `specs/`. If your working tree has unrelated changes, stage explicitly — do not `git add .`.
+
 ## Implementation status
 
 The slash command is scaffolded; the agent drives the steps manually using `rg`, `AskUserQuestion`, and `Edit`. No additional tooling is needed.

@@ -192,6 +192,17 @@ Before marking work complete:
 
 Can't tick every box? You skipped TDD. Start over.
 
+## Commit
+
+Each green-refactor cycle is a natural commit boundary. Once the suite is green and the refactor is clean, commit before starting the next red. See `.claude/rules/commit-discipline.md`.
+
+Typical shape:
+
+- **One commit per behavior** when test and impl are tightly bound: `feat: <behavior>` or `fix: <bug>`. The commit contains the new test and the minimum code to make it pass.
+- **Split into two commits** when the failing test is valuable on its own (e.g. a regression test that should land even if the fix takes longer): `test: add failing test for <bug>` then `fix: <bug>`.
+
+Do **not** commit while red. A WIP commit between red and green is the wrong answer — finish the cycle, then commit.
+
 ## Related skills
 
 - `implementing-a-spec` — the workflow that invokes this skill

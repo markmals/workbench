@@ -66,7 +66,7 @@ For each spec ID:
 
 When all specs done:
   8. Run /sdd-verify <platform> to confirm tests pass.
-  9. Surface results to user; do NOT commit (user handles commits).
+  9. Commit at the natural boundary (see "Commit" below), then surface results to user.
 ```
 
 ## Step-by-step
@@ -101,7 +101,7 @@ Use `subagent_type: "general-purpose"` and `model: "sonnet"`. Provide:
     5. **Self-review**: re-read the spec and the implementation; fix gaps inline.
     6. Report status: `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`. If `BLOCKED`, explain.
 
-Tell the implementer **not to commit**. The user handles all git commits.
+Tell the implementer **not to commit**. The implementer works in a partial state during dispatch; the controller commits once both reviews pass (see "Commit" below).
 
 ### 4. Handle implementer status
 
@@ -162,10 +162,23 @@ Use the `verification-before-completion` skill before claiming the work is compl
 ## Constraints
 
 - **Never dispatch parallel implementer subagents on the same files.** They'll conflict.
-- **Never commit on the user's behalf.** Stage at most; let the user commit.
+- **Never let the implementer commit.** It works mid-task; the controller commits at the natural boundary once reviews pass.
 - **Never skip reviews.** The "two stages" are non-negotiable.
 - **Never let the implementer self-review replace actual review.** Both are needed.
 - **Never start code-quality review before spec-compliance is ✅.** Wrong order.
+
+## Commit
+
+Once both reviews pass and `/sdd-verify` is green, commit. See `.claude/rules/commit-discipline.md` for message style.
+
+Natural boundaries per spec applied:
+
+- **Test commit:** `test: add scenarios for <spec-id> on <platform>` — the failing tests that pin the spec.
+- **Implementation commit:** `feat: implement <spec-id> on <platform>` — the minimum code that makes the tests pass, with the `// SPEC: <id>` reverse pointer attached.
+
+Combine the pair into one commit if the diff is small and they're tightly bound. If you applied multiple specs in one session, commit each independently — never bundle "implement X and Y" into one commit.
+
+Fixups from review (either spec-compliance or code-quality) belong in the same commit pair if not yet pushed; otherwise land them as a follow-up commit (`fix:` or `refactor:`).
 
 ## Model selection
 

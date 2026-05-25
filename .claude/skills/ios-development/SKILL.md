@@ -159,3 +159,13 @@ apps/ios/App/
 - Booting the simulator, screenshotting, tapping? → `ios-simulator-control`
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec`
+
+## Commit
+
+Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per view-model + its tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
+
+iOS-specific notes:
+
+- **Tuist manifest changes go alone.** `Project.swift` / `Workspace.swift` edits belong in their own commit (`chore: add <module> to Tuist project`). Don't bundle with feature code.
+- **Don't commit generated Xcode project files.** `apps/ios/.xcodeproj/` is gitignored; regenerated via Tuist on demand.
+- **Asset additions are separate.** New images, color sets, or localizable strings belong in their own commit so the diff is reviewable.

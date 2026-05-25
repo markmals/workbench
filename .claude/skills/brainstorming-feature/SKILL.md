@@ -132,6 +132,17 @@ Once approved, point the user at the next steps:
 - **If clarifications remain:** `/sdd-clarify <slug>` to resolve them.
 - **Otherwise:** `/sdd-analyze <slug>` to verify cross-artifact consistency, then `/sdd-apply <story-id-or-vm-id> web` to start the reference implementation. Use the `implementing-a-spec` skill from there.
 
+### 9. Commit
+
+After the user approves the feature folder, commit the spec content. See `.claude/rules/commit-discipline.md` for message style.
+
+Natural boundaries:
+
+- **One commit for the feature scaffold** when the folder is small enough to read as a single unit: `spec: scaffold features/<NNNN>-<slug>`. Body lists what's inside (N stories, M domain models, etc.).
+- **Split by artifact kind** when the folder is large: a NARRATIVE+stories commit, then domain models, then view-models, then flows/errors. Each commit should leave the feature folder in an internally consistent state.
+
+Use `spec:` as the commit prefix for everything authored by this skill. Do not include implementation code in the same commit — that's a separate step driven by `/sdd-apply`.
+
 ## Key principles
 
 - **One question at a time.** Don't overwhelm.

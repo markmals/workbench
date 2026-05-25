@@ -156,6 +156,17 @@ When you see these: **return to Phase 1**.
 | 3. Hypothesis     | State theory, test minimally, verify                                            | Confirmed or new hypothesis          |
 | 4. Implementation | Write failing test, fix root cause, verify                                      | Bug resolved, tests pass             |
 
+## Commit
+
+Once the failing test passes, the fix is verified, and the broader suite is green, commit. See `.claude/rules/commit-discipline.md` for message style.
+
+Natural boundaries for a debugging session:
+
+- **Regression test + fix:** one commit. Subject: `fix: <user-observable bug description>`. Body explains the root cause uncovered in Phase 1, not the symptom.
+- **Split into two commits** when the failing test is independently valuable (e.g. it pins behavior that wasn't previously tested): `test: add regression test for <bug>` then `fix: <bug>`.
+
+Do **not** bundle a "while I'm here" cleanup, an unrelated refactor, or a fix for a second bug into the same commit. One root cause, one commit. Other findings get their own commits or their own debugging sessions.
+
 ## Related skills
 
 - `test-driven-development` — for the failing-test step in Phase 4
