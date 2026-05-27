@@ -20,6 +20,16 @@ If you are tempted to create a shared package, write a spec instead.
 3. `specs/DESIGN_SYSTEM.md` — design tokens, component vocabulary, parity rules across platforms.
 4. The platform `CLAUDE.md` for whichever app you're working on (`apps/web/CLAUDE.md`, `apps/ios/CLAUDE.md`, `apps/android/CLAUDE.md`, or `services/convex/CLAUDE.md`) once you've scaffolded it.
 
+### Three places work comes from
+
+The repo derives the work queue from three artifacts, in priority order:
+
+1. **Specs and tests** — the work of building or evolving behavior. `/sdd-apply`, `/sdd-verify`, `/sdd-cover`. Source of truth for cross-platform behavior.
+2. **Drift** — specs and implementations out of sync. `/sdd-drift`, `/sdd-reconcile`. Surfaced mechanically from the reverse pointers and mtimes.
+3. **Sub-spec defects** — platform-local cosmetic / polish / quirk issues that the cross-platform spec deliberately doesn't cover. Tracked in `apps/<platform>/DEFECTS.md`. Filed via `/sdd-defect`, drained via the `triaging-defects` skill. This file should want to be empty.
+
+If something doesn't fit any of those, it's either a future feature (write a spec) or out of scope.
+
 ## Layout
 
 ```
@@ -61,6 +71,7 @@ If you are tempted to create a shared package, write a spec instead.
 | `/sdd-drift <platform>`           | List spec IDs whose impl is stale, plus impl files with no spec pointer. |
 | `/sdd-reconcile <platform>`       | Bring the spec + other platforms in line with this platform's impl.      |
 | `/sdd-cover <spec-id>`            | Show which platforms implement a spec and which tests pass.              |
+| `/sdd-defect <platform> <desc>`   | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow. |
 
 These are scaffolded with intent docs; their internals are agent-driven (no automation yet — the agent uses `rg`, `Edit`, `AskUserQuestion`, etc.).
 
@@ -76,6 +87,7 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `test-driven-development`        | When writing any production code. Iron Law: no production code without a failing test first.                              |
 | `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                     |
 | `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                             |
+| `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete. |
 | `web-development`                | When writing web code. Stack idioms, `/llms.txt` doc links.                                                               |
 | `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                        |
 | `ios-development`                | When writing iOS code. SwiftUI + `@Observable` + Swift Testing idioms, HIG link list.                                     |

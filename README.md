@@ -81,6 +81,8 @@ Beads is a thoughtful ticket tracker built around the way agents actually work �
 
 If your project _grows_ to need a ticket tracker (especially for cross-team coordination beyond the repo), Beads is a great choice — it composes cleanly alongside this template. We just didn't want it to be a precondition.
 
+The one class of work that _isn't_ derivable from the spec library is **sub-spec defects**: platform-local cosmetic / polish / quirk issues that the cross-platform spec deliberately doesn't speak to. For those, each platform keeps an [`apps/<platform>/DEFECTS.md`](.claude/templates/platform/DEFECTS.md) drain file — filed via [`/sdd-defect`](.claude/commands/sdd-defect.md), drained via the [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md) skill, deleted on fix. It's a tiny convention with no status fields, severity labels, or assignees on purpose: the file wants to be empty, and the fix commit is the durable record.
+
 ### vs. generic tooling
 
 Most "AI-friendly" templates are AI-agnostic templates with a `CLAUDE.md` bolted on. This one inverts that: the spec format, the slash commands, the hook lifecycle, and the per-platform discipline were all designed assuming you'll be reading and writing markdown _alongside_ an agent that can navigate the repo. If we end up using a different agent later, much of the structure will still hold — but the optimization target is Claude Code today.
@@ -165,6 +167,7 @@ Skills are markdown files that encode "how we do X here." Claude invokes them vi
 | [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md)               | When writing any production code. Iron Law: no production code without a failing test first.                   |
 | [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md) | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.          |
 | [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                  |
+| [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain. |
 | [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web code. TanStack Start + Convex + Tailwind v4 + React Aria idioms.                              |
 | [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                             |
 | [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing iOS code. SwiftUI + `@Observable` + Swift Testing idioms, HIG link list.                          |
@@ -197,6 +200,7 @@ User-typed commands. Each is intent-only at the moment — the agent uses `rg`, 
 | [`/sdd-reconcile <source-platform>`](.claude/commands/sdd-reconcile.md) | Bring the spec + other platforms in line with this platform's impl (when a platform raced ahead). |
 | [`/sdd-clarify <feature-or-spec>`](.claude/commands/sdd-clarify.md)     | Scan a feature or spec for `[NEEDS CLARIFICATION]` markers and resolve them with the user.        |
 | [`/sdd-analyze <feature>`](.claude/commands/sdd-analyze.md)             | Read-only cross-artifact consistency check for a feature folder.                                  |
+| [`/sdd-defect <platform> <desc>`](.claude/commands/sdd-defect.md)       | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow.                   |
 
 ### `.claude/hooks/` — lifecycle scripts
 
@@ -222,6 +226,7 @@ Markdown templates for new specs and features. Used by the `brainstorming-featur
 | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`.claude/templates/feature/`](.claude/templates/feature/)           | Full structure for a new `features/<NNNN>-<slug>/` folder: `NARRATIVE.md`, `stories/STORY.md`, `models/MODEL.md`, `view-models/VIEW_MODEL.md`, `use-cases/USE_CASE.md`, `user-flow/USER_FLOW.md`, `errors/ERROR.md`. |
 | [`.claude/templates/spec/MODEL.md`](.claude/templates/spec/MODEL.md) | Canonical template for a cross-cutting spec under `specs/`.                                                                                                                                                          |
+| [`.claude/templates/platform/DEFECTS.md`](.claude/templates/platform/DEFECTS.md) | Seed file for per-platform sub-spec defect tracking. Copied to `apps/<platform>/DEFECTS.md` on first `/sdd-defect`.                                                                          |
 
 ## Local tooling
 

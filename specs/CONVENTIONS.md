@@ -281,5 +281,6 @@ These are reference material an agent may read, but not the spec layer. Do not p
 - Prototype code or sandbox repos
 - Meeting notes, RFCs, decision logs (use a `docs/` directory if you need one)
 - Analytics events, telemetry, observability — these are implementation concerns
+- Platform-local cosmetic defects (clipping, jank, missing haptic, polish issues) — these go in `apps/<platform>/DEFECTS.md`, not in specs. See the `triaging-defects` skill for the classifier that decides which side of the line an observation falls on.
 
-If you find yourself writing implementation details into a spec, stop and ask: **could a different platform realize this differently and still be correct?** If no, it is implementation, not spec.
+If you find yourself writing implementation details into a spec, stop and ask: **could a different platform realize this differently and still be correct?** If no, it is implementation, not spec. The same test decides whether an observation belongs in `DEFECTS.md` (yes — platform idioms can differ) or in a spec amendment (no — every platform must converge).
