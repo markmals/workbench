@@ -4,7 +4,7 @@
             <h1 class="sdd-hero__title">Workbench</h1>
             <p class="sdd-hero__tagline">
                 A spec-driven multiplatform app harness. One set of specs; native implementations on
-                web, iOS, and Android.
+                web, mobile, desktop, and CLI.
             </p>
             <div class="sdd-hero__actions">
                 <a href="/specs/CONVENTIONS" class="sdd-hero__button sdd-hero__button--primary">
