@@ -59,7 +59,15 @@
             "Bash(emulator:*)",
             "Bash(./gradlew:*)",
             "Bash(gradle:*)",
-            "Bash(ktlint:*)"
+            "Bash(ktlint:*)",
+            "Bash(ktfmt:*)",
+            "Bash(swift-format:*)",
+            "Bash(cargo:*)",
+            "Bash(rustfmt:*)",
+            "Bash(dotnet:*)",
+            "Bash(astro:*)",
+            "Bash(varlock:*)",
+            "Bash(wrangler dev:*)"
         ],
         "ask": [
             "Bash(git push:*)",
@@ -69,6 +77,9 @@
             "Bash(convex deploy*)",
             "Bash(npx convex deploy*)",
             "Bash(pnpx convex deploy*)",
+            "Bash(wrangler deploy:*)",
+            "Bash(railway up:*)",
+            "Bash(railway redeploy:*)",
             "Bash(rm -rf:*)"
         ],
         "deny": []
@@ -113,6 +124,11 @@
                         "type": "command",
                         "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/convex-codegen.sh",
                         "timeout": 60
+                    },
+                    {
+                        "type": "command",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/openapi-codegen.sh",
+                        "timeout": 10
                     },
                     {
                         "type": "command",

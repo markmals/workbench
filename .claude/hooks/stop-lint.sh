@@ -24,9 +24,14 @@ $output"
 }
 
 run_lint "web"     "apps/web"      "lint"
+run_lint "website" "apps/website"  "lint"
 run_lint "convex"  "services/convex" "lint"
+run_lint "cli"     "apps/cli"      "lint"
 run_lint "ios"     "apps/ios"      "l"
-# Android lint goes through Gradle (slow). Run `mise run -C apps/android lint` manually before merge.
+run_lint "tui"     "apps/tui"      "lint"   # cargo clippy
+run_lint "linux"   "apps/linux"    "lint"   # cargo clippy
+# Android (Gradle) and Windows (dotnet) lint are slow. Run
+# `mise run -C apps/android lint` / `mise run -C apps/windows lint` manually before merge.
 
 if [[ -n "$failures" ]]; then
     jq -n --arg reason "Lint failures before stop:

@@ -19,6 +19,18 @@ case "$file_path" in
         echo "Blocked: '$file_path' is inside node_modules. Edit the source package or update package.json." >&2
         exit 2
         ;;
+    */target/*)
+        echo "Blocked: '$file_path' is a Cargo build output (target/). Edit the source under src/ and rebuild." >&2
+        exit 2
+        ;;
+    */obj/*|*/bin/Debug/*|*/bin/Release/*)
+        echo "Blocked: '$file_path' is a .NET build output. Edit the source and rebuild." >&2
+        exit 2
+        ;;
+    */.astro/*)
+        echo "Blocked: '$file_path' is Astro-generated (.astro/). Edit src/ and Astro regenerates it." >&2
+        exit 2
+        ;;
     */dist/*|*/.output/*|*/.nitro/*|*/.tanstack/*|*/.wrangler/*)
         echo "Blocked: '$file_path' is a build output. Edit the source under src/ and rebuild." >&2
         exit 2
