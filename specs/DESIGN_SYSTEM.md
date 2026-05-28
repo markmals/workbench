@@ -5,7 +5,9 @@ kind: design-system
 
 # Design System
 
-> **This is a template.** Tokens, component vocabulary, and parity rules belong here. The web app is the canonical realization; iOS and Android adapt these tokens to their native conventions.
+> **This is a template.** Tokens, component vocabulary, and parity rules belong here. The web app is the canonical realization; every other GUI platform adapts these tokens to its native conventions.
+>
+> Columns below cover the GUI platforms (web, Apple, Android, Windows, Linux). The **website** reuses the web realization. The **CLIs** (Ratatui TUI, Node CLI) have no design-system surface beyond terminal color and layout — they are exempt from these tables.
 
 ## Tokens
 
@@ -13,14 +15,14 @@ Tokens are abstract values that every platform realizes in its own idiom. The to
 
 ### Color
 
-| Token                  | Intent             | Web (Tailwind v4)           | iOS                                 | Android                                      |
-| ---------------------- | ------------------ | --------------------------- | ----------------------------------- | -------------------------------------------- |
-| `color.surface.base`   | Default surface    | `bg-surface`                | `Color(.systemBackground)`          | `MaterialTheme.colorScheme.surface`          |
-| `color.surface.raised` | Cards, sheets      | `bg-surface-raised`         | `Color(.secondarySystemBackground)` | `MaterialTheme.colorScheme.surfaceContainer` |
-| `color.text.primary`   | Main copy          | `text-primary`              | `Color.primary`                     | `MaterialTheme.colorScheme.onSurface`        |
-| `color.text.secondary` | Subtler copy       | `text-secondary`            | `Color.secondary`                   | `MaterialTheme.colorScheme.onSurfaceVariant` |
-| `color.accent`         | Brand accent       | `text-accent` / `bg-accent` | _accent color_                      | `MaterialTheme.colorScheme.primary`          |
-| `color.danger`         | Destructive intent | `text-danger` / `bg-danger` | `Color.red`                         | `MaterialTheme.colorScheme.error`            |
+| Token                  | Intent             | Web (Tailwind v4)           | iOS                                 | Android                                      | Windows (WinUI)                  | Linux (Adwaita)        |
+| ---------------------- | ------------------ | --------------------------- | ----------------------------------- | -------------------------------------------- | -------------------------------- | ---------------------- |
+| `color.surface.base`   | Default surface    | `bg-surface`                | `Color(.systemBackground)`          | `MaterialTheme.colorScheme.surface`          | `ApplicationPageBackgroundThemeBrush` | `@window_bg_color` |
+| `color.surface.raised` | Cards, sheets      | `bg-surface-raised`         | `Color(.secondarySystemBackground)` | `MaterialTheme.colorScheme.surfaceContainer` | `CardBackgroundFillColorDefaultBrush` | `@card_bg_color`  |
+| `color.text.primary`   | Main copy          | `text-primary`              | `Color.primary`                     | `MaterialTheme.colorScheme.onSurface`        | `TextFillColorPrimaryBrush`      | `@theme_fg_color`      |
+| `color.text.secondary` | Subtler copy       | `text-secondary`            | `Color.secondary`                   | `MaterialTheme.colorScheme.onSurfaceVariant` | `TextFillColorSecondaryBrush`    | `.dim-label`           |
+| `color.accent`         | Brand accent       | `text-accent` / `bg-accent` | _accent color_                      | `MaterialTheme.colorScheme.primary`          | `AccentFillColorDefaultBrush`    | `@accent_color`        |
+| `color.danger`         | Destructive intent | `text-danger` / `bg-danger` | `Color.red`                         | `MaterialTheme.colorScheme.error`            | `SystemFillColorCriticalBrush`   | `@error_color`         |
 
 <!-- Add the actual hex/HSL values once branding is settled. -->
 
@@ -56,38 +58,38 @@ A 4-px base scale: `space.0` … `space.12` (= 0, 4, 8, 12, 16, 20, 24, 32, 40, 
 
 These are abstract components every platform must provide. The name and intent are stable; the realization is idiomatic.
 
-| Component    | Intent                          | Web                            | iOS                 | Android                     |
-| ------------ | ------------------------------- | ------------------------------ | ------------------- | --------------------------- |
-| `Button`     | Primary action affordance       | React Aria `Button`            | SwiftUI `Button`    | Compose `Button`            |
-| `TextField`  | Single-line text input          | React Aria `TextField`         | SwiftUI `TextField` | Compose `OutlinedTextField` |
-| `List`       | Vertically scrolling collection | Custom or React Aria `ListBox` | SwiftUI `List`      | Compose `LazyColumn`        |
-| `Sheet`      | Modal that slides from edge     | React Aria `Modal`             | SwiftUI `.sheet`    | Compose `ModalBottomSheet`  |
-| `Avatar`     | Person/identity glyph           | Custom                         | Custom              | Custom                      |
-| `EmptyState` | Friendly empty placeholder      | Custom                         | Custom              | Custom                      |
+| Component    | Intent                          | Web                            | iOS                 | Android                     | Windows (WinUI)        | Linux (GTK/Adwaita)     |
+| ------------ | ------------------------------- | ------------------------------ | ------------------- | --------------------------- | ---------------------- | ----------------------- |
+| `Button`     | Primary action affordance       | React Aria `Button`            | SwiftUI `Button`    | Compose `Button`            | `Button`               | `Gtk.Button`            |
+| `TextField`  | Single-line text input          | React Aria `TextField`         | SwiftUI `TextField` | Compose `OutlinedTextField` | `TextBox`              | `Adw.EntryRow`          |
+| `List`       | Vertically scrolling collection | Custom or React Aria `ListBox` | SwiftUI `List`      | Compose `LazyColumn`        | `ListView`             | `Gtk.ListBox`           |
+| `Sheet`      | Modal that slides from edge     | React Aria `Modal`             | SwiftUI `.sheet`    | Compose `ModalBottomSheet`  | `ContentDialog`        | `Adw.Dialog`            |
+| `Avatar`     | Person/identity glyph           | Custom                         | Custom              | Custom                      | `PersonPicture`        | `Adw.Avatar`            |
+| `EmptyState` | Friendly empty placeholder      | Custom                         | Custom              | Custom                      | Custom                 | `Adw.StatusPage`        |
 
 ## Iconography
 
-Use the same icon vocabulary across platforms — names map to SF Symbols on iOS, Material Icons on Android, and Lucide on web.
+Use the same icon vocabulary across platforms — names map to Lucide on web, SF Symbols on Apple, Material Icons on Android, Segoe Fluent Icons on Windows, and named/symbolic icons on Linux.
 
-| Intent | Web             | iOS                  | Android           |
-| ------ | --------------- | -------------------- | ----------------- |
-| Add    | Lucide `Plus`   | SF `plus`            | Material `Add`    |
-| Edit   | Lucide `Pencil` | SF `pencil`          | Material `Edit`   |
-| Delete | Lucide `Trash2` | SF `trash`           | Material `Delete` |
-| Search | Lucide `Search` | SF `magnifyingglass` | Material `Search` |
+| Intent | Web             | iOS                  | Android           | Windows (Segoe Fluent) | Linux (symbolic)         |
+| ------ | --------------- | -------------------- | ----------------- | ---------------------- | ------------------------ |
+| Add    | Lucide `Plus`   | SF `plus`            | Material `Add`    | `Add`                  | `list-add-symbolic`      |
+| Edit   | Lucide `Pencil` | SF `pencil`          | Material `Edit`   | `Edit`                 | `document-edit-symbolic` |
+| Delete | Lucide `Trash2` | SF `trash`           | Material `Delete` | `Delete`               | `user-trash-symbolic`    |
+| Search | Lucide `Search` | SF `magnifyingglass` | Material `Search` | `Search`               | `system-search-symbolic` |
 
 ## Parity rules
 
-- **Visual parity is not pixel parity.** A SwiftUI list looks like a SwiftUI list; a Compose list looks like a Compose list. Don't fight platform conventions.
+- **Visual parity is not pixel parity.** A SwiftUI list looks like a SwiftUI list; a Compose list looks like a Compose list; a WinUI `ListView` and a GTK `ListBox` each look native. Don't fight platform conventions.
 - **Tokens must agree.** The same color, spacing, type intent must produce the same _role_ on every platform.
-- **Layout convergence at the screen level.** A given screen (e.g. an "items list") on iOS contains the same primary surfaces (search bar, list, add affordance) as on web and Android.
+- **Layout convergence at the screen level.** A given screen (e.g. an "items list") on any client contains the same primary surfaces (search bar, list, add affordance) as the web reference.
 - **Native affordances are encouraged.** Pull-to-refresh, swipe actions, share sheets — use them. Mark them `// SPEC: manual` if no spec applies.
 
 ## Accessibility baseline
 
-- All interactive elements must have a label and meet the platform's minimum touch target size (44pt iOS, 48dp Android, 44px web).
+- All interactive elements must have a label and meet the platform's minimum touch/click target size (44pt iOS, 48dp Android, 44px web, 40px Windows, 24px+ pointer / accessible labels on Linux).
 - All text meets WCAG AA contrast against its background.
-- Focus order matches reading order on every platform.
+- Focus order matches reading order on every platform. Expose accessibility metadata natively — XAML `AutomationProperties` on Windows, `Gtk.Accessible` roles on Linux, the platform's accessibility API everywhere else.
 
 ## Open design questions
 
