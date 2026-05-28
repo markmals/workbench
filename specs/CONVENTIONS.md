@@ -134,6 +134,16 @@ final class ItemsListViewModel { /* ... */ }
 class ItemsListViewModel : ViewModel() { /* ... */ }
 ```
 
+```cs
+// SPEC: vm.items.list
+public sealed partial class ItemsListViewModel : ObservableObject { /* ... */ }
+```
+
+```rust
+// SPEC: vm.items.list
+pub struct ItemsListViewModel { /* ... */ }
+```
+
 For Convex functions:
 
 ```ts
@@ -163,6 +173,8 @@ Every behavioral test is tagged with the spec IDs it verifies. The mechanism is 
     ```
 - **Swift Testing:** `@Test(.tags(.spec("vm.items.list"), .scenario("items.list.empty")))`.
 - **kotlin.test (JUnit5):** `@Tag("spec:vm.items.list")` and `@DisplayName("[scenario.items.list.empty] ...")`.
+- **MSTest (C#):** `[TestCategory("spec:vm.items.list")]` on the class and `[Description("[scenario.items.list.empty] ...")]` on the method.
+- **Cargo test (Rust):** a `#[cfg(test)] mod` carrying `// SPEC: vm.items.list`, with a `// [scenario.items.list.empty]` comment above each `#[test]` fn (Rust test names can't hold dots or brackets, so the scenario sub-ID lives in the comment that drift tooling greps).
 
 The `[scenario.<id>]` prefix is mandatory because Gherkin scenarios in story files have their own sub-IDs (see "Stories and scenarios" below) and tests must trace to a specific scenario, not just a story.
 

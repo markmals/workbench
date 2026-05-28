@@ -8,7 +8,7 @@
 - **Reverse pointers are mandatory.** Every class, function, or module that realizes a spec carries `// SPEC: <id>`. Tests are tagged with the spec IDs they verify.
 - **Use `// SPEC: <id> (deviates: <reason>)` when a platform must differ.** Use `// SPEC: manual` for genuinely platform-specific code with no cross-platform analog.
 - **The spec defines what; the test proves it; the implementation satisfies it.** None is the source of truth alone.
-- **Web is the reference implementation.** When implementing a spec on iOS or Android, read the web realization for context — but the spec is authoritative.
+- **Web is the reference implementation.** When implementing a spec on any other platform (Apple, Android, Windows, Linux, or a CLI), read the web realization for context — but the spec is authoritative.
 
 ## Before writing implementation code
 
