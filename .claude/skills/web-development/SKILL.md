@@ -1,27 +1,42 @@
 ---
 name: web-development
-description: Use when writing or modifying web app code under `apps/web/` or `services/convex/`. Covers TanStack Start + Convex + Tailwind v4 + React Aria idioms, and points at /llms.txt endpoints for first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (visual verification loop).
+description: Use when writing or modifying web app code under `apps/web/` or `services/convex/`. Covers React + TanStack Start/Router/Query/DB/Form + Convex + Clerk + Tailwind v4 + React Aria + Motion + Valibot idioms, and points at /llms.txt endpoints for first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (visual verification loop).
 ---
 
 # Web Development
 
-This skill covers **how to write web code** in this repo. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For the _verify-iterate loop_ in a browser, see `web-verification`. For _what to build_, see the spec.
+This skill covers **how to write web-app code** in this repo. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For the _verify-iterate loop_ in a browser, see `web-verification`. For _what to build_, see the spec. For the marketing/content site, see `website-development` (Astro, not TanStack Start).
 
-The web app is the **reference implementation**. Build features here first; iOS and Android use the web realization as a worked example.
+The web app is the **reference implementation**. Build features here first; every other platform uses the web realization as a worked example.
 
 ## Stack at a glance
 
 | Concern            | Choice                                     | First-party docs                                                               |
 | ------------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
 | Framework          | TanStack Start                             | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Components / React | React + React Compiler (optimizer)         | [react.dev/llms.txt](https://react.dev/llms.txt)                               |
+| Router             | TanStack Router (via Start)                | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Server state       | TanStack Query + `@convex-dev/react-query` | (covered by Convex docs below)                                                 |
+| Local-first store  | TanStack DB                                | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Tables / Forms     | TanStack Table · TanStack Form             | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Hotkeys            | TanStack Hotkeys                           | [llms.txt](https://tanstack.com/llms.txt)                                      |
 | Backend            | Convex                                     | [llms.txt](https://docs.convex.dev/llms.txt)                                   |
-| Components         | React Aria Components                      | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                          |
+| Auth               | Clerk                                      | [llms.txt](https://clerk.com/docs/llms.txt)                                    |
+| Unstyled UI        | React Aria Components                      | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                          |
+| Styling            | Tailwind v4 (+ Tailwind Plus blocks)       | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_      |
+| Animation          | Motion                                     | [motion.dev/docs](https://motion.dev/docs)                                     |
+| Validation         | Valibot                                    | [valibot.dev](https://valibot.dev/)                                            |
+| Relational / edge DB | Drizzle (e.g. Cloudflare D1)             | [orm.drizzle.team](https://orm.drizzle.team/docs)                              |
+| Logging            | Evlog                                      | [evlog.dev](https://www.evlog.dev/)                                            |
 | Build tool         | Vite                                       | [llms.txt](https://vitejs.dev/llms.txt)                                        |
+| Library bundler    | tsdown (only for shared libs / exes)       | [tsdown.dev](https://tsdown.dev/)                                              |
 | Tests              | Vitest                                     | [llms.txt](https://vitest.dev/llms.txt)                                        |
 | Linter / formatter | Oxlint + Oxfmt                             | [llms.txt](https://oxc.rs/llms.txt)                                            |
-| Styling            | Tailwind v4                                | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_      |
-| Server state       | TanStack Query + `@convex-dev/react-query` | (covered by Convex docs above)                                                 |
+| Type checker       | tsgo (`@typescript/native-preview`)        | [tsdown.dev](https://tsdown.dev/)                                              |
+| Dev tools          | TanStack DevTools                          | [tanstack.com/devtools](https://tanstack.com/devtools/latest)                  |
+| Package manager    | pnpm                                       | [pnpm.io](https://pnpm.io/)                                                    |
 | Production runtime | Cloudflare Workers                         | [developers.cloudflare.com/workers](https://developers.cloudflare.com/workers) |
+| Desktop packaging  | Electron (wraps this same app)             | [electronjs.org/docs](https://www.electronjs.org/docs/latest)                  |
 
 When you need to look something up: fetch the relevant `/llms.txt` with WebFetch and let it route you to the specific page. The `/llms.txt` is the index, not the content — it tells you which URLs to fetch next.
 
@@ -80,7 +95,23 @@ Anything that isn't a Convex query/mutation but needs to run server-side goes in
 
 ### No global state library
 
-TanStack Query + Convex's reactive cache _is_ the global state. Don't reach for Redux, Zustand, Jotai, or Pinia. Local UI state (open/closed, hover, transient input) stays in components via `useState`.
+TanStack Query + Convex's reactive cache _is_ the server state. Don't reach for Redux, Zustand, Jotai, or Pinia. Local UI state (open/closed, hover, transient input) stays in components via `useState`. For genuinely **local-first** views — optimistic, offline-tolerant, or derived across queries — use **TanStack DB** collections backed by the Convex query, not a bespoke cache. Most reads stay plain `convexQuery`; reach for TanStack DB only when the view actually needs it.
+
+### Auth is Clerk
+
+Identity, sessions, and the signed-in user come from **Clerk** — not hand-rolled auth state. Gate routes with Clerk, read the user from Clerk's hooks/components, and let Convex validate the Clerk-issued identity server-side. There is no separate user table you own for authentication.
+
+### Forms: TanStack Form + Valibot
+
+**TanStack Form** owns form state; **Valibot** owns the schema. Define the Valibot schema once and share it between the form's validators and the Convex mutation's argument validation, so client and server can't disagree about what's valid. Don't hand-roll `onChange` validation.
+
+### Animation is Motion
+
+Use **Motion** for transitions and micro-interactions. Honor `prefers-reduced-motion`, and match the `motion.*` duration/easing tokens in `DESIGN_SYSTEM.md` rather than inventing per-component timings.
+
+### Logging is Evlog
+
+Structured logging goes through **Evlog**, not `console.log`, in anything that ships. `console.*` is fine for throwaway local debugging — remove it before committing.
 
 ### Tailwind v4 conventions
 
@@ -101,7 +132,9 @@ These are the linter and formatter. Don't ship ESLint or Prettier config files. 
 - **Schema is the protocol.** Every entity lives in `services/convex/schema.ts` with explicit indexes. Add `// SPEC: domain.<entity>` to each table block.
 - **Functions are thin.** Queries return the precise shape the client needs; mutations validate inputs and return the affected entity. Heavy logic lives in `services/convex/lib/`.
 - **Use actions for I/O only.** Anything calling an external API goes in an action, not a mutation.
-- **Run `mise run -C services/convex codegen` after schema changes.** Then `mise run -C apps/web typecheck` to surface breaks.
+- **Identity comes from Clerk.** Convex functions read the authenticated identity via the Clerk integration (`ctx.auth.getUserIdentity()`), not a user table you manage for authentication.
+- **Convex is the primary store; Drizzle is the exception.** Reach for Drizzle (e.g. Cloudflare D1) only for data that genuinely belongs at the edge or in a relational shape Convex doesn't fit. Default to Convex.
+- **Run `mise run -C services/convex codegen` after schema changes.** Then `mise run -C apps/web typecheck` (tsgo) to surface breaks.
 
 ## TanStack Start specifics
 
