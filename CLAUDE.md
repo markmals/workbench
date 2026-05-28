@@ -1,8 +1,8 @@
 # Spec-Driven Development Template
 
-A spec-driven multiplatform app harness. Specs are the source of truth; every platform implements them natively. Choose a primary "reference" platform — typically web (TanStack Start + Convex) — and mirror its behavior on additional platforms (iOS / Swift, Android / Kotlin) idiomatically.
+A spec-driven multiplatform app harness. Specs are the source of truth; every platform implements them natively. The reference platform is **web** (React + TanStack Start + Convex); other clients — websites, Apple, Android, Windows, Linux, and Node / Rust CLIs — mirror its behavior idiomatically. The backend is **Convex** (database, file storage, cron, queues, realtime) with **Clerk** for identity.
 
-This is the bare template. The `apps/` and `services/` directories are not committed — you scaffold them per-platform when you start that platform's implementation. The harness assumes (and the per-platform skills are written for) the layout below.
+This template ships as the **superset** of every platform the stack supports — see [`STACK.md`](STACK.md) for the full toolchain catalog. On a fresh copy, run **`/setup`** first: it asks which platforms your product actually uses and prunes the skills, hooks, permissions, and docs for the rest. Whatever you keep, the `apps/` and `services/` directories are not committed — you scaffold each one when you start that platform's implementation. The harness assumes (and the per-platform skills are written for) the layout below.
 
 @.claude/rules/code-quality.md
 @.claude/rules/commit-discipline.md
@@ -16,9 +16,10 @@ If you are tempted to create a shared package, write a spec instead.
 **Read these before doing anything substantial:**
 
 1. `specs/CONVENTIONS.md` — spec format, ID taxonomy, frontmatter, reverse pointers, deviation marker, drift detection. **This is the contract.**
-2. `specs/ARCHITECTURE.md` — top-level layering, data flow, deployment targets.
+2. `specs/ARCHITECTURE.md` — top-level layering, data flow, deployment targets, the contract-first backend model.
 3. `specs/DESIGN_SYSTEM.md` — design tokens, component vocabulary, parity rules across platforms.
-4. The platform `CLAUDE.md` for whichever app you're working on (`apps/web/CLAUDE.md`, `apps/ios/CLAUDE.md`, `apps/android/CLAUDE.md`, or `services/convex/CLAUDE.md`) once you've scaffolded it.
+4. `STACK.md` — the canonical toolchain catalog: every tool, framework, and service this template knows how to wire up, organized by layer.
+5. The platform `CLAUDE.md` for whichever app you're working on (`apps/<platform>/CLAUDE.md` or `services/convex/CLAUDE.md`) once you've scaffolded it.
 
 ### Three places work comes from
 
@@ -43,16 +44,22 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 │   ├── skills/                        ← procedural workflows (writing-user-stories, simulator control)
 │   └── templates/                     ← canonical templates for new features and specs
 ├── .mcp.json                          ← project MCP servers (Chrome DevTools)
-├── docs/                              ← VitePress site rendering specs/ and features/
+├── STACK.md                           ← canonical toolchain catalog (rendered in docs)
+├── docs/                              ← VitePress site rendering specs/, features/, STACK
 │   └── index.md                       ← home page (URL-rewritten to /)
 ├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM)
 ├── features/                          ← (you create) feature-scoped specs as <NNNN>-<slug>/
 ├── apps/                              ← (you create) platform implementations
-│   ├── web/                           ←   TanStack Start + Convex (recommended reference)
-│   ├── ios/                           ←   Swift / SwiftUI / Swift Testing
-│   └── android/                       ←   Kotlin / Jetpack Compose / kotlin.test
+│   ├── web/                           ←   React + TanStack Start + Convex (reference)
+│   ├── website/                       ←   Astro + React islands (marketing / content)
+│   ├── ios/                           ←   Swift / SwiftUI / SwiftData (Apple family: iOS · iPadOS · macOS · …)
+│   ├── android/                       ←   Kotlin / Jetpack Compose / Room
+│   ├── windows/                       ←   C# / WinUI 3 / EF Core
+│   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
+│   ├── cli/                           ←   Node single-file exe / TS-Rest / Bombshell
+│   └── tui/                           ←   Rust / Clap + Ratatui (high-performance CLI)
 └── services/                          ← (you create) backend services
-    └── convex/                        ←   Convex backend (schema is the data-layer protocol)
+    └── convex/                        ←   Convex backend (schema is the data-layer protocol) + Clerk auth
 ```
 
 ## Working with specs
@@ -66,6 +73,7 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 
 | Command                           | Purpose                                                                  |
 | --------------------------------- | ------------------------------------------------------------------------ |
+| `/setup`                          | **Run once on a fresh copy.** Asks which platforms + backend you're using and prunes everything for the rest. |
 | `/sdd-apply <spec-id> <platform>` | Regenerate a spec's implementation + tests on a platform.                |
 | `/sdd-verify <platform>`          | Run the platform's behavioral test suite.                                |
 | `/sdd-drift <platform>`           | List spec IDs whose impl is stale, plus impl files with no spec pointer. |
@@ -88,12 +96,17 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                     |
 | `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                             |
 | `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete. |
-| `web-development`                | When writing web code. Stack idioms, `/llms.txt` doc links.                                                               |
+| `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.         |
 | `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                        |
-| `ios-development`                | When writing iOS code. SwiftUI + `@Observable` + Swift Testing idioms, HIG link list.                                     |
-| `ios-simulator-control`          | When verifying iOS UI changes. Wraps `xcrun simctl` + `idb`.                                                              |
-| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow idioms.                                                     |
+| `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                            |
+| `ios-development`                | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing idioms, HIG link list.                  |
+| `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                            |
+| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                       |
 | `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                           |
+| `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                           |
+| `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                          |
+| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.       |
+| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                                   |
 
 These skills are deliberately lighter than the official `superpowers` suite and adapted to this template's spec-driven shape (no plan documents, no branch ceremony, reverse pointers everywhere). Several lift patterns from superpowers; see each `SKILL.md` header for attribution.
 
@@ -111,9 +124,14 @@ The site reads markdown directly from `specs/` and `features/` (no copying, no s
 
 ## MCP servers
 
-- **Chrome DevTools** (`.mcp.json`) — DOM, console, screenshots, network, lighthouse. Configured for **Chromium**, not Chrome. Use it aggressively when debugging or verifying web visuals; running it in a tight verify-iterate loop is the intended workflow.
+- **Chrome DevTools** (`.mcp.json`) — DOM, console, screenshots, network, lighthouse. Configured for **Chromium**, not Chrome. Use it aggressively when debugging or verifying web visuals; running it in a tight verify-iterate loop is the intended workflow. This one is committed because it's `npx`-launched and self-contained.
 
-For iOS and Android simulator control, see the `ios-simulator-control` and `android-emulator-control` skills (zsh-based recipes around `xcrun simctl`/`idb` and `adb`/`uiautomator`).
+- **Per-platform IDE bridges (user/local config, not committed).** Several toolchains expose the IDE to the agent over MCP — building, testing, and reading the code model with structured results. These are **per-machine** (they need the IDE running with the feature enabled), so configure them in your user or `.mcp.local.json`, never the shared `.mcp.json`:
+    - **Apple** — Xcode's [external agent access](https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode). See `ios-development`.
+    - **Android** — Android Studio / IntelliJ [MCP Server](https://www.jetbrains.com/help/idea/mcp-server.html#external-client-setup). See `android-development`.
+    - **Windows** — [RoslynMcpExtension](https://github.com/sailro/RoslynMcpExtension) for the C# code model. See `windows-development`.
+
+For Apple and Android simulator control, see the `ios-simulator-control` and `android-emulator-control` skills (zsh-based recipes around `xcrun simctl`/`idb` and `adb`/`uiautomator`). Windows, Linux, and CLI verification is documented in-skill (no GUI-automation MCP) — each `*-development` skill carries a "Verifying" section.
 
 ## Local tooling
 
@@ -136,7 +154,9 @@ All editing is done via your editor of choice. Builds, tests, simulators, and em
 | -------------------------------------------------- | --------------------------------------------------------------- |
 | "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                          |
 | "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                 |
-| "What's the web stack?"                            | `apps/web/CLAUDE.md` (after scaffolding)                        |
+| "What tool/framework does the template use for X?" | `STACK.md`                                                      |
+| "Which platforms is this copy set up for?"         | Run `/setup`, or read the platform rows in `specs/ARCHITECTURE.md` |
+| "What's the web stack?"                            | `STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding) |
 | "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding) |
 | "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                  |
 | "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                 |

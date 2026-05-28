@@ -12,15 +12,16 @@ This template assumes you will work with [Claude Code](https://claude.com/claude
 
 1. Click **"Use this template"** on GitHub to create your repo.
 2. Clone it locally and open it in your editor.
-3. Customize the seed content:
+3. **Run [`/setup`](.claude/commands/setup.md) in Claude.** This template ships as the _superset_ of every platform the stack supports (see [`STACK.md`](STACK.md)). `/setup` asks which platforms and backend you're actually shipping and prunes the skills, hooks, permissions, and docs for everything else — turning the superset into just your project.
+4. Customize the seed content:
     - [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md) — fill in the `[NEEDS CLARIFICATION]` product overview and out-of-scope sections.
     - [`specs/DESIGN_SYSTEM.md`](specs/DESIGN_SYSTEM.md) — adjust tokens once branding is settled.
-    - [`CLAUDE.md`](CLAUDE.md) — keep, but tweak the "Working with specs" note if you want a different reference platform than web.
+    - [`.env.schema`](.env.schema) — declare your environment variables (Varlock's typed contract).
     - `docs/index.md`, `docs/.vitepress/config.ts`, `docs/.vitepress/theme/components/Hero.vue` — set the project title.
     - `docs/public/` — replace `workbench-hero.png`, `workbench-icon.png`, `favicon.svg` with your own brand art.
-4. Author your first feature: invoke the `brainstorming-feature` skill in Claude. It populates `features/0001-<your-slug>/`.
-5. Scaffold your reference platform under `apps/<platform>/`. Add the per-platform `CLAUDE.md` and `mise.toml`. (See [`CLAUDE.md`](CLAUDE.md) for the recommended layout.)
-6. Implement the feature on the reference platform with the `implementing-a-spec` skill, then mirror to other platforms via `/sdd-apply <spec-id> <platform>`.
+5. Author your first feature: invoke the `brainstorming-feature` skill in Claude. It populates `features/0001-<your-slug>/`.
+6. Scaffold your reference platform under `apps/<platform>/`. Add the per-platform `CLAUDE.md` and `mise.toml`. (See [`CLAUDE.md`](CLAUDE.md) for the recommended layout.)
+7. Implement the feature on the reference platform with the `implementing-a-spec` skill, then mirror to other platforms via `/sdd-apply <spec-id> <platform>`.
 
 ## What "Claude-native" means
 
@@ -29,7 +30,7 @@ Lots of templates can be _used with_ an AI assistant. This one is _designed for_
 - **The spec is the contract; the agent is the implementer.** Specs in [`specs/`](specs/) and `features/<NNNN>-<slug>/` describe behavior in a form Claude can read, reason about, and translate into native code on each platform. Implementations carry `// SPEC: <id>` reverse pointers so Claude can trace from a line of code back to the spec it came from — and detect drift in the other direction.
 - **Workflows live as skills, not in your head.** Recurring procedures (writing a story, implementing a spec, debugging, verifying before claiming done) are encoded in [`.claude/skills/`](.claude/skills/) so that any session — yours, a teammate's, a fresh agent — picks up the same discipline.
 - **Cross-cutting checks live as subagents.** Audits like drift detection, spec review, test-coverage gaps, and visual verification run as isolated subagents in [`.claude/agents/`](.claude/agents/) so they don't pollute the main conversation context.
-- **Repetitive judgment is automated as hooks.** Formatting on edit, blocking edits to generated files, regenerating Convex / Tuist projects, linting on stop, surfacing reconciliation reminders when a spec changes — all in [`.claude/hooks/`](.claude/hooks/).
+- **Repetitive judgment is automated as hooks.** Formatting on edit (per language), blocking edits to generated files, regenerating Convex / Tuist projects, reminding you to regenerate OpenAPI clients when the contract changes, linting on stop, surfacing reconciliation reminders when a spec changes — all in [`.claude/hooks/`](.claude/hooks/).
 - **The orientation file is the orientation file.** [`CLAUDE.md`](CLAUDE.md) loads on every session and tells Claude how this repo works. There is no second README that drifts from the first.
 
 You can absolutely work in this repo without Claude — the specs, tests, and code are all human-readable, the docs site renders the spec library, and `mise` runs everything from the terminal. But the workflows assume Claude is doing a lot of the typing.
@@ -38,22 +39,26 @@ You can absolutely work in this repo without Claude — the specs, tests, and co
 
 The other half of this template's thesis: **each platform is built in its own native language, framework, and tooling — and the spec is what holds them together instead of a shared runtime.**
 
-The conventional way to ship "the same app" on web, iOS, and Android is to pick a cross-platform framework — React Native, Flutter, Capacitor, Kotlin Multiplatform — and accept the trade-offs that come with it: a thin abstraction over each platform's UI layer, generic interaction patterns, a JS/Dart/Kotlin runtime layered on top of the OS, and a shared codebase that is structurally biased toward whatever the framework finds easy to express. You ship faster initially, you ship more uniformly forever, and the app feels approximately right on every platform.
+The conventional way to ship "the same app" across web, mobile, and desktop is to pick a cross-platform framework — React Native, Flutter, Capacitor, Kotlin Multiplatform — and accept the trade-offs that come with it: a thin abstraction over each platform's UI layer, generic interaction patterns, a JS/Dart/Kotlin runtime layered on top of the OS, and a shared codebase that is structurally biased toward whatever the framework finds easy to express. You ship faster initially, you ship more uniformly forever, and the app feels approximately right on every platform.
 
 This template makes the opposite bet:
 
-- **Web is TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform.
-- **iOS is SwiftUI + `@Observable` + Swift Testing.** Native navigation, native gestures, native accessibility, the Apple HIG as a real constraint.
-- **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow.** Material You theming, predictive back, the real Android system behaviors.
-- **Backend is Convex, and every app uses Convex's official native client.** The web app uses the official TypeScript client; iOS uses Convex's first-party Swift client; Android uses Convex's first-party Kotlin client. No platform hand-rolls its own HTTP/WebSocket layer or "mirrors" Convex via a custom transport — reactive subscriptions, mutations, auth, and codegen-driven types all flow through the official client on every platform.
+- **Web is React + TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform — and the reference every other client mirrors.
+- **Websites are Astro + React islands.** Content-first marketing and docs surfaces that ship HTML and hydrate sparingly.
+- **Apple is SwiftUI + Observation + SwiftData.** One Swift codebase across iOS / iPadOS / macOS / tvOS / watchOS / visionOS; native navigation, gestures, accessibility, the HIG as a real constraint.
+- **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow + Room.** Material You theming, predictive back, the real Android system behaviors.
+- **Windows is C# + WinUI 3 + MVVM Toolkit + EF Core.** Native XAML, the real Windows shell.
+- **Linux is Rust + GTK 4 + Adwaita + Relm4.** Native GNOME, the real desktop.
+- **CLIs are Node (TS-Rest + Bombshell) and Rust (Clap + Ratatui).** Headless automation and a high-performance TUI.
+- **Backend is Convex (Clerk for auth), reached contract-first.** Web and the website talk to Convex directly through its TypeScript client — reactive subscriptions, mutations, codegen-driven types. Native and CLI clients consume a **generated OpenAPI client** (Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota, Progenitor) over the platform's own HTTP stack, with an on-device database (SwiftData / Room / EF Core / Diesel) as a local-first cache. No platform hand-rolls a transport or mirrors the protocol by hand — the contract is the only thing that crosses the wire.
 
 There is no shared package between any of these. There is no transpilation step, no bridge layer, no abstracted UI primitive. Each app ships the platform's native idioms — the kind of detail that distinguishes "an app" from "a website wrapped in a chrome." When something is genuinely different between platforms (a swipe gesture, a system share sheet, a context menu, a haptic), the platform implements it the platform's way, marked `// SPEC: <id> (deviates: <reason>)` so that divergence is explicit rather than smuggled.
 
-**The spec is what fills the role a shared framework usually plays.** It is the contract that says "all three apps must support _these_ states, _these_ transitions, _these_ errors, _these_ acceptance criteria." Each platform satisfies the contract idiomatically. The spec is the framework — written in markdown, enforced by reverse pointers and Gherkin scenarios, kept honest by `/sdd-drift` and `/sdd-verify`.
+**The spec is what fills the role a shared framework usually plays.** It is the contract that says "every client must support _these_ states, _these_ transitions, _these_ errors, _these_ acceptance criteria." Each platform satisfies the contract idiomatically. The spec is the framework — written in markdown, enforced by reverse pointers and Gherkin scenarios, kept honest by `/sdd-drift` and `/sdd-verify`.
 
-Why is this tractable now when historically it wasn't? Because **agents close the cost gap**. Implementing a feature three times in three native stacks used to be prohibitively expensive — three times the engineering effort, three sources of bugs, three drift trajectories. With Claude doing most of the per-platform translation from a shared spec, the cost flattens dramatically. You write the spec once, dispatch `/sdd-apply <spec-id> <platform>` for each target, and the agent produces idiomatic native code on each platform that satisfies the same behavioral contract. Drift is detected mechanically; reconciliation is a command, not a project.
+Why is this tractable now when historically it wasn't? Because **agents close the cost gap**. Implementing a feature once per platform across a half-dozen native stacks used to be prohibitively expensive — N times the engineering effort, N sources of bugs, N drift trajectories. With Claude doing most of the per-platform translation from a shared spec, the cost flattens dramatically. You write the spec once, dispatch `/sdd-apply <spec-id> <platform>` for each target, and the agent produces idiomatic native code on each platform that satisfies the same behavioral contract. Drift is detected mechanically; reconciliation is a command, not a project.
 
-The result: an app that feels at home on every platform — not a uniform skin over a uniform runtime — without paying the historical cost of writing and maintaining three apps by hand.
+The result: an app that feels at home on every platform — not a uniform skin over a uniform runtime — without paying the historical cost of writing and maintaining a fleet of native apps by hand.
 
 ## Why this template invents its own skills, agents, hooks, and conventions
 
@@ -65,7 +70,7 @@ Superpowers is a fantastic, broad skill library — debugging, brainstorming, co
 
 - **No plan documents, no branch ceremony.** Superpowers leans on plan files and worktree branches to coordinate multi-step work. This template uses TodoWrite + per-spec subagents (see the [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md) skill) because the unit of work is "satisfy this spec on this platform" — finer-grained than a plan doc, larger than a single edit.
 - **Reverse pointers replace task tracking.** Every line of code points back to its spec via `// SPEC: <id>`. Drift detection is `rg`-able, not ticket-shaped. You don't need a separate issue tracker to know what's done — `/sdd-drift` and `/sdd-cover` derive it from the code.
-- **Smaller surface area = faster onboarding.** Superpowers ships ~50 skills. This template ships ~12, each tuned to the spec-driven workflow. A new contributor reads them all in a sitting.
+- **Smaller surface area = faster onboarding.** Superpowers ships ~50 skills. This template ships a focused set tuned to the spec-driven workflow — the cross-cutting process skills plus one development skill per platform. Run `/setup` and the platform skills you don't use are pruned, so each copy stays readable in a sitting.
 - **`[NEEDS CLARIFICATION]` is the missing-info convention.** Borrowed in spirit from Superpowers' brainstorming flow but adapted: any unresolved question lives inline in the spec as `[NEEDS CLARIFICATION: ...]` and is resolved by the [`/sdd-clarify`](.claude/commands/sdd-clarify.md) command.
 
 Several skills (notably [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md), [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md), [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md), [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md)) lift their core moves directly from Superpowers — see the attribution in each `SKILL.md` header. The originals are excellent; we just wanted them shaped to this repo's grain.
@@ -107,19 +112,26 @@ The discipline is enforced by hooks: `block-generated.sh` refuses edits to gener
 .
 ├── CLAUDE.md                          ← orientation doc Claude loads every session
 ├── README.md                          ← this file (orientation for humans)
+├── STACK.md                           ← full toolchain catalog (the superset /setup prunes from)
+├── .env.schema                        ← Varlock environment contract
 ├── .mcp.json                          ← project-level MCP servers (Chromium DevTools)
 ├── .claude/                           ← everything Claude-shaped (see catalog below)
-├── docs/                              ← VitePress site rendering specs/ and features/
+├── docs/                              ← VitePress site rendering specs/, features/, STACK
 ├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM)
 ├── mise.toml                          ← root task runner (docs:* + per-platform orchestration)
 │
 ├── features/                          ← (you create) feature-scoped specs as <NNNN>-<slug>/
 ├── apps/                              ← (you create) platform implementations
-│   ├── web/                           ←   TanStack Start + Convex (recommended reference)
-│   ├── ios/                           ←   Swift / SwiftUI / Swift Testing
-│   └── android/                       ←   Kotlin / Jetpack Compose / kotlin.test
+│   ├── web/                           ←   React + TanStack Start + Convex (reference)
+│   ├── website/                       ←   Astro + React islands
+│   ├── ios/                           ←   Swift / SwiftUI / SwiftData (Apple family)
+│   ├── android/                       ←   Kotlin / Jetpack Compose / Room
+│   ├── windows/                       ←   C# / WinUI 3 / EF Core
+│   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
+│   ├── cli/                           ←   Node / TS-Rest / Bombshell
+│   └── tui/                           ←   Rust / Clap + Ratatui
 └── services/                          ← (you create) backend services
-    └── convex/                        ←   Convex backend
+    └── convex/                        ←   Convex backend + Clerk auth
 ```
 
 The `apps/` and `services/` directories aren't committed in this template — you scaffold them per-platform as you start that platform's work. Each scaffolded directory will have its own `CLAUDE.md` (with stack idioms) and `mise.toml` (with build/test/lint tasks).
@@ -133,7 +145,9 @@ Everything below is what makes this template "Claude-native." If you copied just
 | Path                        | Purpose                                                                                                                                                                                                                                 |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`CLAUDE.md`](CLAUDE.md)    | Loaded on every Claude Code session. The top-level orientation: how the repo works, where to read first, slash command index, skill index. `@includes` the rule files below so they're part of every session.                           |
-| [`.mcp.json`](.mcp.json)    | Project-level MCP server config. Currently registers the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) pointed at **Chromium** (not Chrome) in `--isolated` mode for visual verification of the web app. |
+| [`STACK.md`](STACK.md)      | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                                                    |
+| [`.env.schema`](.env.schema) | [Varlock](https://varlock.dev) environment contract: the committed, typed declaration of the project's env vars. Real values live in gitignored `.env` / `.env.local`.                                                                  |
+| [`.mcp.json`](.mcp.json)    | Project-level MCP server config. Registers the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) pointed at **Chromium** (not Chrome) in `--isolated` mode for web visual verification. Per-platform IDE bridges (Xcode, Android Studio/JetBrains, Roslyn) are configured in **user/local** MCP config, not here. |
 | `apps/<platform>/CLAUDE.md` | Per-platform orientation (created when you scaffold the platform). Stack idioms, test commands, where reverse pointers go in that language.                                                                                             |
 | `services/convex/CLAUDE.md` | Backend orientation (created when you scaffold Convex). Schema-as-protocol conventions, mutation/query patterns.                                                                                                                        |
 
@@ -141,7 +155,7 @@ Everything below is what makes this template "Claude-native." If you copied just
 
 Project-level Claude Code settings. Wires up:
 
-- **Permissions** — auto-allow safe read-only and build commands (`mise`, `pnpm`, `xcodebuild`, `adb`, `rg`, etc.); ask before `git push`, `convex deploy`, `rm -rf`.
+- **Permissions** — auto-allow safe read-only and build commands (`mise`, `pnpm`, `cargo`, `dotnet`, `xcodebuild`, `adb`, `rustfmt`, `oxfmt`, `rg`, etc.); ask before `git push`, `convex deploy`, `wrangler deploy`, `railway up`, `rm -rf`.
 - **Hooks** — registers every script in `.claude/hooks/` to its lifecycle event (`PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`, `Notification`).
 - **Default permission mode** — `auto` (continuous execution).
 
@@ -168,12 +182,17 @@ Skills are markdown files that encode "how we do X here." Claude invokes them vi
 | [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md) | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.          |
 | [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                  |
 | [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain. |
-| [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web code. TanStack Start + Convex + Tailwind v4 + React Aria idioms.                              |
+| [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web-app code. React + TanStack suite + Convex + Clerk + Tailwind + React Aria + Motion + Valibot idioms. |
 | [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                             |
-| [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing iOS code. SwiftUI + `@Observable` + Swift Testing idioms, HIG link list.                          |
-| [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying iOS UI changes. Wraps `xcrun simctl` + `idb`.                                                   |
-| [`android-development`](.claude/skills/android-development/SKILL.md)                       | When writing Android code. Compose + Material 3 + Kotlin coroutines/Flow idioms.                               |
+| [`website-development`](.claude/skills/website-development/SKILL.md)                       | When writing the marketing/content site. Astro + React islands + content collections idioms.                  |
+| [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing + generated OpenAPI client.   |
+| [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                 |
+| [`android-development`](.claude/skills/android-development/SKILL.md)                       | When writing Android code. Compose + Material 3 + coroutines/Flow + Room + Ktor + OpenAPI idioms.             |
 | [`android-emulator-control`](.claude/skills/android-emulator-control/SKILL.md)             | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                |
+| [`windows-development`](.claude/skills/windows-development/SKILL.md)                       | When writing Windows code. C# + WinUI 3 + MVVM Toolkit + EF Core + Kiota; Roslyn MCP bridge.                  |
+| [`linux-development`](.claude/skills/linux-development/SKILL.md)                           | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel + Progenitor idioms.                 |
+| [`server-cli-development`](.claude/skills/server-cli-development/SKILL.md)                 | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob; owns the OpenAPI contract.        |
+| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                       |
 
 ### `.claude/agents/` — cross-cutting subagents
 
@@ -193,6 +212,7 @@ User-typed commands. Each is intent-only at the moment — the agent uses `rg`, 
 
 | Command                                                                 | Purpose                                                                                           |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [`/setup`](.claude/commands/setup.md)                                   | **Run once on a fresh copy.** Choose which platforms + backend you ship; prune everything else.   |
 | [`/sdd-apply <spec-id> <platform>`](.claude/commands/sdd-apply.md)      | Regenerate a spec's implementation and tests on a target platform.                                |
 | [`/sdd-verify <platform>`](.claude/commands/sdd-verify.md)              | Run the platform's behavioral test suite and report which spec IDs pass.                          |
 | [`/sdd-drift <platform>`](.claude/commands/sdd-drift.md)                | List spec IDs whose implementation has drifted from the spec on a platform.                       |
@@ -208,10 +228,11 @@ Bash scripts wired up in `settings.json`. Each runs at a specific Claude Code li
 
 | Hook                                                               | Event                                       | Purpose                                                                                                                                                        |
 | ------------------------------------------------------------------ | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`block-generated.sh`](.claude/hooks/block-generated.sh)           | `PreToolUse` (Edit/Write/MultiEdit)         | Refuses edits to files that are tool-generated (Convex `_generated/`, Xcode-derived data, etc.).                                                               |
+| [`block-generated.sh`](.claude/hooks/block-generated.sh)           | `PreToolUse` (Edit/Write/MultiEdit)         | Refuses edits to tool-generated files (Convex `_generated/`, Xcode-derived data, Cargo `target/`, .NET `obj/`+`bin/`, Astro `.astro/`, etc.).                  |
 | [`conventional-commits.sh`](.claude/hooks/conventional-commits.sh) | `PreToolUse` (Bash, gated to `git commit*`) | Requires a Conventional Commits prefix (`feat:`, `fix:`, etc.) in the commit message.                                                                          |
-| [`format-on-edit.sh`](.claude/hooks/format-on-edit.sh)             | `PostToolUse` (Edit/Write/MultiEdit)        | Formats the touched file in place using the right formatter for the extension (`oxfmt`, `swiftformat`, `ktlint`).                                              |
+| [`format-on-edit.sh`](.claude/hooks/format-on-edit.sh)             | `PostToolUse` (Edit/Write/MultiEdit)        | Formats the touched file in place by extension (`oxfmt` for TS, `rustfmt` for Rust, `swift-format` for Swift). Slow formatters (ktfmt, dotnet format) run via the platform build. |
 | [`convex-codegen.sh`](.claude/hooks/convex-codegen.sh)             | `PostToolUse` (Edit/Write/MultiEdit)        | Regenerates Convex types when `schema.ts` changes.                                                                                                             |
+| [`openapi-codegen.sh`](.claude/hooks/openapi-codegen.sh)           | `PostToolUse` (Edit/Write/MultiEdit)        | When the OpenAPI contract changes, reminds you to regenerate the per-platform typed clients (reminder only — the producer is a project choice).                |
 | [`tuist-regen.sh`](.claude/hooks/tuist-regen.sh)                   | `PostToolUse` (Edit/Write/MultiEdit)        | Regenerates the Xcode project when `Project.swift` changes.                                                                                                    |
 | [`spec-reconcile.sh`](.claude/hooks/spec-reconcile.sh)             | `PostToolUse` (Edit/Write/MultiEdit)        | When a spec is edited, lists implementations that reference its ID and suggests `/sdd-apply` per platform. When code is edited, surfaces drift hints.          |
 | [`stop-lint.sh`](.claude/hooks/stop-lint.sh)                       | `Stop`                                      | Runs lint on whichever platforms have uncommitted changes since `HEAD`. **Blocks the stop** if any lint fails — Claude can't declare "done" with a dirty lint. |
@@ -230,7 +251,7 @@ Markdown templates for new specs and features. Used by the `brainstorming-featur
 
 ## Local tooling
 
-[`mise`](https://mise.jdx.dev) is the task runner. The root [`mise.toml`](mise.toml) only ships `docs:*` tasks and `fmt`; per-platform tasks live in `apps/*/mise.toml` and `services/*/mise.toml` once you scaffold them.
+[`mise`](https://mise.jdx.dev) manages toolchains and runs tasks. The root [`mise.toml`](mise.toml) ships `docs:*` tasks and `fmt`; per-platform tasks live in `apps/*/mise.toml` and `services/*/mise.toml` once you scaffold them. Environment variables are managed by [Varlock](https://varlock.dev) against the committed [`.env.schema`](.env.schema) — run env-dependent commands with `varlock run -- <cmd>`.
 
 ```sh
 mise run docs:dev          # docs site (VitePress) at http://localhost:5173
