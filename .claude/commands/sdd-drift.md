@@ -5,7 +5,7 @@ argument-hint: <platform>
 
 # /sdd-drift $ARGUMENTS
 
-You are detecting drift on a single platform: `$ARGUMENTS` (one of `web`, `ios`, `android`, `convex`).
+You are detecting drift on a single platform: `$ARGUMENTS` (one of `web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui`, `convex`).
 
 ## Intent
 

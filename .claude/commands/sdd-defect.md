@@ -5,7 +5,7 @@ argument-hint: <platform> <short description>
 
 # /sdd-defect $ARGUMENTS
 
-You are filing a sub-spec defect observation. First token of `$ARGUMENTS` is the platform (`web`, `ios`, `android`, `convex`); the rest is a free-text description of what was observed.
+You are filing a sub-spec defect observation. First token of `$ARGUMENTS` is the platform (`web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui`, `convex`); the rest is a free-text description of what was observed.
 
 ## Intent
 
@@ -16,7 +16,7 @@ Sub-spec defects are platform-local, observed cosmetic / polish / quirk issues t
 ## Steps
 
 1. **Resolve the target file.**
-    - `web`, `ios`, `android` → `apps/<platform>/DEFECTS.md`
+    - `web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui` → `apps/<platform>/DEFECTS.md`
     - `convex` → `services/convex/DEFECTS.md`
     - If the file doesn't exist yet, copy `.claude/templates/platform/DEFECTS.md` to the target path and replace `<platform>` placeholders in the heading and example paths with the real platform name.
 2. **Gather the entry fields.** Use `AskUserQuestion` only when the slash command argument didn't already supply the answer. The fields are:

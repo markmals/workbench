@@ -7,7 +7,7 @@ argument-hint: <spec-id> <platform>
 
 You are applying a single spec to a single platform. Spec ID and target platform are: `$ARGUMENTS`.
 
-Argument format: `<spec-id> <platform>` where `<platform>` is one of `web`, `ios`, `android`, `convex`.
+Argument format: `<spec-id> <platform>` where `<platform>` is one of your project's platforms (`web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui`, or `convex` — whichever survived `/setup`).
 
 ## Intent
 

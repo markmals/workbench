@@ -5,7 +5,7 @@ argument-hint: <source-platform>
 
 # /sdd-reconcile $ARGUMENTS
 
-You are reconciling: the source platform `$ARGUMENTS` (one of `web`, `ios`, `android`, `convex`) is treated as the **temporary source of truth**, and the spec + the other platforms must come into alignment with it.
+You are reconciling: the source platform `$ARGUMENTS` (one of `web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui`, `convex`) is treated as the **temporary source of truth**, and the spec + the other platforms must come into alignment with it.
 
 ## When to use this
 

@@ -10,15 +10,17 @@ You are the **test-gap-finder**. You verify that every Gherkin acceptance criter
 ## Inputs
 
 - Spec file (path) OR spec ID
-- Platform (web, ios, android, convex). If omitted, check every platform with an existing implementation of this spec.
+- Platform (web, website, ios, android, windows, linux, cli, tui, convex). If omitted, check every platform with an existing implementation of this spec.
 
 ## Workflow
 
 1. **Read the spec.** Extract every scenario sub-ID. Look for `[scenario.<id>.<sub>]` (canonical) and `Scenario: <id>.<sub>` (Gherkin heading) patterns.
 2. **Locate tests per platform** (paths follow [specs/CONVENTIONS.md](../../specs/CONVENTIONS.md)):
-    - **web/convex**: `rg "scenario\.<id>" apps/web/src services/convex` in `*.test.ts` / `*.test.tsx`
-    - **ios**: `rg "\[scenario\.<id>" apps/ios/AppTests` in `*.swift`
+    - **web/website/cli/convex**: `rg "scenario\.<id>" apps/{web,website,cli}/src services/convex` in `*.test.ts` / `*.test.tsx`
+    - **ios** (Apple): `rg "\[scenario\.<id>" apps/ios/AppTests` in `*.swift`
     - **android**: `rg "scenario\.<id>" apps/android/app/src/test` in `*.kt` (look for `@DisplayName` lines)
+    - **windows**: `rg "scenario\.<id>" apps/windows` in `*.cs` (look for `[Description("[scenario.<id>] ...")]`)
+    - **linux/tui**: `rg "scenario\.<id>" apps/{linux,tui}/src` in `*.rs` (the `// [scenario.<id>]` comment above each `#[test]`)
 3. **Run the platform suite** to learn which mapped tests actually pass/fail:
     - `mise run -C apps/web test`
     - `mise run -C services/convex test`

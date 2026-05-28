@@ -19,7 +19,7 @@ For a given spec ID, show:
 ## Steps
 
 1. **Read the spec.** Confirm the ID exists and read its content (so the report header includes the spec's intent in one line).
-2. **For each platform** (`web`, `ios`, `android`, `convex`):
+2. **For each platform** (`web`, `website`, `ios`, `android`, `windows`, `linux`, `cli`, `tui`, `convex`):
    a. `rg "SPEC: <spec-id>"` in `apps/<platform>/` (or `services/convex/`) — record matching files.
    b. `rg "scenario.<spec-id>" / "@Tag(\"spec:<spec-id>\")"` etc. — record test files and scenario sub-IDs.
    c. Optionally run the platform's tests filtered to this spec ID and record pass/fail.
