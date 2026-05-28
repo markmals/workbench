@@ -9,7 +9,7 @@ const sidebar = generateSidebar();
 
 const config = defineConfig({
     title: "Workbench",
-    description: "A spec-driven multiplatform app harness — web, iOS, Android.",
+    description: "A spec-driven multiplatform app harness — web, native, desktop, and CLI.",
     srcDir: "..",
     srcExclude: [
         "**/node_modules/**",
@@ -24,6 +24,10 @@ const config = defineConfig({
         "docs/pnpm-lock.yaml",
         "apps/**",
         "services/**",
+        // GitHub/agent orientation docs — read on GitHub, not rendered as site
+        // pages. They link to repo files (.claude/, mise.toml) that aren't pages.
+        "README.md",
+        "CLAUDE.md",
     ],
     rewrites: {
         "docs/index.md": "index.md",
@@ -46,6 +50,7 @@ const config = defineConfig({
         nav: [
             { text: "Specs", link: "/specs/CONVENTIONS", activeMatch: "/specs/" },
             { text: "Features", link: sidebar.firstFeatureLink ?? "/", activeMatch: "/features/" },
+            { text: "Stack", link: "/STACK" },
         ],
         sidebar: {
             "/specs/": sidebar.specs,
