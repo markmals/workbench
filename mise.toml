@@ -1,7 +1,18 @@
-# Root mise config — orchestrates docs and per-platform tasks.
-# Per-platform tools (node, jdk, etc.) live in their respective mise.toml files
-# under apps/<platform>/ and services/<service>/, which you create when starting
-# that platform.
+# Root mise config — orchestrates docs and per-platform tasks, and pins the
+# few project-wide tools. Per-platform toolchains live in their own mise.toml
+# under apps/<platform>/ and services/<service>/, created when you scaffold that
+# platform:
+#   web / website / cli  → node, pnpm        ios → swift, tuist
+#   android              → jdk, kotlin       windows → dotnet
+#   tui / linux          → rust, cargo       convex → node, pnpm
+#
+# Environment variables are managed by Varlock: the committed `.env.schema`
+# (repo root) is the typed contract; real values live in `.env` / `.env.local`
+# (gitignored). Run env-dependent commands through `varlock run -- <cmd>`, or
+# wire Varlock into a platform's mise task. See https://varlock.dev.
+#
+# When you scaffold a platform, add its root orchestration task here (e.g.
+# `web:dev`, `ios:test`) so cross-platform commands work from the repo root.
 #
 # Run `mise tasks` from any directory to see what's available.
 
@@ -10,6 +21,7 @@ experimental = true
 
 [tools]
 "npm:oxfmt" = "latest"
+"npm:varlock" = "latest"
 
 [hooks]
 postinstall = "cd docs && pnpm install"

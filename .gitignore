@@ -43,10 +43,12 @@ captures/
 .cxx/
 release/
 
-# Env
+# Env (Varlock: .env.schema is the committed contract; real values are gitignored)
 .env
 .env.*
 !.env.example
+!.env.schema
+env.d.ts
 
 # Logs and temp
 *.log
