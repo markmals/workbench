@@ -15,14 +15,14 @@ Tokens are abstract values that every platform realizes in its own idiom. The to
 
 ### Color
 
-| Token                  | Intent             | Web (Tailwind v4)           | iOS                                 | Android                                      | Windows (WinUI)                  | Linux (Adwaita)        |
-| ---------------------- | ------------------ | --------------------------- | ----------------------------------- | -------------------------------------------- | -------------------------------- | ---------------------- |
-| `color.surface.base`   | Default surface    | `bg-surface`                | `Color(.systemBackground)`          | `MaterialTheme.colorScheme.surface`          | `ApplicationPageBackgroundThemeBrush` | `@window_bg_color` |
-| `color.surface.raised` | Cards, sheets      | `bg-surface-raised`         | `Color(.secondarySystemBackground)` | `MaterialTheme.colorScheme.surfaceContainer` | `CardBackgroundFillColorDefaultBrush` | `@card_bg_color`  |
-| `color.text.primary`   | Main copy          | `text-primary`              | `Color.primary`                     | `MaterialTheme.colorScheme.onSurface`        | `TextFillColorPrimaryBrush`      | `@theme_fg_color`      |
-| `color.text.secondary` | Subtler copy       | `text-secondary`            | `Color.secondary`                   | `MaterialTheme.colorScheme.onSurfaceVariant` | `TextFillColorSecondaryBrush`    | `.dim-label`           |
-| `color.accent`         | Brand accent       | `text-accent` / `bg-accent` | _accent color_                      | `MaterialTheme.colorScheme.primary`          | `AccentFillColorDefaultBrush`    | `@accent_color`        |
-| `color.danger`         | Destructive intent | `text-danger` / `bg-danger` | `Color.red`                         | `MaterialTheme.colorScheme.error`            | `SystemFillColorCriticalBrush`   | `@error_color`         |
+| Token                  | Intent             | Web (Tailwind v4)           | iOS                                 | Android                                      | Windows (WinUI)                       | Linux (Adwaita)    |
+| ---------------------- | ------------------ | --------------------------- | ----------------------------------- | -------------------------------------------- | ------------------------------------- | ------------------ |
+| `color.surface.base`   | Default surface    | `bg-surface`                | `UIColor.systemBackground`          | `MaterialTheme.colorScheme.surface`          | `ApplicationPageBackgroundThemeBrush` | `@window_bg_color` |
+| `color.surface.raised` | Cards, sheets      | `bg-surface-raised`         | `UIColor.secondarySystemBackground` | `MaterialTheme.colorScheme.surfaceContainer` | `CardBackgroundFillColorDefaultBrush` | `@card_bg_color`   |
+| `color.text.primary`   | Main copy          | `text-primary`              | `UIColor.label`                     | `MaterialTheme.colorScheme.onSurface`        | `TextFillColorPrimaryBrush`           | `@theme_fg_color`  |
+| `color.text.secondary` | Subtler copy       | `text-secondary`            | `UIColor.secondaryLabel`            | `MaterialTheme.colorScheme.onSurfaceVariant` | `TextFillColorSecondaryBrush`         | `.dim-label`       |
+| `color.accent`         | Brand accent       | `text-accent` / `bg-accent` | `UIColor.tintColor`                 | `MaterialTheme.colorScheme.primary`          | `AccentFillColorDefaultBrush`         | `@accent_color`    |
+| `color.danger`         | Destructive intent | `text-danger` / `bg-danger` | `UIColor.systemRed`                 | `MaterialTheme.colorScheme.error`            | `SystemFillColorCriticalBrush`        | `@error_color`     |
 
 <!-- Add the actual hex/HSL values once branding is settled. -->
 
@@ -36,7 +36,7 @@ Tokens are abstract values that every platform realizes in its own idiom. The to
 | `type.label`   | Form labels, list metadata |
 | `type.caption` | Microcopy                  |
 
-Each platform maps these to its native type scale (Tailwind utility classes on web, `Font.title2` etc. on iOS, `MaterialTheme.typography.titleLarge` etc. on Android).
+Each platform maps these to its native type scale (Tailwind utility classes on web, `UIFont.preferredFont(forTextStyle:)` on iOS, `MaterialTheme.typography.titleLarge` etc. on Android).
 
 ### Spacing
 
@@ -58,14 +58,14 @@ A 4-px base scale: `space.0` … `space.12` (= 0, 4, 8, 12, 16, 20, 24, 32, 40, 
 
 These are abstract components every platform must provide. The name and intent are stable; the realization is idiomatic.
 
-| Component    | Intent                          | Web                            | iOS                 | Android                     | Windows (WinUI)        | Linux (GTK/Adwaita)     |
-| ------------ | ------------------------------- | ------------------------------ | ------------------- | --------------------------- | ---------------------- | ----------------------- |
-| `Button`     | Primary action affordance       | React Aria `Button`            | SwiftUI `Button`    | Compose `Button`            | `Button`               | `Gtk.Button`            |
-| `TextField`  | Single-line text input          | React Aria `TextField`         | SwiftUI `TextField` | Compose `OutlinedTextField` | `TextBox`              | `Adw.EntryRow`          |
-| `List`       | Vertically scrolling collection | Custom or React Aria `ListBox` | SwiftUI `List`      | Compose `LazyColumn`        | `ListView`             | `Gtk.ListBox`           |
-| `Sheet`      | Modal that slides from edge     | React Aria `Modal`             | SwiftUI `.sheet`    | Compose `ModalBottomSheet`  | `ContentDialog`        | `Adw.Dialog`            |
-| `Avatar`     | Person/identity glyph           | Custom                         | Custom              | Custom                      | `PersonPicture`        | `Adw.Avatar`            |
-| `EmptyState` | Friendly empty placeholder      | Custom                         | Custom              | Custom                      | Custom                 | `Adw.StatusPage`        |
+| Component    | Intent                          | Web                            | iOS                             | Android                     | Windows (WinUI) | Linux (GTK/Adwaita) |
+| ------------ | ------------------------------- | ------------------------------ | ------------------------------- | --------------------------- | --------------- | ------------------- |
+| `Button`     | Primary action affordance       | React Aria `Button`            | UIKit `UIButton`                | Compose `Button`            | `Button`        | `Gtk.Button`        |
+| `TextField`  | Single-line text input          | React Aria `TextField`         | UIKit `UITextField`             | Compose `OutlinedTextField` | `TextBox`       | `Adw.EntryRow`      |
+| `List`       | Vertically scrolling collection | Custom or React Aria `ListBox` | UIKit `UITableView`             | Compose `LazyColumn`        | `ListView`      | `Gtk.ListBox`       |
+| `Sheet`      | Modal that slides from edge     | React Aria `Modal`             | `UISheetPresentationController` | Compose `ModalBottomSheet`  | `ContentDialog` | `Adw.Dialog`        |
+| `Avatar`     | Person/identity glyph           | Custom                         | Custom                          | Custom                      | `PersonPicture` | `Adw.Avatar`        |
+| `EmptyState` | Friendly empty placeholder      | Custom                         | Custom                          | Custom                      | Custom          | `Adw.StatusPage`    |
 
 ## Iconography
 
@@ -80,7 +80,7 @@ Use the same icon vocabulary across platforms — names map to Lucide on web, SF
 
 ## Parity rules
 
-- **Visual parity is not pixel parity.** A SwiftUI list looks like a SwiftUI list; a Compose list looks like a Compose list; a WinUI `ListView` and a GTK `ListBox` each look native. Don't fight platform conventions.
+- **Visual parity is not pixel parity.** A UIKit table view looks like a UIKit table view; a Compose list looks like a Compose list; a WinUI `ListView` and a GTK `ListBox` each look native. Don't fight platform conventions.
 - **Tokens must agree.** The same color, spacing, type intent must produce the same _role_ on every platform.
 - **Layout convergence at the screen level.** A given screen (e.g. an "items list") on any client contains the same primary surfaces (search bar, list, add affordance) as the web reference.
 - **Native affordances are encouraged.** Pull-to-refresh, swipe actions, share sheets — use them. Mark them `// SPEC: manual` if no spec applies.

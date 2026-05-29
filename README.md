@@ -45,7 +45,7 @@ This template makes the opposite bet:
 
 - **Web is React + TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform — and the reference every other client mirrors.
 - **Websites are Astro + React islands.** Content-first marketing and docs surfaces that ship HTML and hydrate sparingly.
-- **Apple is SwiftUI + Observation + SwiftData.** One Swift codebase across iOS / iPadOS / macOS / tvOS / watchOS / visionOS; native navigation, gestures, accessibility, the HIG as a real constraint.
+- **Apple is UIKit + Observation + SwiftData.** One Swift codebase across iOS / iPadOS / macOS / tvOS / watchOS / visionOS — UIKit on iOS · iPadOS · tvOS · visionOS, AppKit on macOS, SwiftUI on watchOS; native navigation, gestures, accessibility, the HIG as a real constraint.
 - **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow + Room.** Material You theming, predictive back, the real Android system behaviors.
 - **Windows is C# + WinUI 3 + MVVM Toolkit + EF Core.** Native XAML, the real Windows shell.
 - **Linux is Rust + GTK 4 + Adwaita + Relm4.** Native GNOME, the real desktop.
@@ -124,7 +124,7 @@ The discipline is enforced by hooks: `block-generated.sh` refuses edits to gener
 ├── apps/                              ← (you create) platform implementations
 │   ├── web/                           ←   React + TanStack Start + Convex (reference)
 │   ├── website/                       ←   Astro + React islands
-│   ├── ios/                           ←   Swift / SwiftUI / SwiftData (Apple family)
+│   ├── ios/                           ←   Swift / UIKit / SwiftData (Apple family)
 │   ├── android/                       ←   Kotlin / Jetpack Compose / Room
 │   ├── windows/                       ←   C# / WinUI 3 / EF Core
 │   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
@@ -173,26 +173,26 @@ Loaded on every session via `@includes` from `CLAUDE.md`.
 
 Skills are markdown files that encode "how we do X here." Claude invokes them via the `Skill` tool.
 
-| Skill                                                                                      | When to use                                                                                                                  |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md)                   | Before starting any new feature. Walks narrative → stories → models → view-models → flows → errors.                          |
-| [`writing-user-stories`](.claude/skills/writing-user-stories/SKILL.md)                     | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                       |
-| [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md)                       | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.               |
-| [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md)               | When writing any production code. Iron Law: no production code without a failing test first.                                 |
-| [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md) | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                        |
-| [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                |
-| [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain. |
-| [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web-app code. React + TanStack suite + Convex + Clerk + Tailwind + React Aria + Motion + Valibot idioms.        |
-| [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                           |
-| [`website-development`](.claude/skills/website-development/SKILL.md)                       | When writing the marketing/content site. Astro + React islands + content collections idioms.                                 |
-| [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing + generated OpenAPI client.                |
-| [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                               |
-| [`android-development`](.claude/skills/android-development/SKILL.md)                       | When writing Android code. Compose + Material 3 + coroutines/Flow + Room + Ktor + OpenAPI idioms.                            |
-| [`android-emulator-control`](.claude/skills/android-emulator-control/SKILL.md)             | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                              |
-| [`windows-development`](.claude/skills/windows-development/SKILL.md)                       | When writing Windows code. C# + WinUI 3 + MVVM Toolkit + EF Core + Kiota; Roslyn MCP bridge.                                 |
-| [`linux-development`](.claude/skills/linux-development/SKILL.md)                           | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel + Progenitor idioms.                                |
-| [`server-cli-development`](.claude/skills/server-cli-development/SKILL.md)                 | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob; owns the OpenAPI contract.                       |
-| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                                      |
+| Skill                                                                                      | When to use                                                                                                                                       |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md)                   | Before starting any new feature. Walks narrative → stories → models → view-models → flows → errors.                                               |
+| [`writing-user-stories`](.claude/skills/writing-user-stories/SKILL.md)                     | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                                            |
+| [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md)                       | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.                                    |
+| [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md)               | When writing any production code. Iron Law: no production code without a failing test first.                                                      |
+| [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md) | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                                             |
+| [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                     |
+| [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain.                      |
+| [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web-app code. React + TanStack suite + Convex + Clerk + Tailwind + React Aria + Motion + Zod idioms.                                 |
+| [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                |
+| [`website-development`](.claude/skills/website-development/SKILL.md)                       | When writing the marketing/content site. Astro + React islands + content collections idioms.                                                      |
+| [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing + generated OpenAPI client. |
+| [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                    |
+| [`android-development`](.claude/skills/android-development/SKILL.md)                       | When writing Android code. Compose + Material 3 + coroutines/Flow + Room + Ktor (OkHttp) + OpenAPI idioms.                                        |
+| [`android-emulator-control`](.claude/skills/android-emulator-control/SKILL.md)             | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                   |
+| [`windows-development`](.claude/skills/windows-development/SKILL.md)                       | When writing Windows code. C# + WinUI 3 + MVVM Toolkit + EF Core + Kiota; Roslyn MCP bridge.                                                      |
+| [`linux-development`](.claude/skills/linux-development/SKILL.md)                           | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel + Progenitor idioms.                                                     |
+| [`server-cli-development`](.claude/skills/server-cli-development/SKILL.md)                 | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob; owns the OpenAPI contract.                                            |
+| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                   |
 
 ### `.claude/agents/` — cross-cutting subagents
 

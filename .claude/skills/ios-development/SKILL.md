@@ -1,31 +1,34 @@
 ---
 name: ios-development
-description: Use when writing or modifying Apple app code under `apps/ios/`. Covers SwiftUI + Observation + SwiftData + Swift Testing idioms, the generated OpenAPI client, and points at Apple's first-party docs. Complementary to `implementing-a-spec` (process) and `ios-simulator-control` (simulator driving).
+description: Use when writing or modifying Apple app code under `apps/ios/`. Covers UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing idioms, the generated OpenAPI client, and points at Apple's first-party docs. Complementary to `implementing-a-spec` (process) and `ios-simulator-control` (simulator driving).
 ---
 
 # Apple Development
 
 This skill covers **how to write Apple-platform code** in this repo. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For _driving the simulator_ (boot, install, screenshot, tap), see `ios-simulator-control`. For _what to build_, see the spec.
 
-**One Swift codebase, the whole Apple family.** `apps/ios/` is the Apple app: a single Swift/SwiftUI/SwiftData codebase whose targets cover iOS, iPadOS, macOS, tvOS, watchOS, and visionOS via SwiftPM/Tuist. iOS and macOS are the worked examples; the others share the same view-model and domain layers and diverge only at the view edge (mark those `// SPEC: manual` or `(deviates: …)`). Don't enumerate every target up front — add a target when the product actually ships it.
+**One Swift codebase, the whole Apple family.** `apps/ios/` is the Apple app: a single Swift/SwiftData codebase whose targets cover iOS, iPadOS, macOS, tvOS, watchOS, and visionOS via SwiftPM/Tuist. The UI framework is **per-target**: **UIKit** on iOS · iPadOS · tvOS · visionOS, **AppKit** on macOS, and **SwiftUI** on watchOS. iOS (UIKit) and macOS (AppKit) are the worked examples; every target shares the same view-model and domain layers and diverges only at the view edge (mark those `// SPEC: manual` or `(deviates: …)`). Don't enumerate every target up front — add a target when the product actually ships it.
 
 ## Stack at a glance
 
-| Concern            | Choice                                               | First-party docs                                                                                                          |
-| ------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Language           | Swift (latest stable)                                | [docs.swift.org/swift-book](https://docs.swift.org/swift-book/)                                                           |
-| UI                 | SwiftUI                                              | [developer.apple.com/documentation/swiftui](https://developer.apple.com/documentation/swiftui)                            |
-| Reactive state     | `@Observable` macro (Observation framework)          | [developer.apple.com/documentation/observation](https://developer.apple.com/documentation/observation)                    |
-| Concurrency        | Swift Concurrency (`async`/`await`, `Task`, `Actor`) | [docs.swift.org concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) |
-| Tests              | Swift Testing                                        | [developer.apple.com/documentation/testing](https://developer.apple.com/documentation/testing)                            |
-| Design language    | Apple Human Interface Guidelines                     | [developer.apple.com/design/human-interface-guidelines](https://developer.apple.com/design/human-interface-guidelines)    |
-| Package manager    | Swift Package Manager                                | [swift.org/package-manager](https://www.swift.org/package-manager/)                                                       |
-| Linter / formatter | swift-format                                         | [github.com/swiftlang/swift-format](https://github.com/swiftlang/swift-format)                                            |
-| Project generation | Tuist (Swift manifests, no checked-in `.xcodeproj`)  | [docs.tuist.dev](https://docs.tuist.dev)                                                                                  |
-| On-device database | SwiftData                                            | [developer.apple.com/documentation/swiftdata](https://developer.apple.com/documentation/swiftdata)                       |
-| Networking         | URLSession                                           | [developer.apple.com/documentation/foundation/urlsession](https://developer.apple.com/documentation/foundation/urlsession) |
-| API client         | Swift OpenAPI Generator (typed client over URLSession; do **not** hand-roll requests) | [github.com/apple/swift-openapi-generator](https://github.com/apple/swift-openapi-generator)            |
-| Auth               | Clerk (identity / token)                             | [clerk.com/docs](https://clerk.com/docs)                                                                                  |
+| Concern                             | Choice                                                                                | First-party docs                                                                                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Language                            | Swift (latest stable)                                                                 | [docs.swift.org/swift-book](https://docs.swift.org/swift-book/)                                                            |
+| UI (iOS · iPadOS · tvOS · visionOS) | UIKit                                                                                 | [developer.apple.com/documentation/uikit](https://developer.apple.com/documentation/uikit)                                 |
+| UI (macOS)                          | AppKit                                                                                | [developer.apple.com/documentation/appkit](https://developer.apple.com/documentation/appkit)                               |
+| UI (watchOS)                        | SwiftUI                                                                               | [developer.apple.com/documentation/swiftui](https://developer.apple.com/documentation/swiftui)                             |
+| Reactive state                      | `@Observable` macro (Observation framework)                                           | [developer.apple.com/documentation/observation](https://developer.apple.com/documentation/observation)                     |
+| Concurrency                         | Swift Concurrency (`async`/`await`, `Task`, `Actor`)                                  | [docs.swift.org concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)  |
+| Tests                               | Swift Testing                                                                         | [developer.apple.com/documentation/testing](https://developer.apple.com/documentation/testing)                             |
+| Design language                     | Apple Human Interface Guidelines                                                      | [developer.apple.com/design/human-interface-guidelines](https://developer.apple.com/design/human-interface-guidelines)     |
+| Package manager                     | Swift Package Manager                                                                 | [swift.org/package-manager](https://www.swift.org/package-manager/)                                                        |
+| Linter / formatter                  | swift-format                                                                          | [github.com/swiftlang/swift-format](https://github.com/swiftlang/swift-format)                                             |
+| Project generation                  | Tuist (Swift manifests, no checked-in `.xcodeproj`)                                   | [docs.tuist.dev](https://docs.tuist.dev)                                                                                   |
+| On-device database                  | SwiftData                                                                             | [developer.apple.com/documentation/swiftdata](https://developer.apple.com/documentation/swiftdata)                         |
+| Networking                          | URLSession                                                                            | [developer.apple.com/documentation/foundation/urlsession](https://developer.apple.com/documentation/foundation/urlsession) |
+| API client                          | Swift OpenAPI Generator (typed client over URLSession; do **not** hand-roll requests) | [github.com/apple/swift-openapi-generator](https://github.com/apple/swift-openapi-generator)                               |
+| Push notifications                  | APNs (UserNotifications)                                                              | [developer.apple.com/documentation/usernotifications](https://developer.apple.com/documentation/usernotifications)         |
+| Auth                                | Clerk (identity / token)                                                              | [clerk.com/docs](https://clerk.com/docs)                                                                                   |
 
 Apple doesn't publish a `/llms.txt` for any of these. Use WebFetch against the canonical doc URLs above when you need to look something up.
 
@@ -42,6 +45,8 @@ In the remote modes, **SwiftData** is a local-first cache (not a second backend)
 ## Idioms (read these before writing code)
 
 ### `@Observable` for view models, not Combine
+
+The view model is the **primary spec target** and is **UI-framework-agnostic** — the same `@Observable` class drives a UIKit view controller, an AppKit view controller, and a SwiftUI watch view.
 
 ```swift
 // SPEC: vm.items.list
@@ -88,9 +93,9 @@ final class ItemsListViewModel {
 
 No completion handlers, no `DispatchQueue.main.async`. If you need to bridge a completion-handler API, wrap it once with `withCheckedContinuation` and forget about it.
 
-### Dependencies via initializer or `@Environment`
+### Dependencies via initializer or property injection
 
-No singletons. The API client and other services are passed via initializer or SwiftUI's `Environment`. This is what makes testing tractable — a view model under test gets a mock client.
+No singletons. The API client and other services are passed into a view controller (or, on watchOS, a SwiftUI view) via its initializer. This is what makes testing tractable — a view model under test gets a mock client. (On watchOS you may use SwiftUI's `Environment` for ambient dependencies; UIKit/AppKit use plain initializer/property injection.)
 
 ### Tests at the view-model layer
 
@@ -117,9 +122,84 @@ struct ItemsListViewModelTests {
 - `@Test` display name starts with `[scenario.<id>]`. Drift tooling reads this prefix.
 - Use `#expect` and `#require` (Swift Testing macros) instead of XCTest's `XCTAssert*`.
 
-### SwiftUI views are dumb
+### UIKit views are dumb — drive them from `@Observable` via `updateProperties()`
 
-A SwiftUI view consumes a view model and renders. No business logic in `body`.
+A view controller consumes a view model and renders. No business logic in the controller. On iOS · iPadOS · tvOS · visionOS, read the view model inside **`updateProperties()`**: UIKit automatically tracks the `@Observable` properties you read there and re-invokes the method whenever they change — the UIKit analogue of SwiftUI's `body`. No manual KVO, no diffing subscriptions.
+
+```swift
+final class ItemsListViewController: UIViewController {
+    private let viewModel: ItemsListViewModel
+    private let tableView = UITableView()
+
+    init(viewModel: ItemsListViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("use init(viewModel:)") }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // configure tableView, add subviews, constraints…
+        Task { await viewModel.load() }
+    }
+
+    // Reads of viewModel.status / viewModel.items here are tracked automatically;
+    // UIKit re-runs updateProperties() whenever they change.
+    override func updateProperties() {
+        super.updateProperties()
+        switch viewModel.status {
+        case .idle, .loading:
+            showLoading()
+        case .loaded:
+            apply(items: viewModel.items)
+        case .error(let message):
+            showError(message, retry: { [weak self] in
+                Task { await self?.viewModel.load() }
+            })
+        }
+    }
+}
+```
+
+The reverse pointer lives on the **view model**, not the view controller. Controllers carry `// SPEC: manual` (no cross-platform behavioral contract) or `// SPEC: <vm-id> (deviates: <ui reason>)` if there's a UI-level deviation.
+
+### AppKit (macOS): observe an `Observations` async sequence
+
+AppKit has no `updateProperties()`. Drive rendering from an **`Observations`** async sequence — it yields whenever any `@Observable` property read inside the closure changes — consumed on the main actor.
+
+```swift
+final class ItemsListViewController: NSViewController {
+    private let viewModel: ItemsListViewModel
+    private var renderTask: Task<Void, Never>?
+
+    init(viewModel: ItemsListViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("use init(viewModel:)") }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let states = Observations { [viewModel] in viewModel.status }
+        renderTask = Task { @MainActor [weak self] in
+            for await status in states {
+                self?.render(status)
+            }
+        }
+        Task { await viewModel.load() }
+    }
+
+    deinit { renderTask?.cancel() }
+}
+```
+
+### watchOS: SwiftUI, reading the same view model
+
+On watchOS the view is SwiftUI and reads the `@Observable` view model directly — no `updateProperties()`, no `Observations`; SwiftUI tracks it natively. Keep the view dumb the same way (no logic in `body`).
 
 ```swift
 struct ItemsListView: View {
@@ -128,22 +208,17 @@ struct ItemsListView: View {
     var body: some View {
         Group {
             switch viewModel.status {
-            case .idle, .loading:
-                ProgressView()
-            case .loaded:
-                List(viewModel.items) { item in
-                    ItemRow(item: item)
-                }
-            case .error(let message):
-                ItemsErrorState(message: message, onRetry: { Task { await viewModel.load() } })
+            case .idle, .loading: ProgressView()
+            case .loaded: List(viewModel.items) { ItemRow(item: $0) }
+            case .error(let message): ItemsErrorState(message: message) {
+                Task { await viewModel.load() }
+            }
             }
         }
         .task { await viewModel.load() }
     }
 }
 ```
-
-The reverse pointer lives on the **view model**, not the view. Views carry `// SPEC: manual` (no cross-platform behavioral contract) or `// SPEC: <vm-id> (deviates: <ui reason>)` if there's a UI-level deviation.
 
 ### HIG-driven affordances
 
@@ -154,7 +229,7 @@ When in doubt about a design choice, read the relevant HIG section. Common ones:
 - [Lists and tables](https://developer.apple.com/design/human-interface-guidelines/lists-and-tables)
 - [Modality](https://developer.apple.com/design/human-interface-guidelines/modality)
 
-Native iOS affordances (pull-to-refresh, swipe actions, share sheets, system back gestures) are encouraged. Mark them `// SPEC: manual` if no cross-platform spec applies.
+Native affordances (pull-to-refresh via `UIRefreshControl`, swipe actions, share sheets, system back gestures, AppKit toolbars and menus) are encouraged. Mark them `// SPEC: manual` if no cross-platform spec applies.
 
 ## File layout (within apps/ios/)
 
@@ -162,8 +237,8 @@ See `apps/ios/CLAUDE.md` for the canonical layout. Summary:
 
 ```
 apps/ios/App/
-├── App/                            ← App entry, root view, root container
-├── Features/<Feature>/             ← Feature-scoped: VM, VM tests, View(s)
+├── App/                            ← App entry, root scene/window, root controller
+├── Features/<Feature>/             ← Feature-scoped: VM, VM tests, view controller(s)
 ├── Domain/                         ← Plain types and validation (one file per domain.* spec)
 ├── Client/                         ← generated OpenAPI client wrapper (URLSession transport)
 ├── Store/                          ← SwiftData models + local-first cache

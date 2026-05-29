@@ -1,6 +1,6 @@
 ---
 name: website-development
-description: Use when writing or modifying marketing/content site code under `apps/website/`. Covers Astro + React islands + content collections + Tailwind v4 + React Aria + Motion + Valibot idioms, and points at first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (browser verification loop). Distinct from `web-development` (the TanStack Start app).
+description: Use when writing or modifying marketing/content site code under `apps/website/`. Covers Astro + React islands + content collections + Tailwind v4 + React Aria + View Transitions + Zod idioms, and points at first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (browser verification loop). Distinct from `web-development` (the TanStack Start app).
 ---
 
 # Website Development
@@ -11,23 +11,24 @@ The website is a **sibling of the app, not the app**. It's the marketing / conte
 
 ## Stack at a glance
 
-| Concern              | Choice                                | First-party docs                                                                          |
-| -------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Framework            | Astro                                 | [docs.astro.build](https://docs.astro.build)                                              |
-| Components / islands | React + React Compiler (optimizer)    | [react.dev/llms.txt](https://react.dev/llms.txt)                                          |
-| Content              | Astro content collections             | [content-collections](https://docs.astro.build/en/guides/content-collections/)           |
-| Styling              | Tailwind v4 (+ Tailwind Plus blocks)  | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_                 |
-| Unstyled UI          | React Aria Components                  | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                                     |
-| Animation            | Motion                                | [motion.dev/docs](https://motion.dev/docs)                                                |
-| Validation           | Valibot                               | [valibot.dev](https://valibot.dev/)                                                       |
-| Relational / edge DB | Drizzle (e.g. Cloudflare D1)          | [orm.drizzle.team](https://orm.drizzle.team/docs)                                         |
-| Networking           | fetch                                 | [MDN Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)              |
-| Logging              | Evlog                                 | [evlog.dev](https://www.evlog.dev/)                                                       |
-| Tests                | Vitest                                | [llms.txt](https://vitest.dev/llms.txt)                                                   |
-| Linter / formatter   | Oxlint + Oxfmt                        | [llms.txt](https://oxc.rs/llms.txt)                                                       |
-| Type checker         | tsgo (`@typescript/native-preview`)   | —                                                                                         |
-| Package manager      | pnpm                                  | [pnpm.io](https://pnpm.io/)                                                               |
-| Production           | Cloudflare (static + CDN + image opt) | [workers/static-assets](https://developers.cloudflare.com/workers/static-assets/)        |
+| Concern              | Choice                                   | First-party docs                                                                  |
+| -------------------- | ---------------------------------------- | --------------------------------------------------------------------------------- |
+| Framework            | Astro                                    | [docs.astro.build](https://docs.astro.build)                                      |
+| Components / islands | React + React Compiler (optimizer)       | [react.dev/llms.txt](https://react.dev/llms.txt)                                  |
+| Content              | Astro content collections                | [content-collections](https://docs.astro.build/en/guides/content-collections/)    |
+| Internationalization | Astro i18n routing                       | [astro i18n](https://docs.astro.build/en/recipes/i18n/)                           |
+| Styling              | Tailwind v4 (+ Tailwind Plus blocks)     | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_         |
+| Unstyled UI          | React Aria Components                    | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                             |
+| Animation            | View Transitions                         | [astro view transitions](https://docs.astro.build/en/guides/view-transitions/)    |
+| Validation           | Zod                                      | [zod.dev](https://zod.dev/)                                                       |
+| Relational / edge DB | Drizzle (`node:sqlite` or Cloudflare D1) | [orm.drizzle.team](https://orm.drizzle.team/docs)                                 |
+| Networking           | fetch                                    | [MDN Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)       |
+| Logging              | Evlog                                    | [evlog.dev](https://www.evlog.dev/)                                               |
+| Tests                | Vitest                                   | [llms.txt](https://vitest.dev/llms.txt)                                           |
+| Linter / formatter   | Oxlint + Oxfmt                           | [llms.txt](https://oxc.rs/llms.txt)                                               |
+| Type checker         | tsgo (`@typescript/native-preview`)      | —                                                                                 |
+| Package manager      | pnpm                                     | [pnpm.io](https://pnpm.io/)                                                       |
+| Production           | Cloudflare (static + CDN + image opt)    | [workers/static-assets](https://developers.cloudflare.com/workers/static-assets/) |
 
 When you need to look something up: fetch the relevant `/llms.txt` with WebFetch and let it route you. For Astro and Cloudflare (no `/llms.txt`), WebFetch the canonical docs URL above.
 
@@ -59,21 +60,21 @@ Markdown / MDX content lives in **typed content collections** under `src/content
 // SPEC: domain.post
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
-import * as v from "valibot";
+import { z } from "zod";
 
 const post = defineCollection({
     loader: glob({ pattern: "**/*.md", base: "./src/content/posts" }),
-    schema: v.object({
-        title: v.string(),
-        publishedAt: v.date(),
-        draft: v.optional(v.boolean(), false),
+    schema: z.object({
+        title: z.string(),
+        publishedAt: z.date(),
+        draft: z.boolean().default(false),
     }),
 });
 
 export const collections = { post };
 ```
 
-The reverse pointer goes on the schema (it realizes the content domain). Use Valibot for the schema where the same shape is shared with app code; plain Zod via `astro:content` is acceptable for content-only shapes — pick one per collection and be consistent.
+The reverse pointer goes on the schema (it realizes the content domain). Use **Zod** for the schema — `astro:content` supports it natively, and the same shape can be shared with app code so the site and the app can't disagree about what's valid.
 
 ### Islands stay dumb
 
@@ -96,15 +97,19 @@ The reverse pointer lives on the **logic** (the view model / selector), not on i
 
 ### The website is mostly read-only
 
-It reads content collections and, where it needs structured data, queries the edge DB via **Drizzle** (e.g. Cloudflare D1) server-side during the build or render. It usually does **not** talk to Convex realtime — that's the app's job (`web-development`). If a marketing page genuinely needs live product data (a public stats counter, say), fetch it **server-side** in the frontmatter or a server endpoint with `fetch`, render the result into HTML, and don't drag a realtime client onto the page.
+It reads content collections and, where it needs structured data, queries the edge DB via **Drizzle** (`node:sqlite` locally or Cloudflare D1 in production) server-side during the build or render. It usually does **not** talk to Convex realtime — that's the app's job (`web-development`). If a marketing page genuinely needs live product data (a public stats counter, say), fetch it **server-side** in the frontmatter or a server endpoint with `fetch`, render the result into HTML, and don't drag a realtime client onto the page.
 
-### Tailwind v4 + React Aria + Motion
+### Internationalization is Astro routing
 
-Same conventions as the app:
+Localized routes use **Astro's built-in i18n** — configure locales and the default locale in `astro.config`, keep translated content in per-locale content-collection entries, and let Astro generate the `/<locale>/…` routes. Don't hand-roll a locale router or a runtime translation layer for static content.
+
+### Tailwind v4 + React Aria + View Transitions
+
+Same conventions as the app, with one difference — animation:
 
 - **Tailwind v4** reads config from CSS via `@theme`; reference tokens with `var(--color-...)`. Utility-first; reach for `@apply` only for genuine component-level patterns. No v3-style `tailwind.config.js`.
 - **React Aria Components** for any interactive primitive inside an island (Dialog, Menu, Disclosure, Select). Don't hand-roll ARIA on raw elements.
-- **Motion** for transitions and micro-interactions. Honor `prefers-reduced-motion`, and match the `motion.*` duration/easing tokens in `DESIGN_SYSTEM.md` rather than inventing per-component timings.
+- **View Transitions** are the site's animation primitive — Astro's `<ClientRouter />` plus `transition:*` directives for page and element transitions, no JS animation runtime on the page. Honor `prefers-reduced-motion`, and keep durations in line with the `motion.*` tokens in `DESIGN_SYSTEM.md`. For genuinely complex in-island motion the app's **Motion** convention applies, but reach for it last — most marketing motion is a View Transition or CSS.
 
 ## File layout (within apps/website/)
 

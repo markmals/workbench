@@ -31,7 +31,7 @@ git diff --name-only HEAD -- 'specs/**.md' 'features/**.md'
 - For `story.*` specs: every scenario has `Given/When/Then` and a stable sub-ID prefix (`[scenario.<id>.<sub>]` or `Scenario: <id>.<sub>`)
 - No leftover `[NEEDS CLARIFICATION]` markers (these are P0 if present — surface each verbatim with file:line)
 - No "should" / "may" / "could" / "might" without a concrete acceptance criterion below them (P1)
-- No platform-specific implementation details (specs are platform-neutral; "the SwiftUI list shows..." is wrong — P1)
+- No platform-specific implementation details (specs are platform-neutral; "the UIKit table view shows..." is wrong — P1)
 - No reference to a function or type that doesn't exist (P2)
 
 ### Cross-references

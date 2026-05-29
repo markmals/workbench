@@ -1,6 +1,6 @@
 ---
 name: web-development
-description: Use when writing or modifying web app code under `apps/web/` or `services/convex/`. Covers React + TanStack Start/Router/Query/DB/Form + Convex + Clerk + Tailwind v4 + React Aria + Motion + Valibot idioms, and points at /llms.txt endpoints for first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (visual verification loop).
+description: Use when writing or modifying web app code under `apps/web/` or `services/convex/`. Covers React + TanStack Start/Router/Query/DB/Form + Convex + Clerk + Tailwind v4 + React Aria + Motion + Zod idioms, and points at /llms.txt endpoints for first-party docs. Complementary to `implementing-a-spec` (process) and `web-verification` (visual verification loop).
 ---
 
 # Web Development
@@ -13,32 +13,32 @@ The web app is the **reference implementation**. Build features here first; ever
 
 ## Stack at a glance
 
-| Concern            | Choice                                     | First-party docs                                                               |
-| ------------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
-| Framework          | TanStack Start                             | [llms.txt](https://tanstack.com/llms.txt)                                      |
-| Components / React | React + React Compiler (optimizer)         | [react.dev/llms.txt](https://react.dev/llms.txt)                               |
-| Router             | TanStack Router (via Start)                | [llms.txt](https://tanstack.com/llms.txt)                                      |
-| Server state       | TanStack Query + `@convex-dev/react-query` | (covered by Convex docs below)                                                 |
-| Local-first store  | TanStack DB                                | [llms.txt](https://tanstack.com/llms.txt)                                      |
-| Tables / Forms     | TanStack Table · TanStack Form             | [llms.txt](https://tanstack.com/llms.txt)                                      |
-| Hotkeys            | TanStack Hotkeys                           | [llms.txt](https://tanstack.com/llms.txt)                                      |
-| Backend            | Convex                                     | [llms.txt](https://docs.convex.dev/llms.txt)                                   |
-| Auth               | Clerk                                      | [llms.txt](https://clerk.com/docs/llms.txt)                                    |
-| Unstyled UI        | React Aria Components                      | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                          |
-| Styling            | Tailwind v4 (+ Tailwind Plus blocks)       | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_      |
-| Animation          | Motion                                     | [motion.dev/docs](https://motion.dev/docs)                                     |
-| Validation         | Valibot                                    | [valibot.dev](https://valibot.dev/)                                            |
-| Relational / edge DB | Drizzle (e.g. Cloudflare D1)             | [orm.drizzle.team](https://orm.drizzle.team/docs)                              |
-| Logging            | Evlog                                      | [evlog.dev](https://www.evlog.dev/)                                            |
-| Build tool         | Vite                                       | [llms.txt](https://vitejs.dev/llms.txt)                                        |
-| Library bundler    | tsdown (only for shared libs / exes)       | [tsdown.dev](https://tsdown.dev/)                                              |
-| Tests              | Vitest                                     | [llms.txt](https://vitest.dev/llms.txt)                                        |
-| Linter / formatter | Oxlint + Oxfmt                             | [llms.txt](https://oxc.rs/llms.txt)                                            |
-| Type checker       | tsgo (`@typescript/native-preview`)        | [tsdown.dev](https://tsdown.dev/)                                              |
-| Dev tools          | TanStack DevTools                          | [tanstack.com/devtools](https://tanstack.com/devtools/latest)                  |
-| Package manager    | pnpm                                       | [pnpm.io](https://pnpm.io/)                                                    |
-| Production runtime | Cloudflare Workers                         | [developers.cloudflare.com/workers](https://developers.cloudflare.com/workers) |
-| Desktop packaging  | Electron (wraps this same app)             | [electronjs.org/docs](https://www.electronjs.org/docs/latest)                  |
+| Concern              | Choice                                     | First-party docs                                                               |
+| -------------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| Framework            | TanStack Start                             | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Components / React   | React + React Compiler (optimizer)         | [react.dev/llms.txt](https://react.dev/llms.txt)                               |
+| Router               | TanStack Router (via Start)                | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Server state         | TanStack Query + `@convex-dev/react-query` | (covered by Convex docs below)                                                 |
+| Local-first store    | TanStack DB                                | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Tables / Forms       | TanStack Table · TanStack Form             | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Hotkeys              | TanStack Hotkeys                           | [llms.txt](https://tanstack.com/llms.txt)                                      |
+| Backend              | Convex                                     | [llms.txt](https://docs.convex.dev/llms.txt)                                   |
+| Auth                 | Clerk                                      | [llms.txt](https://clerk.com/docs/llms.txt)                                    |
+| Unstyled UI          | React Aria Components                      | [llms.txt](https://react-spectrum.adobe.com/llms.txt)                          |
+| Styling              | Tailwind v4 (+ Tailwind Plus blocks)       | [tailwindcss.com/docs](https://tailwindcss.com/docs) _(no /llms.txt yet)_      |
+| Animation            | Motion                                     | [motion.dev/docs](https://motion.dev/docs)                                     |
+| Validation           | Zod                                        | [zod.dev](https://zod.dev/)                                                    |
+| Relational / edge DB | Drizzle (`node:sqlite` or Cloudflare D1)   | [orm.drizzle.team](https://orm.drizzle.team/docs)                              |
+| Logging              | Evlog                                      | [evlog.dev](https://www.evlog.dev/)                                            |
+| Build tool           | Vite                                       | [llms.txt](https://vitejs.dev/llms.txt)                                        |
+| Library bundler      | tsdown (only for shared libs / exes)       | [tsdown.dev](https://tsdown.dev/)                                              |
+| Tests                | Vitest                                     | [llms.txt](https://vitest.dev/llms.txt)                                        |
+| Linter / formatter   | Oxlint + Oxfmt                             | [llms.txt](https://oxc.rs/llms.txt)                                            |
+| Type checker         | tsgo (`@typescript/native-preview`)        | [tsdown.dev](https://tsdown.dev/)                                              |
+| Dev tools            | TanStack DevTools                          | [tanstack.com/devtools](https://tanstack.com/devtools/latest)                  |
+| Package manager      | pnpm                                       | [pnpm.io](https://pnpm.io/)                                                    |
+| Production runtime   | Cloudflare Workers                         | [developers.cloudflare.com/workers](https://developers.cloudflare.com/workers) |
+| Desktop packaging    | Electron (wraps this same app)             | [electronjs.org/docs](https://www.electronjs.org/docs/latest)                  |
 
 When you need to look something up: fetch the relevant `/llms.txt` with WebFetch and let it route you to the specific page. The `/llms.txt` is the index, not the content — it tells you which URLs to fetch next.
 
@@ -103,13 +103,17 @@ TanStack Query + Convex's reactive cache _is_ the server state. Don't reach for 
 
 Identity, sessions, and the signed-in user come from **Clerk** — not hand-rolled auth state. Gate routes with Clerk, read the user from Clerk's hooks/components, and let Convex validate the Clerk-issued identity server-side. There is no separate user table you own for authentication.
 
-### Forms: TanStack Form + Valibot
+### Forms: TanStack Form + Zod
 
-**TanStack Form** owns form state; **Valibot** owns the schema. Define the Valibot schema once and share it between the form's validators and the Convex mutation's argument validation, so client and server can't disagree about what's valid. Don't hand-roll `onChange` validation.
+**TanStack Form** owns form state; **Zod** owns the schema. Define the Zod schema once and share it between the form's validators and the Convex mutation's argument validation, so client and server can't disagree about what's valid. Don't hand-roll `onChange` validation.
 
 ### Animation is Motion
 
 Use **Motion** for transitions and micro-interactions. Honor `prefers-reduced-motion`, and match the `motion.*` duration/easing tokens in `DESIGN_SYSTEM.md` rather than inventing per-component timings.
+
+### Rich text is TipTap
+
+Rich-text editing (comments, descriptions, document bodies) uses **TipTap**. Keep the editor a dumb component that emits structured content up to a view model; don't scatter editor commands through business logic. Persist the document model, not rendered HTML, and share the schema with the backend the same way forms share their Zod schema.
 
 ### Logging is Evlog
 

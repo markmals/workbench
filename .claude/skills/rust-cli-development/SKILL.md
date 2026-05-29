@@ -1,6 +1,6 @@
 ---
 name: rust-cli-development
-description: Use when writing or modifying the high-performance CLI/TUI under `apps/tui/`. Covers Clap + Ratatui + Diesel + reqwest + Progenitor (generated OpenAPI client) idioms with cargo test / rustfmt / clippy. Complementary to `implementing-a-spec` (process).
+description: Use when writing or modifying the high-performance CLI/TUI under `apps/tui/`. Covers Clap + Ratatui + Tears (Elm/TEA-style state) + Diesel + reqwest + Progenitor (generated OpenAPI client) idioms with cargo test / rustfmt / clippy. Complementary to `implementing-a-spec` (process).
 ---
 
 # Rust CLI Development
@@ -11,19 +11,20 @@ The web app is the **reference implementation**. This is the **TUI client** — 
 
 ## Stack at a glance
 
-| Concern             | Choice                                                          | First-party docs                                                              |
-| ------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Language            | Rust                                                           | [rust-lang.org](https://www.rust-lang.org/)                                   |
-| Arg parser          | Clap (derive)                                                 | [docs.rs/clap](https://docs.rs/clap)                                          |
-| TUI renderer        | Ratatui                                                       | [ratatui.rs](https://ratatui.rs/)                                            |
-| On-device database  | Diesel (SQLite)                                               | [diesel.rs](https://diesel.rs/)                                              |
-| Networking          | reqwest                                                       | [docs.rs/reqwest](https://docs.rs/reqwest)                                    |
-| API client          | Progenitor (typed client generated from the OpenAPI document — don't hand-roll requests) | [github.com/oxidecomputer/progenitor](https://github.com/oxidecomputer/progenitor) |
-| Tests               | cargo test                                                    | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
-| Formatter           | rustfmt                                                       | [github.com/rust-lang/rustfmt](https://github.com/rust-lang/rustfmt)         |
-| Linter              | Clippy                                                        | [doc.rust-lang.org/stable/clippy](https://doc.rust-lang.org/stable/clippy/)   |
-| Package / build     | Cargo (single-file release binary)                            | [crates.io](https://crates.io/)                                              |
-| Auth                | Clerk (token attached to the generated client)               | [clerk.com/docs](https://clerk.com/docs)                                      |
+| Concern            | Choice                                                                                   | First-party docs                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Language           | Rust                                                                                     | [rust-lang.org](https://www.rust-lang.org/)                                                             |
+| Arg parser         | Clap (derive)                                                                            | [docs.rs/clap](https://docs.rs/clap)                                                                    |
+| State management   | Tears (Elm/TEA-style runtime)                                                            | [github.com/akiomik/tears](https://github.com/akiomik/tears)                                            |
+| TUI renderer       | Ratatui                                                                                  | [ratatui.rs](https://ratatui.rs/)                                                                       |
+| On-device database | Diesel (SQLite)                                                                          | [diesel.rs](https://diesel.rs/)                                                                         |
+| Networking         | reqwest                                                                                  | [docs.rs/reqwest](https://docs.rs/reqwest)                                                              |
+| API client         | Progenitor (typed client generated from the OpenAPI document — don't hand-roll requests) | [github.com/oxidecomputer/progenitor](https://github.com/oxidecomputer/progenitor)                      |
+| Tests              | cargo test                                                                               | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
+| Formatter          | rustfmt                                                                                  | [github.com/rust-lang/rustfmt](https://github.com/rust-lang/rustfmt)                                    |
+| Linter             | Clippy                                                                                   | [doc.rust-lang.org/stable/clippy](https://doc.rust-lang.org/stable/clippy/)                             |
+| Package / build    | Cargo (single-file release binary)                                                       | [crates.io](https://crates.io/)                                                                         |
+| Auth               | Clerk (token attached to the generated client)                                           | [clerk.com/docs](https://clerk.com/docs)                                                                |
 
 ## The Client layer depends on the backend mode
 
@@ -60,9 +61,9 @@ enum Command {
 }
 ```
 
-### Ratatui: pure state + event loop, separate from rendering
+### Tears + Ratatui: pure state + event loop, separate from rendering
 
-Hold UI state in an **app-state struct**. An `update` step folds an event into new state; a `draw` step renders widgets from that state. The **update layer is pure and testable** — no IO, no terminal handles. This pure layer is the view-model analog and the **primary spec target**.
+Hold UI state in an **app-state struct**. An `update` step folds an event into new state; a `draw` step renders widgets from that state. The **update layer is pure and testable** — no IO, no terminal handles. This pure layer is the view-model analog and the **primary spec target**. **Tears** (an Elm/TEA-style framework) supplies the model · message · update · view runtime that drives this loop over Ratatui — you write the model and the pure `update`; Tears owns the event pump and the redraw scheduling.
 
 ```rust
 // SPEC: vm.items.list

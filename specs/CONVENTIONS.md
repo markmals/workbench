@@ -6,7 +6,7 @@ This document defines the structure of specs in this repo. Every spec, every rev
 
 ## Why specs at all
 
-Native, idiomatic implementations on every platform mean the _behavior_ must converge even though the _code_ won't. Specs are the only artifact shared across platforms — they are the contract. Everything else (TanStack Start app, SwiftUI app, Compose app, Convex schema) is a regeneration target.
+Native, idiomatic implementations on every platform mean the _behavior_ must converge even though the _code_ won't. Specs are the only artifact shared across platforms — they are the contract. Everything else (TanStack Start app, UIKit app, Compose app, Convex schema) is a regeneration target.
 
 Specs describe **what** must hold. Tests prove it. Implementations satisfy it. None of those three is the source of truth on its own.
 

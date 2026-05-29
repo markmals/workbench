@@ -52,7 +52,7 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 ├── apps/                              ← (you create) platform implementations
 │   ├── web/                           ←   React + TanStack Start + Convex (reference)
 │   ├── website/                       ←   Astro + React islands (marketing / content)
-│   ├── ios/                           ←   Swift / SwiftUI / SwiftData (Apple family: iOS · iPadOS · macOS · …)
+│   ├── ios/                           ←   Swift / UIKit / SwiftData (Apple family: iOS · iPadOS · macOS · …)
 │   ├── android/                       ←   Kotlin / Jetpack Compose / Room
 │   ├── windows/                       ←   C# / WinUI 3 / EF Core
 │   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
@@ -99,14 +99,14 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.                                                |
 | `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                               |
 | `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                                                                    |
-| `ios-development`                | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing idioms, HIG link list.                                                         |
+| `ios-development`                | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing idioms, HIG link list.                     |
 | `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                   |
 | `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                                                              |
 | `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                  |
 | `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                  |
 | `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                 |
 | `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.                                             |
-| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                                                                          |
+| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                                  |
 
 These skills are deliberately lighter than the official `superpowers` suite and adapted to this template's spec-driven shape (no plan documents, no branch ceremony, reverse pointers everywhere). Several lift patterns from superpowers; see each `SKILL.md` header for attribution.
 

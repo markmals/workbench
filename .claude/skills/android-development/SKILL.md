@@ -9,23 +9,23 @@ This skill covers **how to write Android code** in this repo. For the _workflow_
 
 ## Stack at a glance
 
-| Concern             | Choice                                                          | First-party docs                                                                                                                               |
-| ------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Language            | Kotlin (latest stable)                                          | [kotlinlang.org/llms.txt](https://kotlinlang.org/llms.txt)                                                                                     |
-| UI                  | Jetpack Compose                                                 | [developer.android.com/jetpack/compose](https://developer.android.com/jetpack/compose)                                                         |
-| Design language     | Material 3                                                      | [m3.material.io](https://m3.material.io/)                                                                                                      |
-| Compose Material 3  | androidx.compose.material3                                      | [developer.android.com/jetpack/androidx/releases/compose-material3](https://developer.android.com/jetpack/androidx/releases/compose-material3) |
-| View models         | `androidx.lifecycle.ViewModel`                                  | [developer.android.com/topic/libraries/architecture/viewmodel](https://developer.android.com/topic/libraries/architecture/viewmodel)           |
-| Reactive primitives | `kotlinx.coroutines.flow.*` (`StateFlow`, `SharedFlow`, `Flow`) | [kotlinlang.org/docs/flow](https://kotlinlang.org/docs/flow.html)                                                                              |
-| Concurrency         | Kotlin coroutines                                               | [kotlinlang.org/docs/coroutines-overview](https://kotlinlang.org/docs/coroutines-overview.html)                                                |
-| Tests               | `kotlin.test` (JUnit5 backend)                                  | [kotlinlang.org/api/latest/kotlin.test](https://kotlinlang.org/api/latest/kotlin.test/)                                                        |
-| Formatter           | ktfmt                                                           | [github.com/facebook/ktfmt](https://github.com/facebook/ktfmt)                                                                 |
-| Linter              | ktlint                                                          | [pinterest.github.io/ktlint](https://pinterest.github.io/ktlint/)                                                                              |
-| Build system        | Gradle (Kotlin DSL)                                             | [docs.gradle.org/current/userguide/kotlin_dsl.html](https://docs.gradle.org/current/userguide/kotlin_dsl.html)                                 |
-| On-device database  | Room                                                            | [developer.android.com/jetpack/androidx/releases/room](https://developer.android.com/jetpack/androidx/releases/room)           |
-| Networking          | Ktor client                                                     | [ktor.io/docs/client-create-and-configure.html](https://ktor.io/docs/client-create-and-configure.html)                         |
-| API client          | OpenAPI Generator (Kotlin; typed client over Ktor — don't hand-roll requests) | [openapi-generator.tech/docs/generators/kotlin](https://openapi-generator.tech/docs/generators/kotlin/)        |
-| Auth                | Clerk (identity / token)                                        | [clerk.com/docs](https://clerk.com/docs)                                                                                       |
+| Concern             | Choice                                                                        | First-party docs                                                                                                                               |
+| ------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language            | Kotlin (latest stable)                                                        | [kotlinlang.org/llms.txt](https://kotlinlang.org/llms.txt)                                                                                     |
+| UI                  | Jetpack Compose                                                               | [developer.android.com/jetpack/compose](https://developer.android.com/jetpack/compose)                                                         |
+| Design language     | Material 3                                                                    | [m3.material.io](https://m3.material.io/)                                                                                                      |
+| Compose Material 3  | androidx.compose.material3                                                    | [developer.android.com/jetpack/androidx/releases/compose-material3](https://developer.android.com/jetpack/androidx/releases/compose-material3) |
+| View models         | `androidx.lifecycle.ViewModel`                                                | [developer.android.com/topic/libraries/architecture/viewmodel](https://developer.android.com/topic/libraries/architecture/viewmodel)           |
+| Reactive primitives | `kotlinx.coroutines.flow.*` (`StateFlow`, `SharedFlow`, `Flow`)               | [kotlinlang.org/docs/flow](https://kotlinlang.org/docs/flow.html)                                                                              |
+| Concurrency         | Kotlin coroutines                                                             | [kotlinlang.org/docs/coroutines-overview](https://kotlinlang.org/docs/coroutines-overview.html)                                                |
+| Tests               | `kotlin.test` (JUnit5 backend)                                                | [kotlinlang.org/api/latest/kotlin.test](https://kotlinlang.org/api/latest/kotlin.test/)                                                        |
+| Formatter           | ktfmt                                                                         | [github.com/facebook/ktfmt](https://github.com/facebook/ktfmt)                                                                                 |
+| Linter              | ktlint                                                                        | [pinterest.github.io/ktlint](https://pinterest.github.io/ktlint/)                                                                              |
+| Build system        | Gradle (Kotlin DSL)                                                           | [docs.gradle.org/current/userguide/kotlin_dsl.html](https://docs.gradle.org/current/userguide/kotlin_dsl.html)                                 |
+| On-device database  | Room                                                                          | [developer.android.com/jetpack/androidx/releases/room](https://developer.android.com/jetpack/androidx/releases/room)                           |
+| Networking          | Ktor (OkHttp engine)                                                          | [ktor.io/docs/client-engines.html](https://ktor.io/docs/client-engines.html)                                                                   |
+| API client          | OpenAPI Generator (Kotlin; typed client over Ktor — don't hand-roll requests) | [openapi-generator.tech/docs/generators/kotlin](https://openapi-generator.tech/docs/generators/kotlin/)                                        |
+| Auth                | Clerk (identity / token)                                                      | [clerk.com/docs](https://clerk.com/docs)                                                                                                       |
 
 Kotlin publishes `/llms.txt`; Google and Android do not. Use WebFetch against canonical URLs when looking things up.
 
@@ -33,7 +33,7 @@ Kotlin publishes `/llms.txt`; Google and Android do not. Use WebFetch against ca
 
 How the app reaches its data is set by the project's backend (see `specs/ARCHITECTURE.md` → "Backend modes"):
 
-- **OpenAPI** — a typed client generated by the OpenAPI Generator (Kotlin) over **Ktor**; never assemble requests by hand.
+- **OpenAPI** — a typed client generated by the OpenAPI Generator (Kotlin) over **Ktor** (OkHttp engine); never assemble requests by hand.
 - **Convex** — Convex's first-party Kotlin client.
 - **No API** — no client at all; **Room** is the source of truth.
 

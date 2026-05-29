@@ -140,7 +140,7 @@ Same model, same general approach. Provide the same files plus the platform CLAU
 
 Instructions:
 
-1. Check **idioms**: does it look like idiomatic SwiftUI / Compose / TanStack Start code?
+1. Check **idioms**: does it look like idiomatic UIKit / Compose / TanStack Start code?
 2. Check **naming**: names match the spec's vocabulary; no synonyms drift.
 3. Check **duplication**: no repeated logic that should be extracted.
 4. Check **size**: any file growing too large?
