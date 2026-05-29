@@ -71,15 +71,15 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 
 ## Slash commands
 
-| Command                           | Purpose                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------ |
+| Command                           | Purpose                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `/setup`                          | **Run once on a fresh copy.** Asks which platforms + backend you're using and prunes everything for the rest. |
-| `/sdd-apply <spec-id> <platform>` | Regenerate a spec's implementation + tests on a platform.                |
-| `/sdd-verify <platform>`          | Run the platform's behavioral test suite.                                |
-| `/sdd-drift <platform>`           | List spec IDs whose impl is stale, plus impl files with no spec pointer. |
-| `/sdd-reconcile <platform>`       | Bring the spec + other platforms in line with this platform's impl.      |
-| `/sdd-cover <spec-id>`            | Show which platforms implement a spec and which tests pass.              |
-| `/sdd-defect <platform> <desc>`   | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow. |
+| `/sdd-apply <spec-id> <platform>` | Regenerate a spec's implementation + tests on a platform.                                                     |
+| `/sdd-verify <platform>`          | Run the platform's behavioral test suite.                                                                     |
+| `/sdd-drift <platform>`           | List spec IDs whose impl is stale, plus impl files with no spec pointer.                                      |
+| `/sdd-reconcile <platform>`       | Bring the spec + other platforms in line with this platform's impl.                                           |
+| `/sdd-cover <spec-id>`            | Show which platforms implement a spec and which tests pass.                                                   |
+| `/sdd-defect <platform> <desc>`   | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow.                               |
 
 These are scaffolded with intent docs; their internals are agent-driven (no automation yet — the agent uses `rg`, `Edit`, `AskUserQuestion`, etc.).
 
@@ -87,26 +87,26 @@ These are scaffolded with intent docs; their internals are agent-driven (no auto
 
 Procedural skills live under `.claude/skills/`. Use them rather than reaching for ad-hoc patterns — they encode the discipline this template expects.
 
-| Skill                            | When to invoke                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `brainstorming-feature`          | Before starting any new feature or substantial change. Walks narrative → stories → models → view-models → flows → errors. |
-| `writing-user-stories`           | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                    |
-| `implementing-a-spec`            | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.            |
-| `test-driven-development`        | When writing any production code. Iron Law: no production code without a failing test first.                              |
-| `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                     |
-| `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                             |
+| Skill                            | When to invoke                                                                                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `brainstorming-feature`          | Before starting any new feature or substantial change. Walks narrative → stories → models → view-models → flows → errors.                                        |
+| `writing-user-stories`           | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                                                           |
+| `implementing-a-spec`            | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.                                                   |
+| `test-driven-development`        | When writing any production code. Iron Law: no production code without a failing test first.                                                                     |
+| `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                                                            |
+| `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                    |
 | `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete. |
-| `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.         |
-| `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                        |
-| `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                            |
-| `ios-development`                | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing idioms, HIG link list.                  |
-| `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                            |
-| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                       |
-| `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                           |
-| `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                           |
-| `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                          |
-| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.       |
-| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                                   |
+| `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.                                                |
+| `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                               |
+| `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                                                                    |
+| `ios-development`                | When writing Apple-family code. SwiftUI + Observation + SwiftData + Swift Testing idioms, HIG link list.                                                         |
+| `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                   |
+| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                                                              |
+| `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                  |
+| `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                  |
+| `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                 |
+| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.                                             |
+| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Diesel + Progenitor idioms.                                                                          |
 
 These skills are deliberately lighter than the official `superpowers` suite and adapted to this template's spec-driven shape (no plan documents, no branch ceremony, reverse pointers everywhere). Several lift patterns from superpowers; see each `SKILL.md` header for attribution.
 
@@ -142,7 +142,7 @@ mise run docs:dev          # docs site
 mise tasks                 # list everything available
 ```
 
-When you add a platform, also add the orchestration task at the root (`web:dev`, `ios:test`, etc.) so cross-platform commands work.
+When you add a platform, define `fmt` and `lint` tasks in its `mise.toml` (its formatter / linter; `fmt` accepts optional file paths) — the `format-on-edit` and `stop-lint` hooks dispatch to them, which is what keeps those hooks platform-agnostic. Also add the orchestration task at the root (`web:dev`, `ios:test`, etc.) so cross-platform commands work.
 
 ## Editing
 
@@ -150,13 +150,13 @@ All editing is done via your editor of choice. Builds, tests, simulators, and em
 
 ## What lives where
 
-| Question                                           | Where to look                                                   |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                          |
-| "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                 |
-| "What tool/framework does the template use for X?" | `STACK.md`                                                      |
+| Question                                           | Where to look                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------------ |
+| "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                             |
+| "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                    |
+| "What tool/framework does the template use for X?" | `STACK.md`                                                         |
 | "Which platforms is this copy set up for?"         | Run `/setup`, or read the platform rows in `specs/ARCHITECTURE.md` |
-| "What's the web stack?"                            | `STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding) |
-| "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding) |
-| "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                  |
-| "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                 |
+| "What's the web stack?"                            | `STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding)    |
+| "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding)    |
+| "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                     |
+| "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                    |

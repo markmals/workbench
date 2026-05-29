@@ -34,7 +34,11 @@ _.path = ['{{config_root}}/node_modules/.bin']
 postinstall = "pnpm install"
 
 [tasks.fmt]
-description = "Format the entire project"
+# Repo-root formatter (the `format-on-edit` hook calls this for root-level files,
+# and each platform defines its own `fmt`). Accepts optional file paths:
+#   mise run fmt                 → format the whole project
+#   mise run fmt -- path/to.ts   → format just those files
+description = "Format the project (or the files passed as arguments)"
 run = "oxfmt"
 
 [tasks."docs:dev"]
