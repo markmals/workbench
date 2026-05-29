@@ -27,9 +27,9 @@ The web app is the **reference implementation** — build features there first; 
 | Android         | Kotlin + Jetpack Compose + Material 3 + coroutines/Flow + Room                          | Native client. Mirrors web behavior.          |
 | Windows         | C# + WinUI 3 + XAML + MVVM Toolkit + EF Core                                            | Native client. Mirrors web behavior.          |
 | Linux           | Rust + GTK 4 + Adwaita + Relm4 + Diesel                                                 | Native client. Mirrors web behavior.          |
-| Server CLI      | Node single-file exe + TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob        | Headless/automation client. Hosts the API.    |
-| High-perf CLI   | Rust single-file exe + Clap + Ratatui + Diesel + Progenitor                             | TUI client. Generated API client.             |
-| Backend         | Convex (database, file storage, cron, queues, realtime) + Clerk (auth)                  | Single backend serving every client.          |
+| Server CLI      | Node single-file exe + TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob        | Headless/automation client. In OpenAPI mode, hosts the API. |
+| High-perf CLI   | Rust single-file exe + Clap + Ratatui + Diesel + Progenitor                             | TUI client.                                   |
+| Backend         | One of — **Convex** · a **TS-Rest / OpenAPI** server · **none** (local-only). Clerk for identity. | Chosen at `/setup`. See "Backend modes".  |
 
 Desktop web apps (web app stack wrapped in **Electron**) are a packaging concern, not a separate platform — the same React/TanStack code ships to the browser and to the desktop shell.
 
@@ -50,8 +50,8 @@ Every client follows the same conceptual layering, even though the language and 
                   │
                   ▼
 ┌──────────────────────────────────────┐
-│  Convex (queries, mutations, actions)│  spec: protocol — Convex schema is canonical
-│  + Clerk (identity)                  │
+│  Backend: mode-dependent (see below) │  spec: protocol — canonical per mode
+│  + Clerk identity, when there's a remote backend
 └──────────────────────────────────────┘
 ```
 
@@ -60,38 +60,45 @@ Every client follows the same conceptual layering, even though the language and 
 - **Domain** is the data shape and invariants. Pure types and validation, no I/O.
 - **Client** is the layer that differs most by platform — see below. The wrapper exists only to expose idiomatic call sites, never to reimplement a protocol.
 
-### The Client layer is contract-first, not hand-rolled
+### Backend modes — pick one at `/setup`
 
-Two realizations, by platform family:
+The backend is **not** assumed. A project chooses exactly one of three mutually-exclusive modes; the Client layer realizes the chosen mode idiomatically on each platform. These do **not** combine — it is Convex, _or_ OpenAPI, _or_ nothing.
 
-- **Web app and website** talk to **Convex directly** through its generated TypeScript client (via TanStack Query + `@convex-dev/react-query`). Reactive subscriptions, mutations, and codegen-driven types flow through the official client. Relational or edge-local data that isn't a fit for Convex uses **Drizzle** (e.g. Cloudflare D1).
-- **Native clients (Apple, Android, Windows, Linux) and the CLIs** consume the backend through a **generated OpenAPI client** — Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota (C#), Progenitor (Rust). The platform's standard HTTP stack (URLSession / Ktor / HttpClient / reqwest) is the transport; the typed surface is generated, never hand-written. Each carries a local on-device database (SwiftData / Room / EF Core / Diesel) as a **local-first cache**, not a second source of truth.
+- **Convex** — a reactive backend (database, file storage, cron, queues, realtime). Web and website use Convex's TypeScript client (TanStack Query + `@convex-dev/react-query`); native clients and CLIs use Convex's first-party client SDK for their platform. Reactive subscriptions wherever the platform supports them. No OpenAPI layer.
+- **OpenAPI** — a **TS-Rest** server (hosted; the Server CLI) is the backend and owns the OpenAPI document. Web and website use the TS-Rest typed fetch client; native clients and the Rust CLI consume a **generated** OpenAPI client — Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota (C#), Progenitor (Rust) — over the platform's HTTP stack (URLSession / Ktor / HttpClient / reqwest). No Convex.
+- **No API** — no backend at all. Each client is **local-first**, persisting on-device: Drizzle (web / Electron, local SQLite), SwiftData (Apple), Room (Android), EF Core (Windows), Diesel (Linux / Rust CLI). No networking, no Convex, no OpenAPI.
 
-No platform hand-rolls a transport or "mirrors" the protocol by hand. The contract — Convex's TypeScript client on web, the OpenAPI document everywhere else — is the only thing that crosses the wire boundary.
+Across all modes:
+
+- The on-device databases (SwiftData / Room / EF Core / Diesel) and Drizzle are a **cache** in Convex/OpenAPI modes and the **source of truth** in no-API mode.
+- The Client wrapper exposes idiomatic call sites; it never hand-rolls a transport or re-implements the protocol. The contract — the Convex schema, the OpenAPI document, or nothing — is the only thing that crosses the wire.
+- **Clerk** provides identity in the Convex and OpenAPI modes; a no-API app has local or no identity.
 
 ## Data flow
 
-- **Reads are reactive where the platform supports it:** `useQuery` on web/website (TanStack Query + Convex), `@Observable`-backed queries on Apple, `Flow`-backed queries on Android, observable view models on Windows (MVVM Toolkit) and Linux (Relm4). Native clients fall back to fetch-and-cache against the OpenAPI surface where live subscriptions aren't available.
-- **Writes** go through Convex mutations (web) or the generated client's typed operations (everywhere else). The client wrapper exposes idiomatic call sites.
-- **Identity** is handled by **Clerk** on every platform — Clerk's web SDK on web/website, its native SDKs or token flows on the other clients. Convex validates the Clerk-issued identity.
-- **Server-side, non-data work** (sending email, third-party calls, computing sensitive values) runs in Convex actions or in TanStack Start server functions — never in view code.
-- **Background work**: Convex cron + the Convex Workpool component for queued jobs; the standalone Server CLI uses `plainjob` for its own background jobs.
+The exact mechanics depend on the chosen backend mode (above):
+
+- **Reads** — _Convex mode_: reactive subscriptions where supported (`useQuery` on web/website, `@Observable` on Apple, `Flow` on Android, observable view models on Windows/Linux). _OpenAPI mode_: request/response through the generated client, cached on-device. _No-API mode_: straight from the local store.
+- **Writes** — Convex mutations (Convex mode), the generated client's typed operations (OpenAPI mode), or a local write (no-API mode). The client wrapper exposes idiomatic call sites.
+- **Identity** — **Clerk** wherever there's a remote backend; Convex or the TS-Rest server validates the Clerk-issued token. No-API apps have local or no identity.
+- **Server-side, non-data work** (email, third-party calls, sensitive computation) — Convex actions or TanStack Start server functions (Convex mode), or TS-Rest server handlers (OpenAPI mode). Never in view code.
+- **Background work** — Convex cron + the Workpool component (Convex mode); `plainjob` in the Server CLI (OpenAPI mode).
 
 ## Deployment
 
 | Platform     | Development                       | Production                                         |
 | ------------ | --------------------------------- | -------------------------------------------------- |
-| Web app      | Vite dev + `convex dev`           | Cloudflare Workers (static assets + edge)          |
-| Website      | Astro dev + `convex dev`          | Cloudflare (static hosting + CDN + image opt.)     |
-| Apple        | Xcode simulators + `convex dev`   | TestFlight → App Store                             |
-| Android      | Android emulator + `convex dev`   | Internal track → Play Store                        |
-| Windows      | Local debug + `convex dev`        | MSIX / Microsoft Store                             |
-| Linux        | Local debug + `convex dev`        | Flatpak / distribution package                     |
-| Server CLI   | Local Node + `convex dev`         | Single-file executable; Railway VPS for hosted API |
-| High-perf CLI| Local `cargo run` + `convex dev`  | Single-file binary release (`cargo` → tsdown-style exe) |
-| Backend      | `convex dev`                      | Convex production deployment                       |
+| Web app      | Vite dev + backend dev           | Cloudflare Workers (static assets + edge)          |
+| Website      | Astro dev + backend dev          | Cloudflare (static hosting + CDN + image opt.)     |
+| Apple        | Xcode simulators + backend dev   | TestFlight → App Store                             |
+| Android      | Android emulator + backend dev   | Internal track → Play Store                        |
+| Windows      | Local debug + backend dev        | MSIX / Microsoft Store                             |
+| Linux        | Local debug + backend dev        | Flatpak / distribution package                     |
+| Server CLI   | Local Node + backend dev         | Single-file executable; Railway VPS for hosted API |
+| High-perf CLI| Local `cargo run` + backend dev  | Single-file binary release (`cargo` → tsdown-style exe) |
+| Backend      | per mode (`convex dev` / local TS-Rest server / none) | per mode (Convex deploy / Railway / —)         |
 
-Domains, DNS, CDN, and image optimization are all **Cloudflare**. VPS workloads (the hosted Server CLI / API) run on **Railway**.
+The **backend dev** step depends on your mode: `convex dev` (Convex), the local TS-Rest server (OpenAPI), or nothing (no-API). Domains, DNS, CDN, and image optimization are all **Cloudflare**. VPS workloads (the hosted TS-Rest API) run on **Railway**.
 
 ## Cross-platform parity rules
 
@@ -110,4 +117,4 @@ Domains, DNS, CDN, and image optimization are all **Cloudflare**. VPS workloads 
 
 <!-- Things deliberately deferred. Tag with the date so they can be revisited. -->
 
-- **Who produces the OpenAPI contract that non-web clients generate against?** Two viable shapes: (a) Convex HTTP actions expose an OpenAPI document directly; (b) a thin TS-Rest gateway (the Server CLI's API surface) fronts Convex + Drizzle and owns the OpenAPI document. Pick one per project before scaffolding native clients. _[NEEDS CLARIFICATION: choose (a) or (b).]_
+- _(empty)_ — the backend choice (Convex / OpenAPI / none) is a deliberate `/setup` decision, not an open question. See "Backend modes".

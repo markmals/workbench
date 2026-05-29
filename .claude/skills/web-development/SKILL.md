@@ -9,6 +9,8 @@ This skill covers **how to write web-app code** in this repo. For the _workflow_
 
 The web app is the **reference implementation**. Build features here first; every other platform uses the web realization as a worked example.
 
+> **Backend mode.** This skill documents the **Convex** backend (the template default). If your project chose `OpenAPI` mode at `/setup`, the data layer swaps the Convex client for the TS-Rest typed client; if `No API`, for local Drizzle / TanStack DB. The view-model and component idioms below are identical regardless of mode — only the Client layer changes. See `specs/ARCHITECTURE.md` → "Backend modes".
+
 ## Stack at a glance
 
 | Concern            | Choice                                     | First-party docs                                                               |

@@ -33,6 +33,8 @@ When you need to look something up, fetch the relevant doc with WebFetch. For Vi
 
 ## This platform owns the contract
 
+> This section applies in **OpenAPI** backend mode (see `specs/ARCHITECTURE.md` → "Backend modes"). In **Convex** mode the CLI uses the Convex client instead of hosting a contract; in **No API** mode it's a standalone tool with only local state.
+
 The **TS-Rest router/contract is the single source of truth for the HTTP surface.** It is the canonical description of every endpoint: path, method, inputs, outputs, errors. From it, TS-Rest emits the **OpenAPI document** that every native client (Apple, Android, Windows, Linux, the Rust CLI) generates its typed client against. Change the contract and you change every downstream client.
 
 Because of that:

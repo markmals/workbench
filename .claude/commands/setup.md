@@ -18,15 +18,15 @@ The platform set is larger than one `AskUserQuestion` question allows (max 4 opt
 
 1. **App / GUI platforms** (multiSelect): `Web app (reference)`, `Website (Astro)`, `Apple`, `Android`.
 2. **Additional platforms** (multiSelect): `Windows`, `Linux`, `Server / Node CLI`, `High-performance Rust CLI`.
-3. **Backend & contract** (single):
-    - `Convex + OpenAPI contract` — web talks to Convex directly; native/CLI clients generate against an OpenAPI document (the default for any product with native or CLI clients).
-    - `Convex only` — web/website only; no OpenAPI clients to generate.
-    - `Decide later` — keep both paths documented.
+3. **Backend mode** (single — these are mutually exclusive; see `specs/ARCHITECTURE.md` → "Backend modes"):
+    - `Convex` — a reactive backend; web/website use the Convex TS client, native clients and CLIs use Convex's first-party SDK. No OpenAPI layer.
+    - `OpenAPI` — a TS-Rest server is the backend and owns the OpenAPI document; web/website use the TS-Rest client, native clients and the Rust CLI consume a generated OpenAPI client. No Convex.
+    - `No API` — local-only; each client persists on-device (Drizzle / SwiftData / Room / EF Core / Diesel). No backend, no networking, no Convex.
 
 Notes for interpreting answers:
 
 - **Web is the default reference platform.** If the user deselects the web app, ask which selected platform becomes the reference and update `specs/ARCHITECTURE.md` + `CLAUDE.md` accordingly.
-- If they pick **no** native/CLI client, the OpenAPI contract is moot — treat the backend as `Convex only` and skip the OpenAPI machinery.
+- The backend mode is independent of the platform set, but cross-check for nonsense: `No API` with a `Server / Node CLI` selected is contradictory (the Node CLI's reason to exist is hosting the API) — confirm with the user. `OpenAPI` mode wants something to host the contract (typically the Server CLI or a `services/` server).
 
 ## Step 3 — Prune
 
@@ -50,12 +50,16 @@ For every platform **not** selected, remove its artifacts using the map below. W
 - **TS toolchain** (`pnpm`, `node`, `vite`, `vitest`, `oxfmt`, `oxlint`, `tsgo`, the `format-on-edit` TS branch) is shared by **web app, website, and server CLI**. Keep it while _any_ of those three survive.
 - **Rust toolchain** (`cargo`, `rustfmt`, the `format-on-edit` `.rs` branch, the `block-generated` `target/` rule) is shared by **Rust CLI and Linux**. Keep it while _either_ survives.
 - **Chrome DevTools MCP** (`.mcp.json`) is used by **web app and website** via `web-verification`. Remove the `.mcp.json` server entry only if both are gone.
-- **OpenAPI machinery** (`openapi-codegen.sh` hook + its settings registration, the OpenAPI rows in ARCHITECTURE) is only meaningful if at least one native/CLI client is kept _and_ the backend is contract-first. Drop it for a `Convex only` project.
+- **OpenAPI machinery** (`openapi-codegen.sh` hook + its settings registration, the OpenAPI mode in ARCHITECTURE, the generated-client framing in the native/CLI skills) belongs to **OpenAPI mode** only. Drop it in `Convex` and `No API` modes.
+- **Convex machinery** (`convex-codegen.sh` hook + its registration, `services/convex`, the Convex idioms in `web-development`) belongs to **Convex mode** only. Drop it in `OpenAPI` and `No API` modes.
 
-### Backend pruning
+### Backend pruning (by mode)
 
-- **Convex only** — remove the OpenAPI contract layer from `ARCHITECTURE.md` (the "Client layer is contract-first" subsection's native half and the open question), drop `openapi-codegen.sh` + its settings registration, and resolve the architecture open question to "(a) Convex direct".
-- **Decide later** — leave both paths and the `[NEEDS CLARIFICATION]` open question in place.
+Edit the **Backend modes** section of `specs/ARCHITECTURE.md` down to the single chosen mode, then:
+
+- **Convex** — keep `services/convex`, `convex-codegen.sh`, and Clerk. Drop `openapi-codegen.sh` + its settings registration. In the native/CLI skills, the Client layer uses **Convex's SDK**, not a generated OpenAPI client — adjust their "Client layer" note accordingly.
+- **OpenAPI** — keep the TS-Rest server surface (the Server CLI's `contract/` + `server/`), `openapi-codegen.sh`, and Clerk. Drop `convex-codegen.sh` + its registration and the `services/convex` references; `web-development` uses the **TS-Rest client** in place of Convex.
+- **No API** — local-only. Drop both `convex-codegen.sh` and `openapi-codegen.sh` (+ registrations), `services/convex`, the networking/OpenAPI rows in the skills, and Clerk (unless you keep local identity). Each client keeps only its on-device database.
 
 ## Step 4 — Rewrite the surviving docs
 
