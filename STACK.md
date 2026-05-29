@@ -129,37 +129,38 @@ Spec-driven-development multiplatform application toolkit powered by Claude.
 
 Targets: iOS · iPadOS · macOS · tvOS · watchOS · visionOS.
 
-| Concern         | Choice                                                                                                                |
-| --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Language        | [Swift](https://www.swift.org/)                                                                                       |
-| Concurrency     | [Swift Concurrency](https://developer.apple.com/documentation/swift/concurrency)                                      |
-| Reactivity      | [Swift Observation](https://developer.apple.com/documentation/Observation)                                            |
-| Views           | [SwiftUI](https://developer.apple.com/swiftui/)                                                                       |
-| Database        | [SwiftData](https://developer.apple.com/documentation/swiftdata)                                                      |
-| Networking      | [URLSession](https://developer.apple.com/documentation/foundation/urlsession)                                         |
-| OpenAPI         | [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)                                           |
-| Test runner     | [Swift Testing](https://developer.apple.com/xcode/swift-testing/)                                                     |
-| Formatter       | [swift-format](https://github.com/swiftlang/swift-format#formatting)                                                  |
-| Linter          | [swift-format](https://github.com/swiftlang/swift-format#linting)                                                     |
-| Package manager | [Swift Package Manager](https://developer.apple.com/documentation/xcode/swift-packages)                               |
-| Agent ↔ IDE     | [Xcode external agent access](https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode) |
+| Concern         | Choice                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language        | [Swift](https://www.swift.org/)                                                                                                                                           |
+| Concurrency     | [Swift Concurrency](https://developer.apple.com/documentation/swift/concurrency)                                                                                          |
+| Reactivity      | [Swift Observation](https://developer.apple.com/documentation/Observation)                                                                                                |
+| Views           | [SwiftUI](https://developer.apple.com/swiftui/), [UIKit](https://developer.apple.com/documentation/uikit), and [AppKit](https://developer.apple.com/documentation/appkit) |
+| Database        | [SwiftData](https://developer.apple.com/documentation/swiftdata)                                                                                                          |
+| Networking      | [URLSession](https://developer.apple.com/documentation/foundation/urlsession)                                                                                             |
+| OpenAPI         | [Swift OpenAPI Generator](https://github.com/apple/swift-openapi-generator)                                                                                               |
+| Test runner     | [Swift Testing](https://developer.apple.com/xcode/swift-testing/)                                                                                                         |
+| Formatter       | [swift-format](https://github.com/swiftlang/swift-format#formatting)                                                                                                      |
+| Linter          | [swift-format](https://github.com/swiftlang/swift-format#linting)                                                                                                         |
+| Package manager | [Swift Package Manager](https://developer.apple.com/documentation/xcode/swift-packages)                                                                                   |
+| Project manager | [Tuist](https://tuist.dev)                                                                                                                                                |
+| IDE MCP         | [Xcode MCP](https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode)                                                                       |
 
 ## Android
 
-| Concern         | Choice                                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Language        | [Kotlin](https://kotlinlang.org/multiplatform/)                                                                    |
-| Concurrency     | [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)                                          |
-| Reactivity      | [Kotlin Flows](https://kotlinlang.org/docs/flow.html)                                                              |
-| Views           | [Jetpack Compose](https://developer.android.com/compose)                                                           |
-| Database        | [Room](https://developer.android.com/jetpack/androidx/releases/room)                                               |
-| Networking      | [Ktor](https://ktor.io/docs/client-create-and-configure.html)                                                      |
-| OpenAPI         | [OpenAPI Generator](https://openapi-generator.tech/docs/generators/kotlin/)                                        |
-| Test runner     | [kotlin.test](https://kotlinlang.org/api/core/kotlin-test/)                                                        |
-| Formatter       | [ktfmt](https://github.com/facebook/ktfmt)                                                                         |
-| Linter          | [ktlint](https://github.com/pinterest/ktlint)                                                                      |
-| Package manager | [Gradle](https://gradle.org/)                                                                                      |
-| Agent ↔ IDE     | [Android Studio / JetBrains MCP server](https://www.jetbrains.com/help/idea/mcp-server.html#external-client-setup) |
+| Concern         | Choice                                                                      |
+| --------------- | --------------------------------------------------------------------------- |
+| Language        | [Kotlin](https://kotlinlang.org/multiplatform/)                             |
+| Concurrency     | [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)   |
+| Reactivity      | [Kotlin Flows](https://kotlinlang.org/docs/flow.html)                       |
+| Views           | [Jetpack Compose](https://developer.android.com/compose)                    |
+| Database        | [Room](https://developer.android.com/jetpack/androidx/releases/room)        |
+| Networking      | [Ktor](https://ktor.io/docs/client-create-and-configure.html)               |
+| OpenAPI         | [OpenAPI Generator](https://openapi-generator.tech/docs/generators/kotlin/) |
+| Test runner     | [kotlin.test](https://kotlinlang.org/api/core/kotlin-test/)                 |
+| Formatter       | [ktfmt](https://github.com/facebook/ktfmt)                                  |
+| Linter          | [ktlint](https://github.com/pinterest/ktlint)                               |
+| Package manager | [Gradle](https://gradle.org/)                                               |
+| IDE MCP         | [JetBrains MCP](https://www.jetbrains.com/help/idea/mcp-server.html)        |
 
 ## Windows
 
@@ -176,20 +177,20 @@ Targets: iOS · iPadOS · macOS · tvOS · watchOS · visionOS.
 | Formatter       | [dotnet format](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-format)                                             |
 | Linter          | [StyleCop](https://github.com/DotNetAnalyzers/StyleCopAnalyzers)                                                               |
 | Package manager | [NuGet](https://www.nuget.org/)                                                                                                |
-| Agent ↔ IDE     | [RoslynMcpExtension](https://github.com/sailro/RoslynMcpExtension)                                                             |
+| IDE MCP         | [RoslynMcpExtension](https://github.com/sailro/RoslynMcpExtension)                                                             |
 
 ## Linux
 
-| Concern         | Choice                                                                                      |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| Language        | [Rust](https://rust-lang.org/)                                                              |
-| Concurrency     | [Tokio](https://tokio.rs/)                                                                  |
-| Reactivity      | [Relm4](https://github.com/Relm4/Relm4/blob/main/examples/simple_manual.rs)                 |
-| Views           | [GTK 4](https://gtk-rs.org/) + [Adwaita](https://relm4.org/docs/next/libadwaita/index.html) |
-| Database        | [Diesel](https://diesel.rs/) (SQLite)                                                       |
-| Networking      | [reqwest](https://github.com/seanmonstar/reqwest)                                           |
-| OpenAPI         | [Progenitor](https://github.com/oxidecomputer/progenitor)                                   |
-| Test runner     | [Cargo Test](https://doc.rust-lang.org/cargo/commands/cargo-test.html)                      |
-| Formatter       | [rustfmt](https://github.com/rust-lang/rustfmt)                                             |
-| Linter          | [Clippy](https://doc.rust-lang.org/stable/clippy/usage.html)                                |
-| Package manager | [Cargo](https://crates.io/)                                                                 |
+| Concern         | Choice                                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Language        | [Rust](https://rust-lang.org/)                                                                                    |
+| Concurrency     | [Tokio](https://tokio.rs/)                                                                                        |
+| Reactivity      | [Relm4](https://github.com/Relm4/Relm4/blob/main/examples/simple_manual.rs)                                       |
+| Views           | [GTK 4](https://relm4.org/book/stable/gtk_rs.html) + [Adwaita](https://relm4.org/docs/next/libadwaita/index.html) |
+| Database        | [Diesel](https://diesel.rs/) (SQLite)                                                                             |
+| Networking      | [reqwest](https://github.com/seanmonstar/reqwest)                                                                 |
+| OpenAPI         | [Progenitor](https://github.com/oxidecomputer/progenitor)                                                         |
+| Test runner     | [Cargo Test](https://doc.rust-lang.org/cargo/commands/cargo-test.html)                                            |
+| Formatter       | [rustfmt](https://github.com/rust-lang/rustfmt)                                                                   |
+| Linter          | [Clippy](https://doc.rust-lang.org/stable/clippy/usage.html)                                                      |
+| Package manager | [Cargo](https://crates.io/)                                                                                       |
