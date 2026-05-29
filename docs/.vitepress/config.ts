@@ -17,11 +17,7 @@ const config = defineConfig({
         ".git/**",
         ".github/**",
         "docs/.vitepress/**",
-        "docs/node_modules/**",
         "docs/public/**",
-        "docs/package.json",
-        "docs/mise.toml",
-        "docs/pnpm-lock.yaml",
         "apps/**",
         "services/**",
         // GitHub/agent orientation docs — read on GitHub, not rendered as site

@@ -20,11 +20,18 @@
 experimental = true
 
 [tools]
+node = "24"
+pnpm = "11"
 "npm:oxfmt" = "latest"
 "npm:varlock" = "latest"
 
+[env]
+# VitePress tooling installs at the repo root so markdown rendered via `srcDir`
+# (specs/, features/, STACK.md) can resolve vue/vitepress during the build.
+_.path = ['{{config_root}}/node_modules/.bin']
+
 [hooks]
-postinstall = "cd docs && pnpm install"
+postinstall = "pnpm install"
 
 [tasks.fmt]
 description = "Format the entire project"
@@ -32,15 +39,13 @@ run = "oxfmt"
 
 [tasks."docs:dev"]
 description = "Run the docs site (VitePress) dev server"
-dir = "docs"
-run = "mise run dev"
+run = "vitepress dev docs"
 
 [tasks."docs:build"]
 description = "Build the static docs site"
-dir = "docs"
-run = "mise run build"
+run = "vitepress build docs"
 
 [tasks."docs:preview"]
 description = "Preview the built docs site locally"
-dir = "docs"
-run = "mise run preview"
+depends = ["docs:build"]
+run = "vitepress preview docs"

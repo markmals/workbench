@@ -1,4 +1,5 @@
 {
+    "name": "workbench-docs-tooling",
     "private": true,
     "type": "module",
     "devDependencies": {

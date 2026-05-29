@@ -1,0 +1,12 @@
+# The VitePress docs tooling installs at the repo root (not under docs/) so that
+# `vue` and `vitepress` are resolvable from markdown rendered via VitePress's
+# `srcDir` — i.e. specs/, features/, and the root STACK.md. Installing only
+# inside docs/ left those files unable to resolve `vue/server-renderer` during
+# the production SSR bundle.
+#
+# `packages:` is intentionally empty: the scaffolded apps/services are separate
+# pnpm projects with their own installs. Add globs here only if you later want a
+# true multi-package workspace.
+allowBuilds:
+    esbuild: true
+    vue-demi: true
