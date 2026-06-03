@@ -52,6 +52,7 @@ If you're thinking "skip TDD just this once" — stop. That's rationalization.
 - One behavior per test.
 - Clear name: `[scenario.<id>] <what the user observes>`.
 - Test real code; mock only what you can't control (network, time, randomness).
+- **Example or invariant?** A specific scenario ("creating with valid info shows it in the list") is an example test. A universally-quantified rule from a `domain.<entity>` spec — "name is never blank after trim", "for all valid items, encode/decode round-trips" — is a **property**, and the failing test you write first is a property test. See "Invariants get a property, not just examples" below. Don't settle for examples when the spec said "for all".
 
 ```ts
 // Vitest, web
@@ -121,6 +122,43 @@ Run the test. Confirm:
 
 Now that you're green, clean up. Remove duplication, improve names, extract helpers. Keep tests green throughout — every change should leave the suite passing. Do not add new behavior.
 
+## Invariants get a property, not just examples
+
+When a spec states an invariant — something that must hold for **all** valid inputs, not just the ones you happened to think of — the test for it **is a property-based test**. Hand-picked examples alone are insufficient: they prove the cases you imagined, and the `adversarial-review` stage will flag an invariant covered only by examples, because it hunts exactly the inputs your examples skipped. Write the property; keep a few examples beside it for documentation.
+
+The trigger is concrete: a `domain.<entity>` spec's **Invariants** section that says "always", "never", "for any", or "for all". Each such invariant earns a property:
+
+- "name is non-empty after trimming" → for all strings that are blank after trimming, validation rejects.
+- round-trip → for all valid items, `decode(encode(item))` equals `item`.
+- idempotence → for all inputs, `normalize(normalize(x))` equals `normalize(x)`.
+
+```ts
+// Vitest + fast-check, web
+import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
+import { validateItem } from "./item";
+
+describe("domain.item", () => {
+    // [scenario.item.name-required] no blank-after-trim name ever validates
+    it("[scenario.item.name-required] rejects any blank-after-trim name", () => {
+        fc.assert(
+            fc.property(fc.stringOf(fc.constantFrom(" ", "\t", "\n")), (blank) => {
+                expect(validateItem({ id: "1", name: blank }).ok).toBe(false);
+            }),
+        );
+    });
+});
+```
+
+Per-platform property runners: **fast-check** (web/TS), **SwiftCheck** or parameterized `@Test(arguments:)` (Apple), **kotest-property** (Android), **FsCheck** (C#), **proptest** (Rust).
+
+Discipline that still applies:
+
+- **Watch it fail first.** A property test is a RED test like any other — run it against the missing/wrong implementation and confirm it fails for the right reason before you make it pass.
+- **Keep the example tests too.** They document the specific Gherkin scenarios and read clearly. The property is the safety net underneath them, not a replacement for the scenario tests.
+- **Tag it** with the spec ID and the scenario sub-ID it most directly defends, same as any other test.
+- **Don't force a property where there isn't one.** A single enum mapping, a constant, UI formatting — those are example-shaped. Properties are for universally-quantified invariants, not for everything.
+
 ## Why order matters
 
 > "I'll write tests after to verify it works."
@@ -148,14 +186,15 @@ If a test doesn't carry these tags, drift detection can't find it. Don't skip th
 
 ## Common rationalizations
 
-| Excuse                       | Reality                                                 |
-| ---------------------------- | ------------------------------------------------------- |
-| "Too simple to test"         | Simple code still breaks. The test takes 30 seconds.    |
-| "I'll test after"            | Tests passing immediately prove nothing.                |
-| "Already manually tested"    | Manual ≠ automated. No record, can't re-run.            |
-| "Deleting work is wasteful"  | Sunk cost. Keeping unverified code is technical debt.   |
-| "Need to explore first"      | Fine — throw the exploration away, then start with TDD. |
-| "Test hard = design unclear" | Listen to the test. Hard to test means hard to use.     |
+| Excuse                            | Reality                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| "Too simple to test"              | Simple code still breaks. The test takes 30 seconds.                                                |
+| "I'll test after"                 | Tests passing immediately prove nothing.                                                            |
+| "Already manually tested"         | Manual ≠ automated. No record, can't re-run.                                                        |
+| "Deleting work is wasteful"       | Sunk cost. Keeping unverified code is technical debt.                                               |
+| "Need to explore first"           | Fine — throw the exploration away, then start with TDD.                                             |
+| "Test hard = design unclear"      | Listen to the test. Hard to test means hard to use.                                                 |
+| "My examples cover the invariant" | Examples cover the inputs you thought of. "For all" means the ones you didn't — write the property. |
 
 ## Red flags — stop and start over
 
@@ -182,6 +221,7 @@ All of these mean: **delete the code, start with TDD**.
 Before marking work complete:
 
 - [ ] Every behavior has at least one test
+- [ ] Every stated invariant ("always" / "for all") has a property-based test, not just examples
 - [ ] Watched each test fail before implementing
 - [ ] Each test failed for the expected reason
 - [ ] Wrote minimal code to pass each test
