@@ -1,13 +1,21 @@
 ---
 name: rust-cli-development
-description: Use when writing or modifying the high-performance CLI/TUI under `apps/tui/`. Covers Clap + Ratatui + Tears (Elm/TEA-style state) + Diesel + reqwest + Progenitor (generated OpenAPI client) idioms with cargo test / rustfmt / clippy. Complementary to `implementing-a-spec` (process).
+description: Use when writing or modifying the Rust CLI stack under `apps/cli/`. Covers Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish — a Rust port of the Charm ecosystem) + Diesel + reqwest + Progenitor (generated OpenAPI client) idioms with cargo test / rustfmt / clippy. Complementary to `implementing-a-spec` (process).
 ---
 
 # Rust CLI Development
 
-This skill covers **how to write the high-performance terminal client** in this repo. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For _what to build_, see the spec.
+This skill covers **how to write the CLI when its stack is Rust**. The CLI is one platform with a
+choice of stack — Node, Rust, or Go — picked at `/setup`; this is the **Rust** stack, and it lives
+at `apps/cli/`. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For _what to
+build_, see the spec.
 
-The web app is the **reference implementation**. This is the **TUI client** — it mirrors web behavior idiomatically in a terminal. Read the web realization for context; the spec is authoritative.
+The web app is the **reference implementation**. This is a **terminal client** — it mirrors web
+behavior idiomatically in a TUI. Read the web realization for context; the spec is authoritative.
+
+The TUI layer is **[charmed_rust](https://github.com/dicklesworthstone/charmed_rust)** — a Rust port
+of the Charm ecosystem (bubbletea · bubbles · lipgloss · huh · glamour · harmonica · wish), chosen
+so this stack stays at parity with the Go CLI stack. It needs **Rust 1.85+ (edition 2024)**.
 
 ## Stack at a glance
 
@@ -15,32 +23,43 @@ The web app is the **reference implementation**. This is the **TUI client** — 
 | ------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Language           | Rust                                                                                     | [rust-lang.org](https://www.rust-lang.org/)                                                             |
 | Arg parser         | Clap (derive)                                                                            | [docs.rs/clap](https://docs.rs/clap)                                                                    |
-| State management   | Tears (Elm/TEA-style runtime)                                                            | [github.com/akiomik/tears](https://github.com/akiomik/tears)                                            |
-| TUI renderer       | Ratatui                                                                                  | [ratatui.rs](https://ratatui.rs/)                                                                       |
+| State + view       | charmed_rust `bubbletea` (Elm/TEA-style model · message · update · view)                 | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| Components         | charmed_rust `bubbles` (lists, inputs, tables, spinners, viewports, file pickers)        | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| Styling            | charmed_rust `lipgloss`                                                                  | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| Forms / prompts    | charmed_rust `huh`                                                                       | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| Markdown render    | charmed_rust `glamour`                                                                   | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| Animations         | charmed_rust `harmonica`                                                                 | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
+| SSH app framework  | charmed_rust `wish`                                                                      | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust)                                       |
 | On-device database | Diesel (SQLite)                                                                          | [diesel.rs](https://diesel.rs/)                                                                         |
 | Networking         | reqwest                                                                                  | [docs.rs/reqwest](https://docs.rs/reqwest)                                                              |
 | API client         | Progenitor (typed client generated from the OpenAPI document — don't hand-roll requests) | [github.com/oxidecomputer/progenitor](https://github.com/oxidecomputer/progenitor)                      |
-| Tests              | cargo test                                                                               | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
+| Tests              | cargo test (+ `insta` for snapshot assertions on rendered views)                         | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
 | Formatter          | rustfmt                                                                                  | [github.com/rust-lang/rustfmt](https://github.com/rust-lang/rustfmt)                                    |
 | Linter             | Clippy                                                                                   | [doc.rust-lang.org/stable/clippy](https://doc.rust-lang.org/stable/clippy/)                             |
 | Package / build    | Cargo (single-file release binary)                                                       | [crates.io](https://crates.io/)                                                                         |
 | Auth               | Clerk (token attached to the generated client)                                           | [clerk.com/docs](https://clerk.com/docs)                                                                |
 
+The Go CLI stack mirrors this exactly with the original Charm libraries — see `go-cli-development`.
+
 ## The Client layer depends on the backend mode
 
-How the TUI reaches its data is set by the project's backend (see `specs/ARCHITECTURE.md` → "Backend modes"):
+How the CLI reaches its data is set by the project's backend (see `specs/ARCHITECTURE.md` →
+"Backend modes"):
 
 - **OpenAPI** — a typed client generated by Progenitor over **reqwest**; never assemble requests by hand.
 - **Convex** — Convex's Rust client.
 - **No API** — no client at all; **Diesel/SQLite** is the source of truth.
 
-In the remote modes, **Diesel/SQLite** is a local-first cache (not a second backend) and identity flows through **Clerk**, whose token the client attaches. See `apps/tui/CLAUDE.md` for the wrapper that exposes idiomatic call sites.
+In the remote modes, **Diesel/SQLite** is a local-first cache (not a second backend) and identity
+flows through **Clerk**, whose token the client attaches. See `apps/cli/CLAUDE.md` for the wrapper
+that exposes idiomatic call sites.
 
 ## Idioms (read these before writing code)
 
 ### Clap derive for the CLI surface
 
-Define commands and args declaratively with `#[derive(Parser)]`. Keep parsing thin — parse into a struct, then hand off. No business logic in the arg layer.
+Define commands and args declaratively with `#[derive(Parser)]`. Keep parsing thin — parse into a
+struct, then hand off. No business logic in the arg layer.
 
 ```rust
 use clap::{Parser, Subcommand};
@@ -61,9 +80,14 @@ enum Command {
 }
 ```
 
-### Tears + Ratatui: pure state + event loop, separate from rendering
+### charmed_rust bubbletea: pure state + event loop, separate from rendering
 
-Hold UI state in an **app-state struct**. An `update` step folds an event into new state; a `draw` step renders widgets from that state. The **update layer is pure and testable** — no IO, no terminal handles. This pure layer is the view-model analog and the **primary spec target**. **Tears** (an Elm/TEA-style framework) supplies the model · message · update · view runtime that drives this loop over Ratatui — you write the model and the pure `update`; Tears owns the event pump and the redraw scheduling.
+Hold UI state in an **app-state model**. An `update` step folds a message into new state; a `view`
+step renders a string from that state via `lipgloss`/`bubbles`. The **update layer is pure and
+testable** — no IO, no terminal handles. This pure layer is the view-model analog and the **primary
+spec target**. `bubbletea` (charmed_rust's Elm/TEA-style runtime) supplies the model · message ·
+update · view loop — you write the model and the pure `update`; the runtime owns the event pump and
+redraw scheduling.
 
 ```rust
 // SPEC: vm.items.list
@@ -72,16 +96,16 @@ pub struct ItemsListModel {
     pub selected: usize,
 }
 
-pub enum Event {
+pub enum Msg {
     Up,
     Down,
 }
 
 impl ItemsListModel {
-    pub fn update(&mut self, event: Event) {
-        match event {
-            Event::Up => self.selected = self.selected.saturating_sub(1),
-            Event::Down => {
+    pub fn update(&mut self, msg: Msg) {
+        match msg {
+            Msg::Up => self.selected = self.selected.saturating_sub(1),
+            Msg::Down => {
                 if self.selected + 1 < self.items.len() {
                     self.selected += 1;
                 }
@@ -91,13 +115,16 @@ impl ItemsListModel {
 }
 ```
 
-- The reverse pointer lives on the **model** (the pure update layer), not the draw code.
-- `draw` reads state and renders widgets; it holds no logic. Tag it `// SPEC: manual` — it has no cross-platform contract.
-- IO (reqwest calls, Diesel reads, terminal events) lives at the edges and feeds events into `update`.
+- The reverse pointer lives on the **model** (the pure update layer), not the view code.
+- `view` reads state and renders with `lipgloss`/`bubbles`; it holds no logic. Tag it
+  `// SPEC: manual` — it has no cross-platform contract.
+- IO (reqwest calls, Diesel reads, terminal events) lives at the edges and feeds messages into `update`.
 
 ### Tests at the logic layer
 
-Follow the Rust convention: a `#[cfg(test)] mod` carrying `// SPEC: <id>`, with a `// [scenario.<id>]` comment above each `#[test]` fn (Rust test names can't hold dots or brackets, so the scenario sub-ID lives in the comment that drift tooling greps).
+Follow the Rust convention: a `#[cfg(test)] mod` carrying `// SPEC: <id>`, with a
+`// [scenario.<id>]` comment above each `#[test]` fn (Rust test names can't hold dots or brackets,
+so the scenario sub-ID lives in the comment that drift tooling greps).
 
 ```rust
 #[cfg(test)]
@@ -112,51 +139,55 @@ mod tests {
             items: vec![Item::default(), Item::default()],
             selected: 0,
         };
-        model.update(Event::Down);
+        model.update(Msg::Down);
         assert_eq!(model.selected, 1);
     }
 }
 ```
 
-For TUI rendering, use Ratatui's `TestBackend` to render a frame into a buffer and assert on cells — no real terminal required.
+The pure `update` carries the behavioral coverage. When you need to pin the rendered frame, snapshot
+the `view` string with `insta` — no real terminal required.
 
 ```rust
 // [scenario.items.list.renders-title]
 #[test]
 fn renders_selected_title() {
-    let backend = ratatui::backend::TestBackend::new(20, 3);
-    let mut terminal = ratatui::Terminal::new(backend).unwrap();
-    terminal.draw(|frame| draw(frame, &model)).unwrap();
-    terminal.backend().assert_buffer_lines(["First item".into()]);
+    let model = ItemsListModel { items: vec![item("First item")], selected: 0 };
+    insta::assert_snapshot!(model.view());
 }
 ```
 
 ### Error handling with `Result`
 
-Return `Result` from anything fallible. Use `thiserror` for library-style typed errors at the domain boundary; `anyhow` for the application top level where you just want context and a clean exit. **No `unwrap()` or `expect()` on fallible IO in shipped paths** — propagate with `?` and surface failures, don't swallow them. `unwrap()` is fine only on invariants that genuinely can't fail (and a `// SAFETY`-style comment helps the next reader).
+Return `Result` from anything fallible. Use `thiserror` for library-style typed errors at the domain
+boundary; `anyhow` for the application top level where you just want context and a clean exit. **No
+`unwrap()` or `expect()` on fallible IO in shipped paths** — propagate with `?` and surface failures,
+don't swallow them. `unwrap()` is fine only on invariants that genuinely can't fail (and a
+`// SAFETY`-style comment helps the next reader).
 
-## File layout (within apps/tui/)
+## File layout (within apps/cli/)
 
-See `apps/tui/CLAUDE.md` for the canonical layout. Summary:
+See `apps/cli/CLAUDE.md` for the canonical layout. Summary:
 
 ```
-apps/tui/src/
-├── main.rs            ← entry point; wires Clap → app → terminal loop
+apps/cli/src/
+├── main.rs            ← entry point; wires Clap → app → bubbletea runtime
 ├── cli.rs             ← Clap parser definitions (thin)
-├── app/               ← state structs + pure update logic (the spec target)
-├── ui/                ← Ratatui draw functions (dumb; SPEC: manual)
+├── app/               ← models + pure update logic (the spec target)
+├── ui/                ← bubbletea views: lipgloss styling + bubbles widgets (dumb; SPEC: manual)
 ├── api/               ← Progenitor client wrapper (reqwest transport)
 └── db/                ← Diesel schema, models, local-first cache
 ```
 
 ## Verifying
 
-- `mise run -C apps/tui run` (or `cargo run`) for manual checks against a live terminal.
+- `mise run -C apps/cli run` (or `cargo run`) for manual checks against a live terminal.
 - `cargo test` for the pure logic layer — this is where behavioral coverage lives.
-- Ratatui `TestBackend` to render a frame into a buffer and assert on cells inside tests.
+- `insta` snapshots to pin a rendered `view` string inside tests.
 - `cargo clippy` and `cargo fmt --check` must be clean before you declare done.
 
-Run the verifying command **in this turn** and read its output before claiming success — see `verification-before-completion`.
+Run the verifying command **in this turn** and read its output before claiming success — see
+`verification-before-completion`.
 
 ## When to invoke a more specific skill
 
@@ -165,14 +196,19 @@ Run the verifying command **in this turn** and read its output before claiming s
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec`
 
-Related platforms: `linux-development` shares this Rust/Diesel/reqwest/Progenitor toolchain (it ships a GTK GUI instead of a TUI). `server-cli-development` owns the API contract — the OpenAPI document this client generates against.
+Related: `linux-development` shares this Rust/Diesel/reqwest/Progenitor toolchain (it ships a GTK GUI
+instead of a TUI). The other two CLI stacks at `apps/cli` are `go-cli-development` (the same Charm
+TUI in Go) and `server-cli-development` (Node; owns the OpenAPI contract in OpenAPI mode).
 
 ## Commit
 
-Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per model + its tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
+Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per model +
+its tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
 
 Rust-specific notes:
 
-- **`Cargo.toml` / `Cargo.lock` bumps go alone.** A dependency change is its own commit (`chore: bump <crate>`); don't bundle it with feature code.
-- **Generated Progenitor output rides with the contract/codegen commit** that produced it — never commit it out of sync with the OpenAPI document.
-- **Don't commit build outputs.** `apps/tui/target/` is gitignored.
+- **`Cargo.toml` / `Cargo.lock` bumps go alone.** A dependency change is its own commit
+  (`chore: bump <crate>`); don't bundle it with feature code.
+- **Generated Progenitor output rides with the contract/codegen commit** that produced it — never
+  commit it out of sync with the OpenAPI document.
+- **Don't commit build outputs.** `apps/cli/target/` is gitignored.
