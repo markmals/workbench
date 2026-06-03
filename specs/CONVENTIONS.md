@@ -254,6 +254,8 @@ A spec and its implementation are **in sync** when:
 
 Drift is detected by `/sdd-drift <platform>` (scaffolded; implementation deferred). The slash command outputs the IDs that fail any of the above.
 
+All three invariants are mechanically checkable — reverse-pointer presence, an mtime comparison, a tagged-test lookup — yet they are still enforced by an agent running `rg` by hand. They are the canonical target for promotion to a real `/sdd-drift` implementation: cheap, deterministic, and cross-platform, exactly the kind of rule that should live in a mechanism rather than in prose an agent must remember. See `.claude/rules/enforcement-hierarchy.md`.
+
 ## Reconciliation
 
 When a single platform's implementation diverges from the spec — usually because it was edited directly to fix a bug or change behavior — the spec and the other platforms must be updated to match. This is what `/sdd-reconcile <platform>` does:
