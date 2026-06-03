@@ -87,26 +87,27 @@ These are scaffolded with intent docs; their internals are agent-driven (no auto
 
 Procedural skills live under `.claude/skills/`. Use them rather than reaching for ad-hoc patterns — they encode the discipline this template expects.
 
-| Skill                            | When to invoke                                                                                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `brainstorming-feature`          | Before starting any new feature or substantial change. Walks narrative → stories → models → view-models → flows → errors.                                        |
-| `writing-user-stories`           | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                                                           |
-| `implementing-a-spec`            | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.                                                   |
-| `test-driven-development`        | When writing any production code. Iron Law: no production code without a failing test first.                                                                     |
-| `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                                                            |
-| `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                    |
-| `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete. |
-| `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.                                                |
-| `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                               |
-| `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                                                                    |
-| `ios-development`                | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing idioms, HIG link list.                     |
-| `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                   |
-| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                                                              |
-| `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                  |
-| `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                  |
-| `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                 |
-| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.                                             |
-| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                                  |
+| Skill                            | When to invoke                                                                                                                                                                                        |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `brainstorming-feature`          | Before starting any new feature or substantial change. Walks narrative → stories → models → view-models → flows → errors.                                                                             |
+| `writing-user-stories`           | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                                                                                                |
+| `implementing-a-spec`            | The default "how to write code" workflow. Per-spec subagent dispatch + three-stage review (spec-compliance, code-quality, adversarial). Used by `/sdd-apply`.                                         |
+| `test-driven-development`        | When writing any production code. Iron Law: no production code without a failing test first. Invariants ("for all") get a property-based test, not just examples.                                     |
+| `adversarial-review`             | The refutational third review stage, after spec-compliance and code-quality pass. Fresh context, different model; assumes the code is broken and tries to break it. Invoked by `implementing-a-spec`. |
+| `verification-before-completion` | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                                                                                                 |
+| `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                                                         |
+| `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete.                                      |
+| `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.                                                                                     |
+| `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                                                                    |
+| `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                                                                                                         |
+| `ios-development`                | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing idioms, HIG link list.                                                          |
+| `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                                                        |
+| `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                                                                                                   |
+| `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                                                       |
+| `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                                                       |
+| `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                                                      |
+| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.                                                                                  |
+| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                                                                       |
 
 These skills are deliberately lighter than the official `superpowers` suite and adapted to this template's spec-driven shape (no plan documents, no branch ceremony, reverse pointers everywhere). Several lift patterns from superpowers; see each `SKILL.md` header for attribution.
 
