@@ -71,15 +71,16 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 
 ## Slash commands
 
-| Command                           | Purpose                                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `/setup`                          | **Run once on a fresh copy.** Asks which platforms + backend you're using and prunes everything for the rest. |
-| `/sdd-apply <spec-id> <platform>` | Regenerate a spec's implementation + tests on a platform.                                                     |
-| `/sdd-verify <platform>`          | Run the platform's behavioral test suite.                                                                     |
-| `/sdd-drift <platform>`           | List spec IDs whose impl is stale, plus impl files with no spec pointer.                                      |
-| `/sdd-reconcile <platform>`       | Bring the spec + other platforms in line with this platform's impl.                                           |
-| `/sdd-cover <spec-id>`            | Show which platforms implement a spec and which tests pass.                                                   |
-| `/sdd-defect <platform> <desc>`   | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow.                               |
+| Command                               | Purpose                                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `/setup`                              | **Run once on a fresh copy.** Asks which platforms + backend you're using and prunes everything for the rest. |
+| `/sdd-apply <spec-id> <platform>`     | Regenerate a spec's implementation + tests on a platform.                                                     |
+| `/sdd-verify <platform>`              | Run the platform's behavioral test suite.                                                                     |
+| `/sdd-drift <platform>`               | List spec IDs whose impl is stale, plus impl files with no spec pointer.                                      |
+| `/sdd-reconcile <platform>`           | Bring the spec + other platforms in line with this platform's impl.                                           |
+| `/sdd-cover <spec-id>`                | Show which platforms implement a spec and which tests pass.                                                   |
+| `/sdd-challenge <spec-id> <platform>` | Adversarially review a spec's implementation on a platform — try to break it. Read-only audit.                |
+| `/sdd-defect <platform> <desc>`       | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow.                               |
 
 These are scaffolded with intent docs; their internals are agent-driven (no automation yet — the agent uses `rg`, `Edit`, `AskUserQuestion`, etc.).
 
