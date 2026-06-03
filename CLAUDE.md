@@ -106,8 +106,9 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `android-development`            | When writing Android code. Compose + Material 3 + Kotlin flow + Room + Ktor idioms.                                                                                                                   |
 | `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                                                       |
 | `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                                                       |
+| `windows-app-control`            | When verifying Windows UI **on Windows**. Wraps the `winapp` CLI (`winapp run` + `winapp ui`). Inert on a macOS-hosted agent — verify at the MSTest view-model layer there.                           |
 | `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                                                      |
-| `node-cli-development`         | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob idioms; single-file exe packaging. Hosts the API in OpenAPI mode.                         |
+| `node-cli-development`           | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob idioms; single-file exe packaging. Hosts the API in OpenAPI mode.                         |
 | `rust-cli-development`           | When writing the **Rust** CLI stack (`apps/cli`). Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish) + Diesel + reqwest + Progenitor idioms.                                 |
 | `go-cli-development`             | When writing the **Go** CLI stack (`apps/cli`). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh + Glamour + database/sql (go-sqlite) + oapi-codegen idioms.                                       |
 
@@ -134,7 +135,7 @@ The site reads markdown directly from `specs/` and `features/` (no copying, no s
     - **Android** — Android Studio / IntelliJ [MCP Server](https://www.jetbrains.com/help/idea/mcp-server.html#external-client-setup). See `android-development`.
     - **Windows** — [RoslynMcpExtension](https://github.com/sailro/RoslynMcpExtension) for the C# code model. See `windows-development`.
 
-For Apple and Android simulator control, see the `ios-simulator-control` and `android-emulator-control` skills (zsh-based recipes around `xcrun simctl`/`idb` and `adb`/`uiautomator`). Windows, Linux, and CLI verification is documented in-skill (no GUI-automation MCP) — each `*-development` skill carries a "Verifying" section.
+For Apple and Android simulator control, see the `ios-simulator-control` and `android-emulator-control` skills (zsh-based recipes around `xcrun simctl`/`idb` and `adb`/`uiautomator`); for Windows, see `windows-app-control` (the `winapp` CLI — Windows-host only, no MCP). Linux and CLI verification is documented in-skill — each `*-development` skill carries a "Verifying" section.
 
 ## Local tooling
 
@@ -153,13 +154,14 @@ All editing is done via your editor of choice. Builds, tests, simulators, and em
 
 ## What lives where
 
-| Question                                           | Where to look                                                      |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                             |
-| "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                    |
-| "What tool/framework does the template use for X?" | `specs/STACK.md`                                                         |
-| "Which platforms is this copy set up for?"         | Run `/setup`, or read the platform rows in `specs/ARCHITECTURE.md` |
-| "What's the web stack?"                            | `specs/STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding)    |
-| "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding)    |
-| "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                     |
-| "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                    |
+| Question                                           | Where to look                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------------- |
+| "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                                |
+| "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                       |
+| "What tool/framework does the template use for X?" | `specs/STACK.md`                                                      |
+| "Which platforms is this copy set up for?"         | Run `/setup`, or read the platform rows in `specs/ARCHITECTURE.md`    |
+| "What's the web stack?"                            | `specs/STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding) |
+| "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding)       |
+| "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                        |
+| "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                       |
+| "Should this rule be a hook, command, or prose?"   | `.claude/rules/enforcement-hierarchy.md`                              |

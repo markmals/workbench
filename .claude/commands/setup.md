@@ -6,7 +6,7 @@ description: First-run setup — choose which platforms this copy ships and prun
 
 This template ships as the **superset** of every platform the stack supports. This command turns it into _just this project_: it asks which platforms and backend you're actually shipping, then deletes the skills, hooks, permissions, and documentation rows for everything else. The file you're reading is the only thing that knows the full matrix — so run this **once, on a fresh copy**, before you scaffold anything.
 
-There is no automation behind this command. You (the agent) drive it with `AskUserQuestion`, `rg`, `Edit`, and `rm`, exactly like the `/sdd-*` commands.
+There is no automation behind this command. You (the agent) drive it with `AskUserQuestion`, `rg`, `Edit`, and `rm`, exactly like the `/sdd-*` commands. The artifacts you prune span the enforcement tiers — hooks, commands, skills, docs; see `.claude/rules/enforcement-hierarchy.md` for what each layer is for.
 
 ## Step 1 — Guard
 
@@ -41,9 +41,9 @@ For every platform **not** selected, remove its artifacts using the map below. W
 | Website         | `website-development`                             | (TS toolchain ⚠️shared)                                               | `stop-lint` `website` line                                          | Website rows; `apps/website` line; Websites STACK section                    |
 | Apple           | `ios-development`, `ios-simulator-control`        | `xcrun simctl …`, `xcodebuild`, `swift-format`, `idb`                 | `tuist-regen`; `stop-lint` `ios`; `block-generated` Tuist/xcodeproj | Apple row; iOS column; Apple STACK section; Xcode MCP bullet                 |
 | Android         | `android-development`, `android-emulator-control` | `adb …`, `emulator`, `./gradlew`, `gradle`, `ktlint`, `ktfmt`         | `stop-lint` Android note                                            | Android row; Android column; Android STACK section; JetBrains MCP bullet     |
-| Windows         | `windows-development`                             | `dotnet`                                                              | `block-generated` `.NET obj/bin`; `stop-lint` Windows note          | Windows row; Windows column; Windows STACK section; Roslyn MCP bullet        |
+| Windows         | `windows-development`, `windows-app-control`      | `dotnet`                                                              | `block-generated` `.NET obj/bin`; `stop-lint` Windows note          | Windows row; Windows column; Windows STACK section; Roslyn MCP bullet        |
 | Linux           | `linux-development`                               | `cargo`,`rustfmt` ⚠️shared-Rust                                       | `stop-lint` `linux`; `block-generated` `target/` ⚠️shared           | Linux row; Linux column; Linux STACK section                                 |
-| CLI: Node stack | `node-cli-development`                          | (TS toolchain ⚠️shared)                                               | — (`cli` lint line stays)                                           | Node CLI table in the `## CLI` STACK section                                 |
+| CLI: Node stack | `node-cli-development`                            | (TS toolchain ⚠️shared)                                               | — (`cli` lint line stays)                                           | Node CLI table in the `## CLI` STACK section                                 |
 | CLI: Rust stack | `rust-cli-development`                            | `cargo`,`rustfmt` ⚠️shared-Rust; `block-generated` `target/` ⚠️shared | —                                                                   | Rust CLI table in the `## CLI` STACK section                                 |
 | CLI: Go stack   | `go-cli-development`                              | `go`,`gofmt`                                                          | —                                                                   | Go CLI table in the `## CLI` STACK section                                   |
 

@@ -27,7 +27,7 @@ Sub-spec defects are platform-local, observed cosmetic / polish / quirk issues t
 
     Do **not** ask for severity, priority, owner, or status — they don't exist in this system. If the user's argument already contains enough detail to infer a field, infer it; don't re-ask.
 
-3. **Offer a screenshot, but don't insist.** If the defect is visual, ask once whether to capture one. If yes, drive the platform via its verification skill (`web-verification`, `ios-simulator-control`, `android-emulator-control`), save the file to `apps/<platform>/.defects/<slug>.png` (slug derived from the title), and reference the path from the entry. If the user declines or is mid-flow, skip — they invoked this command to capture quickly, not to context-switch.
+3. **Offer a screenshot, but don't insist.** If the defect is visual, ask once whether to capture one. If yes, drive the platform via its verification skill (`web-verification`, `ios-simulator-control`, `android-emulator-control`, `windows-app-control`), save the file to `apps/<platform>/.defects/<slug>.png` (slug derived from the title), and reference the path from the entry. If the user declines or is mid-flow, skip — they invoked this command to capture quickly, not to context-switch.
 4. **Append the entry under `## Open`.** Use this shape exactly (omit screenshot/notes lines if empty):
 
     ```markdown
