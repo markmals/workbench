@@ -60,6 +60,21 @@ Every client follows the same conceptual layering, even though the language and 
 - **Domain** is the data shape and invariants. Pure types and validation, no I/O.
 - **Client** is the layer that differs most by platform — see below. The wrapper exists only to expose idiomatic call sites, never to reimplement a protocol.
 
+### The purity boundary
+
+The layering above is also a **verifiability boundary**, and drawing it deliberately is the most consequential structural decision in this template.
+
+- **Pure core** — the Domain layer and the decision logic of the View Models: data shapes, invariants, validation, state transitions, derived values. No I/O, no framework imports, no clock, no network, no persistence. Same inputs always produce the same outputs.
+- **Effectful shell** — the View (rendering), the Client (transport / persistence), identity, background work, and anything else that touches the outside world.
+
+Dependencies point **inward**: the shell depends on the core; the core depends on nothing but other pure code. Effects are pushed to the edges and injected, never reached for from inside the core. This is what `code-quality.md` means by "I/O at the edges; pure logic in the middle" and "the domain layer doesn't import the framework" — stated here as an architectural invariant, not just a style rule.
+
+Why it earns its place:
+
+- **Behavioral tests live in the core**, which is why the same scenarios port across platforms without standing up a runtime — a View Model test substitutes a client interface, not "the universe."
+- **Invariants are property-tested in the core** (see the `test-driven-development` skill): a function that takes data in and returns a result is one a property runner can hammer with thousands of generated inputs; a function that also reads a database is not.
+- If a behavior can't be tested without mocking half the system, the boundary was drawn in the wrong place. Fix the architecture, not the test.
+
 ### Backend modes — pick one at `/setup`
 
 The backend is **not** assumed. A project chooses exactly one of three mutually-exclusive modes; the Client layer realizes the chosen mode idiomatically on each platform. These do **not** combine — it is Convex, _or_ OpenAPI, _or_ nothing.
