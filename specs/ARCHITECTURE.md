@@ -19,16 +19,16 @@ _[NEEDS CLARIFICATION: describe what this product is, who uses it, and what prob
 
 The web app is the **reference implementation** — build features there first; every other client mirrors its behavior idiomatically. Delete the rows your product doesn't ship.
 
-| Platform      | Stack                                                                                                                            | Role                                                        |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Web app       | React + TanStack Start/Router/Query + Tailwind v4 + React Aria                                                                   | **Reference implementation. Built first.**                  |
-| Website       | Astro + React islands + Tailwind v4 + content collections                                                                        | Marketing / content surface. Mostly static.                 |
-| Apple         | Swift + UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData (iOS · iPadOS · macOS · tvOS · watchOS · visionOS) | Native clients. Mirror web behavior.                        |
-| Android       | Kotlin + Jetpack Compose + Material 3 + coroutines/Flow + Room                                                                   | Native client. Mirrors web behavior.                        |
-| Windows       | C# + WinUI 3 + XAML + MVVM Toolkit + EF Core                                                                                     | Native client. Mirrors web behavior.                        |
-| Linux         | Rust + GTK 4 + Adwaita + Relm4 + Diesel                                                                                          | Native client. Mirrors web behavior.                        |
-| CLI           | One platform, one stack (chosen at `/setup`): Node (TS-Rest + Bombshell) · Rust (Clap + charmed_rust) · Go (Cobra/Fang + Charm) | Headless automation + TUI client. One CLI per app. Node/Go host the API in OpenAPI mode. |
-| Backend       | One of — **Convex** · a **TS-Rest / OpenAPI** server · **none** (local-only). Clerk for identity.                                | Chosen at `/setup`. See "Backend modes".                    |
+| Platform | Stack                                                                                                                            | Role                                                                                     |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Web app  | React + TanStack Start/Router/Query + Tailwind v4 + React Aria                                                                   | **Reference implementation. Built first.**                                               |
+| Website  | Astro + React islands + Tailwind v4 + content collections                                                                        | Marketing / content surface. Mostly static.                                              |
+| Apple    | Swift + UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData (iOS · iPadOS · macOS · tvOS · watchOS · visionOS) | Native clients. Mirror web behavior.                                                     |
+| Android  | Kotlin + Jetpack Compose + Material 3 + coroutines/Flow + Room                                                                   | Native client. Mirrors web behavior.                                                     |
+| Windows  | C# + WinUI 3 + XAML + MVVM Toolkit + EF Core                                                                                     | Native client. Mirrors web behavior.                                                     |
+| Linux    | Rust + GTK 4 + Adwaita + Relm4 + Diesel                                                                                          | Native client. Mirrors web behavior.                                                     |
+| CLI      | One platform, one stack (chosen at `/setup`): Node (TS-Rest + Bombshell) · Rust (Clap + charmed_rust) · Go (Cobra/Fang + Charm)  | Headless automation + TUI client. One CLI per app. Node/Go host the API in OpenAPI mode. |
+| Backend  | One of — **Convex** · a **TS-Rest / OpenAPI** server · **none** (local-only). Clerk for identity.                                | Chosen at `/setup`. See "Backend modes".                                                 |
 
 Desktop web apps (web app stack wrapped in **Electron**) are a packaging concern, not a separate platform — the same React/TanStack code ships to the browser and to the desktop shell.
 
@@ -100,16 +100,16 @@ The exact mechanics depend on the chosen backend mode (above):
 
 ## Deployment
 
-| Platform      | Development                                           | Production                                              |
-| ------------- | ----------------------------------------------------- | ------------------------------------------------------- |
-| Web app       | Vite dev + backend dev                                | Cloudflare Workers (static assets + edge)               |
-| Website       | Astro dev + backend dev                               | Cloudflare (static hosting + CDN + image opt.)          |
-| Apple         | Xcode simulators + backend dev                        | TestFlight → App Store                                  |
-| Android       | Android emulator + backend dev                        | Internal track → Play Store                             |
-| Windows       | Local debug + backend dev                             | MSIX / Microsoft Store                                  |
-| Linux         | Local debug + backend dev                             | Flatpak / distribution package                          |
-| CLI           | Local `node` / `cargo run` / `go run` + backend dev   | Single-file executable (per stack); Node/Go can host the Railway API |
-| Backend       | per mode (`convex dev` / local TS-Rest server / none) | per mode (Convex deploy / Railway / —)                  |
+| Platform | Development                                           | Production                                                           |
+| -------- | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| Web app  | Vite dev + backend dev                                | Cloudflare Workers (static assets + edge)                            |
+| Website  | Astro dev + backend dev                               | Cloudflare (static hosting + CDN + image opt.)                       |
+| Apple    | Xcode simulators + backend dev                        | TestFlight → App Store                                               |
+| Android  | Android emulator + backend dev                        | Internal track → Play Store                                          |
+| Windows  | Local debug + backend dev                             | MSIX / Microsoft Store                                               |
+| Linux    | Local debug + backend dev                             | Flatpak / distribution package                                       |
+| CLI      | Local `node` / `cargo run` / `go run` + backend dev   | Single-file executable (per stack); Node/Go can host the Railway API |
+| Backend  | per mode (`convex dev` / local TS-Rest server / none) | per mode (Convex deploy / Railway / —)                               |
 
 The **backend dev** step depends on your mode: `convex dev` (Convex), the local TS-Rest server (OpenAPI), or nothing (no-API). Domains, DNS, CDN, and image optimization are all **Cloudflare**. VPS workloads (the hosted TS-Rest API) run on **Railway**.
 

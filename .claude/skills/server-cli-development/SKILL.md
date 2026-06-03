@@ -11,23 +11,23 @@ This target is special. It is both a **client** (a headless/automation client th
 
 ## Stack at a glance
 
-| Concern             | Choice                                          | First-party docs                                                                                       |
-| ------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Runtime             | Node single-file executable (SEA)               | [single-executable-applications](https://nodejs.org/api/single-executable-applications.html)           |
-| Exe bundler         | tsdown                                          | [tsdown.dev/options/exe](https://tsdown.dev/options/exe)                                               |
-| Arg parser          | Bombshell Args                                  | [github.com/bombshell-dev/args](https://github.com/bombshell-dev/args)                                 |
-| Prompts             | Bombshell Clack                                 | [github.com/bombshell-dev/clack](https://github.com/bombshell-dev/clack)                               |
-| Shell completions   | Bombshell Tab                                   | [github.com/bombshell-dev/tab](https://github.com/bombshell-dev/tab)                                   |
-| Server / RPC / OpenAPI | TS-Rest                                      | [ts-rest.com](https://ts-rest.com)                                                                     |
-| Database            | Drizzle (node:sqlite)                           | [orm.drizzle.team/docs/connect-node-sqlite](https://orm.drizzle.team/docs/connect-node-sqlite)         |
-| Background jobs     | plainjob                                        | [github.com/justplainstuff/plainjob](https://github.com/justplainstuff/plainjob)                       |
-| Networking          | fetch                                           | [MDN Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)                            |
-| Logging             | Evlog                                           | [evlog.dev](https://www.evlog.dev/)                                                                    |
-| Tests               | Vitest                                          | [llms.txt](https://vitest.dev/llms.txt)                                                                |
-| Linter / formatter  | Oxlint + Oxfmt                                  | [llms.txt](https://oxc.rs/llms.txt)                                                                    |
-| Type checker        | tsgo                                            | —                                                                                                      |
-| Package manager     | pnpm                                            | [pnpm.io](https://pnpm.io/)                                                                            |
-| Production          | Single-file executable; Railway VPS for hosted API | [railway.com](https://railway.com/)                                                                 |
+| Concern                | Choice                                             | First-party docs                                                                               |
+| ---------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Runtime                | Node single-file executable (SEA)                  | [single-executable-applications](https://nodejs.org/api/single-executable-applications.html)   |
+| Exe bundler            | tsdown                                             | [tsdown.dev/options/exe](https://tsdown.dev/options/exe)                                       |
+| Arg parser             | Bombshell Args                                     | [github.com/bombshell-dev/args](https://github.com/bombshell-dev/args)                         |
+| Prompts                | Bombshell Clack                                    | [github.com/bombshell-dev/clack](https://github.com/bombshell-dev/clack)                       |
+| Shell completions      | Bombshell Tab                                      | [github.com/bombshell-dev/tab](https://github.com/bombshell-dev/tab)                           |
+| Server / RPC / OpenAPI | TS-Rest                                            | [ts-rest.com](https://ts-rest.com)                                                             |
+| Database               | Drizzle (node:sqlite)                              | [orm.drizzle.team/docs/connect-node-sqlite](https://orm.drizzle.team/docs/connect-node-sqlite) |
+| Background jobs        | plainjob                                           | [github.com/justplainstuff/plainjob](https://github.com/justplainstuff/plainjob)               |
+| Networking             | fetch                                              | [MDN Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)                    |
+| Logging                | Evlog                                              | [evlog.dev](https://www.evlog.dev/)                                                            |
+| Tests                  | Vitest                                             | [llms.txt](https://vitest.dev/llms.txt)                                                        |
+| Linter / formatter     | Oxlint + Oxfmt                                     | [llms.txt](https://oxc.rs/llms.txt)                                                            |
+| Type checker           | tsgo                                               | —                                                                                              |
+| Package manager        | pnpm                                               | [pnpm.io](https://pnpm.io/)                                                                    |
+| Production             | Single-file executable; Railway VPS for hosted API | [railway.com](https://railway.com/)                                                            |
 
 When you need to look something up, fetch the relevant doc with WebFetch. For Vitest and Oxc the `/llms.txt` is the index — it routes you to the page, it is not the content.
 
@@ -135,6 +135,7 @@ The verify-iterate loop is **build → run command → assert output → fix**.
     ```
     Check the printed output and the exit code together — a command that prints an error but exits `0` is a bug.
 - **Command logic:** Vitest against the pure functions in `src/lib/`. `describe("<id>")` per spec ID, `it("[scenario.<id>] ...")` per scenario.
+
     ```ts
     import { describe, it, expect } from "vitest";
     import { createItem } from "./items.create";
@@ -145,6 +146,7 @@ The verify-iterate loop is **build → run command → assert output → fix**.
         });
     });
     ```
+
 - **Server / contract:** test handlers against the TS-Rest contract — assert each handler satisfies the contract's response shape. Tag contract tests with `describe("protocol.<area>.<op>")`.
 
 Run the suite through the platform `mise` task; never claim a pass without reading the output this turn (see `verification-before-completion`).
