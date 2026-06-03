@@ -13,6 +13,8 @@ This template ships as the **superset** of every platform the stack supports —
 
 If you are tempted to create a shared package, write a spec instead.
 
+**One product, or several related ones.** The default — and simplest — shape is a single product projected across platforms: the `apps/<platform>/` layout below, every client a native realization of the same specs. A monorepo may also hold **several logically-related apps**, not just platform projections of one product — distinct apps that share specs (a common domain, cross-cutting conventions) and, when they run on the same stack, code. Disambiguate them by **name**, not platform alone: a second CLI is not a second per-language folder bolted onto `apps/cli`, it is a second named app with its own platform projections, and `web` stays each app's reference platform. The cross-platform rule is unchanged either way — **platform projections of the same app share no code**; they share specs and reconcile through regeneration. Ordinary library reuse _between_ same-stack related apps is fine; it is cross-_platform_ sharing of one app's behavior that this template refuses.
+
 **Read these before doing anything substantial:**
 
 1. `specs/CONVENTIONS.md` — spec format, ID taxonomy, frontmatter, reverse pointers, deviation marker, drift detection. **This is the contract.**
