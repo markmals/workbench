@@ -2,7 +2,7 @@
 
 A spec-driven multiplatform app harness. Specs are the source of truth; every platform implements them natively. The reference platform is **web** (React + TanStack Start + Convex); other clients — websites, Apple, Android, Windows, Linux, and a CLI (Node, Rust, or Go) — mirror its behavior idiomatically. The backend is **Convex** (database, file storage, cron, queues, realtime) with **Clerk** for identity.
 
-This template ships as the **superset** of every platform the stack supports — see [`STACK.md`](STACK.md) for the full toolchain catalog. On a fresh copy, run **`/setup`** first: it asks which platforms your product actually uses and prunes the skills, hooks, permissions, and docs for the rest. Whatever you keep, the `apps/` and `services/` directories are not committed — you scaffold each one when you start that platform's implementation. The harness assumes (and the per-platform skills are written for) the layout below.
+This template ships as the **superset** of every platform the stack supports — see [`STACK.md`](specs/STACK.md) for the full toolchain catalog. On a fresh copy, run **`/setup`** first: it asks which platforms your product actually uses and prunes the skills, hooks, permissions, and docs for the rest. Whatever you keep, the `apps/` and `services/` directories are not committed — you scaffold each one when you start that platform's implementation. The harness assumes (and the per-platform skills are written for) the layout below.
 
 @.claude/rules/code-quality.md
 @.claude/rules/commit-discipline.md
@@ -20,7 +20,7 @@ If you are tempted to create a shared package, write a spec instead.
 1. `specs/CONVENTIONS.md` — spec format, ID taxonomy, frontmatter, reverse pointers, deviation marker, drift detection. **This is the contract.**
 2. `specs/ARCHITECTURE.md` — top-level layering, data flow, deployment targets, the contract-first backend model.
 3. `specs/DESIGN_SYSTEM.md` — design tokens, component vocabulary, parity rules across platforms.
-4. `STACK.md` — the canonical toolchain catalog: every tool, framework, and service this template knows how to wire up, organized by layer.
+4. `specs/STACK.md` — the canonical toolchain catalog: every tool, framework, and service this template knows how to wire up, organized by layer.
 5. The platform `CLAUDE.md` for whichever app you're working on (`apps/<platform>/CLAUDE.md` or `services/convex/CLAUDE.md`) once you've scaffolded it.
 
 ### Three places work comes from
@@ -46,10 +46,9 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 │   ├── skills/                        ← procedural workflows (writing-user-stories, simulator control)
 │   └── templates/                     ← canonical templates for new features and specs
 ├── .mcp.json                          ← project MCP servers (Chrome DevTools)
-├── STACK.md                           ← canonical toolchain catalog (rendered in docs)
-├── docs/                              ← VitePress site rendering specs/, features/, STACK
+├── docs/                              ← VitePress site rendering specs/ and features/
 │   └── index.md                       ← home page (URL-rewritten to /)
-├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM)
+├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM, STACK)
 ├── features/                          ← (you create) feature-scoped specs as <NNNN>-<slug>/
 ├── apps/                              ← (you create) platform implementations
 │   ├── web/                           ←   React + TanStack Start + Convex (reference)
@@ -158,9 +157,9 @@ All editing is done via your editor of choice. Builds, tests, simulators, and em
 | -------------------------------------------------- | ------------------------------------------------------------------ |
 | "What's a spec ID look like?"                      | `specs/CONVENTIONS.md`                                             |
 | "How do I add a new feature?"                      | `specs/CONVENTIONS.md` → "Adding a new feature"                    |
-| "What tool/framework does the template use for X?" | `STACK.md`                                                         |
+| "What tool/framework does the template use for X?" | `specs/STACK.md`                                                         |
 | "Which platforms is this copy set up for?"         | Run `/setup`, or read the platform rows in `specs/ARCHITECTURE.md` |
-| "What's the web stack?"                            | `STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding)    |
+| "What's the web stack?"                            | `specs/STACK.md` → Web Apps; `apps/web/CLAUDE.md` (after scaffolding)    |
 | "How do I run iOS tests?"                          | `apps/ios/mise.toml` + `apps/ios/CLAUDE.md` (after scaffolding)    |
 | "How do I write a user story?"                     | `.claude/skills/writing-user-stories/SKILL.md`                     |
 | "How do I take a screenshot of the iOS simulator?" | `.claude/skills/ios-simulator-control/SKILL.md`                    |

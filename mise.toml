@@ -28,7 +28,7 @@ pnpm = "11"
 
 [env]
 # VitePress tooling installs at the repo root so markdown rendered via `srcDir`
-# (specs/, features/, STACK.md) can resolve vue/vitepress during the build.
+# (specs/ and features/) can resolve vue/vitepress during the build.
 _.path = ['{{config_root}}/node_modules/.bin']
 
 [hooks]

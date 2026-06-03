@@ -12,7 +12,7 @@ This template assumes you will work with [Claude Code](https://claude.com/claude
 
 1. Click **"Use this template"** on GitHub to create your repo.
 2. Clone it locally and open it in your editor.
-3. **Run [`/setup`](.claude/commands/setup.md) in Claude.** This template ships as the _superset_ of every platform the stack supports (see [`STACK.md`](STACK.md)). `/setup` asks which platforms and backend you're actually shipping and prunes the skills, hooks, permissions, and docs for everything else — turning the superset into just your project.
+3. **Run [`/setup`](.claude/commands/setup.md) in Claude.** This template ships as the _superset_ of every platform the stack supports (see [`STACK.md`](specs/STACK.md)). `/setup` asks which platforms and backend you're actually shipping and prunes the skills, hooks, permissions, and docs for everything else — turning the superset into just your project.
 4. Customize the seed content:
     - [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md) — fill in the `[NEEDS CLARIFICATION]` product overview and out-of-scope sections.
     - [`specs/DESIGN_SYSTEM.md`](specs/DESIGN_SYSTEM.md) — adjust tokens once branding is settled.
@@ -114,12 +114,11 @@ The discipline is enforced by hooks: `block-generated.sh` refuses edits to gener
 .
 ├── CLAUDE.md                          ← orientation doc Claude loads every session
 ├── README.md                          ← this file (orientation for humans)
-├── STACK.md                           ← full toolchain catalog (the superset /setup prunes from)
 ├── .env.schema                        ← Varlock environment contract
 ├── .mcp.json                          ← project-level MCP servers (Chromium DevTools)
 ├── .claude/                           ← everything Claude-shaped (see catalog below)
-├── docs/                              ← VitePress site rendering specs/, features/, STACK
-├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM)
+├── docs/                              ← VitePress site rendering specs/ and features/
+├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM, STACK)
 ├── mise.toml                          ← root task runner (docs:* + per-platform orchestration)
 │
 ├── features/                          ← (you create) feature-scoped specs as <NNNN>-<slug>/
@@ -146,7 +145,7 @@ Everything below is what makes this template "Claude-native." If you copied just
 | Path                         | Purpose                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`CLAUDE.md`](CLAUDE.md)     | Loaded on every Claude Code session. The top-level orientation: how the repo works, where to read first, slash command index, skill index. `@includes` the rule files below so they're part of every session.                                                                                                                                |
-| [`STACK.md`](STACK.md)       | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                                                                                                                                                        |
+| [`STACK.md`](specs/STACK.md)       | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                                                                                                                                                        |
 | [`.env.schema`](.env.schema) | [Varlock](https://varlock.dev) environment contract: the committed, typed declaration of the project's env vars. Real values live in gitignored `.env` / `.env.local`.                                                                                                                                                                       |
 | [`.mcp.json`](.mcp.json)     | Project-level MCP server config. Registers the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) pointed at **Chromium** (not Chrome) in `--isolated` mode for web visual verification. Per-platform IDE bridges (Xcode, Android Studio/JetBrains, Roslyn) are configured in **user/local** MCP config, not here. |
 | `apps/<platform>/CLAUDE.md`  | Per-platform orientation (created when you scaffold the platform). Stack idioms, test commands, where reverse pointers go in that language.                                                                                                                                                                                                  |

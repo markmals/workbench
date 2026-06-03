@@ -46,7 +46,7 @@ const config = defineConfig({
         nav: [
             { text: "Specs", link: "/specs/CONVENTIONS", activeMatch: "/specs/" },
             { text: "Features", link: sidebar.firstFeatureLink ?? "/", activeMatch: "/features/" },
-            { text: "Stack", link: "/STACK" },
+            { text: "Stack", link: "/specs/STACK" },
         ],
         sidebar: {
             "/specs/": sidebar.specs,

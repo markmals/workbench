@@ -7,7 +7,7 @@ kind: architecture
 
 > **This is a template.** Replace the placeholder content below with the architecture for this product. Sections are intentionally short — this document is for orientation, not exhaustive reference.
 >
-> This template ships as the **superset** of every platform the stack supports. Run `/setup` on a fresh copy to declare which targets your product actually uses and prune the rest. The full toolchain catalog lives in [STACK.md](../STACK.md).
+> This template ships as the **superset** of every platform the stack supports. Run `/setup` on a fresh copy to declare which targets your product actually uses and prune the rest. The full toolchain catalog lives in [STACK.md](STACK.md).
 
 ## Product overview
 

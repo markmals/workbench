@@ -1,6 +1,6 @@
 # The VitePress docs tooling installs at the repo root (not under docs/) so that
 # `vue` and `vitepress` are resolvable from markdown rendered via VitePress's
-# `srcDir` — i.e. specs/, features/, and the root STACK.md. Installing only
+# `srcDir` — i.e. specs/ (including STACK.md) and features/. Installing only
 # inside docs/ left those files unable to resolve `vue/server-renderer` during
 # the production SSR bundle.
 #

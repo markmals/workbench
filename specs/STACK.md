@@ -16,7 +16,7 @@ Spec-driven-development multiplatform application toolkit powered by Claude.
 | Agent instructions     | `CLAUDE.md`                                                                                        |
 | Acceptance criteria    | Gherkin-in-markdown                                                                                |
 
-API contracts are mode-dependent and mutually exclusive — a project uses the Convex schema **or** an OpenAPI document **or** neither. See [ARCHITECTURE.md](specs/ARCHITECTURE.md) → "Backend modes".
+API contracts are mode-dependent and mutually exclusive — a project uses the Convex schema **or** an OpenAPI document **or** neither. See [ARCHITECTURE.md](ARCHITECTURE.md) → "Backend modes".
 
 ## Quality
 
@@ -60,7 +60,7 @@ API contracts are mode-dependent and mutually exclusive — a project uses the C
 
 ## Platform
 
-The backend is one of three mutually-exclusive modes (**Convex** · **OpenAPI** · **none**) chosen at `/setup` — see [ARCHITECTURE.md](specs/ARCHITECTURE.md) → "Backend modes". The catalog below is the **Convex** backend; identity is **Clerk** in any remote mode.
+The backend is one of three mutually-exclusive modes (**Convex** · **OpenAPI** · **none**) chosen at `/setup` — see [ARCHITECTURE.md](ARCHITECTURE.md) → "Backend modes". The catalog below is the **Convex** backend; identity is **Clerk** in any remote mode.
 
 | Concern              | Choice                                                                        |
 | -------------------- | ----------------------------------------------------------------------------- |
