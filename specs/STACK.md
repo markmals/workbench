@@ -273,6 +273,7 @@ Targets: iOS · iPadOS · macOS · tvOS · watchOS · visionOS.
 | OpenAPI client     | [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/quickstarts/dotnet)                                                            |
 | Push notifications | [Windows App SDK](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/app-notifications-quickstart) |
 | Test runner        | [MSTest](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-mstest)                                        |
+| UI automation      | [winapp CLI](https://github.com/microsoft/winappcli) (`winapp run` + `winapp ui`; Windows host only — see `windows-app-control`)       |
 | Formatter          | [dotnet format](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-format)                                                     |
 | Linter             | [StyleCop](https://github.com/DotNetAnalyzers/StyleCopAnalyzers)                                                                       |
 | Package manager    | [NuGet](https://www.nuget.org/)                                                                                                        |
