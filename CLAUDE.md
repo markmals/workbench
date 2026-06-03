@@ -108,7 +108,7 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                                                       |
 | `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                                                       |
 | `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                                                      |
-| `server-cli-development`         | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob idioms; single-file exe packaging. Hosts the API in OpenAPI mode.                         |
+| `node-cli-development`         | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob idioms; single-file exe packaging. Hosts the API in OpenAPI mode.                         |
 | `rust-cli-development`           | When writing the **Rust** CLI stack (`apps/cli`). Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish) + Diesel + reqwest + Progenitor idioms.                                 |
 | `go-cli-development`             | When writing the **Go** CLI stack (`apps/cli`). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh + Glamour + database/sql (go-sqlite) + oapi-codegen idioms.                                       |
 

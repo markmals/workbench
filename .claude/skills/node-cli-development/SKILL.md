@@ -1,13 +1,13 @@
 ---
-name: server-cli-development
-description: Use when writing or modifying the Node server/CLI under `apps/cli/`. Covers TS-Rest contracts + Bombshell (args/clack/tab) + Drizzle + plainjob + Evlog idioms and single-file-executable packaging with tsdown. Complementary to `implementing-a-spec` (process).
+name: node-cli-development
+description: Use when writing or modifying the Node CLI stack under `apps/cli/`. Covers TS-Rest contracts + Bombshell (args/clack/tab) + Drizzle + plainjob + Evlog idioms and single-file-executable packaging with tsdown. Complementary to `implementing-a-spec` (process).
 ---
 
-# Server / CLI Development
+# Node CLI Development
 
-This skill covers **how to write Node server/CLI code** in this repo. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For _what to build_, see the spec.
+This skill covers **how to write the CLI when its stack is Node**. The CLI is one platform with a choice of stack — Node, Rust, or Go — picked at `/setup`; this is the **Node** stack, and it lives at `apps/cli/`. For the _workflow_ of implementing a spec, see `implementing-a-spec`. For _what to build_, see the spec.
 
-This target is special. It is both a **client** (a headless/automation client that consumes the API) and the **host of the API itself**. The web app is the reference implementation for behavior; this target owns the wire contract every native client generates against.
+The Node stack is distinctive among the CLI stacks: it is both a **client** (a headless/automation client that consumes the API) and a **host of the API itself** (a TS-Rest web server). Hosting a server isn't unique to Node — the Go stack can host via oapi-codegen — but it's the Node stack's native shape. The web app is the reference implementation for behavior; in OpenAPI mode this stack owns the wire contract every native client generates against.
 
 ## Stack at a glance
 
@@ -157,14 +157,14 @@ Run the suite through the platform `mise` task; never claim a pass without readi
 - About to claim work is done? → `verification-before-completion`
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec`
-- Writing the high-performance TUI client (Rust)? → `rust-cli-development`
+- Building the CLI in Rust or Go instead? → `rust-cli-development` / `go-cli-development`
 - Working on the reference web app? → `web-development`
 
 ## Commit
 
 Land focused, atomic commits as the work hits natural boundaries — typically per spec ID, per command + its pure-logic tests, or per cohesive refactor. See `.claude/rules/commit-discipline.md`.
 
-Server/CLI-specific notes:
+Node-CLI-specific notes:
 
 - **Contract changes go alone.** An edit to `src/contract/` ripples to every generated client — it belongs in its own commit (`feat: add protocol.items.create endpoint`) so the downstream regeneration is reviewable in isolation. Don't bundle it with handler or command code.
 - **Drizzle schema/migration changes are separate** from the queries that consume them.

@@ -211,7 +211,7 @@ Run the verifying command **in this turn** and read its output before claiming s
 - Implementing a spec end-to-end? → `implementing-a-spec`
 
 Related: the other two CLI stacks at `apps/cli` are `rust-cli-development` (the same Charm TUI in Rust
-via charmed_rust) and `server-cli-development` (Node; the TS-Rest stack that owns the OpenAPI contract
+via charmed_rust) and `node-cli-development` (the Node/TS-Rest stack that owns the OpenAPI contract
 in OpenAPI mode).
 
 ## Commit

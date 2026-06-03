@@ -198,7 +198,7 @@ Run the verifying command **in this turn** and read its output before claiming s
 
 Related: `linux-development` shares this Rust/Diesel/reqwest/Progenitor toolchain (it ships a GTK GUI
 instead of a TUI). The other two CLI stacks at `apps/cli` are `go-cli-development` (the same Charm
-TUI in Go) and `server-cli-development` (Node; owns the OpenAPI contract in OpenAPI mode).
+TUI in Go) and `node-cli-development` (the Node/TS-Rest stack; owns the OpenAPI contract in OpenAPI mode).
 
 ## Commit
 
