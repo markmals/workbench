@@ -1,11 +1,11 @@
 ---
 name: implementing-a-spec
-description: Use when implementing a spec on a target platform — `/sdd-apply <id> <platform>`. Dispatches a fresh subagent per spec, runs spec-compliance review then code-quality review, and updates TodoWrite as it goes. This is the default "how to write code" workflow for this repo.
+description: Use when implementing a spec on a target platform — `/sdd-apply <id> <platform>`. Dispatches a fresh subagent per spec, runs spec-compliance review, code-quality review, then an adversarial refutational pass, and updates TodoWrite as it goes. This is the default "how to write code" workflow for this repo.
 ---
 
 # Implementing a Spec
 
-Each spec ID is a unit of work. To implement one on a target platform, you dispatch a fresh subagent that writes failing tests, makes them pass, attaches a `// SPEC: <id>` reverse pointer, then submits for two-stage review (spec compliance, then code quality).
+Each spec ID is a unit of work. To implement one on a target platform, you dispatch a fresh subagent that writes failing tests, makes them pass, attaches a `// SPEC: <id>` reverse pointer, then submits for review: spec compliance, code quality, then an adversarial pass that assumes the code is broken and tries to break it (the `adversarial-review` skill).
 
 Lifts patterns from superpowers' subagent-driven-development. Adapted to our spec layer, our reverse-pointer convention, and the fact that we don't use feature branches.
 
@@ -25,7 +25,7 @@ Lifts patterns from superpowers' subagent-driven-development. Adapted to our spe
 
 ## Core principle
 
-**Fresh subagent per spec + two-stage review = high quality, fast iteration.**
+**Fresh subagent per spec + layered review (confirm, then refute) = high quality, fast iteration.**
 
 The controller (you) does:
 
@@ -45,6 +45,7 @@ The reviewer subagent(s) do:
 
 - Spec compliance: does the code satisfy the spec? Are reverse pointers correct?
 - Code quality: is the code idiomatic, well-named, free of duplication?
+- Adversarial: assume it's broken and try to break it — un-enumerated edges, aliasing/mutation/concurrency/resource bugs, tests that would pass even if the behavior were wrong. See the `adversarial-review` skill.
 
 ## Process
 
@@ -61,12 +62,15 @@ For each spec ID:
      - Reviewer ✅? Continue.
   6. Dispatch code-quality reviewer
      - Reviewer finds issues? Implementer fixes, re-review.
-     - Reviewer ✅? Mark task complete in TodoWrite.
-  7. Move to next spec.
+     - Reviewer ✅? Continue.
+  7. Dispatch adversarial reviewer (adversarial-review skill — fresh context, different model)
+     - VERDICT: BROKEN? Implementer fixes each defect; re-run from step 5.
+     - VERDICT: CONVERGED? Mark task complete in TodoWrite.
+  8. Move to next spec.
 
 When all specs done:
-  8. Run /sdd-verify <platform> to confirm tests pass.
-  9. Commit at the natural boundary (see "Commit" below), then surface results to user.
+  9. Run /sdd-verify <platform> to confirm tests pass.
+  10. Commit at the natural boundary (see "Commit" below), then surface results to user.
 ```
 
 ## Step-by-step
@@ -149,7 +153,24 @@ Instructions:
 
 Implementer fixes Important issues. Nice-to-have is the user's call.
 
-### 7. Verify completion
+### 7. Dispatch the adversarial reviewer
+
+The code now satisfies the spec and reads cleanly. That is exactly when confirmatory review stops looking and real defects hide. Run the `adversarial-review` skill as the final stage.
+
+- **Fresh context, different model.** Dispatch a new subagent that never saw the code get built. Default it to `model: "opus"` even though the earlier reviewers ran on `sonnet` — the cognitive diversity is the point. Tell it to read `.claude/skills/adversarial-review/SKILL.md` and apply it.
+- Provide the full spec text and the files the implementer touched (paste them, don't say "go read").
+- It returns the skill's output format: DEFECTS / SUSPICIONS / SPEC GAPS / VERDICT.
+
+Handle the verdict:
+
+- **BROKEN** → the implementer subagent fixes each defect. Re-run spec-compliance and code-quality if the fix was substantial, then re-run the adversary. Loop.
+- **SUSPICIONS** → verify each before acting; drop the ones that don't reproduce. Never fix a suspicion blind.
+- **SPEC GAPS** → surface to the user and route to the spec via a spec edit, not a silent implementer change.
+- **CONVERGED** → the adversary is reduced to nitpicks or inventing problems. Done. Mark the task complete in TodoWrite.
+
+Loop until VERDICT is CONVERGED.
+
+### 8. Verify completion
 
 After all spec implementations are done:
 
@@ -163,9 +184,10 @@ Use the `verification-before-completion` skill before claiming the work is compl
 
 - **Never dispatch parallel implementer subagents on the same files.** They'll conflict.
 - **Never let the implementer commit.** It works mid-task; the controller commits at the natural boundary once reviews pass.
-- **Never skip reviews.** The "two stages" are non-negotiable.
-- **Never let the implementer self-review replace actual review.** Both are needed.
+- **Never skip reviews.** All three stages — spec-compliance, code-quality, adversarial — are non-negotiable.
+- **Never let the implementer self-review replace actual review.** All are needed.
 - **Never start code-quality review before spec-compliance is ✅.** Wrong order.
+- **Never run the adversarial pass before both confirmatory reviews are ✅.** Refuting code that doesn't match the spec yet spends the adversary on the wrong layer.
 
 ## Commit
 
@@ -182,8 +204,9 @@ Fixups from review (either spec-compliance or code-quality) belong in the same c
 
 ## Model selection
 
-- Default: `sonnet` for implementer and both reviewers.
-- Escalate to `opus` only if the subagent reports `BLOCKED` due to reasoning, not context.
+- Default: `sonnet` for the implementer and both confirmatory reviewers.
+- **Adversarial reviewer: `opus` by default** — cognitive diversity against the Sonnet-built code is the point of the stage. A different model family is better still when one is available.
+- Escalate the implementer to `opus` only if the subagent reports `BLOCKED` due to reasoning, not context.
 - Never `haiku` — it's been observed to improvise destructive recovery (e.g. `git reset --hard`) when confused.
 
 ## Skip dispatch entirely when
@@ -201,6 +224,7 @@ Just do it inline. A failed trivial dispatch is more expensive than the work.
 
 - `brainstorming-feature` — produces the spec(s) this skill implements
 - `test-driven-development` — the discipline subagents follow inside their dispatch
+- `adversarial-review` — the third review stage; the refutational pass that runs after both confirmatory reviews
 - `verification-before-completion` — the gate before claiming a spec is done
 - `systematic-debugging` — when an implementer gets stuck on a confusing failure
 
