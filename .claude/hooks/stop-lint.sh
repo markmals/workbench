@@ -26,9 +26,8 @@ $output"
 run_lint "web"     "apps/web"      "lint"
 run_lint "website" "apps/website"  "lint"
 run_lint "convex"  "services/convex" "lint"
-run_lint "cli"     "apps/cli"      "lint"
+run_lint "cli"     "apps/cli"      "lint"   # stack-dependent: oxlint | clippy | go vet
 run_lint "ios"     "apps/ios"      "l"
-run_lint "tui"     "apps/tui"      "lint"   # cargo clippy
 run_lint "linux"   "apps/linux"    "lint"   # cargo clippy
 # Android (Gradle) and Windows (dotnet) lint are slow. Run
 # `mise run -C apps/android lint` / `mise run -C apps/windows lint` manually before merge.

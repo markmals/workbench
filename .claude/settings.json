@@ -64,6 +64,8 @@
             "Bash(swift-format:*)",
             "Bash(cargo:*)",
             "Bash(rustfmt:*)",
+            "Bash(go:*)",
+            "Bash(gofmt:*)",
             "Bash(dotnet:*)",
             "Bash(astro:*)",
             "Bash(varlock:*)",
