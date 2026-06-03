@@ -1,6 +1,6 @@
 # Spec-Driven Development Template
 
-A spec-driven multiplatform app harness. Specs are the source of truth; every platform implements them natively. The reference platform is **web** (React + TanStack Start + Convex); other clients — websites, Apple, Android, Windows, Linux, and Node / Rust CLIs — mirror its behavior idiomatically. The backend is **Convex** (database, file storage, cron, queues, realtime) with **Clerk** for identity.
+A spec-driven multiplatform app harness. Specs are the source of truth; every platform implements them natively. The reference platform is **web** (React + TanStack Start + Convex); other clients — websites, Apple, Android, Windows, Linux, and a CLI (Node, Rust, or Go) — mirror its behavior idiomatically. The backend is **Convex** (database, file storage, cron, queues, realtime) with **Clerk** for identity.
 
 This template ships as the **superset** of every platform the stack supports — see [`STACK.md`](STACK.md) for the full toolchain catalog. On a fresh copy, run **`/setup`** first: it asks which platforms your product actually uses and prunes the skills, hooks, permissions, and docs for the rest. Whatever you keep, the `apps/` and `services/` directories are not committed — you scaffold each one when you start that platform's implementation. The harness assumes (and the per-platform skills are written for) the layout below.
 
@@ -58,8 +58,7 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 │   ├── android/                       ←   Kotlin / Jetpack Compose / Room
 │   ├── windows/                       ←   C# / WinUI 3 / EF Core
 │   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
-│   ├── cli/                           ←   Node single-file exe / TS-Rest / Bombshell
-│   └── tui/                           ←   Rust / Clap + Ratatui (high-performance CLI)
+│   └── cli/                           ←   the CLI — one stack: Node (TS-Rest) · Rust (charmed_rust) · Go (Charm)
 └── services/                          ← (you create) backend services
     └── convex/                        ←   Convex backend (schema is the data-layer protocol) + Clerk auth
 ```
@@ -109,8 +108,9 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `android-emulator-control`       | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                                                       |
 | `windows-development`            | When writing Windows code. C# + WinUI 3 + XAML + MVVM Toolkit + EF Core idioms.                                                                                                                       |
 | `linux-development`              | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel idioms.                                                                                                                      |
-| `server-cli-development`         | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob idioms; single-file executable packaging.                                                                                  |
-| `rust-cli-development`           | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                                                                       |
+| `server-cli-development`         | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob idioms; single-file exe packaging. Hosts the API in OpenAPI mode.                  |
+| `rust-cli-development`           | When writing the **Rust** CLI stack (`apps/cli`). Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish) + Diesel + reqwest + Progenitor idioms.                          |
+| `go-cli-development`             | When writing the **Go** CLI stack (`apps/cli`). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh + Glamour + database/sql (go-sqlite) + oapi-codegen idioms.                                |
 
 These skills are deliberately lighter than the official `superpowers` suite and adapted to this template's spec-driven shape (no plan documents, no branch ceremony, reverse pointers everywhere). Several lift patterns from superpowers; see each `SKILL.md` header for attribution.
 

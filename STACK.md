@@ -131,39 +131,90 @@ The backend is one of three mutually-exclusive modes (**Convex** · **OpenAPI** 
 | Edge hosting       | [Cloudflare](https://workers.cloudflare.com/)                               |
 | VPS hosting        | [Railway](https://railway.com/deploy/bun-starter)                           |
 
-## Server CLI
+## CLI
+
+The CLI is **one platform with a choice of stack** — Node, Rust, or Go — chosen at `/setup` and mutually exclusive, the way a backend mode is. One CLI per app: a second CLI is a second app, not a second folder (see [CLAUDE.md](CLAUDE.md) → "One product, or several related ones"). The catalog documents all three stacks; a project keeps one and prunes the rest. Whichever you pick lives at `apps/cli`.
+
+- **Node** — headless automation; in OpenAPI mode the TS-Rest server also **hosts** the backend.
+- **Rust** — a high-performance binary with a rich TUI via [charmed_rust](https://github.com/dicklesworthstone/charmed_rust), a Rust port of the Charm ecosystem.
+- **Go** — a single binary with a rich TUI via the [Charm](https://charm.sh/) ecosystem; in OpenAPI mode it can host the backend via [`oapi-codegen`](https://github.com/oapi-codegen/oapi-codegen).
+
+### Node CLI
 
 | Concern                 | Choice                                                                                                                                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Single-file executables | [Node](https://nodejs.org/api/single-executable-applications.html)                                                                                                                              |
-| Bundler                 | [tsdown](https://tsdown.dev/options/exe)                                                                                                                                                        |
-| Argument parser         | [Bombshell Args](https://github.com/bombshell-dev/args)                                                                                                                                         |
-| Prompts                 | [Bombshell Clack](https://github.com/bombshell-dev/clack)                                                                                                                                       |
-| Completions             | [Bombshell Tab](https://github.com/bombshell-dev/tab)                                                                                                                                           |
-| Server                  | [TS-Rest](https://ts-rest.com/server/serverless/fetch-runtimes)                                                                                                                                 |
-| RPC                     | [TS-Rest](https://ts-rest.com/client/fetch)                                                                                                                                                     |
-| OpenAPI                 | [TS-Rest](https://ts-rest.com/openapi)                                                                                                                                                          |
-| Database                | [Drizzle](https://orm.drizzle.team/docs/connect-node-sqlite) + [`node:sqlite`](https://nodejs.org/api/sqlite.html)                                                                              |
-| Networking              | [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)                                                                                                                             |
-| Logging                 | [Evlog](https://www.evlog.dev/)                                                                                                                                                                 |
-| Background jobs         | [plainjob](https://github.com/justplainstuff/plainjob)                                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-file executables | [Node](https://nodejs.org/api/single-executable-applications.html)                                                                                                                            |
+| Bundler                 | [tsdown](https://tsdown.dev/options/exe)                                                                                                                                                       |
+| Argument parser         | [Bombshell Args](https://github.com/bombshell-dev/args)                                                                                                                                        |
+| Prompts                 | [Bombshell Clack](https://github.com/bombshell-dev/clack)                                                                                                                                      |
+| Completions             | [Bombshell Tab](https://github.com/bombshell-dev/tab)                                                                                                                                          |
+| Server                  | [TS-Rest](https://ts-rest.com/server/serverless/fetch-runtimes)                                                                                                                                |
+| RPC                     | [TS-Rest](https://ts-rest.com/client/fetch)                                                                                                                                                    |
+| OpenAPI                 | [TS-Rest](https://ts-rest.com/openapi)                                                                                                                                                         |
+| Database                | [Drizzle](https://orm.drizzle.team/docs/connect-node-sqlite) + [`node:sqlite`](https://nodejs.org/api/sqlite.html)                                                                            |
+| Networking              | [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)                                                                                                                           |
+| Logging                 | [Evlog](https://www.evlog.dev/)                                                                                                                                                                |
+| Background jobs         | [plainjob](https://github.com/justplainstuff/plainjob)                                                                                                                                         |
 | Distribution            | [Homebrew](https://brew.sh/), [Mise](https://mise.jdx.dev/), [apt](<https://en.wikipedia.org/wiki/APT_(software)>), [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) |
 
-## High-Performance CLI
+### Rust CLI
+
+Full parity with the Go stack via [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) — a Rust port of the Charm ecosystem (requires Rust 1.85+, edition 2024).
 
 | Concern                 | Choice                                                                                                                                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Single-file executables | [Rust](https://rust-lang.org/)                                                                                                                                                                  |
-| Argument parser         | [Clap](https://github.com/clap-rs/clap)                                                                                                                                                         |
-| State management        | [Tears](https://github.com/akiomik/tears)                                                                                                                                                       |
-| Views                   | [Ratatui](https://github.com/ratatui/ratatui)                                                                                                                                                   |
-| Database                | [Diesel](https://diesel.rs/) (SQLite)                                                                                                                                                           |
-| Networking              | [reqwest](https://github.com/seanmonstar/reqwest)                                                                                                                                               |
-| OpenAPI client          | [Progenitor](https://github.com/oxidecomputer/progenitor)                                                                                                                                       |
-| Test runner             | [Cargo Test](https://doc.rust-lang.org/cargo/commands/cargo-test.html)                                                                                                                          |
-| Formatter               | [rustfmt](https://github.com/rust-lang/rustfmt)                                                                                                                                                 |
-| Linter                  | [Clippy](https://doc.rust-lang.org/stable/clippy/usage.html)                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-file executables | [Rust](https://rust-lang.org/)                                                                                                                                                                 |
+| Argument parser         | [Clap](https://github.com/clap-rs/clap)                                                                                                                                                        |
+| State management        | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (bubbletea)                                                                                                                  |
+| Views                   | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (bubbletea + bubbles)                                                                                                        |
+| Styling                 | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (lipgloss)                                                                                                                   |
+| Prompts/forms           | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (huh)                                                                                                                        |
+| Markdown rendering      | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (glamour)                                                                                                                    |
+| Animations              | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (harmonica)                                                                                                                  |
+| SSH app framework       | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (wish)                                                                                                                       |
+| Networking              | [reqwest](https://github.com/seanmonstar/reqwest)                                                                                                                                              |
+| Serialization           | [serde_json](https://github.com/serde-rs/json)                                                                                                                                                 |
+| Logging                 | [charmed_rust](https://github.com/dicklesworthstone/charmed_rust) (charmed_log)                                                                                                                |
+| Embedded assets         | [rust-embed](https://github.com/pyrossh/rust-embed)                                                                                                                                            |
+| Database interface      | [Diesel](https://diesel.rs/) (SQLite)                                                                                                                                                          |
+| OpenAPI client          | [Progenitor](https://github.com/oxidecomputer/progenitor)                                                                                                                                      |
+| Tests                   | [cargo test](https://doc.rust-lang.org/cargo/commands/cargo-test.html)                                                                                                                         |
+| Snapshot tests          | [insta](https://insta.rs/)                                                                                                                                                                     |
+| Formatter               | [rustfmt](https://github.com/rust-lang/rustfmt)                                                                                                                                                |
+| Linter/static checks    | [Clippy](https://doc.rust-lang.org/stable/clippy/usage.html)                                                                                                                                   |
+| Docs                    | [rustdoc](https://doc.rust-lang.org/rustdoc/)                                                                                                                                                  |
 | Package manager         | [Cargo](https://crates.io/)                                                                                                                                                                     |
+| Distribution            | [Homebrew](https://brew.sh/), [Mise](https://mise.jdx.dev/), [apt](<https://en.wikipedia.org/wiki/APT_(software)>), [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) |
+
+### Go CLI
+
+| Concern                 | Choice                                                                                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-file executables | [Go](https://go.dev/)                                                                                                                                                                          |
+| CLI starter kit         | [Fang](https://github.com/charmbracelet/fang)                                                                                                                                                  |
+| Argument parser         | [Cobra](https://github.com/spf13/cobra)                                                                                                                                                        |
+| State management        | [Bubble Tea](https://github.com/charmbracelet/bubbletea)                                                                                                                                       |
+| Views                   | [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Bubbles](https://github.com/charmbracelet/bubbles)                                                                                 |
+| Styling                 | [Lip Gloss](https://github.com/charmbracelet/lipgloss)                                                                                                                                         |
+| Prompts/forms           | [Huh](https://github.com/charmbracelet/huh)                                                                                                                                                    |
+| Markdown rendering      | [Glamour](https://github.com/charmbracelet/glamour)                                                                                                                                            |
+| Animations              | [Harmonica](https://github.com/charmbracelet/harmonica)                                                                                                                                        |
+| SSH directory           | [Wishlist](https://github.com/charmbracelet/wishlist)                                                                                                                                          |
+| SSH app framework       | [Wish](https://github.com/charmbracelet/wish)                                                                                                                                                  |
+| Networking              | [`net/http`](https://pkg.go.dev/net/http)                                                                                                                                                      |
+| Serialization           | [`encoding/json`](https://pkg.go.dev/encoding/json)                                                                                                                                            |
+| Logging                 | [`log/slog`](https://pkg.go.dev/log/slog)                                                                                                                                                      |
+| Embedded assets         | [`embed`](https://pkg.go.dev/embed)                                                                                                                                                            |
+| Database interface      | [`database/sql`](https://pkg.go.dev/database/sql)                                                                                                                                              |
+| SQLite driver           | [glebarez/go-sqlite](https://github.com/glebarez/go-sqlite)                                                                                                                                    |
+| OpenAPI server          | [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen)                                                                                                                                   |
+| OpenAPI client          | [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen)                                                                                                                                   |
+| Tests                   | [`testing`](https://pkg.go.dev/testing), [`go test`](https://pkg.go.dev/cmd/go#hdr-Test_packages)                                                                                              |
+| Snapshot tests          | [`testing`](https://pkg.go.dev/testing) + files in `testdata/`                                                                                                                                 |
+| Formatter               | [`go fmt`](https://pkg.go.dev/cmd/gofmt)                                                                                                                                                       |
+| Linter/static checks    | [`go vet`](https://pkg.go.dev/cmd/vet)                                                                                                                                                          |
+| Docs                    | [`go doc`](https://pkg.go.dev/cmd/doc)                                                                                                                                                         |
+| Package manager         | [Go modules](https://go.dev/ref/mod)                                                                                                                                                           |
 | Distribution            | [Homebrew](https://brew.sh/), [Mise](https://mise.jdx.dev/), [apt](<https://en.wikipedia.org/wiki/APT_(software)>), [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) |
 
 ## Apple

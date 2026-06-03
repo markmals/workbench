@@ -7,7 +7,7 @@ kind: design-system
 
 > **This is a template.** Tokens, component vocabulary, and parity rules belong here. The web app is the canonical realization; every other GUI platform adapts these tokens to its native conventions.
 >
-> Columns below cover the GUI platforms (web, Apple, Android, Windows, Linux). The **website** reuses the web realization. The **CLIs** (Ratatui TUI, Node CLI) have no design-system surface beyond terminal color and layout — they are exempt from these tables.
+> Columns below cover the GUI platforms (web, Apple, Android, Windows, Linux). The **website** reuses the web realization. The **CLI** (whichever stack — Node, Rust + charmed_rust, or Go + Charm) has no design-system surface beyond terminal color and layout — it is exempt from these tables.
 
 ## Tokens
 

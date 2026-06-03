@@ -27,8 +27,7 @@ The web app is the **reference implementation** — build features there first; 
 | Android       | Kotlin + Jetpack Compose + Material 3 + coroutines/Flow + Room                                                                   | Native client. Mirrors web behavior.                        |
 | Windows       | C# + WinUI 3 + XAML + MVVM Toolkit + EF Core                                                                                     | Native client. Mirrors web behavior.                        |
 | Linux         | Rust + GTK 4 + Adwaita + Relm4 + Diesel                                                                                          | Native client. Mirrors web behavior.                        |
-| Server CLI    | Node single-file exe + TS-Rest + Bombshell (args/clack/tab) + Drizzle + plainjob                                                 | Headless/automation client. In OpenAPI mode, hosts the API. |
-| High-perf CLI | Rust single-file exe + Clap + Ratatui + Diesel + Progenitor                                                                      | TUI client.                                                 |
+| CLI           | One platform, one stack (chosen at `/setup`): Node (TS-Rest + Bombshell) · Rust (Clap + charmed_rust) · Go (Cobra/Fang + Charm) | Headless automation + TUI client. One CLI per app. Node/Go host the API in OpenAPI mode. |
 | Backend       | One of — **Convex** · a **TS-Rest / OpenAPI** server · **none** (local-only). Clerk for identity.                                | Chosen at `/setup`. See "Backend modes".                    |
 
 Desktop web apps (web app stack wrapped in **Electron**) are a packaging concern, not a separate platform — the same React/TanStack code ships to the browser and to the desktop shell.
@@ -80,8 +79,8 @@ Why it earns its place:
 The backend is **not** assumed. A project chooses exactly one of three mutually-exclusive modes; the Client layer realizes the chosen mode idiomatically on each platform. These do **not** combine — it is Convex, _or_ OpenAPI, _or_ nothing.
 
 - **Convex** — a reactive backend (database, file storage, cron, queues, realtime). Web and website use Convex's TypeScript client (TanStack Query + `@convex-dev/react-query`); native clients and CLIs use Convex's first-party client SDK for their platform. Reactive subscriptions wherever the platform supports them. No OpenAPI layer.
-- **OpenAPI** — a **TS-Rest** server (hosted; the Server CLI) is the backend and owns the OpenAPI document. Web and website use the TS-Rest typed fetch client; native clients and the Rust CLI consume a **generated** OpenAPI client — Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota (C#), Progenitor (Rust) — over the platform's HTTP stack (URLSession / Ktor / HttpClient / reqwest). No Convex.
-- **No API** — no backend at all. Each client is **local-first**, persisting on-device: Drizzle (web / Electron, local SQLite), SwiftData (Apple), Room (Android), EF Core (Windows), Diesel (Linux / Rust CLI). No networking, no Convex, no OpenAPI.
+- **OpenAPI** — a server (the CLI in server mode — Node/TS-Rest or Go/oapi-codegen — or a dedicated `services/` server) is the backend and owns the OpenAPI document. Web and website use the TS-Rest typed fetch client; native clients and the Rust/Go CLI consume a **generated** OpenAPI client — Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota (C#), Progenitor (Rust), oapi-codegen (Go) — over the platform's HTTP stack (URLSession / Ktor / HttpClient / reqwest / net/http). No Convex.
+- **No API** — no backend at all. Each client is **local-first**, persisting on-device: Drizzle (web / Electron, local SQLite), SwiftData (Apple), Room (Android), EF Core (Windows), Diesel (Linux / Rust CLI), go-sqlite (Go CLI). No networking, no Convex, no OpenAPI.
 
 Across all modes:
 
@@ -97,7 +96,7 @@ The exact mechanics depend on the chosen backend mode (above):
 - **Writes** — Convex mutations (Convex mode), the generated client's typed operations (OpenAPI mode), or a local write (no-API mode). The client wrapper exposes idiomatic call sites.
 - **Identity** — **Clerk** wherever there's a remote backend; Convex or the TS-Rest server validates the Clerk-issued token. No-API apps have local or no identity.
 - **Server-side, non-data work** (email, third-party calls, sensitive computation) — Convex actions or TanStack Start server functions (Convex mode), or TS-Rest server handlers (OpenAPI mode). Never in view code.
-- **Background work** — Convex cron + the Workpool component (Convex mode); `plainjob` in the Server CLI (OpenAPI mode).
+- **Background work** — Convex cron + the Workpool component (Convex mode); `plainjob` in the Node CLI stack (OpenAPI mode).
 
 ## Deployment
 
@@ -109,8 +108,7 @@ The exact mechanics depend on the chosen backend mode (above):
 | Android       | Android emulator + backend dev                        | Internal track → Play Store                             |
 | Windows       | Local debug + backend dev                             | MSIX / Microsoft Store                                  |
 | Linux         | Local debug + backend dev                             | Flatpak / distribution package                          |
-| Server CLI    | Local Node + backend dev                              | Single-file executable; Railway VPS for hosted API      |
-| High-perf CLI | Local `cargo run` + backend dev                       | Single-file binary release (`cargo` → tsdown-style exe) |
+| CLI           | Local `node` / `cargo run` / `go run` + backend dev   | Single-file executable (per stack); Node/Go can host the Railway API |
 | Backend       | per mode (`convex dev` / local TS-Rest server / none) | per mode (Convex deploy / Railway / —)                  |
 
 The **backend dev** step depends on your mode: `convex dev` (Convex), the local TS-Rest server (OpenAPI), or nothing (no-API). Domains, DNS, CDN, and image optimization are all **Cloudflare**. VPS workloads (the hosted TS-Rest API) run on **Railway**.

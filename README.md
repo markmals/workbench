@@ -49,8 +49,8 @@ This template makes the opposite bet:
 - **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow + Room.** Material You theming, predictive back, the real Android system behaviors.
 - **Windows is C# + WinUI 3 + MVVM Toolkit + EF Core.** Native XAML, the real Windows shell.
 - **Linux is Rust + GTK 4 + Adwaita + Relm4.** Native GNOME, the real desktop.
-- **CLIs are Node (TS-Rest + Bombshell) and Rust (Clap + Ratatui).** Headless automation and a high-performance TUI.
-- **Backend is Convex (Clerk for auth), reached contract-first.** Web and the website talk to Convex directly through its TypeScript client — reactive subscriptions, mutations, codegen-driven types. Native and CLI clients consume a **generated OpenAPI client** (Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota, Progenitor) over the platform's own HTTP stack, with an on-device database (SwiftData / Room / EF Core / Diesel) as a local-first cache. No platform hand-rolls a transport or mirrors the protocol by hand — the contract is the only thing that crosses the wire.
+- **The CLI is one of Node (TS-Rest + Bombshell), Rust (Clap + charmed_rust), or Go (Cobra/Fang + Charm).** Headless automation and/or a rich TUI.
+- **Backend is Convex (Clerk for auth), reached contract-first.** Web and the website talk to Convex directly through its TypeScript client — reactive subscriptions, mutations, codegen-driven types. Native and CLI clients consume a **generated OpenAPI client** (Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota, Progenitor, oapi-codegen) over the platform's own HTTP stack, with an on-device database (SwiftData / Room / EF Core / Diesel) as a local-first cache. No platform hand-rolls a transport or mirrors the protocol by hand — the contract is the only thing that crosses the wire.
 
 There is no shared package between any of these. There is no transpilation step, no bridge layer, no abstracted UI primitive. Each app ships the platform's native idioms — the kind of detail that distinguishes "an app" from "a website wrapped in a chrome." When something is genuinely different between platforms (a swipe gesture, a system share sheet, a context menu, a haptic), the platform implements it the platform's way, marked `// SPEC: <id> (deviates: <reason>)` so that divergence is explicit rather than smuggled.
 
@@ -130,8 +130,7 @@ The discipline is enforced by hooks: `block-generated.sh` refuses edits to gener
 │   ├── android/                       ←   Kotlin / Jetpack Compose / Room
 │   ├── windows/                       ←   C# / WinUI 3 / EF Core
 │   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
-│   ├── cli/                           ←   Node / TS-Rest / Bombshell
-│   └── tui/                           ←   Rust / Clap + Ratatui
+│   └── cli/                           ←   the CLI — one stack: Node (TS-Rest) · Rust (charmed_rust) · Go (Charm)
 └── services/                          ← (you create) backend services
     └── convex/                        ←   Convex backend + Clerk auth
 ```
@@ -193,8 +192,9 @@ Skills are markdown files that encode "how we do X here." Claude invokes them vi
 | [`android-emulator-control`](.claude/skills/android-emulator-control/SKILL.md)             | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                   |
 | [`windows-development`](.claude/skills/windows-development/SKILL.md)                       | When writing Windows code. C# + WinUI 3 + MVVM Toolkit + EF Core + Kiota; Roslyn MCP bridge.                                                      |
 | [`linux-development`](.claude/skills/linux-development/SKILL.md)                           | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel + Progenitor idioms.                                                     |
-| [`server-cli-development`](.claude/skills/server-cli-development/SKILL.md)                 | When writing the Node server/CLI. TS-Rest + Bombshell + Drizzle + plainjob; owns the OpenAPI contract.                                            |
-| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the high-performance CLI/TUI. Clap + Ratatui + Tears + Diesel + Progenitor idioms.                                                   |
+| [`server-cli-development`](.claude/skills/server-cli-development/SKILL.md)                 | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell + Drizzle + plainjob; hosts the OpenAPI contract in OpenAPI mode.            |
+| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the **Rust** CLI stack (`apps/cli`). Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish) + Diesel + reqwest + Progenitor. |
+| [`go-cli-development`](.claude/skills/go-cli-development/SKILL.md)                         | When writing the **Go** CLI stack (`apps/cli`). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh + Glamour + database/sql (go-sqlite) + oapi-codegen.        |
 
 ### `.claude/agents/` — cross-cutting subagents
 

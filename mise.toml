@@ -2,9 +2,10 @@
 # few project-wide tools. Per-platform toolchains live in their own mise.toml
 # under apps/<platform>/ and services/<service>/, created when you scaffold that
 # platform:
-#   web / website / cli  → node, pnpm        ios → swift, tuist
+#   web / website        → node, pnpm        ios → swift, tuist
 #   android              → jdk, kotlin       windows → dotnet
-#   tui / linux          → rust, cargo       convex → node, pnpm
+#   linux                → rust, cargo       convex → node, pnpm
+#   cli                  → node,pnpm | rust,cargo | go   (CLI stack chosen at /setup)
 #
 # Environment variables are managed by Varlock: the committed `.env.schema`
 # (repo root) is the typed contract; real values live in `.env` / `.env.local`
