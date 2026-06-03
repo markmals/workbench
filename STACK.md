@@ -133,7 +133,7 @@ The backend is one of three mutually-exclusive modes (**Convex** · **OpenAPI** 
 
 ## CLI
 
-The CLI is **one platform with a choice of stack** — Node, Rust, or Go — chosen at `/setup` and mutually exclusive, the way a backend mode is. One CLI per app: a second CLI is a second app, not a second folder (see [CLAUDE.md](CLAUDE.md) → "One product, or several related ones"). The catalog documents all three stacks; a project keeps one and prunes the rest. Whichever you pick lives at `apps/cli`.
+The CLI is **one platform with a choice of stack** — Node, Rust, or Go — chosen at `/setup` and mutually exclusive, the way a backend mode is. One CLI per app: a second CLI is a second app, not a second folder (see `CLAUDE.md` → "One product, or several related ones"). The catalog documents all three stacks; a project keeps one and prunes the rest. Whichever you pick lives at `apps/cli`.
 
 - **Node** — headless automation; in OpenAPI mode the TS-Rest server also **hosts** the backend.
 - **Rust** — a high-performance binary with a rich TUI via [charmed_rust](https://github.com/dicklesworthstone/charmed_rust), a Rust port of the Charm ecosystem.

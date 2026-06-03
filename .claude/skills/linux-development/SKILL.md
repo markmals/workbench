@@ -11,22 +11,22 @@ This is the **Linux desktop client (GTK)**. The web app is the **reference imple
 
 ## Stack at a glance
 
-| Concern               | Choice                                                       | First-party docs                                                                       |
-| --------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Language              | Rust                                                         | [rust-lang.org](https://www.rust-lang.org/)                                            |
-| Concurrency           | Tokio                                                        | [tokio.rs](https://tokio.rs/)                                                          |
-| Architecture          | Relm4 (Elm-style component model)                            | [relm4.org](https://relm4.org/)                                                       |
-| UI                    | GTK 4 + Adwaita (libadwaita)                                 | [gtk-rs.org](https://gtk-rs.org/)                                                     |
-| On-device database    | Diesel (SQLite)                                              | [diesel.rs](https://diesel.rs/)                                                       |
-| Networking            | reqwest                                                      | [docs.rs/reqwest](https://docs.rs/reqwest)                                            |
-| API client            | Progenitor (typed client from the OpenAPI doc — don't hand-roll) | [github.com/oxidecomputer/progenitor](https://github.com/oxidecomputer/progenitor) |
-| Tests                 | cargo test                                                   | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
-| Formatter             | rustfmt                                                      | [github.com/rust-lang/rustfmt](https://github.com/rust-lang/rustfmt)                  |
-| Linter                | Clippy                                                       | [doc.rust-lang.org/stable/clippy](https://doc.rust-lang.org/stable/clippy/)           |
-| Build / packages      | Cargo                                                        | [crates.io](https://crates.io/)                                                       |
-| Design language       | GNOME Human Interface Guidelines                             | [developer.gnome.org/hig](https://developer.gnome.org/hig/)                            |
-| Auth                  | Clerk (token attached to the generated client)              | [clerk.com/docs](https://clerk.com/docs)                                              |
-| Production            | Flatpak / distribution package                               | [docs.flatpak.org](https://docs.flatpak.org/)                                         |
+| Concern            | Choice                                                           | First-party docs                                                                                        |
+| ------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Language           | Rust                                                             | [rust-lang.org](https://www.rust-lang.org/)                                                             |
+| Concurrency        | Tokio                                                            | [tokio.rs](https://tokio.rs/)                                                                           |
+| Architecture       | Relm4 (Elm-style component model)                                | [relm4.org](https://relm4.org/)                                                                         |
+| UI                 | GTK 4 + Adwaita (libadwaita)                                     | [gtk-rs.org](https://gtk-rs.org/)                                                                       |
+| On-device database | Diesel (SQLite)                                                  | [diesel.rs](https://diesel.rs/)                                                                         |
+| Networking         | reqwest                                                          | [docs.rs/reqwest](https://docs.rs/reqwest)                                                              |
+| API client         | Progenitor (typed client from the OpenAPI doc — don't hand-roll) | [github.com/oxidecomputer/progenitor](https://github.com/oxidecomputer/progenitor)                      |
+| Tests              | cargo test                                                       | [doc.rust-lang.org/cargo/commands/cargo-test](https://doc.rust-lang.org/cargo/commands/cargo-test.html) |
+| Formatter          | rustfmt                                                          | [github.com/rust-lang/rustfmt](https://github.com/rust-lang/rustfmt)                                    |
+| Linter             | Clippy                                                           | [doc.rust-lang.org/stable/clippy](https://doc.rust-lang.org/stable/clippy/)                             |
+| Build / packages   | Cargo                                                            | [crates.io](https://crates.io/)                                                                         |
+| Design language    | GNOME Human Interface Guidelines                                 | [developer.gnome.org/hig](https://developer.gnome.org/hig/)                                             |
+| Auth               | Clerk (token attached to the generated client)                   | [clerk.com/docs](https://clerk.com/docs)                                                                |
+| Production         | Flatpak / distribution package                                   | [docs.flatpak.org](https://docs.flatpak.org/)                                                           |
 
 The gtk-rs and Relm4 books are the canonical guides for binding-level patterns. Use WebFetch against the docs above when you need an API you don't remember — don't guess at signatures.
 
@@ -153,7 +153,7 @@ apps/linux/src/
 - Debugging something unexpected? → `systematic-debugging`
 - Implementing a spec end-to-end? → `implementing-a-spec` (this skill supports that workflow with idiom knowledge)
 
-`rust-cli-development` shares this Rust toolchain (Diesel, reqwest, Progenitor, cargo test/clippy/fmt) — it builds a Ratatui TUI instead of a GTK GUI. Read it for Rust idioms that aren't GTK-specific.
+`rust-cli-development` shares this Rust toolchain (Diesel, reqwest, Progenitor, cargo test/clippy/fmt) — it builds a charmed_rust TUI (the Rust CLI stack at `apps/cli`) instead of a GTK GUI. Read it for Rust idioms that aren't GTK-specific.
 
 ## Commit
 

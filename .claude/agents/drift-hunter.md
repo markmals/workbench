@@ -20,7 +20,7 @@ If unclear, default to all platforms.
 
 ## Workflow
 
-1. **Enumerate scope**: list platforms (`apps/web`, `apps/website`, `apps/ios`, `apps/android`, `apps/windows`, `apps/linux`, `apps/cli`, `apps/tui`, `services/convex`) and the spec IDs in scope.
+1. **Enumerate scope**: list platforms (`apps/web`, `apps/website`, `apps/ios`, `apps/android`, `apps/windows`, `apps/linux`, `apps/cli`, `services/convex`) and the spec IDs in scope.
 2. **Drift detection**: for each platform, invoke `/sdd-drift <platform>` if implemented. If not (per [CLAUDE.md](../../CLAUDE.md) the slash commands are scaffolded), fall back:
     - `rg "SPEC:[[:space:]]*[a-zA-Z0-9._-]+" apps/<platform> services/<platform>` to enumerate referenced IDs
     - Cross-check that each ID has a spec file under `specs/` or `features/<n>/`

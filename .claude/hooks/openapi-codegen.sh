@@ -22,7 +22,7 @@ echo "OpenAPI contract changed ($file_path). Regenerate the typed client on ever
   - Android  → OpenAPI Generator (Kotlin)  (mise run -C apps/android codegen)
   - Windows  → Kiota                       (mise run -C apps/windows codegen)
   - Linux    → Progenitor                  (mise run -C apps/linux codegen)
-  - Rust CLI → Progenitor                  (mise run -C apps/tui codegen)
+  - CLI      → Progenitor (Rust) / oapi-codegen (Go)  (mise run -C apps/cli codegen)
 Web/website consume Convex directly and need no OpenAPI client."
 
 exit 0
