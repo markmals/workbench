@@ -151,6 +151,8 @@ Instructions:
 5. Check **error handling**: only at boundaries; no defensive hand-wringing in internal code.
 6. Output: ✅ Approved, OR ❌ list of issues categorized as Important / Nice-to-have.
 
+**Signal-to-noise gate — apply before reporting.** A long review buries its real findings. Drop anything that is: a style nit the formatter or linter already owns, a restatement of what the code does, context inflation with no concrete cost, or a fix that only helps this one site. For each surviving finding, apply the **generalization test** — name three other places the same issue would bite. If you can't, it's a nitpick, not an Important issue. A short list of real issues beats a long list that hides them.
+
 Implementer fixes Important issues. Nice-to-have is the user's call.
 
 ### 7. Dispatch the adversarial reviewer

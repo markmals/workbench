@@ -104,7 +104,7 @@ Any of these → you reverted to confirmation. Restart from the refute-by-defaul
 
 ## Related skills
 
-- `implementing-a-spec` — runs this as the third review stage after spec-compliance and code-quality.
+- `implementing-a-spec` — runs this as the third review stage after spec-compliance and code-quality. Noise-filtering — dropping nitpicks that don't generalize — is that skill's **signal-to-noise gate** in the code-quality stage, not your job here. The adversary does the opposite: report every defect you actually traced, however narrow.
 - `test-driven-development` — the discipline whose tests this stage tries to defeat.
 - `systematic-debugging` — once a defect is confirmed, used to find its root cause before the fix.
 - `verification-before-completion` — the gate this stage feeds; a spec isn't done until the adversary converges.
