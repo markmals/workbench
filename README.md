@@ -108,6 +108,75 @@ The flow is the same on every platform:
 
 The discipline is enforced by hooks: `block-generated.sh` refuses edits to generated artifacts, `format-on-edit.sh` formats every touched file, `spec-reconcile.sh` reminds you to `/sdd-apply` when a spec changes, and `stop-lint.sh` runs lint on dirty platforms before letting Claude declare done.
 
+### The standard flow, command by command
+
+The prose above is the shape; this is the runbook. It's the sequence to run **per feature**, with concrete arguments. The example feature is `0001-managing-items`, whose folder contains the specs `domain.item`, `vm.items.list`, and `story.item.create`.
+
+**Phase 0 — once, on a fresh copy of the template**
+
+```text
+/setup                              # choose platforms + backend; prune the rest
+```
+
+**Phase 1 — author the feature (specs only; no code yet)**
+
+```text
+invoke skill: brainstorming-feature # narrative → stories → models → view-models → flows → errors
+                                    #   ↳ writes features/0001-managing-items/
+/sdd-clarify 0001                   # resolve every [NEEDS CLARIFICATION] marker with you
+/sdd-analyze 0001                   # read-only: gaps, contradictions, dangling depends-on
+dispatch subagent: spec-reviewer    # P0/P1/P2 audit of the spec before any code
+```
+
+Loop Phase 1 until `/sdd-analyze` is clean and the spec-reviewer has no P0/P1 issues. **The spec is the leverage — sharpen it here, before it forks across N platforms.**
+
+**Phase 2 — implement on the reference platform (web)**
+
+Apply each spec in the feature in `depends-on` order — models, then view-models, then stories/errors:
+
+```text
+/sdd-apply domain.item       web    # writes failing tests first, then minimum impl
+/sdd-apply vm.items.list     web
+/sdd-apply story.item.create web
+/sdd-verify web                      # run web's behavioral suite, keyed by spec ID
+dispatch subagent: visual-verifier   # walk the Gherkin scenarios through the real UI
+```
+
+`/sdd-apply` runs the [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md) loop internally (test → impl → spec-compliance review → code-quality review → adversarial pass) and commits at natural boundaries. If it reports the spec itself is wrong, stop and fix the spec, then re-apply.
+
+**Phase 3 — mirror to every other platform**
+
+Same spec IDs, same order, once per target platform. Web is now a worked example alongside the spec:
+
+```text
+/sdd-apply domain.item       ios
+/sdd-apply vm.items.list     ios
+/sdd-apply story.item.create ios
+/sdd-verify ios
+
+/sdd-apply domain.item       android
+/sdd-apply vm.items.list     android
+/sdd-apply story.item.create android
+/sdd-verify android
+#   … repeat per platform: website · windows · linux · cli
+```
+
+**Phase 4 — confirm coverage, then keep it honest over time**
+
+```text
+/sdd-cover story.item.create        # which platforms implement it + which tests pass
+/sdd-drift web                       # periodically, per platform: what's gone stale
+/sdd-reconcile ios                   # when a platform raced ahead — fold its change back into the spec + others
+/sdd-defect ios "list scrollbar flickers on first paint"   # capture platform-local polish; drain via triaging-defects
+```
+
+**Two recurring sub-flows once the feature exists:**
+
+- **Changing a spec** → edit the spec file, then `/sdd-apply <id> <platform>` for every platform that implements it. The `spec-reconcile.sh` hook reminds you which ones.
+- **Fixing a platform-only bug the spec already requires** → just fix it and `/sdd-verify <platform>`. No spec edit. (If the _behavior_ changed rather than getting _corrected_, that's `/sdd-reconcile` instead.)
+
+You drive the commands; the hooks (format-on-edit, codegen, lint-on-stop) and the per-spec review stages run on their own. The throughput is in Phases 2–3 fanning out across platforms; the judgment is in Phase 1.
+
 ## Repo layout
 
 ```
