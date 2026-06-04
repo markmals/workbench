@@ -1,0 +1,37 @@
+# mise — Rust CLI (apps/cli). Clap + charmed_rust (TUI) + Diesel + reqwest.
+#
+# Template → copy to apps/cli/mise.toml when you scaffold the Rust CLI stack.
+# One CLI, one stack — use exactly one cli-*.toml. Task NAMES are a contract —
+# see ./README.md. Add `cli:test` etc. to the repo-root mise.toml.
+
+[tools]
+rust = "1.85" # edition 2024 (charmed_rust)
+
+[tasks.run]
+description = "Run the CLI against a live terminal"
+run = "cargo run"
+
+[tasks.build]
+description = "Build the release binary"
+run = "cargo build --release"
+
+[tasks.test]
+description = "Run the spec-bound test suite (cargo test + insta)" # what /sdd-verify runs
+run = "cargo test"
+
+[tasks.fmt]
+description = "Format Rust sources (or the files passed as arguments)"
+usage = 'arg "[paths]" var=#true' # format-on-edit passes one file; bare formats all
+run = '''
+set -- $usage_paths
+if [ "$#" -gt 0 ]; then rustfmt --edition 2024 "$@"; else cargo fmt; fi
+'''
+
+[tasks.lint]
+description = "Lint Rust sources (Clippy, warnings as errors)"
+run = "cargo clippy --all-targets -- -D warnings"
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI client (Progenitor)"
+# OpenAPI backend mode only — delete in Convex / No-API mode.
+run = "echo 'configure progenitor (build.rs or generator)'"

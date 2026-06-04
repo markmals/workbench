@@ -1,0 +1,42 @@
+# mise — Windows app (apps/windows). C# + WinUI 3 + XAML + MVVM Toolkit + EF Core.
+#
+# Template → copy to apps/windows/mise.toml when you scaffold the app, then adapt.
+# Task NAMES are a contract — see ./README.md. Lint runs manually (not stop-lint.sh).
+# Build/test/UI verification are Windows-host only; on a macOS agent verify at the
+# MSTest view-model layer. Add `windows:test` etc. to the repo-root mise.toml.
+
+[tools]
+dotnet = "9"
+
+[env]
+# CONFIGURE: match the solution layout.
+APP_PROJECT = "src/App/App.csproj"
+
+[tasks.run]
+description = "Build + run the app (Windows host)"
+run = 'dotnet run --project "$APP_PROJECT"'
+
+[tasks.build]
+description = "Build the solution"
+run = "dotnet build"
+
+[tasks.test]
+description = "Run the spec-bound test suite (MSTest)" # what /sdd-verify runs
+run = "dotnet test"
+
+[tasks.fmt]
+description = "Format C# sources (or the files passed as arguments)"
+usage = 'arg "[paths]" var=#true' # format-on-edit passes one file; bare formats all
+run = '''
+set -- $usage_paths
+if [ "$#" -gt 0 ]; then dotnet format --include "$@"; else dotnet format; fi
+'''
+
+[tasks.lint]
+description = "Verify formatting + StyleCop without changing files — run before merge"
+run = "dotnet format --verify-no-changes"
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI client (Kiota)"
+# OpenAPI backend mode only — delete in Convex / No-API mode.
+run = "echo 'configure kiota generate'"

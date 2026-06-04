@@ -1,0 +1,40 @@
+# mise — Linux desktop app (apps/linux). Rust + GTK 4 + Adwaita + Relm4 + Diesel.
+#
+# Template → copy to apps/linux/mise.toml when you scaffold the app, then adapt.
+# Task NAMES are a contract — see ./README.md. Add `linux:test` etc. to the
+# repo-root mise.toml.
+
+[tools]
+rust = "1.85" # edition 2024
+# GTK 4, libadwaita, and their -dev headers are SYSTEM packages mise can't install
+# (e.g. `apt install libgtk-4-dev libadwaita-1-dev`). Install them before building.
+
+[tasks.run]
+description = "Build + run the app"
+run = "cargo run"
+
+[tasks.build]
+description = "Build the app"
+run = "cargo build"
+
+[tasks.test]
+description = "Run the spec-bound test suite (cargo test)" # what /sdd-verify runs
+run = "cargo test"
+
+[tasks.fmt]
+description = "Format Rust sources (or the files passed as arguments)"
+usage = 'arg "[paths]" var=#true' # format-on-edit passes one file; bare formats all
+run = '''
+set -- $usage_paths
+if [ "$#" -gt 0 ]; then rustfmt --edition 2024 "$@"; else cargo fmt; fi
+'''
+
+[tasks.lint]
+description = "Lint Rust sources (Clippy, warnings as errors)"
+run = "cargo clippy --all-targets -- -D warnings"
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI client (Progenitor)"
+# OpenAPI backend mode only — delete in Convex / No-API mode. Progenitor usually
+# runs from build.rs; trigger a build of the client crate here if it's standalone.
+run = "echo 'configure progenitor (build.rs or generator)'"

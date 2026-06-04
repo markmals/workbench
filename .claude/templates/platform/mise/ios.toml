@@ -1,0 +1,99 @@
+# mise — Apple app (apps/ios). Swift + UIKit + Tuist. Targets iOS/iPadOS/macOS/…
+#
+# Template → copy to apps/ios/mise.toml when you scaffold the app, then adapt.
+# Task NAMES are a contract — see ./README.md. iOS uses short aliases the hooks
+# call: `l` for lint (stop-lint.sh), `g` for generate (tuist-regen.sh), `t` for
+# test. The sim:* tasks back the ios-simulator-control skill. Add `ios:test` etc.
+# to the repo-root mise.toml.
+
+[tools]
+tuist = "latest"
+# swift-format ships with recent Swift toolchains; if mise can't resolve it as a
+# tool here, install it via the toolchain or add the right backend (aqua:/spm:).
+"swift-format" = "latest"
+
+[env]
+# CONFIGURE: match Project.swift and the simulator you verify on.
+APP_SCHEME = "App"
+BUNDLE_ID = "com.example.app"
+SIMULATOR_NAME = "iPhone 16 Pro"
+DERIVED_DATA = ".derived-data"
+
+[tasks.generate]
+alias = "g"
+description = "Generate the Xcode project from Project.swift (Tuist)" # tuist-regen.sh
+run = "tuist generate --no-open"
+
+[tasks.build]
+description = "Build for the configured simulator"
+depends = ["generate"]
+run = '''
+xcodebuild \
+  -project App.xcodeproj \
+  -scheme "$APP_SCHEME" \
+  -destination "platform=iOS Simulator,name=$SIMULATOR_NAME" \
+  -derivedDataPath "$DERIVED_DATA" \
+  build
+'''
+
+[tasks.test]
+alias = "t"
+description = "Run the spec-bound test suite (Swift Testing via xcodebuild)"
+depends = ["generate"]
+run = '''
+xcodebuild test \
+  -project App.xcodeproj \
+  -scheme "$APP_SCHEME" \
+  -destination "platform=iOS Simulator,name=$SIMULATOR_NAME"
+'''
+
+[tasks.fmt]
+description = "Format Swift sources (or the files passed as arguments)"
+usage = 'arg "[paths]" var=#true' # format-on-edit passes one file; bare formats all
+run = '''
+set -- $usage_paths
+if [ "$#" -gt 0 ]; then
+  swift-format format --in-place "$@"
+else
+  swift-format format --in-place --recursive Sources Tests
+fi
+'''
+
+[tasks.lint]
+alias = "l"
+description = "Lint Swift sources (swift-format)"
+run = "swift-format lint --strict --recursive Sources Tests"
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI client (Swift OpenAPI Generator)"
+# OpenAPI backend mode only — delete in Convex / No-API mode. The generator
+# usually runs as an SPM build plugin; invoke it here if you generate ahead of build.
+run = "echo 'configure swift-openapi-generator (build plugin or CLI)'"
+
+# --- Simulator control (ios-simulator-control skill) ---
+
+[tasks."sim:list"]
+description = "List available simulators"
+run = "xcrun simctl list devices available"
+
+[tasks."sim:boot"]
+description = "Boot the configured simulator + open Simulator.app"
+run = 'xcrun simctl boot "$SIMULATOR_NAME" || true; open -a Simulator'
+
+[tasks."sim:install"]
+description = "Build + install the app onto the booted simulator"
+depends = ["build"]
+run = 'xcrun simctl install booted "$DERIVED_DATA/Build/Products/Debug-iphonesimulator/$APP_SCHEME.app"'
+
+[tasks."sim:launch"]
+description = "Build + install + launch on the booted simulator"
+depends = ["sim:install"]
+run = 'xcrun simctl launch booted "$BUNDLE_ID"'
+
+[tasks."sim:screenshot"]
+description = "Screenshot the booted simulator to .build/simulator/$APP_SCHEME.png"
+run = 'mkdir -p .build/simulator && xcrun simctl io booted screenshot ".build/simulator/$APP_SCHEME.png"'
+
+[tasks."sim:erase"]
+description = "Wipe the booted simulator's data (fresh state)"
+run = "xcrun simctl erase booted"

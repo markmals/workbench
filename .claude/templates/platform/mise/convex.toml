@@ -1,0 +1,39 @@
+# mise — Convex backend (services/convex). Schema is the data-layer protocol.
+#
+# Template → copy to services/convex/mise.toml when you scaffold the backend.
+# Task NAMES are a contract the hooks dispatch to — see ./README.md.
+# `convex-codegen.sh` runs `mise run codegen` here whenever schema.ts changes.
+
+[tools]
+node = "24"
+pnpm = "11"
+
+[env]
+_.path = ['{{config_root}}/node_modules/.bin']
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.dev]
+description = "Run the Convex dev deployment (watch + push)"
+run = "convex dev"
+
+[tasks.codegen]
+description = "Regenerate Convex types from the schema" # fired by convex-codegen.sh
+run = "convex codegen"
+
+[tasks.test]
+description = "Run the spec-bound test suite (Vitest + convex-test)"
+run = "vitest run"
+
+[tasks.typecheck]
+description = "Type-check the functions without emitting (tsgo)"
+run = "tsgo --noEmit"
+
+[tasks.fmt]
+description = "Format the backend (or the files passed as arguments)"
+run = "oxfmt"
+
+[tasks.lint]
+description = "Lint the backend (Oxlint)"
+run = "oxlint"

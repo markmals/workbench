@@ -1,0 +1,58 @@
+# mise — Android app (apps/android). Kotlin + Jetpack Compose + Room + Gradle.
+#
+# Template → copy to apps/android/mise.toml when you scaffold the app, then adapt.
+# Task NAMES are a contract — see ./README.md. Lint is run manually (Gradle is
+# slow), not by stop-lint.sh. The emulator task backs android-emulator-control.
+# Add `android:test` etc. to the repo-root mise.toml.
+
+[tools]
+java = "temurin-21"
+# The Android SDK, Kotlin compiler, ktfmt, and ktlint are driven by the Gradle
+# wrapper (./gradlew) — no separate mise tools. Ensure $ANDROID_HOME is set.
+
+[env]
+# CONFIGURE: match the app's manifest.
+APP_ID = "com.example.app"
+MAIN_ACTIVITY = ".MainActivity"
+AVD_NAME = "Pixel_8_API_34"
+
+[tasks.build]
+description = "Assemble the debug APK"
+run = "./gradlew :app:assembleDebug"
+
+[tasks.run]
+description = "Install the debug APK + launch the main activity"
+run = './gradlew :app:installDebug && adb shell am start -n "$APP_ID/$MAIN_ACTIVITY"'
+
+[tasks.test]
+description = "Run the spec-bound unit suite (kotlin.test)" # what /sdd-verify runs
+run = "./gradlew testDebugUnitTest"
+
+[tasks.fmt]
+description = "Format Kotlin sources (ktfmt via Gradle)"
+# ktfmt via Gradle is whole-module; the `[paths]` arg is declared so the
+# format-on-edit hook's per-file call is absorbed (not appended as a bogus Gradle
+# task) — it just formats the module. Per-edit Gradle is slow; swap in a
+# standalone ktfmt if it bites.
+usage = 'arg "[paths]" var=#true'
+run = "./gradlew ktfmtFormat"
+
+[tasks.lint]
+description = "Lint Kotlin sources (ktlint via Gradle) — run before merge"
+run = "./gradlew ktlintCheck"
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI client (OpenAPI Generator, Kotlin)"
+# OpenAPI backend mode only — delete in Convex / No-API mode.
+run = "echo 'configure openapi-generator (kotlin)'"
+
+[tasks.emulator]
+description = "Boot the configured AVD and wait until it's ready"
+run = '''
+emulator -avd "$AVD_NAME" -no-snapshot-load &
+adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+'''
+
+[tasks.screenshot]
+description = "Screenshot the running device to .build/screen.png"
+run = "mkdir -p .build && adb exec-out screencap -p > .build/screen.png"

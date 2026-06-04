@@ -1,0 +1,48 @@
+# mise — marketing/content site (apps/website). Astro + React islands.
+#
+# Template → copy to apps/website/mise.toml when you scaffold the site, then adapt.
+# Task NAMES are a contract the hooks dispatch to — see ./README.md. Add the
+# `website:dev` / `website:build` root wrappers to the repo-root mise.toml.
+
+[tools]
+node = "24"
+pnpm = "11"
+
+[env]
+_.path = ['{{config_root}}/node_modules/.bin']
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.dev]
+description = "Run the site (Astro dev server, http://localhost:4321)"
+run = "astro dev"
+
+[tasks.build]
+description = "Build the static site"
+run = "astro build"
+
+[tasks.preview]
+description = "Preview the built site locally"
+depends = ["build"]
+run = "astro preview"
+
+[tasks.check]
+description = "Validate content collections + templates (astro check)"
+run = "astro check"
+
+[tasks.typecheck]
+description = "Type-check the islands without emitting (tsgo)"
+run = "tsgo --noEmit"
+
+[tasks.test]
+description = "Run the spec-bound test suite (Vitest)" # what /sdd-verify runs
+run = "vitest run"
+
+[tasks.fmt]
+description = "Format the site (or the files passed as arguments)"
+run = "oxfmt"
+
+[tasks.lint]
+description = "Lint the site (Oxlint)"
+run = "oxlint"

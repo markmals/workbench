@@ -146,7 +146,7 @@ mise run docs:dev          # docs site
 mise tasks                 # list everything available
 ```
 
-When you add a platform, define `fmt` and `lint` tasks in its `mise.toml` (its formatter / linter; `fmt` accepts optional file paths) — the `format-on-edit` and `stop-lint` hooks dispatch to them, which is what keeps those hooks platform-agnostic. Also add the orchestration task at the root (`web:dev`, `ios:test`, etc.) so cross-platform commands work.
+When you add a platform, start its `mise.toml` from the matching template in [`.claude/templates/platform/mise/`](.claude/templates/platform/mise/) — they pre-wire the task **names** the hooks and `sdd-*` commands dispatch to (`fmt`, `lint`, `test`, `codegen`, plus iOS's `l`/`g`/`t` aliases and the `sim:*`/`emulator` tasks). At minimum a platform defines `fmt` and `lint` (its formatter / linter; `fmt` accepts optional file paths) — the `format-on-edit` and `stop-lint` hooks dispatch to them, which is what keeps those hooks platform-agnostic. Also add the orchestration task at the root (`web:dev`, `ios:test`, etc.) so cross-platform commands work. The template README documents the full contract.
 
 ## Editing
 

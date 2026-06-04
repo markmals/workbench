@@ -1,0 +1,44 @@
+# mise — Node CLI (apps/cli). TS-Rest + Bombshell + Drizzle + plainjob.
+#
+# Template → copy to apps/cli/mise.toml when you scaffold the Node CLI stack.
+# One CLI, one stack — use exactly one cli-*.toml. Task NAMES are a contract —
+# see ./README.md. Add `cli:test` etc. to the repo-root mise.toml.
+
+[tools]
+node = "24"
+pnpm = "11"
+
+[env]
+_.path = ['{{config_root}}/node_modules/.bin']
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.run]
+description = "Run the CLI against a live terminal"
+run = "node ./src/main.ts"
+
+[tasks.build]
+description = "Bundle the single-file executable (tsdown)"
+run = "tsdown"
+
+[tasks.test]
+description = "Run the spec-bound test suite (Vitest)" # what /sdd-verify runs
+run = "vitest run"
+
+[tasks.typecheck]
+description = "Type-check without emitting (tsgo)"
+run = "tsgo --noEmit"
+
+[tasks.fmt]
+description = "Format the CLI (or the files passed as arguments)"
+run = "oxfmt"
+
+[tasks.lint]
+description = "Lint the CLI (Oxlint)"
+run = "oxlint"
+
+[tasks.serve]
+description = "Host the TS-Rest server (OpenAPI backend mode)"
+# OpenAPI backend mode only — the Node stack hosts the API. Delete otherwise.
+run = "node ./src/server.ts"

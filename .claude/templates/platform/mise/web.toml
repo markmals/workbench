@@ -1,0 +1,40 @@
+# mise — web app (apps/web). Reference platform: React + TanStack Start + Convex.
+#
+# Template → copy to apps/web/mise.toml when you scaffold the web app, then adapt.
+# Task NAMES are a contract the hooks dispatch to — see ./README.md. Add the
+# `web:dev` / `web:test` root wrappers to the repo-root mise.toml.
+
+[tools]
+node = "24"
+pnpm = "11"
+
+[env]
+# Resolve the app's own devDependencies (oxfmt, oxlint, tsgo, vitest, vite).
+_.path = ['{{config_root}}/node_modules/.bin']
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.dev]
+description = "Run the web app (Vite dev server, http://localhost:5173)"
+run = "vite dev"
+
+[tasks.build]
+description = "Build the production bundle"
+run = "vite build"
+
+[tasks.test]
+description = "Run the spec-bound test suite (Vitest)" # what /sdd-verify runs
+run = "vitest run"
+
+[tasks.typecheck]
+description = "Type-check without emitting (tsgo)"
+run = "tsgo --noEmit"
+
+[tasks.fmt]
+description = "Format the app (or the files passed as arguments)"
+run = "oxfmt" # `mise run fmt -- src/x.tsx` narrows to those files
+
+[tasks.lint]
+description = "Lint the app (Oxlint)"
+run = "oxlint"

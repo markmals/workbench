@@ -1,0 +1,38 @@
+# mise — Go CLI (apps/cli). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh.
+#
+# Template → copy to apps/cli/mise.toml when you scaffold the Go CLI stack.
+# One CLI, one stack — use exactly one cli-*.toml. Task NAMES are a contract —
+# see ./README.md. Add `cli:test` etc. to the repo-root mise.toml.
+
+[tools]
+go = "latest"
+
+[tasks.run]
+description = "Run the CLI against a live terminal"
+run = "go run ."
+
+[tasks.build]
+description = "Build the single binary"
+run = "go build -o ./bin/cli ."
+
+[tasks.test]
+description = "Run the spec-bound test suite (go test)" # what /sdd-verify runs
+run = "go test ./..."
+
+[tasks.fmt]
+description = "Format Go sources (or the files passed as arguments)"
+usage = 'arg "[paths]" var=#true' # format-on-edit passes one file; bare formats all
+run = '''
+set -- $usage_paths
+if [ "$#" -gt 0 ]; then gofmt -w "$@"; else gofmt -w .; fi
+'''
+
+[tasks.lint]
+description = "Vet Go sources (go vet)"
+run = "go vet ./..."
+
+[tasks.codegen]
+description = "Regenerate the OpenAPI server/client (oapi-codegen via go generate)"
+# OpenAPI backend mode only — delete in Convex / No-API mode. Drive it with a
+# //go:generate directive next to the contract package.
+run = "go generate ./..."
