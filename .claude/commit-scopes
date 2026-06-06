@@ -1,0 +1,19 @@
+# Project-specific commit scopes for scoped-commits.sh (one per line; # = comment).
+#
+# The hook already accepts, automatically: every spec/feature `id:` in specs/ &
+# features/, the immediate subdirs of apps/ and services/, each features/<slug>,
+# the harness areas (hooks, skills, commands, agents, templates, rules, docs,
+# mise, readme), plus `specs` and `treewide`. List here only the scopes that
+# aren't derivable that way — e.g. platforms you haven't scaffolded into apps/
+# yet, or custom app/workspace names that don't live under apps/.
+#
+# This template ships the full canonical platform set; `/setup` prunes the rows
+# for platforms you don't keep.
+web
+website
+ios
+android
+windows
+linux
+cli
+convex

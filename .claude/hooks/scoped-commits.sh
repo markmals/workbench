@@ -2,8 +2,11 @@
 # PreToolUse on Bash (gated by if: "Bash(git commit*)"):
 # enforce a Scoped Commits subject — `<scope>: <description>` — where <scope> is
 # a *defined* scope in this repo: a spec/feature ID (a reverse pointer to a real
-# `id:` in specs/ or features/), a platform, a harness area, a feature slug, or
-# `treewide`. Handles `git commit -m "..."` and the HEREDOC `-m "$(cat <<'EOF'
+# `id:` in specs/ or features/), an app/service dir, a harness area, a feature
+# slug, a name listed in `.claude/commit-scopes`, or `treewide`. The set is
+# derived from the filesystem at commit time — adding a spec, an `apps/<x>` dir,
+# or a `.claude/commit-scopes` line makes that scope usable with no list to edit.
+# Handles `git commit -m "..."` and the HEREDOC `-m "$(cat <<'EOF'
 # ... )"` form; on commit forms whose subject can't be read confidently it
 # enforces shape only, never a false rejection on membership.
 # See https://scopedcommits.com/ and .claude/rules/commit-discipline.md.
@@ -53,9 +56,18 @@ case "$subject" in
   *) exit 0 ;;
 esac
 
-# Defined scopes = structural names + every frontmatter `id:` in specs/ & features/
-# + each existing feature slug. (`|| true` so a no-match grep can't trip pipefail.)
-valid_ids=$(
+# Build the defined-scope set from the filesystem. (`|| true` so a no-match grep
+# or an absent dir can't trip pipefail.)
+#   - always: treewide, specs, and the harness areas
+#   - app/service scopes: the immediate subdirs of apps/ and services/
+#   - project scopes: non-comment lines of .claude/commit-scopes
+#   - spec/feature scopes: every frontmatter `id:` in specs/ & features/
+allowed=$(printf '%s\n' treewide specs agents commands hooks rules skills templates docs mise readme)
+allowed+=$'\n'$({ ls -d "$root"/apps/*/ "$root"/services/*/ 2>/dev/null || true; } | sed -E 's#.*/(apps|services)/##; s#/$##')
+if [ -f "$root/.claude/commit-scopes" ]; then
+  allowed+=$'\n'$(grep -vE '^[[:space:]]*(#|$)' "$root/.claude/commit-scopes" 2>/dev/null || true)
+fi
+allowed+=$'\n'$(
   { grep -rlE '^id:' "$root/specs" "$root/features" 2>/dev/null || true; } \
   | while IFS= read -r f; do
       awk 'NR==1 && $0 !~ /^---[[:space:]]*$/ {exit}
@@ -68,12 +80,7 @@ feature_slugs=$({ ls -d "$root"/features/*/ 2>/dev/null || true; } | sed -E 's#.
 is_valid_scope() {
   local s
   s=$(printf '%s' "$1" | sed -E 's/[[:space:]]+\([A-Za-z0-9-]+\)$//; s/^[[:space:]]+//; s/[[:space:]]+$//')
-  case "$s" in
-    treewide|specs) return 0 ;;
-    web|website|ios|android|windows|linux|cli|convex) return 0 ;;
-    agents|commands|hooks|rules|skills|templates|docs|readme|mise) return 0 ;;
-  esac
-  grep -qxF "$s" <<<"$valid_ids" && return 0
+  grep -qxF "$s" <<<"$allowed" && return 0
   local slug
   for slug in $feature_slugs; do [ "$s" = "features/$slug" ] && return 0; done
   return 1
@@ -81,7 +88,7 @@ is_valid_scope() {
 
 IFS=',' read -ra parts <<<"$raw_scope"
 for p in "${parts[@]}"; do
-  is_valid_scope "$p" || fail "Scope '$(printf '%s' "$p" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')' is not a defined scope. Use a platform (web, website, ios, android, windows, linux, cli, convex), a harness area (hooks, skills, commands, agents, templates, rules, docs, mise, readme), a spec/feature ID from specs/ or features/ (list them with: grep -rhE '^id:' specs features), 'specs', a 'features/<slug>', or 'treewide'. See .claude/rules/commit-discipline.md."
+  is_valid_scope "$p" || fail "Scope '$(printf '%s' "$p" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')' is not a defined scope. Use a spec/feature ID from specs/ or features/ (list: grep -rhE '^id:' specs features), an app/service dir, a harness area (hooks, skills, commands, agents, templates, rules, docs, mise, readme), a name from .claude/commit-scopes, a 'features/<slug>', 'specs', or 'treewide'. See .claude/rules/commit-discipline.md."
 done
 
 exit 0
