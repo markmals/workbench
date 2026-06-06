@@ -47,18 +47,18 @@ The **description**:
 - No trailing period.
 - Specific. "fix bug" is useless; "reject duplicate emails in item creation" is useful.
 
-The **scope** names what the commit touches. Scoped Commits leaves the vocabulary to the project; in this repo a scope is one of:
+The **scope** names what the commit touches. Scoped Commits leaves the vocabulary to the project; in this repo a scope must be one of the **defined** scopes below — and `scoped-commits.sh` enforces that mechanically, rejecting a subject whose scope isn't real (see `.claude/rules/enforcement-hierarchy.md`). The set isn't a hand-maintained list: the hook derives it from the filesystem at commit time, so adding a spec or a feature folder makes its ID a usable scope automatically.
 
-| Scope                                                                                                   | Use for                                                                             |
-| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| a platform — `web`, `ios`, `android`, `windows`, `linux`, `cli`, `website`, `convex`                    | Changes inside that platform's `apps/`/`services/` tree.                            |
-| a spec ID — `vm.items.list`, `story.item.create`                                                        | A change scoped to one spec's behavior (impl, tests, or the spec file itself).      |
-| `specs`                                                                                                 | Cross-cutting spec files (`CONVENTIONS`, `ARCHITECTURE`, `DESIGN_SYSTEM`, `STACK`). |
-| `features/<slug>`                                                                                       | Authoring or extending a feature folder.                                            |
-| a harness area — `hooks`, `skills`, `commands`, `agents`, `templates`, `rules`, `docs`, `setup`, `mise` | Changes to the template's own machinery.                                            |
-| `treewide`                                                                                              | A genuinely repo-wide sweep with no single home.                                    |
+| Scope                                                                                          | Use for                                                                                                                   |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| a **spec / feature ID** — `vm.items.list`, `story.item.create`, `domain.item`                  | A change scoped to one spec's behavior. The scope is a **reverse pointer to that `id:`** — same discipline as `// SPEC:`. |
+| a platform — `web`, `ios`, `android`, `windows`, `linux`, `cli`, `website`, `convex`           | Changes inside that platform's `apps/`/`services/` tree.                                                                  |
+| `specs`                                                                                        | Cross-cutting spec files (`CONVENTIONS`, `ARCHITECTURE`, `DESIGN_SYSTEM`, `STACK`).                                       |
+| `features/<slug>`                                                                              | Authoring or extending a feature folder (slug must be a real `features/` directory).                                      |
+| a harness area — `hooks`, `skills`, `commands`, `agents`, `templates`, `rules`, `docs`, `mise` | Changes to the template's own machinery.                                                                                  |
+| `treewide`                                                                                     | A genuinely repo-wide sweep with no single home.                                                                          |
 
-When a change spans more than one area, prefer the **broadest scope that still describes it**; only fall back to a comma-separated list (`web, ios: …`) when no single scope fits, and to `treewide` for a true global sweep. A ticket number, when there is one, goes in parentheses after the scope: `web (PROJ-12): …`.
+The IDs come straight from the `id:` frontmatter in `specs/` and `features/` — list them with `grep -rhE '^id:' specs features`. When a change spans more than one area, prefer the **broadest scope that still describes it**; only fall back to a comma-separated list (`web, ios: …`) when no single scope fits, and to `treewide` for a true global sweep. A ticket number, when there is one, goes in parentheses after the scope: `web (PROJ-12): …`.
 
 Examples:
 

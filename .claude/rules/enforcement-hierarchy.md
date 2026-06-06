@@ -6,7 +6,7 @@ A rule an agent must _remember_ is the weakest kind of rule. Under load, prose g
 
 ## The tiers — strongest to weakest
 
-- **Tier 0 — Hooks** (`.claude/hooks/`). Deterministic; the agent cannot forget or skip them. `block-generated.sh` refuses edits to generated output; `format-on-edit.sh` / `stop-lint.sh` dispatch the platform's `fmt`/`lint`; `spec-reconcile.sh` injects drift reminders; the codegen hooks (`convex-codegen.sh`, `openapi-codegen.sh`, `tuist-regen.sh`) keep generated artifacts current. If a rule can be a hook, it should be.
+- **Tier 0 — Hooks** (`.claude/hooks/`). Deterministic; the agent cannot forget or skip them. `block-generated.sh` refuses edits to generated output; `format-on-edit.sh` / `stop-lint.sh` dispatch the platform's `fmt`/`lint`; `spec-reconcile.sh` injects drift reminders; `scoped-commits.sh` rejects a commit whose scope isn't a defined spec/feature ID, platform, or harness area; the codegen hooks (`convex-codegen.sh`, `openapi-codegen.sh`, `tuist-regen.sh`) keep generated artifacts current. If a rule can be a hook, it should be.
 - **Tier 1 — Commands & tasks.** The `sdd-*` commands and the `mise` `fmt`/`lint`/`test` tasks. Agent-invoked, but the _behavior_ is codified, not recalled. Drift, coverage, and verification belong here.
 - **Tier 2 — Templates** (`.claude/templates/`). Shape the work so the correct thing is the path of least resistance — the frontmatter, the reverse pointer, the scenario tags all come pre-wired.
 - **Tier 3 — Prose** (`SKILL.md` files, the `rules/` files). The rule the agent must read and remember. Necessary for judgment that can't be mechanized, but the tier most likely to be missed.

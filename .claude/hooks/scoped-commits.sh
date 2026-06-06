@@ -1,35 +1,87 @@
 #!/usr/bin/env bash
 # PreToolUse on Bash (gated by if: "Bash(git commit*)"):
-# require a Scoped Commits subject — `<scope>: <description>` — anywhere in the
-# command, so it handles both `git commit -m "web: ..."` and HEREDOC forms.
+# enforce a Scoped Commits subject — `<scope>: <description>` — where <scope> is
+# a *defined* scope in this repo: a spec/feature ID (a reverse pointer to a real
+# `id:` in specs/ or features/), a platform, a harness area, a feature slug, or
+# `treewide`. Handles `git commit -m "..."` and the HEREDOC `-m "$(cat <<'EOF'
+# ... )"` form; on commit forms whose subject can't be read confidently it
+# enforces shape only, never a false rejection on membership.
 # See https://scopedcommits.com/ and .claude/rules/commit-discipline.md.
 set -euo pipefail
 
 input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
+root="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo .)}"
 
-# Skip if this isn't actually creating a commit (e.g. `git commit --help`).
-if ! echo "$command" | grep -qE '(^|[[:space:]])git[[:space:]]+commit\b'; then
-    exit 0
-fi
-if echo "$command" | grep -qE '(--help|--allow-empty-message|--amend)'; then
-    exit 0
-fi
+# Skip non-commit invocations and amend / empty-message / help.
+if ! echo "$command" | grep -qE '(^|[[:space:]])git[[:space:]]+commit\b'; then exit 0; fi
+if echo "$command" | grep -qE '(--help|--allow-empty-message|--amend)'; then exit 0; fi
 
-# Catch the Conventional Commits habit: a `type(subscope):` prefix — a word
-# immediately followed by `(...)` with no space. Scoped Commits is scope-first;
-# a ticket, if any, goes after a space: `web (PROJ-12): ...`.
+# Only inline messages are inspectable. A `-F`/`-C`/editor commit carries its
+# message out of band — there's nothing to judge, so don't block it.
+if ! echo "$command" | grep -qE '(^|[[:space:]])(-m|--message)([[:space:]]|=)' \
+   && ! echo "$command" | grep -q '<<'; then exit 0; fi
+
+fail() { echo "$1" >&2; exit 2; }
+
+# Conventional Commits habit: a `type(subscope):` prefix — a word glued to `(...)`
+# with no space. Scoped Commits is scope-first; a ticket goes after a space.
 if echo "$command" | grep -qE '[a-z]+\([a-z0-9_./-]+\):[[:space:]]'; then
-    echo "Looks like a Conventional Commits 'type(scope):' subject. This repo uses Scoped Commits — lead with the scope: '<scope>: <description>' (ticket goes after a space, e.g. 'web (PROJ-12): ...'). See .claude/rules/commit-discipline.md." >&2
-    exit 2
+  fail "Looks like a Conventional Commits 'type(scope):' subject. This repo uses Scoped Commits — lead with a defined scope: '<scope>: <description>' (ticket after a space, e.g. 'web (PROJ-12): ...'). See .claude/rules/commit-discipline.md."
 fi
 
-# A Scoped Commits subject: one or more lowercase scope tokens (optionally with a
-# ` (TICKET)` suffix), then `: ` and a description.
-scope='[a-z0-9._/-]+([[:space:]]\([A-Za-z0-9-]+\))?'
-if ! echo "$command" | grep -qE "${scope}(,[[:space:]]${scope})*:[[:space:]]"; then
-    echo "Commit subject must be a Scoped Commit: '<scope>: <description>' (e.g. 'web:', 'vm.items.list:', 'specs:', 'hooks:', or 'treewide:'). See .claude/rules/commit-discipline.md." >&2
-    exit 2
+# Shape gate — always enforced.
+scope_re='[a-z0-9._/-]+([[:space:]]\([A-Za-z0-9-]+\))?'
+if ! echo "$command" | grep -qE "${scope_re}(,[[:space:]]${scope_re})*:[[:space:]]"; then
+  fail "Commit subject must be a Scoped Commit: '<scope>: <description>'. See .claude/rules/commit-discipline.md."
 fi
+
+# Read the subject from the two forms we can parse confidently; on anything else
+# the shape gate stands and we skip membership (no false rejections).
+if echo "$command" | grep -q '<<'; then
+  subject=$(printf '%s\n' "$command" | awk '/<</{f=1;next} f&&NF{gsub(/^[ \t]+|[ \t]+$/,"");print;exit}')
+elif [ "$(echo "$command" | grep -oE '(^|[[:space:]])-m([[:space:]]|=)' | wc -l | tr -d ' ')" = "1" ]; then
+  subject=$(printf '%s\n' "$command" | sed -nE "s/.*-m[[:space:]]+[\"']//p" | head -1)
+  subject=${subject%%\"*}; subject=${subject%%\'*}
+else
+  exit 0
+fi
+[ -n "${subject:-}" ] || exit 0
+
+case "$subject" in
+  *": "*) raw_scope=${subject%%": "*} ;;
+  *) exit 0 ;;
+esac
+
+# Defined scopes = structural names + every frontmatter `id:` in specs/ & features/
+# + each existing feature slug. (`|| true` so a no-match grep can't trip pipefail.)
+valid_ids=$(
+  { grep -rlE '^id:' "$root/specs" "$root/features" 2>/dev/null || true; } \
+  | while IFS= read -r f; do
+      awk 'NR==1 && $0 !~ /^---[[:space:]]*$/ {exit}
+           /^---[[:space:]]*$/ {c++; if (c==2) exit; next}
+           c==1 && /^id:[[:space:]]*/ {sub(/^id:[[:space:]]*/,""); sub(/[[:space:]]+$/,""); print; exit}' "$f"
+    done
+)
+feature_slugs=$({ ls -d "$root"/features/*/ 2>/dev/null || true; } | sed -E 's#.*/features/##; s#/$##')
+
+is_valid_scope() {
+  local s
+  s=$(printf '%s' "$1" | sed -E 's/[[:space:]]+\([A-Za-z0-9-]+\)$//; s/^[[:space:]]+//; s/[[:space:]]+$//')
+  case "$s" in
+    treewide|specs) return 0 ;;
+    web|website|ios|android|windows|linux|cli|convex) return 0 ;;
+    agents|commands|hooks|rules|skills|templates|docs|readme|mise) return 0 ;;
+  esac
+  grep -qxF "$s" <<<"$valid_ids" && return 0
+  local slug
+  for slug in $feature_slugs; do [ "$s" = "features/$slug" ] && return 0; done
+  return 1
+}
+
+IFS=',' read -ra parts <<<"$raw_scope"
+for p in "${parts[@]}"; do
+  is_valid_scope "$p" || fail "Scope '$(printf '%s' "$p" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')' is not a defined scope. Use a platform (web, website, ios, android, windows, linux, cli, convex), a harness area (hooks, skills, commands, agents, templates, rules, docs, mise, readme), a spec/feature ID from specs/ or features/ (list them with: grep -rhE '^id:' specs features), 'specs', a 'features/<slug>', or 'treewide'. See .claude/rules/commit-discipline.md."
+done
 
 exit 0
