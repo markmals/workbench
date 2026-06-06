@@ -32,33 +32,43 @@ In each case, split. The Tailwind bump is its own commit. The reformat is either
 
 ## What goes in a good message
 
-A commit message has three parts: **subject**, optional **body**, optional **footer**.
+A commit message has three parts: **subject**, optional **body**, optional **trailer(s)**.
+
+This repo uses **[Scoped Commits](https://scopedcommits.com/)**, not Conventional Commits. The subject leads with the **scope** — the subsystem, area, or module the commit touches — because in a spec-driven repo projected across many platforms, _where_ a change lands is the first thing a reader (or an incident responder) needs to know.
 
 ### Subject
 
-- Imperative, present tense: "Add", "Fix", "Remove" — not "Added" or "Adds".
-- Under ~72 characters.
+The shape is **`<scope>: <description>`**.
+
+The **description**:
+
+- Imperative, present tense: "add", "fix", "remove" — not "added" or "adds".
+- The whole subject (scope included) stays under ~72 characters.
 - No trailing period.
-- Specific. "Fix bug" is useless; "Reject duplicate emails in item creation" is useful.
+- Specific. "fix bug" is useless; "reject duplicate emails in item creation" is useful.
 
-Conventional Commits format is _recommended but not required_. If you use it, the prefixes that apply here:
+The **scope** names what the commit touches. Scoped Commits leaves the vocabulary to the project; in this repo a scope is one of:
 
-| Prefix      | Use for                                          |
-| ----------- | ------------------------------------------------ |
-| `feat:`     | New user-visible capability                      |
-| `fix:`      | Bug fix                                          |
-| `refactor:` | Restructuring without behavior change            |
-| `test:`     | Adding or improving tests                        |
-| `docs:`     | Spec / README / comment-only changes             |
-| `chore:`    | Config, deps, tooling                            |
-| `spec:`     | Edits to files under `specs/` or `features/<n>/` |
+| Scope                                                                                                   | Use for                                                                             |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| a platform — `web`, `ios`, `android`, `windows`, `linux`, `cli`, `website`, `convex`                    | Changes inside that platform's `apps/`/`services/` tree.                            |
+| a spec ID — `vm.items.list`, `story.item.create`                                                        | A change scoped to one spec's behavior (impl, tests, or the spec file itself).      |
+| `specs`                                                                                                 | Cross-cutting spec files (`CONVENTIONS`, `ARCHITECTURE`, `DESIGN_SYSTEM`, `STACK`). |
+| `features/<slug>`                                                                                       | Authoring or extending a feature folder.                                            |
+| a harness area — `hooks`, `skills`, `commands`, `agents`, `templates`, `rules`, `docs`, `setup`, `mise` | Changes to the template's own machinery.                                            |
+| `treewide`                                                                                              | A genuinely repo-wide sweep with no single home.                                    |
+
+When a change spans more than one area, prefer the **broadest scope that still describes it**; only fall back to a comma-separated list (`web, ios: …`) when no single scope fits, and to `treewide` for a true global sweep. A ticket number, when there is one, goes in parentheses after the scope: `web (PROJ-12): …`.
 
 Examples:
 
-- `feat: add items list view model with empty / loaded / error states`
-- `fix: reject item creation when email is already present`
-- `spec: clarify duplicate-email handling in story.item.create`
-- `refactor: split ItemsListView render logic into list and row components`
+- `web: add items list view model with empty / loaded / error states`
+- `vm.items.list: reject item creation when email is already present`
+- `specs: clarify duplicate-email handling in story.item.create`
+- `web: split ItemsListView render logic into list and row components`
+- `hooks: dispatch format-on-edit to the platform's fmt task`
+
+Reverts, merges, and other mechanical commits don't have to follow this shape — format them however is clearest.
 
 ### Body
 
@@ -70,11 +80,12 @@ Optional. Use it when the WHY isn't obvious from the subject. Wrap at ~72 charac
 
 Skip the body for trivial changes.
 
-### Footer
+### Trailer(s)
 
-Optional. Use for:
+Optional `Key: value` lines at the end of the message. Use for:
 
 - Cross-references: `Refs: story.item.create`, `Spec: vm.items.list`
+- A ticket, if you'd rather not put it in the scope: `Ticket: PROJ-12`
 - Breaking changes: `BREAKING CHANGE: <description>`
 - Co-authorship (if collaborating)
 

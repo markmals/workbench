@@ -107,7 +107,7 @@
                     {
                         "type": "command",
                         "if": "Bash(git commit*)",
-                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/conventional-commits.sh",
+                        "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/scoped-commits.sh",
                         "timeout": 5
                     }
                 ]
