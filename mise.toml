@@ -25,6 +25,11 @@ node = "24"
 pnpm = "11"
 "npm:oxfmt" = "latest"
 "npm:varlock" = "latest"
+# Browser-driving CLI for web/website visual verification (provides the
+# `chrome-devtools` command — see the web-verification skill). Root-pinned so
+# it's on PATH repo-wide, since the agent runs it as a bare command from the
+# repo root. /setup drops it when both the web app and website are pruned.
+"npm:chrome-devtools-mcp" = "latest"
 
 [env]
 # VitePress tooling installs at the repo root so markdown rendered via `srcDir`

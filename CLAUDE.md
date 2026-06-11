@@ -127,7 +127,7 @@ The site reads markdown directly from `specs/` and `features/` (no copying, no s
 
 ## MCP servers
 
-- **Web / website visual verification uses the `chrome-devtools` CLI**, not a committed MCP server — DOM, console, screenshots, network, and Lighthouse driven from the shell against **Chromium** (not Chrome). Install it with `mise use -g npm:chrome-devtools-mcp@latest`, then drive it in a tight verify-iterate loop; see the `web-verification` skill. (It's the same `chrome-devtools-mcp` engine earlier versions registered as a committed `.mcp.json` server — the CLI replaces it, so this template ships no committed MCP servers.)
+- **Web / website visual verification uses the `chrome-devtools` CLI**, not a committed MCP server — DOM, console, screenshots, network, and Lighthouse driven from the shell against **Chromium** (not Chrome). It's pinned in the root `mise.toml` (`mise install` puts it on PATH); drive it in a tight verify-iterate loop — see the `web-verification` skill. (It's the same `chrome-devtools-mcp` engine earlier versions registered as a committed `.mcp.json` server — the CLI replaces it, so this template ships no committed MCP servers.)
 
 - **Per-platform IDE bridges (user/local config, not committed).** Several toolchains expose the IDE to the agent over MCP — building, testing, and reading the code model with structured results. These are **per-machine** (they need the IDE running with the feature enabled), so configure them in your user config or a `.mcp.local.json`, never in shared, committed project config:
     - **Apple** — Xcode's [external agent access](https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode). See `ios-development`.

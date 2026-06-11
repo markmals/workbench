@@ -7,11 +7,7 @@ description: Use to drive the web app via the `chrome-devtools` CLI for visual v
 
 Drive the web app from Claude Code via the **`chrome-devtools` CLI** — a background daemon plus one subcommand per browser action. Tight verify-iterate loops: change code → reload → snapshot → assert → fix → repeat.
 
-The CLI is the same `chrome-devtools-mcp` engine the template used to register as an MCP server, driven over the shell instead. Install it once, globally, with mise:
-
-```sh
-mise use -g npm:chrome-devtools-mcp@latest
-```
+The CLI is the same `chrome-devtools-mcp` engine the template used to register as an MCP server, driven over the shell instead. It's pinned in the repo's **root `mise.toml`** (`"npm:chrome-devtools-mcp"`), so `mise install` puts the `chrome-devtools` command on your PATH — no separate install step. (Working in a copy that hasn't pinned it? `mise use npm:chrome-devtools-mcp@latest`.)
 
 Every browser action is a `chrome-devtools <command>` call — run them with the `Bash` tool. The daemon keeps one Chromium instance alive across calls, so there's no per-call launch cost; you're scripting a long-lived browser.
 
@@ -168,7 +164,7 @@ Because each step is a shell command, you can chain a whole loop iteration in on
 
 - `mise run -C apps/web dev` running (default `http://localhost:5173/`; confirm the port).
 - `mise run -C services/convex dev` running in parallel if the page touches Convex data.
-- The CLI on PATH: `mise use -g npm:chrome-devtools-mcp@latest`.
+- The CLI on PATH — pinned in the root `mise.toml`, so `mise install` provides it (or `mise use npm:chrome-devtools-mcp@latest` in a copy that lacks the pin).
 - Chromium installed at the `--executablePath` you pass to `start` (default macOS: `/Applications/Chromium.app/Contents/MacOS/Chromium`). If yours is elsewhere, pass the right path.
 
 ## Common gotchas
