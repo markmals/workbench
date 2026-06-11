@@ -45,7 +45,6 @@ If something doesn't fit any of those, it's either a future feature (write a spe
 │   ├── rules/                         ← shared content @included by platform CLAUDE.md files
 │   ├── skills/                        ← procedural workflows (writing-user-stories, simulator control)
 │   └── templates/                     ← canonical templates for new features and specs
-├── .mcp.json                          ← project MCP servers (Chrome DevTools)
 ├── docs/                              ← VitePress site rendering specs/ and features/
 │   └── index.md                       ← home page (URL-rewritten to /)
 ├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM, STACK)
@@ -99,7 +98,7 @@ Procedural skills live under `.claude/skills/`. Use them rather than reaching fo
 | `systematic-debugging`           | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                                                         |
 | `triaging-defects`               | When `apps/<platform>/DEFECTS.md` is non-empty and you're in a polish pass. Classify each entry as fix-in-place, promote-to-spec, or won't-fix; resolve; delete.                                      |
 | `web-development`                | When writing web-app code. React + TanStack suite + Convex + Tailwind + React Aria idioms, `/llms.txt` doc links.                                                                                     |
-| `web-verification`               | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                                                                    |
+| `web-verification`               | When verifying web UI in a browser. Wraps the `chrome-devtools` CLI.                                                                                                                                  |
 | `website-development`            | When writing marketing/content site code. Astro + React islands + content collections idioms.                                                                                                         |
 | `ios-development`                | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing idioms, HIG link list.                                                          |
 | `ios-simulator-control`          | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                                                        |
@@ -128,9 +127,9 @@ The site reads markdown directly from `specs/` and `features/` (no copying, no s
 
 ## MCP servers
 
-- **Chrome DevTools** (`.mcp.json`) — DOM, console, screenshots, network, lighthouse. Configured for **Chromium**, not Chrome. Use it aggressively when debugging or verifying web visuals; running it in a tight verify-iterate loop is the intended workflow. This one is committed because it's `npx`-launched and self-contained.
+- **Web / website visual verification uses the `chrome-devtools` CLI**, not a committed MCP server — DOM, console, screenshots, network, and Lighthouse driven from the shell against **Chromium** (not Chrome). Install it with `mise use -g npm:chrome-devtools-mcp@latest`, then drive it in a tight verify-iterate loop; see the `web-verification` skill. (It's the same `chrome-devtools-mcp` engine earlier versions registered as a committed `.mcp.json` server — the CLI replaces it, so this template ships no committed MCP servers.)
 
-- **Per-platform IDE bridges (user/local config, not committed).** Several toolchains expose the IDE to the agent over MCP — building, testing, and reading the code model with structured results. These are **per-machine** (they need the IDE running with the feature enabled), so configure them in your user or `.mcp.local.json`, never the shared `.mcp.json`:
+- **Per-platform IDE bridges (user/local config, not committed).** Several toolchains expose the IDE to the agent over MCP — building, testing, and reading the code model with structured results. These are **per-machine** (they need the IDE running with the feature enabled), so configure them in your user config or a `.mcp.local.json`, never in shared, committed project config:
     - **Apple** — Xcode's [external agent access](https://developer.apple.com/documentation/xcode/giving-external-agents-access-to-xcode). See `ios-development`.
     - **Android** — Android Studio / IntelliJ [MCP Server](https://www.jetbrains.com/help/idea/mcp-server.html#external-client-setup). See `android-development`.
     - **Windows** — [RoslynMcpExtension](https://github.com/sailro/RoslynMcpExtension) for the C# code model. See `windows-development`.

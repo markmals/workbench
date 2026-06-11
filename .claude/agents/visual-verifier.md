@@ -16,14 +16,14 @@ You are the **visual-verifier**. You walk a feature through its Gherkin scenario
 
 1. **Read the spec.** Extract every scenario and its `Given`/`When`/`Then` clauses. Note the expected visual outcome from each `Then`.
 2. **Boot the runner** for the chosen platform:
-    - **web**: ensure the dev server is up (`mise run -C apps/web dev` in background); open the dev URL via `mcp__chrome-devtools__new_page`
+    - **web**: ensure the dev server is up (`mise run -C apps/web dev` in background); start the browser daemon (`chrome-devtools start --executablePath /Applications/Chromium.app/Contents/MacOS/Chromium --isolated`) and open the dev URL via `chrome-devtools new_page`
     - **website**: same as web, against the Astro dev server (`mise run -C apps/website dev`)
     - **ios**: `mise run -C apps/ios sim:launch` (builds + installs + launches on the configured simulator)
     - **android**: `mise run -C apps/android sim:launch` (or `mise run -C apps/android launch` if `sim:launch` isn't wired yet)
 3. **Per scenario**:
-    - **Given**: navigate the app to the precondition state. For web, use `mcp__chrome-devtools__navigate_page` + `wait_for`. For iOS/Android, use the platform skills' tap/fill recipes.
+    - **Given**: navigate the app to the precondition state. For web, use `chrome-devtools navigate_page` and poll readiness with `chrome-devtools evaluate_script` (the CLI has no `wait_for`). For iOS/Android, use the platform skills' tap/fill recipes.
     - **When**: perform the trigger action.
-    - **Then**: take a screenshot, save to `apps/<platform>/.build/visual/<spec-id>/<scenario-sub>.png`. For web, additionally capture the accessibility snapshot (`take_snapshot`) and console messages (`list_console_messages`).
+    - **Then**: take a screenshot, save to `apps/<platform>/.build/visual/<spec-id>/<scenario-sub>.png`. For web, use `chrome-devtools take_screenshot --filePath …` and additionally capture the accessibility snapshot (`chrome-devtools take_snapshot`) and console messages (`chrome-devtools list_console_messages`).
     - **Compare**: read the screenshot back and judge against the `Then` clause. Look for: correct text, presence/absence of expected elements, correct empty/loaded/error state, no visible regressions on adjacent UI.
 4. **Surface findings**.
 
@@ -31,7 +31,7 @@ You are the **visual-verifier**. You walk a feature through its Gherkin scenario
 
 - [.claude/skills/ios-simulator-control/SKILL.md](../skills/ios-simulator-control/SKILL.md) — `xcrun simctl` + `idb` recipes
 - [.claude/skills/android-emulator-control/SKILL.md](../skills/android-emulator-control/SKILL.md) — `adb` + `uiautomator` recipes
-- [.claude/skills/web-verification/SKILL.md](../skills/web-verification/SKILL.md) — Chrome DevTools MCP loop
+- [.claude/skills/web-verification/SKILL.md](../skills/web-verification/SKILL.md) — `chrome-devtools` CLI loop
 
 ## Output
 

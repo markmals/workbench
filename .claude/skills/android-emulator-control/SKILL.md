@@ -5,7 +5,7 @@ description: Use to drive the Android emulator for visual verification, UI debug
 
 # Android Emulator Control
 
-Recipes for controlling an Android emulator from zsh. Use these the same way you'd use Chrome DevTools MCP on the web side: tight loops of "make change → run → screenshot → verify".
+Recipes for controlling an Android emulator from zsh. Use these the same way you'd use the `chrome-devtools` CLI on the web side: tight loops of "make change → run → screenshot → verify".
 
 ## Prerequisites
 

@@ -5,7 +5,7 @@ description: Use to drive a running WinUI 3 app on Windows for visual verificati
 
 # Windows App Control
 
-Recipes for driving a running WinUI 3 app from the `winapp` CLI on Windows. Use these the same way you'd use Chrome DevTools MCP on the web side or `ios-simulator-control` on Apple: tight loops of "make change → run → screenshot/assert → verify".
+Recipes for driving a running WinUI 3 app from the `winapp` CLI on Windows. Use these the same way you'd use the `chrome-devtools` CLI on the web side or `ios-simulator-control` on Apple: tight loops of "make change → run → screenshot/assert → verify".
 
 > **Windows host only.** `winapp` is a Windows `winget` package and packaged WinUI apps activate only on Windows. On a macOS-hosted agent this skill is **inert** — there, spec compliance is proven by MSTest at the view-model layer (see `windows-development` → "Verifying"), and GUI / visual / accessibility-runtime checks punt to a human on Windows. Do not load this skill to "verify" Windows behavior you cannot actually run.
 

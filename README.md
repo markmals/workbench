@@ -184,7 +184,6 @@ You drive the commands; the hooks (format-on-edit, codegen, lint-on-stop) and th
 ├── CLAUDE.md                          ← orientation doc Claude loads every session
 ├── README.md                          ← this file (orientation for humans)
 ├── .env.schema                        ← Varlock environment contract
-├── .mcp.json                          ← project-level MCP servers (Chromium DevTools)
 ├── .claude/                           ← everything Claude-shaped (see catalog below)
 ├── docs/                              ← VitePress site rendering specs/ and features/
 ├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM, STACK)
@@ -211,14 +210,13 @@ Everything below is what makes this template "Claude-native." If you copied just
 
 ### Root-level
 
-| Path                         | Purpose                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`CLAUDE.md`](CLAUDE.md)     | Loaded on every Claude Code session. The top-level orientation: how the repo works, where to read first, slash command index, skill index. `@includes` the rule files below so they're part of every session.                                                                                                                                |
-| [`STACK.md`](specs/STACK.md) | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                                                                                                                                                        |
-| [`.env.schema`](.env.schema) | [Varlock](https://varlock.dev) environment contract: the committed, typed declaration of the project's env vars. Real values live in gitignored `.env` / `.env.local`.                                                                                                                                                                       |
-| [`.mcp.json`](.mcp.json)     | Project-level MCP server config. Registers the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) pointed at **Chromium** (not Chrome) in `--isolated` mode for web visual verification. Per-platform IDE bridges (Xcode, Android Studio/JetBrains, Roslyn) are configured in **user/local** MCP config, not here. |
-| `apps/<platform>/CLAUDE.md`  | Per-platform orientation (created when you scaffold the platform). Stack idioms, test commands, where reverse pointers go in that language.                                                                                                                                                                                                  |
-| `services/convex/CLAUDE.md`  | Backend orientation (created when you scaffold Convex). Schema-as-protocol conventions, mutation/query patterns.                                                                                                                                                                                                                             |
+| Path                         | Purpose                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)     | Loaded on every Claude Code session. The top-level orientation: how the repo works, where to read first, slash command index, skill index. `@includes` the rule files below so they're part of every session. |
+| [`STACK.md`](specs/STACK.md) | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                         |
+| [`.env.schema`](.env.schema) | [Varlock](https://varlock.dev) environment contract: the committed, typed declaration of the project's env vars. Real values live in gitignored `.env` / `.env.local`.                                        |
+| `apps/<platform>/CLAUDE.md`  | Per-platform orientation (created when you scaffold the platform). Stack idioms, test commands, where reverse pointers go in that language.                                                                   |
+| `services/convex/CLAUDE.md`  | Backend orientation (created when you scaffold Convex). Schema-as-protocol conventions, mutation/query patterns.                                                                                              |
 
 ### `.claude/settings.json`
 
@@ -252,7 +250,7 @@ Skills are markdown files that encode "how we do X here." Claude invokes them vi
 | [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                  |
 | [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain.                                   |
 | [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web-app code. React + TanStack suite + Convex + Clerk + Tailwind + React Aria + Motion + Zod idioms.                                              |
-| [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the Chrome DevTools MCP.                                                                                             |
+| [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the `chrome-devtools` CLI (`mise use -g npm:chrome-devtools-mcp@latest`).                                            |
 | [`website-development`](.claude/skills/website-development/SKILL.md)                       | When writing the marketing/content site. Astro + React islands + content collections idioms.                                                                   |
 | [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing + generated OpenAPI client.              |
 | [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                 |

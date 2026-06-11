@@ -1,154 +1,189 @@
 ---
 name: web-verification
-description: Use to drive the web app via the Chrome DevTools MCP for visual verification, UI debugging, and behavioral checks. Trigger when verifying web UI changes, screenshotting an app state, simulating interaction, or inspecting console/network in a tight verify-iterate loop. Analog of `ios-simulator-control` and `android-emulator-control` for the web platform.
+description: Use to drive the web app via the `chrome-devtools` CLI for visual verification, UI debugging, and behavioral checks. Trigger when verifying web UI changes, screenshotting an app state, simulating interaction, or inspecting console/network in a tight verify-iterate loop. Analog of `ios-simulator-control` and `android-emulator-control` for the web platform.
 ---
 
 # Web Verification
 
-Drive the web app from Claude Code via the Chrome DevTools MCP. Tight verify-iterate loops: change code → reload → snapshot → assert → fix → repeat.
+Drive the web app from Claude Code via the **`chrome-devtools` CLI** — a background daemon plus one subcommand per browser action. Tight verify-iterate loops: change code → reload → snapshot → assert → fix → repeat.
 
-The MCP is already configured in [.mcp.json](.mcp.json) to use **Chromium** (not Chrome). Tools appear as `mcp__plugin_chrome-devtools-mcp_chrome-devtools__*` or similar.
+The CLI is the same `chrome-devtools-mcp` engine the template used to register as an MCP server, driven over the shell instead. Install it once, globally, with mise:
 
-## Prerequisites
+```sh
+mise use -g npm:chrome-devtools-mcp@latest
+```
 
-- `mise run -C apps/web dev` running (default `http://localhost:5173/` for Vite-based projects; check the actual port in the dev server output).
-- `mise run -C services/convex dev` running in parallel if the page touches Convex data.
-- Chromium installed at the path configured in [.mcp.json](.mcp.json) (default macOS: `/Applications/Chromium.app/Contents/MacOS/Chromium`). If yours is elsewhere, edit the executablePath.
+Every browser action is a `chrome-devtools <command>` call — run them with the `Bash` tool. The daemon keeps one Chromium instance alive across calls, so there's no per-call launch cost; you're scripting a long-lived browser.
+
+## Daemon lifecycle
+
+`start` boots (or restarts) the background daemon and decides which browser it drives. Point it at **Chromium** (not Chrome), isolated profile — matching the template's reproducibility intent:
+
+```sh
+chrome-devtools start \
+  --executablePath /Applications/Chromium.app/Contents/MacOS/Chromium \
+  --isolated
+```
+
+- `--isolated` uses a throwaway user-data-dir cleaned up on stop (the default when no `--userDataDir` is given; passed here for intent).
+- Add `--no-headless` if you want to watch the browser drive itself; headless (the default) screenshots identically.
+- `chrome-devtools status` — is the daemon up, and with what args.
+- `chrome-devtools stop` — kill it (and the isolated profile) when done.
+
+Commands auto-start a daemon if none is running, but with the **default** browser (system Chrome) — so run `start` with the Chromium `--executablePath` first, or you'll be driving the wrong browser. `start` is idempotent ("start or restart").
+
+## Output format
+
+Every command prints Markdown by default; pass `--output-format json` when you want to parse the result (page lists, network requests, console dumps):
+
+```sh
+chrome-devtools list_pages --output-format json
+```
 
 ## Open a page
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page
-  url: "http://localhost:5173/"
-```
-
-For an existing tab:
-
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page
-  type: "url"
-  url: "http://localhost:5173/items"
+```sh
+chrome-devtools new_page "http://localhost:5173/"
 ```
 
-To reload (e.g. after a code change that didn't HMR-update):
+(Default dev URL is `http://localhost:5173/` for Vite; check the dev-server output for the real port.)
 
+Navigate an existing tab:
+
+```sh
+chrome-devtools navigate_page --type url --url "http://localhost:5173/items"
 ```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page
-  type: "reload"
-  ignoreCache: true
+
+Reload (e.g. after a change that didn't HMR):
+
+```sh
+chrome-devtools navigate_page --type reload --ignoreCache
 ```
+
+Multiple tabs: `list_pages`, then `select_page <pageId>` to choose the context, `close_page <pageId>` to drop one.
 
 ## Screenshot
 
+```sh
+chrome-devtools take_screenshot \
+  --filePath apps/web/.tmp/screenshots/items-list.png \
+  --fullPage          # omit for just the viewport
 ```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot
-  filePath: "<absolute path inside workspace>"   # e.g. apps/web/.tmp/screenshots/items-list.png
-  fullPage: true                                  # or false for just the viewport
-```
 
-**Important:** screenshots can only be saved inside workspace roots. `/tmp/` will be rejected. Put them under a gitignored path inside the repo — e.g. `apps/web/.tmp/screenshots/` or `docs/.vitepress/cache/` (already gitignored).
+`--filePath` is absolute, or relative to the directory you run the command from. Save under a gitignored path inside the repo (e.g. `apps/web/.tmp/screenshots/`) so before/after shots don't pollute the tree. Then `Read` the file to view it. Screenshot a single element with `--uid <uid from snapshot>` (incompatible with `--fullPage`).
 
-After saving, use `Read` on the screenshot path to view it.
-
-Take screenshots aggressively when verifying visual changes. Name them descriptively (`items-list-empty.png`, `items-list-populated.png`, `item-create-error.png`) so before/after comparison is easy.
+Take screenshots aggressively when verifying visual changes; name them descriptively (`items-list-empty.png`, `item-create-error.png`) so comparison is easy.
 
 ## Inspect what's on screen
 
-Take an accessibility snapshot — text representation of the DOM with stable element UIDs:
+Accessibility snapshot — text representation of the DOM with stable element UIDs:
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot
+```sh
+chrome-devtools take_snapshot
 ```
 
-Use the returned UIDs to drive interactions or assert structure. Prefer snapshots over screenshots when you're checking _content_ rather than _visuals_.
+Use the returned UIDs to drive interactions or assert structure. Prefer a snapshot over a screenshot when checking _content_ rather than _visuals_. (`--filePath` saves it; `--verbose` includes the full a11y tree.)
 
 ## Interact
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__click      uid: <from snapshot>
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill       uid: <from snapshot>  value: "Jane Doe"
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__hover      uid: <from snapshot>
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__press_key  key: "Escape"
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__type_text  text: "Hello"
+```sh
+chrome-devtools click  <uid>                 # --dblClick for double-click
+chrome-devtools fill   <uid> "Jane Doe"      # text input, textarea, or <select>
+chrome-devtools hover  <uid>
+chrome-devtools press_key Escape
+chrome-devtools type_text "Hello"            # into the focused element
 ```
 
-For full-form input use `fill_form` with multiple UIDs and values.
+UIDs come from the latest `take_snapshot` — re-snapshot after anything that re-renders. Add `--includeSnapshot` to `click`/`fill` to get the post-action snapshot in the same call (saves a round-trip in loops). There's no `fill_form` command — fill a form with one `fill` per field.
 
 ## Read console messages
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages
-  types: ["error", "warn"]   # filter to errors/warnings only when triaging
+```sh
+chrome-devtools list_console_messages --types error warn
 ```
 
-After a change, check the console **first** before deciding the change worked. Silent JS errors are a common cause of "looks blank but no obvious problem".
+Check the console **first** after a change before deciding it worked — silent JS errors are the usual cause of "looks blank, no obvious problem." Drop `--types` to see everything; `get_console_message <msgid>` drills into one.
 
 ## Inspect network
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_network_requests
-  resourceTypes: ["document", "fetch", "xhr"]
-```
-
-Drill into a specific request:
-
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__get_network_request
-  reqid: <number from list>
+```sh
+chrome-devtools list_network_requests --resourceTypes document fetch xhr
+chrome-devtools get_network_request --reqid <number from list>
 ```
 
-Useful for catching unexpected requests (someone removed a query but the cache is stale, or a Convex call is firing twice).
+Useful for catching unexpected requests (a stale cache, or a Convex call firing twice).
 
 ## Evaluate JavaScript in the page
 
-The escape hatch for everything else:
+The escape hatch for everything else — pass a function declaration as the positional arg:
 
-```
-mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script
-  function: |
-    () => ({
-      title: document.title,
-      hasItemList: !!document.querySelector('[data-testid="items-list"]'),
-      itemCount: document.querySelectorAll('[data-testid="item-row"]').length,
-    })
+```sh
+chrome-devtools evaluate_script '() => ({
+  title: document.title,
+  hasItemList: !!document.querySelector("[data-testid=items-list]"),
+  itemCount: document.querySelectorAll("[data-testid=item-row]").length,
+})'
 ```
 
-Use this to:
+Use it to confirm the app mounted (`document.getElementById("app").children.length > 0`), read computed styles when a visual check is ambiguous, or inspect page data. Returned values must be JSON-serializable.
 
-- Confirm Vue/React mounted (`document.getElementById('app').children.length > 0`)
-- Read computed styles when a visual check is ambiguous
-- Inspect window globals or page data when something behaves unexpectedly
+This is also how you **wait** — there's no `wait_for` command. Poll a condition before asserting:
 
-Keep returned values JSON-serializable.
+```sh
+chrome-devtools evaluate_script 'async () => {
+  for (let i = 0; i < 50; i++) {
+    if (document.querySelector("[data-testid=items-list]")) return "ready";
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return "timeout";
+}'
+```
+
+For a coarse pause, `sleep 0.5` between commands is fine.
+
+## Lighthouse + performance
+
+```sh
+chrome-devtools lighthouse_audit --device desktop            # a11y / SEO / best-practices
+chrome-devtools performance_start_trace --reload --autoStop  # then performance_stop_trace
+```
+
+Lighthouse excludes performance — use the perf trace for Core Web Vitals (LCP, INP, CLS).
 
 ## Verify-iterate loop pattern
 
 ```
 1. Make a code change in apps/web/.
-2. The dev server should hot-reload automatically. If you suspect it didn't:
-   - navigate_page  type: "reload"  ignoreCache: true
-3. Drive the UI to the state you want to verify:
-   - navigate_page → click → fill → … (one action per step is fine).
-4. Wait for things to settle if the action is async:
-   - wait_for       selector or condition
-5. Take a screenshot OR a snapshot OR read console messages.
-6. Decide: did the change work? If yes, move on. If no, repeat with a fix.
+2. Dev server hot-reloads. If you suspect it didn't:
+   chrome-devtools navigate_page --type reload --ignoreCache
+3. Drive the UI to the state you want (navigate → click → fill → …).
+4. If the action is async, poll with evaluate_script (above) before asserting.
+5. take_screenshot OR take_snapshot OR list_console_messages.
+6. Decide: did it work? Yes → move on. No → fix and repeat.
 ```
 
-If you find yourself running the same sequence three times, define a helper `mise run -C apps/web verify-<feature>` task to script it.
+Because each step is a shell command, you can chain a whole loop iteration in one `Bash` call. If you run the same sequence three times, script it as a `mise run -C apps/web verify-<feature>` task.
+
+## Prerequisites
+
+- `mise run -C apps/web dev` running (default `http://localhost:5173/`; confirm the port).
+- `mise run -C services/convex dev` running in parallel if the page touches Convex data.
+- The CLI on PATH: `mise use -g npm:chrome-devtools-mcp@latest`.
+- Chromium installed at the `--executablePath` you pass to `start` (default macOS: `/Applications/Chromium.app/Contents/MacOS/Chromium`). If yours is elsewhere, pass the right path.
 
 ## Common gotchas
 
 - **404 for `/favicon.ico`** is harmless — the browser's default request. Our favicon is at `/favicon.svg`.
-- **`Content-Type: text/html`** on what should be a static asset means VitePress / Vite is serving its SPA shell as a fallback because the URL didn't match a known asset. Check your `public/` resolution.
-- **Empty `#app`** = Vue/React didn't mount. Almost always a runtime error in the entry script — check `list_console_messages` without filters.
-- **Stale data after a Convex mutation** = the query cache wasn't invalidated. Check the mutation's `optimisticUpdate` / cache config in your view model.
+- **`Content-Type: text/html`** on what should be a static asset means Vite is serving its SPA shell as a fallback because the URL didn't match a known asset. Check `public/` resolution.
+- **Empty `#app`** = React didn't mount. Almost always a runtime error in the entry script — `list_console_messages` with no `--types` filter.
+- **Stale data after a Convex mutation** = the query cache wasn't invalidated. Check the mutation's `optimisticUpdate` / cache config in the view model.
+- **"No daemon running" or driving the wrong browser** = re-run `chrome-devtools start …` with the Chromium `--executablePath`.
 
 ## When NOT to use this skill
 
-- Pure unit tests of view models or selectors — those run via `mise run -C apps/web test`, no browser needed.
-- One-off lookups of page state that aren't tied to a code change.
-- Anything that has a faster path through Vitest + jsdom.
+- Pure unit tests of view models or selectors — `mise run -C apps/web test`, no browser needed.
+- One-off lookups of page state not tied to a code change.
+- Anything with a faster path through Vitest + jsdom.
 
 ## Related skills
 

@@ -164,6 +164,6 @@ Use `spec:` as the commit prefix for everything authored by this skill. Do not i
 ## Anti-patterns
 
 - **No design before code.** Every feature goes through this skill, even small ones. The skill itself can be short for small features (a few questions, two stories, one model) — but it must be invoked.
-- **Visual companion / mockup mode.** Out of scope here. Use Chrome DevTools MCP for visual verification once code exists.
+- **Visual companion / mockup mode.** Out of scope here. Use the `chrome-devtools` CLI (the `web-verification` skill) for visual verification once code exists.
 - **Branching ceremony.** No "create a branch first" steps. Default workspace is `main`.
 - **Plan documents.** We don't have plan.md / tasks.md. The feature folder _is_ the plan.

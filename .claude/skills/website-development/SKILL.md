@@ -126,9 +126,9 @@ apps/website/src/
 
 ## Verifying
 
-- **Visual / behavioral** — use the `web-verification` skill (Chrome DevTools MCP) against the Astro dev server (`mise run website:dev`). Screenshot, inspect console, exercise islands in a tight verify-iterate loop.
+- **Visual / behavioral** — use the `web-verification` skill (the `chrome-devtools` CLI) against the Astro dev server (`mise run website:dev`). Screenshot, inspect console, exercise islands in a tight verify-iterate loop.
 - **Content + types** — run `astro check` (via `mise run -C apps/website check`) to surface content-collection schema errors and type breaks. Then `mise run -C apps/website typecheck` (tsgo).
-- **Performance + SEO** — Lighthouse matters more here than for the app; content sites live or die on perf and SEO. Run the Lighthouse audit through the Chrome DevTools MCP against a production-like build (`mise run website:build` then preview) and read the LCP / CLS / SEO scores before claiming a page is done.
+- **Performance + SEO** — Lighthouse matters more here than for the app; content sites live or die on perf and SEO. Run `chrome-devtools lighthouse_audit` against a production-like build (`mise run website:build` then preview) and read the LCP / CLS / SEO scores before claiming a page is done.
 
 ## When to invoke a more specific skill
 

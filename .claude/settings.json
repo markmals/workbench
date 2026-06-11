@@ -14,6 +14,7 @@
             "Bash(tsgo:*)",
             "Bash(vite:*)",
             "Bash(vitest:*)",
+            "Bash(chrome-devtools:*)",
             "Bash(git status:*)",
             "Bash(git diff:*)",
             "Bash(git log:*)",
