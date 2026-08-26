@@ -2,7 +2,7 @@
 id: proposal.0001
 title: Workbench 2.0
 authors: [markmals, Claude]
-status: draft
+status: awaiting-implementation
 pull-request: https://github.com/markmals/workbench/pull/1
 issues: []
 supersedes: []
@@ -56,24 +56,15 @@ A skill per stage was tried first and rejected. It recreated 1.0's central failu
 
 **Ordering.** Implementation is strictly failing tests, then guides written from the proposal, then code. Guides are compared against the tests before code is written; any behavior in one and not the other is a defect in one of them.
 
-**Validation.** `tools/validate.mjs`, dependency-free Node, enforces five rules over the record: identifiers match filenames and are unique; every `supersedes`, `established-by`, and `describes` reference resolves; superseding an entry requires the superseded entry to be marked; required keys are present and `status` is within the set allowed for that kind; and no proposal at `accepted`, `implemented`, or `superseded` still contains a `[NEEDS CLARIFICATION:` marker. Pure logic is separated from filesystem traversal so the rules are testable directly.
+**Validation.** `tools/validate.mjs`, dependency-free Node, enforces five rules over the record: identifiers match filenames and are unique; every `supersedes`, `established-by`, and `describes` reference resolves; superseding an entry requires the superseded entry to be marked; required keys are present and `status` is within the set allowed for that kind; and no proposal past `draft` still contains an unresolved clarification marker, exempting the statuses where a design is legitimately being reworked or abandoned. Pure logic is separated from filesystem traversal so the rules are testable directly, without network access or third-party dependencies.
 
 **Enforcement surfaces.** `mise run check` runs formatting, validation, the validator's tests, and the guides build. `.github/workflows/ci.yml` runs the same gates plus commit-message validation over the pull request's commits. `.agents/hooks/commit-msg` is a POSIX git hook enforcing Scoped Commits, replacing 1.0's Claude-specific `PreToolUse` hook.
 
-**Publication.** The existing VitePress site is retained and retargeted from `specs/` and `features/` onto the record and the guides, with navigation ordered vision, decisions, policies, proposals, guides. Superseded entries move to a collapsed group rather than disappearing.
+**Publication.** The existing VitePress site is retained and retargeted from `specs/` and `features/` onto the record and the guides, with navigation ordered vision, decisions, policies, proposals, guides. Superseded entries move to a collapsed group rather than disappearing. An empty record directory yields an omitted or empty navigation group and must never fail the build, since a freshly adopted project has nothing in `policies/`, `decisions/`, or `guides/` yet.
 
 **Harness neutrality.** Everything ships in `.agents/` with `AGENTS.md` as the single contract. `ADOPTING.md` documents the one-time adaptation for a specific harness.
 
-## Acceptance criteria
-
-- [ ] A fresh clone contains no reference to a platform, stack, framework, or device — no `apps/`, no `services/`, no reverse pointers, no drift detection, no `/sdd-*` commands.
-- [ ] `AGENTS.md` states the five phases, the artifact set, and the hard rules, and every skill it names exists at the path given.
-- [ ] `mise run check` passes on a clean checkout.
-- [ ] The validator rejects each of its five rule violations and accepts a valid record, proven by tests that run without network access or third-party dependencies.
-- [ ] The site builds, publishes the record and the guides, and does not fail when a record directory is empty.
-- [ ] Continuous integration runs the same gates as `mise run check` plus commit-message validation over the pull request's commits.
-- [ ] A preview workflow ships wired for this repository's shape, with recipes for the other shapes present but inert.
-- [ ] No surviving document instructs the agent not to use a branch, not to push a feature branch, or not to open a pull request.
+**Completeness of the cut.** No surviving document may instruct the agent to avoid a branch, avoid pushing a feature branch, or avoid opening a pull request, and no reference to a platform, stack, or device may remain. Three separate 1.0 documents carried the first prohibition and the second is spread across nearly every file, so this is a property to verify rather than assume.
 
 ## Compatibility
 
