@@ -186,15 +186,23 @@ partial adoption degrades rather than breaks.
 
 ## Preview
 
-Workbench is a documentation and process repository, so its preview is the rendered site:
-`.github/workflows/preview.yml` runs `mise run docs:build` on every pull request and uploads the
-built site as a workflow artifact. Access is gated by repository permissions, which is the privacy
-model.
+Workbench is a documentation and process repository, so its preview is the rendered site,
+deployed. `.github/workflows/preview.yml` builds it on every pull request, publishes it to GitHub
+Pages under `pr-preview/pr-<n>/`, comments the URL on the pull request, and removes both when the
+pull request closes.
 
-This is the cheapest realistic artifact for this repository. A deployment would cost hosting and
-an access-control decision to expose the same static output. A screenshot would not let a reviewer
-navigate the site, follow a cross-reference between record entries, or confirm that an empty
-record directory degrades gracefully.
+A downloadable build artifact was tried first and rejected. It is not a preview: reviewing it
+means downloading a zip, unzipping it, and starting a local server, which nobody does. The whole
+point is that the human exercises the change, and friction at that step means the change gets
+reviewed as prose instead.
+
+This repository is public, so its preview is public, which is correct — the guides and the record
+are already readable in the repository and rendering them exposes nothing new. Projects whose
+guides must stay private cannot use GitHub Pages, which serves privately only under Enterprise;
+the workflow carries a Cloudflare Pages recipe that can gate a preview behind Cloudflare Access.
+
+The build honors a `DOCS_BASE` environment variable, because a site deployed to a subpath without
+a matching base renders every asset URL against the domain root and loads blank.
 
 ## Policies and decisions checked
 

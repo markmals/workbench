@@ -6,7 +6,10 @@ import { clarificationMarkerPlugin } from "./markdown/clarification";
 
 const sidebar = generateSidebar();
 
+// Preview deployments land on a subpath (/<repo>/pr-preview/pr-N/). Without a matching base every
+// asset URL resolves against the domain root and the deployed site loads blank.
 const config = defineConfig({
+    base: process.env.DOCS_BASE ?? "/",
     title: "Workbench",
     description: "A platform-agnostic, harness-agnostic agentic development process kit.",
     srcDir: "..",

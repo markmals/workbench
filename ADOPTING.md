@@ -100,12 +100,24 @@ that is depends on what your project is:
 | Desktop           | installable build                                  |
 | Mobile            | installable build, ad-hoc or internal distribution |
 
-`.github/workflows/preview.yml` ships with the documentation build wired up, because that is what
-Workbench itself is, plus commented recipes for the other shapes. Wire the row matching your
+`.github/workflows/preview.yml` ships with a documentation deployment wired up, because that is
+what Workbench itself is, plus commented recipes for the other shapes. Wire the row matching your
 project and delete the rest.
 
-Previews are private by default — reachable by people with repository access, and no further.
-Make one public only deliberately, as when a library publishes its documentation.
+**A preview has to be something you can actually open or install.** A downloadable build artifact
+is not one — reviewing it would mean unzipping a file and starting a local server, which is enough
+friction that the change gets reviewed as prose instead. The exception is a command-line tool,
+where installing the binary is the real act.
+
+The shipped default deploys to GitHub Pages, which requires enabling Pages with its source set to
+the `gh-pages` branch, and which is public. **If your guides must stay private, do not use it** —
+GitHub Pages serves privately only under Enterprise. Use the Cloudflare Pages recipe in the
+workflow instead, which can gate the preview behind Cloudflare Access, and set
+`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+If your site is deployed to a subpath, make sure its base path is configurable at build time. The
+shipped VitePress config reads `DOCS_BASE` for exactly this reason; without it every asset
+resolves against the domain root and the preview loads blank.
 
 ## 5. Configure the service account
 

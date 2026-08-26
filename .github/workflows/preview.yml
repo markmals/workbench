@@ -1,55 +1,94 @@
-# Guides remain private by default: this artifact inherits repository permissions and is available only to authorized repository users.
+# The preview: the cheapest realistic artifact through which a human can exercise the change.
+#
+# Workbench is a documentation and process repository, so its preview is the rendered site,
+# deployed to a real URL and commented on the pull request. A downloadable build artifact is not a
+# preview — nobody unzips a file and starts a local server to review a docs change.
+#
+# This repository is public, so its preview is public too, which is correct: the guides and the
+# record are already readable in the repository. A project whose guides must stay private should
+# use the Cloudflare Pages recipe at the bottom of this file instead — GitHub Pages cannot serve
+# privately outside Enterprise.
+#
+# Requires GitHub Pages enabled with its source set to the `gh-pages` branch.
+
 name: Preview
 
 on:
     pull_request:
+        types: [opened, synchronize, reopened, closed]
+
+concurrency:
+    group: preview-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: write
+    pull-requests: write
 
 jobs:
     docs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
-            - run: mise install
-            - run: mise run docs:build
-            - uses: actions/upload-artifact@v7
-              with:
-                  name: pr-${{ github.event.pull_request.number }}-docs-preview
-                  path: docs/.vitepress/dist
-                  if-no-files-found: error
 
-# A project wires exactly the row matching its shape and deletes the rest.
+            - uses: jdx/mise-action@v4
+              if: github.event.action != 'closed'
+
+            - run: mise install
+              if: github.event.action != 'closed'
+
+            # The base must match the path the preview is served from, or every asset 404s.
+            - run: mise run docs:build
+              if: github.event.action != 'closed'
+              env:
+                  DOCS_BASE: /${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.pull_request.number }}/
+
+            # Deploys on open and update; removes the preview and its comment when the PR closes,
+            # which is the teardown that phase 5 cleanup requires.
+            - uses: rossjrw/pr-preview-action@v1.8.1
+              with:
+                  source-dir: docs/.vitepress/dist
+                  preview-branch: gh-pages
+                  umbrella-dir: pr-preview
+                  action: auto
+
+# ------------------------------------------------------------------------------
+# PREVIEW RECIPE MENU — ADAPT EXACTLY ONE, DELETE THE REST
 #
+# A preview must be something the human can actually exercise. Match the row to what the
+# repository is, not to what is easiest to wire.
 # ------------------------------------------------------------------------------
-# PREVIEW RECIPE MENU — ADAPT EXACTLY ONE
-# ------------------------------------------------------------------------------
+#
+# Documentation, but private
+#   Replace the deploy step with Cloudflare Pages, which can gate a preview behind Cloudflare
+#   Access. Needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets.
+#     - uses: cloudflare/wrangler-action@v4
+#       with:
+#         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+#         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+#         command: pages deploy docs/.vitepress/dist --project-name=<project> --branch=pr-${{ github.event.pull_request.number }}
+#   Human exercises: click through the deployed site.
+#
 # Library
-#   1. Build and publish a prerelease package under a prerelease tag.
-#   2. Link the prerelease package from the readiness report.
-#   Warning: a public registry publication is public forever.
+#   Publish a prerelease under a prerelease tag, never `latest`, and link it from the readiness
+#   report. A publication to a public registry is public forever — use a scoped or dist-tagged
+#   release, or pkg.pr.new for per-commit installs that expire.
 #   Human exercises: install the prerelease in a dependent project.
 #
-# Web app
-#   1. Build the project and deploy a preview environment.
-#   2. Link the private preview deployment from the readiness report.
-#   Human exercises: changed behavior in the running web app.
+# Web application
+#   Deploy a preview environment per pull request with isolated configuration and its own data.
+#   Human exercises: the changed behavior in the running application.
 #
 # API
-#   1. Deploy a preview endpoint with isolated preview configuration.
-#   2. Link the endpoint and access instructions from the readiness report.
-#   Human exercises: changed requests against the preview endpoint.
+#   Deploy a preview endpoint with isolated configuration. Include credentials or a token in the
+#   readiness report, and revoke them at cleanup.
+#   Human exercises: real requests against the preview endpoint.
 #
-# CLI
-#   1. Build an installable executable for the target operating systems.
-#   2. Upload it as a pull-request artifact and link it from the readiness report.
+# Command-line tool
+#   Build an installable executable for the platforms the human uses and upload it. This is the
+#   one case where an artifact is a legitimate preview, because installing it is the real act.
 #   Human exercises: install and run the changed command.
 #
-# Desktop
-#   1. Build an installable desktop package.
-#   2. Upload it as a pull-request artifact and link it from the readiness report.
-#   Human exercises: install and use the changed desktop behavior.
-#
-# Mobile
-#   1. Build an installable mobile package for ad-hoc or internal distribution.
-#   2. Link the install path from the readiness report.
-#   Human exercises: install and use the changed mobile behavior.
+# Desktop / Mobile
+#   Build an installable package; for mobile use ad-hoc or an internal distribution track.
+#   Human exercises: install and use the changed behavior on a real device.

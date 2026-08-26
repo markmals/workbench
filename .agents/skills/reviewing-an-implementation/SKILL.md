@@ -100,12 +100,16 @@ Reviewing prose is not reviewing behavior. Use the configured project task and C
 | Library          | Prerelease package                                    |
 | Web app          | Preview deployment                                    |
 | API              | Preview endpoint                                      |
-| Docs             | Rendered documentation build                          |
+| Docs             | Deployed documentation site                           |
 | CLI              | Installable executable                                |
 | Desktop          | Installable build                                     |
 | Mobile           | Installable build via ad-hoc or internal distribution |
 
 For a mixed repository, preview the surface the proposal changed; do not produce every repository-shaped preview by habit. A pure refactor with no exercisable surface produces no preview. State that plainly in the readiness report rather than fabricating one.
+
+**The human must be able to open or install it directly.** A downloadable build artifact is not a preview — reviewing it would mean unzipping a file and starting a local server, which is enough friction that the change gets reviewed as prose instead. The one exception is a command-line tool, where installing the binary is the real act. If your preview step ends in "upload artifact" for anything else, it is not finished.
+
+A site deployed to a subpath needs its base path set to that subpath at build time, or every asset resolves against the domain root and the preview loads blank. Verify the deployed preview actually renders before linking it; a green workflow is not evidence, per `.agents/rules/verification.md`.
 
 Build from the pull-request revision. Give repository-accessible humans a stable link or installation location; they must not build the artifact themselves. The readiness report links it and states required setup, what to try, and the expected result. A bare URL is insufficient. Keep the preview's lifetime tied to the pull request.
 
