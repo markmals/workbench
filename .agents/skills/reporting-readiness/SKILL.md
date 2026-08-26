@@ -32,9 +32,9 @@ The adversarial stage loses its value if the primary agent quietly drops a findi
 
 ## Advance the proposal status
 
-Marking the PR ready hands the work to the human, so set the proposal's `status: active-review` in the same change that posts the report. That is the only status transition this skill makes.
+Three things happen together and must not be separated: the proposal moves to `status: active-review`, the readiness report is posted, and the pull request flips from draft to ready. Each one signals that the first full pass at tests, guides, and code exists and the work is now the human's to evaluate. Doing one without the others leaves the record disagreeing with the pull request.
 
-Never set `accepted`. That status records the human's acceptance of the finished work in phase 5; an agent setting it is an agent approving its own work.
+This is the only status transition this skill makes. Never set `accepted` — that records the human's acceptance of the finished work in phase 5, and an agent setting it is an agent approving its own work.
 
 ## Post as a service account
 

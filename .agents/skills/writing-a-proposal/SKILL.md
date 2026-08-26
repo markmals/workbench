@@ -19,7 +19,7 @@ Create exactly one `proposals/<NNNN>-<slug>.md`. Copy [`.agents/templates/PROPOS
 
 - Use the next unused four-digit number and a kebab-case slug.
 - Complete the template frontmatter: `id: proposal.<NNNN>`, Title Case `title`, `status: draft`, the draft PR URL or number, and `supersedes`.
-- Complete every template section: Motivation, Intended behavior, Acceptance criteria, Scope, Out of scope, Design decisions and rejected alternatives, Preview, Policies and decisions checked, and Open questions.
+- Complete every template section: Summary, Motivation, Proposed solution, Detailed design, Acceptance criteria, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
 - Write the Acceptance criteria section with `writing-acceptance-criteria`.
 
 ## Size before detail
@@ -74,9 +74,13 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     Fix clear defects. Count remaining clarification markers and present them to the human.
 
-8. **Get human approval.** Iterate until the human explicitly approves the proposal by setting `status: awaiting-implementation`. Never advance the status yourself — the status records the human's judgement, not your confidence.
+8. **Publish the draft.** Commit the proposal and push it as soon as it is coherent enough to react to. Do not polish it privately first — the draft pull request exists so the human can read and edit the proposal in place, and a proposal held back is a proposal being decided by the agent alone.
 
-    `accepted` is a later, different state: it means the human accepted the finished work during review, not that implementation may begin. Confusing the two lets an agent mark its own work approved.
+9. **Iterate on the pull request.** The human comments, requests changes, and may commit edits to the proposal directly. Read those commits before responding; they are instructions, not conflicts to resolve. Keep iterating — answering questions, revising the design, resolving markers — until the human is satisfied. This can take many rounds, and the proposal stays `draft` throughout.
+
+10. **Wait for the human to close the draft.** The human decides when the proposal is settled and moves it to `status: awaiting-implementation`. They may ask you to make that edit; making it when asked is fine, deciding it is not.
+
+    Never decide this yourself. `accepted` is a different and much later state — it records the human accepting the finished implementation, not permission to begin. An agent that reaches either conclusion unaided is an agent approving its own work.
 
 ## Hard gate
 

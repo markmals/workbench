@@ -2,7 +2,7 @@
 id: proposal.<NNNN>
 title: <Title Case>
 authors: [<name>]
-# Set `draft` when you create the proposal. Never advance status yourself.
+# Set `draft` on creation. See the lifecycle note below for who decides each transition.
 status: draft
 pull-request: <url or number, empty while unopened>
 issues: []
@@ -26,8 +26,10 @@ Lifecycle:
 - `withdrawn` — the author pulled it; retained as a record.
 - `superseded` — a later proposal replaced it; retained as a record.
 Normal path: `draft` → `awaiting-implementation` → `active-review` → `accepted` → `implemented`.
-You set `draft` and never advance the status yourself. Human approval to begin implementation is
-`awaiting-implementation`, not `accepted`.
+Who decides: the human decides `awaiting-implementation`, `returned-for-revisions`, `accepted`,
+and `rejected`; the agent decides `active-review` and `implemented`. The human may ask the agent
+to make the edit — deciding is the part an agent must never do alone. Permission to begin
+implementing is `awaiting-implementation`, never `accepted`.
 
 -->
 

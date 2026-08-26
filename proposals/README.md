@@ -8,21 +8,26 @@ Required frontmatter is `id: proposal.<NNNN>`, `title`, `authors` as a non-empty
 The normal lifecycle is `draft` → `awaiting-implementation` → `active-review` → `accepted` →
 `implemented`.
 
-| Status                    | Meaning                                                                                        | Set by | Phase      |
-| ------------------------- | ---------------------------------------------------------------------------------------------- | ------ | ---------- |
-| `draft`                   | Being written with the human. May carry `[NEEDS CLARIFICATION:` markers.                       | agent  | 2          |
-| `awaiting-implementation` | The human approved the proposal. Implementation is underway or not yet started.                | human  | 3          |
-| `active-review`           | Readiness report posted, pull request marked ready. The human is evaluating the finished work. | agent  | 5          |
-| `returned-for-revisions`  | The human requested changes. Back to implementation, or to the proposal if the design changed. | human  | 5 → 3 or 2 |
-| `accepted`                | The human accepted the work. Vision update, merge and release are underway.                    | human  | 5          |
-| `implemented`             | Merged and released.                                                                           | agent  | done       |
-| `rejected`                | The human declined the change. Kept as record.                                                 | human  | terminal   |
-| `withdrawn`               | The author pulled it. Kept as record.                                                          | either | terminal   |
-| `superseded`              | A later proposal replaced it.                                                                  | either | terminal   |
+| Status                    | Meaning                                                                                        | Decided by | Phase      |
+| ------------------------- | ---------------------------------------------------------------------------------------------- | ---------- | ---------- |
+| `draft`                   | Being written and iterated on in the draft pull request. May carry `[NEEDS CLARIFICATION:`.    | agent      | 2          |
+| `awaiting-implementation` | The human settled the proposal. Implementation is underway or not yet started.                 | human      | 3          |
+| `active-review`           | First full pass at tests, guides and code exists; report posted and pull request marked ready. | agent      | 5          |
+| `returned-for-revisions`  | The human requested changes. Back to implementation, or to the proposal if the design changed. | human      | 5 → 3 or 2 |
+| `accepted`                | The human accepted the work. Vision update, merge and release are underway.                    | human      | 5          |
+| `implemented`             | Merged and released.                                                                           | agent      | done       |
+| `rejected`                | The human declined the change. Kept as record.                                                 | human      | terminal   |
+| `withdrawn`               | The author pulled it. Kept as record.                                                          | either     | terminal   |
+| `superseded`              | A later proposal replaced it.                                                                  | either     | terminal   |
 
-The **Set by** column is the point. An agent may never set `awaiting-implementation` or `accepted`
-— those record the human's judgement that work may begin and that finished work is good enough.
-An agent that can set them is an agent that approves its own work.
+**Decided by** is about judgement, not keystrokes. The human may ask the agent to make the edit —
+that is fine. What an agent must never do is decide on its own that a proposal is settled enough
+to implement, or that finished work is good enough to accept. An agent that can reach those two
+conclusions unaided is an agent approving its own work.
+
+A proposal stays `draft` for as long as it takes. It is published to the draft pull request as
+soon as there is something to react to, and the human edits it there — directly, or by asking for
+changes — until they are satisfied. Iteration is the normal case, not a sign of a bad first draft.
 
 History is preserved: never delete a superseded entry — mark it `superseded` and link its
 replacement through `supersedes`.

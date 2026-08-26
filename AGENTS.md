@@ -44,10 +44,19 @@ review discussion, and status reports. It stays a draft until the agent believes
 
 ### 2. Proposal
 
-Write `proposals/<NNNN>-<slug>.md` with the human and iterate until they are satisfied. It must be
-concrete enough to derive tests, guides, and an implementation from **without** rereading the
-original conversation. Unresolved questions are marked `[NEEDS CLARIFICATION: <question>]` and
-resolved before implementation — never guessed.
+Write `proposals/<NNNN>-<slug>.md` and **push it to the draft pull request as soon as it is
+coherent enough to react to**. Do not polish it privately — the pull request is where the human
+reads it, comments on it, and edits it directly.
+
+Then iterate. The human requests changes, you revise, and this repeats for as long as it takes.
+The proposal stays `status: draft` throughout. It must end up concrete enough to derive tests,
+guides, and an implementation from **without** rereading the original conversation. Unresolved
+questions are marked `[NEEDS CLARIFICATION: <question>]` and resolved with the human — never
+guessed.
+
+The human decides when the proposal is settled and moves it to `status: awaiting-implementation`.
+That is the gate for phase 3. They may ask you to make the edit; deciding it yourself is
+prohibited.
 
 Skill: `.agents/skills/writing-a-proposal/`.
 
