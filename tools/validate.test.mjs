@@ -50,6 +50,20 @@ function validArtifacts() {
         }),
     ];
 }
+function proposalArtifact(status, content = "") {
+    return artifact(
+        "proposals/0001-records.md",
+        {
+            id: "proposal.0001",
+            title: "Record Validation",
+            authors: ["Ada"],
+            status,
+            "pull-request": "42",
+            supersedes: [],
+        },
+        content,
+    );
+}
 
 test("rule 1 rejects missing required keys and invalid statuses", () => {
     const records = validArtifacts();
@@ -142,24 +156,49 @@ test("rule 1 accepts newly allowed statuses for their record kinds", () => {
     }
 });
 
-test("rule 1 rejects statuses that belong to another record kind", () => {
-    const records = validArtifacts();
-    records[0].frontmatter.status = "active";
-    records[2].frontmatter.status = "implemented";
+test("rule 1 accepts every proposal status", () => {
+    const statuses = [
+        "draft",
+        "awaiting-implementation",
+        "active-review",
+        "returned-for-revisions",
+        "accepted",
+        "implemented",
+        "rejected",
+        "withdrawn",
+        "superseded",
+    ];
 
-    assert.deepEqual(
-        validateArtifacts(records).filter(({ message }) => message.includes("invalid status")),
-        [
-            {
-                path: "policies/0001-records.md",
-                message: 'invalid status "implemented" for policy',
-            },
-            {
-                path: "proposals/0001-records.md",
-                message: 'invalid status "active" for proposal',
-            },
-        ],
-    );
+    for (const status of statuses) {
+        assert.deepEqual(validateArtifacts([proposalArtifact(status)]), []);
+    }
+});
+
+test("rule 1 keeps proposal, policy, and decision statuses distinct", () => {
+    const cases = [
+        ["proposal", 0, "active"],
+        ["proposal", 0, "proposed"],
+        ["policy", 2, "implemented"],
+        ["policy", 2, "awaiting-implementation"],
+        ["decision", 3, "awaiting-implementation"],
+    ];
+
+    for (const [type, index, status] of cases) {
+        const records = validArtifacts();
+        records[index].frontmatter.status = status;
+
+        assert.deepEqual(
+            validateArtifacts(records).filter(
+                ({ message }) => message === `invalid status "${status}" for ${type}`,
+            ),
+            [
+                {
+                    path: records[index].path,
+                    message: `invalid status "${status}" for ${type}`,
+                },
+            ],
+        );
+    }
 });
 
 test("rule 1 accepts absent, empty, and populated proposal issues lists", () => {
@@ -300,41 +339,49 @@ test("rule 4 accepts a record marked superseded", () => {
     );
 });
 
-test("rule 5 rejects clarification markers in a finalized proposal", () => {
-    const records = validArtifacts();
-    records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
+test("rule 5 rejects clarification markers in statuses that require a finished design", () => {
+    const statuses = [
+        "awaiting-implementation",
+        "active-review",
+        "accepted",
+        "implemented",
+        "superseded",
+    ];
 
-    assert.deepEqual(
-        validateArtifacts(records).filter(({ message }) => message.includes("NEEDS CLARIFICATION")),
-        [
-            {
-                path: "proposals/0002-replaces.md",
-                message: "finalized proposal contains a [NEEDS CLARIFICATION:] marker",
-            },
-        ],
-    );
+    for (const status of statuses) {
+        const records = validArtifacts();
+        records[1].frontmatter.status = status;
+        records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
+
+        assert.deepEqual(
+            validateArtifacts(records).filter(({ message }) =>
+                message.includes("NEEDS CLARIFICATION"),
+            ),
+            [
+                {
+                    path: "proposals/0002-replaces.md",
+                    message: `proposal status "${status}" does not allow a [NEEDS CLARIFICATION:] marker`,
+                },
+            ],
+        );
+    }
 });
 
-test("rule 5 permits clarification markers in draft proposals", () => {
-    const records = validArtifacts();
-    records[1].frontmatter.status = "draft";
-    records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
+test("rule 5 permits clarification markers in statuses that allow design changes", () => {
+    const statuses = ["draft", "returned-for-revisions", "rejected", "withdrawn"];
 
-    assert.equal(
-        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
-        false,
-    );
-});
+    for (const status of statuses) {
+        const records = validArtifacts();
+        records[1].frontmatter.status = status;
+        records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
 
-test("rule 5 permits clarification markers in withdrawn proposals", () => {
-    const records = validArtifacts();
-    records[1].frontmatter.status = "withdrawn";
-    records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
-
-    assert.equal(
-        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
-        false,
-    );
+        assert.equal(
+            validateArtifacts(records).some(({ message }) =>
+                message.includes("NEEDS CLARIFICATION"),
+            ),
+            false,
+        );
+    }
 });
 
 test("rule 5 ignores a marker inside an inline code span", () => {

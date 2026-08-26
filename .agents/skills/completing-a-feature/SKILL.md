@@ -18,6 +18,8 @@ Read the human's PR comments and any direct commits before acting. Classify each
 
 This judgment matters most. Never encode a design change in code, tests, or guides while leaving the proposal stale.
 
+While revisions are outstanding the proposal sits at `status: returned-for-revisions`, which the human sets when requesting changes. Return it to `active-review` when you repost the readiness report. If reworking the design reopens a question, record it as a clarification marker — that status is exempt from the marker rule precisely so an honest rework is possible.
+
 ## 2. Update the vision
 
 Reread `VISION.md`. Update it when the accepted change alters the project's capabilities, MVP, or direction. Bump `updated` to the current date.
@@ -28,7 +30,9 @@ Consult the human before a substantial rewrite. Do not turn a narrow completion 
 
 Merge only after human acceptance. Preserve the record of what was proposed, what was implemented, why decisions were made, what review found, and how the final state differs from earlier revisions.
 
-Choose a merge strategy that retains that context in the PR and its history. Do not squash the work into one opaque commit that discards the discussion. Set the accepted proposal's `status: implemented` as part of the final PR record.
+Choose a merge strategy that retains that context in the PR and its history. Do not squash the work into one opaque commit that discards the discussion.
+
+Status through this phase: the human sets `accepted` when they accept the work. You set `implemented` once it is merged and released — not before, because a proposal marked implemented that has not shipped misrepresents the record.
 
 ## 4. Release
 

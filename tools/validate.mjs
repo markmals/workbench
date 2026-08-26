@@ -14,7 +14,17 @@ const SCHEMAS = {
         lists: ["authors", "supersedes"],
         optionalLists: ["issues"],
         nonEmptyLists: ["authors"],
-        statuses: ["draft", "accepted", "implemented", "rejected", "withdrawn", "superseded"],
+        statuses: [
+            "draft",
+            "awaiting-implementation",
+            "active-review",
+            "returned-for-revisions",
+            "accepted",
+            "implemented",
+            "rejected",
+            "withdrawn",
+            "superseded",
+        ],
     },
     policy: {
         required: ["id", "title", "status", "established-by", "supersedes"],
@@ -228,13 +238,19 @@ export function validateArtifacts(inputArtifacts) {
 
         if (
             type === "proposal" &&
-            ["accepted", "implemented", "superseded"].includes(artifact.frontmatter.status) &&
+            [
+                "awaiting-implementation",
+                "active-review",
+                "accepted",
+                "implemented",
+                "superseded",
+            ].includes(artifact.frontmatter.status) &&
             withoutCode(artifact.content).includes("[NEEDS CLARIFICATION:")
         ) {
             violations.push(
                 violation(
                     artifact.path,
-                    "finalized proposal contains a [NEEDS CLARIFICATION:] marker",
+                    `proposal status "${artifact.frontmatter.status}" does not allow a [NEEDS CLARIFICATION:] marker`,
                 ),
             );
         }

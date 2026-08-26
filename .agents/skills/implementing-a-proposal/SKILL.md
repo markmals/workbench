@@ -11,7 +11,7 @@ This is the default Phase 3 workflow and its controlled handoff into Phase 4. A 
 
 ## Preconditions
 
-- The proposal is approved (`status: accepted`) and has no unresolved clarification marker.
+- The proposal is approved (`status: awaiting-implementation`) and has no unresolved clarification marker.
 - Phase 1 has already created a branch, pushed it to `origin`, and opened a draft pull request.
 - You read the proposal and the applicable vision, policies, and decisions. Stop and raise any conflict; do not silently deviate.
 

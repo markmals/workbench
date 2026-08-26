@@ -2,7 +2,7 @@
 id: proposal.0001
 title: Workbench 2.0
 authors: [markmals, Claude]
-status: accepted
+status: active-review
 pull-request: https://github.com/markmals/workbench/pull/1
 issues: []
 supersedes: []
@@ -255,7 +255,7 @@ keeps the validator runnable anywhere Node is.
 ## Open questions
 
 None. Scope, harness strategy, preview model, defect tracking, the documentation surface, and the
-template lineage were all resolved with the human before this proposal was accepted.
+template lineage were all resolved with the human before implementation began.
 
 ## Acknowledgments
 

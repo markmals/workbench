@@ -2,6 +2,7 @@
 id: proposal.<NNNN>
 title: <Title Case>
 authors: [<name>]
+# Set `draft` when you create the proposal. Never advance status yourself.
 status: draft
 pull-request: <url or number, empty while unopened>
 issues: []
@@ -13,6 +14,21 @@ supersedes: []
 <!--
 Delete this instruction and replace every <placeholder>. A proposal is the durable
 specification for one change; write for someone without the pull-request conversation.
+
+Lifecycle:
+- `draft` — being written with the human; may carry clarification markers.
+- `awaiting-implementation` — the human approved implementation; it is underway or not started.
+- `active-review` — readiness is posted and the pull request is ready for human evaluation.
+- `returned-for-revisions` — the human requested changes; return to implementation or proposal.
+- `accepted` — the human accepted the work; vision update, merge, and release are underway.
+- `implemented` — merged and released.
+- `rejected` — the human declined the change; retained as a record.
+- `withdrawn` — the author pulled it; retained as a record.
+- `superseded` — a later proposal replaced it; retained as a record.
+Normal path: `draft` → `awaiting-implementation` → `active-review` → `accepted` → `implemented`.
+You set `draft` and never advance the status yourself. Human approval to begin implementation is
+`awaiting-implementation`, not `accepted`.
+
 -->
 
 ## Summary
@@ -141,9 +157,9 @@ If an alternative wins, change the proposal, explain why the new idea won, and u
 
 ## Open questions
 
-<!--
-Put every unresolved question in the exact marker below. Resolve every marker before status becomes
-accepted; the validator enforces this. Do not guess an answer merely to make the proposal appear complete.
+Put every unresolved question in the exact marker below. Resolve every marker before the human
+approves implementation; the validator enforces this. Do not guess an answer merely to make the
+proposal appear complete.
 -->
 
 - [NEEDS CLARIFICATION: <question>]

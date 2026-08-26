@@ -30,6 +30,12 @@ Include these evidence-backed sections:
 
 The adversarial stage loses its value if the primary agent quietly drops a finding it disputes. Preserve declined findings even when they are narrow, uncomfortable, or rejected.
 
+## Advance the proposal status
+
+Marking the PR ready hands the work to the human, so set the proposal's `status: active-review` in the same change that posts the report. That is the only status transition this skill makes.
+
+Never set `accepted`. That status records the human's acceptance of the finished work in phase 5; an agent setting it is an agent approving its own work.
+
 ## Post as a service account
 
 Each project must configure a service-account credential before this step: a bot token or GitHub App installation token in the environment. The kit does not ship a credential.

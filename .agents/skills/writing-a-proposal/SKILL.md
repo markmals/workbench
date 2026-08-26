@@ -74,7 +74,9 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     Fix clear defects. Count remaining clarification markers and present them to the human.
 
-8. **Get human approval.** Iterate on the proposal until the human explicitly approves it by setting `status: accepted`. Do not set that status yourself.
+8. **Get human approval.** Iterate until the human explicitly approves the proposal by setting `status: awaiting-implementation`. Never advance the status yourself — the status records the human's judgement, not your confidence.
+
+    `accepted` is a later, different state: it means the human accepted the finished work during review, not that implementation may begin. Confusing the two lets an agent mark its own work approved.
 
 ## Hard gate
 
@@ -82,7 +84,7 @@ Never write tests, guides, or code until all of these are true:
 
 1. The proposal file exists.
 2. It contains zero `[NEEDS CLARIFICATION:` markers.
-3. The human has set `status: accepted`.
+3. The human has set `status: awaiting-implementation`.
 
 After the gate, enter **Implementation** with `implementing-a-proposal`: failing tests → guides → code → the project's quality gates from `mise tasks`.
 

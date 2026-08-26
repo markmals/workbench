@@ -57,6 +57,13 @@ const meta = computed(() => {
     };
 });
 
+function displayStatus(status: string) {
+    return status
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
 const recordLinks = computed(() => {
     const config = theme.value as Record<string, unknown>;
     const candidate = config.recordLinks;
@@ -115,7 +122,7 @@ const visible = computed(
                 v-if="meta.isRecord && meta.status"
                 :class="['record-header__status', `record-header__status--${meta.status}`]"
             >
-                {{ meta.status }}
+                {{ displayStatus(meta.status) }}
             </span>
         </div>
 
@@ -222,12 +229,14 @@ const visible = computed(
     font-family: var(--vp-font-family-mono);
     font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .record-header__status--draft,
-.record-header__status--proposed {
+.record-header__status--awaiting-implementation,
+.record-header__status--proposed,
+.record-header__status--active-review,
+.record-header__status--returned-for-revisions {
     background-color: rgba(245, 158, 11, 0.15);
     color: rgb(180, 83, 9);
 }
