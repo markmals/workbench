@@ -16,4 +16,4 @@ of defence.
 | Session start                             | Read `AGENTS.md`      |
 
 Harness lifecycle wiring is harness-specific, lives outside `.agents/`, and is covered by
-[`ADOPTING.md`](../../ADOPTING.md).
+[`guides/adapting-your-harness.md`](../../guides/adapting-your-harness.md).

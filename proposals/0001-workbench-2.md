@@ -62,7 +62,13 @@ A skill per stage was tried first and rejected. It recreated 1.0's central failu
 
 **Publication.** The existing VitePress site is retained and retargeted from `specs/` and `features/` onto the record and the guides, with navigation ordered vision, decisions, policies, proposals, guides. Superseded entries move to a collapsed group rather than disappearing. An empty record directory yields an omitted or empty navigation group and must never fail the build, since a freshly adopted project has nothing in `policies/`, `decisions/`, or `guides/` yet.
 
-**Harness neutrality.** Everything ships in `.agents/` with `AGENTS.md` as the single contract. `ADOPTING.md` documents the one-time adaptation for a specific harness.
+**Harness neutrality.** Everything ships in `.agents/` with `AGENTS.md` as the single contract. Adapting it for a specific harness is a documented one-time step.
+
+**Guides.** Workbench's own user-facing documentation lives in `guides/`, because a kit that treats guides as a load-bearing artifact and ships none teaches that the discipline is optional. The existing root documents serve different readers and none of them is a guide: `README.md` answers whether to use the kit, `PROCESS.md` states the process, and neither answers _how do I actually run a feature through this_ — which is the only question a user has after the first hour. Without guides they would read `AGENTS.md`, a contract written for an agent, and infer their own role from it.
+
+The set is task-oriented, one guide per question asked at a distinct moment: getting started, running a feature, writing a good proposal, choosing a preview, keeping the record, and adapting a harness. `running-a-feature` is the load-bearing one — it walks a single change from request to merge, showing what the human does, what `mise run status` reports at each step, and who moves the proposal's status when.
+
+The harness adaptation guide lives at `guides/adapting-your-harness.md`; it is already a guide wearing a root-level filename, and the site publishes guides. Every worked example in a guide must be one that actually runs, per the guides discipline in `.agents/skills/implementing-a-proposal/`.
 
 **Completeness of the cut.** No surviving document may instruct the agent to avoid a branch, avoid pushing a feature branch, or avoid opening a pull request, and no reference to a platform, stack, or device may remain. Three separate 1.0 documents carried the first prohibition and the second is spread across nearly every file, so this is a property to verify rather than assume.
 
@@ -76,7 +82,7 @@ Existing 1.0 users are unaffected until they choose to move, because a template 
 
 Adopting 2.0 requires `mise`, Node 26, and — for the pull-request phases — the `gh` CLI authenticated against the project's remote. A service account for posting readiness reports is recommended but optional; without one the agent posts from whatever identity is available and says so in the report.
 
-The harness adaptation in `ADOPTING.md` is a one-time change that is committed to the project. It is reversible: deleting the generated harness configuration leaves `.agents/` intact.
+The harness adaptation described in `guides/adapting-your-harness.md` is a one-time change that is committed to the project. It is reversible: deleting the generated harness configuration leaves `.agents/` intact.
 
 Adopting the process is not all-or-nothing. A project can use the artifact structure without the pull-request phases, or the review stages without the validator. The gates are independent, and partial adoption degrades rather than breaks.
 
@@ -89,6 +95,7 @@ Adopting the process is not all-or-nothing. A project can use the artifact struc
 - Rewrite commit discipline and the enforcement hierarchy; convert the commit hook to POSIX git.
 - Build the validator with tests; wire `mise` tasks, continuous integration, and the preview.
 - Retarget the documentation site.
+- Write the guides, including the harness adaptation guide, and point inbound links at them.
 
 ### Out of scope
 
@@ -96,7 +103,6 @@ Adopting the process is not all-or-nothing. A project can use the artifact struc
 - **Dependent-project automation.** `PROCESS.md` describes updating dependent repositories' draft pull requests when a preview becomes a release. The skill documents the procedure; no tooling ships. Building it before a second repository exists would be speculative.
 - **Migration tooling for 1.0 users.** See Compatibility.
 - **Preview mechanisms other than this repository's own.** Recipes ship as comments. Wiring and testing all seven would mean maintaining six workflows nobody here runs.
-- **Guides for Workbench itself.** `guides/` ships empty. Workbench's user-facing documentation is currently `README.md`, `PROCESS.md`, and `ADOPTING.md`; converting them into guides is real work and belongs in its own proposal, which will also be the first genuine end-to-end exercise of this process.
 
 ## Preview
 
@@ -121,7 +127,6 @@ Neither is promoted to `policies/` here. They govern this repository rather than
 
 ## Future directions
 
-- Converting `README.md`, `PROCESS.md`, and `ADOPTING.md` into `guides/` entries, which would give the kit a worked example of its own guides discipline.
 - Mechanical checks beyond frontmatter: proposals with no corresponding tests, guides describing behavior no test covers, policies no recent proposal has cited.
 - Dependent-project automation, once a second repository consumes a Workbench preview.
 - Recording whether the adversarial stage catches defects the confirmatory stages miss, which would make it possible to evaluate the process rather than assume it.

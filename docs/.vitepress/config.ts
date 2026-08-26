@@ -49,7 +49,6 @@ const config = defineConfig({
         "README.md",
         "PROCESS.md",
         "AGENTS.md",
-        "ADOPTING.md",
     ],
     rewrites: {
         "docs/index.md": "index.md",

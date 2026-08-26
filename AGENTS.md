@@ -193,5 +193,5 @@ lists everything available.
 ## Harness setup
 
 This repo ships harness-neutral infrastructure in `.agents/`. If your coding harness expects a
-different location or filename, adapt it once — see [`ADOPTING.md`](ADOPTING.md) — and commit the
+different location or filename, adapt it once — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md) — and commit the
 result. `.agents/` stays the source of truth.

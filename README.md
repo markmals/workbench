@@ -23,7 +23,7 @@ that can be checked against what it actually built.
 ## Quick start
 
 1. Click **Use this template** on GitHub, then clone your repository.
-2. Ask your agent to adopt it, pointing it at [`ADOPTING.md`](ADOPTING.md). That wires Workbench
+2. Ask your agent to adopt it, pointing it at [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). That wires Workbench
    into whichever harness you use — a one-time change you commit and forget.
 3. Write your project's vision with your agent, from
    [`.agents/templates/VISION.md`](.agents/templates/VISION.md).
@@ -129,7 +129,7 @@ came from. Deferred defects are linked from the pull request, so the decision to
 | -------------------- | ------------------------------------------------------------- |
 | `AGENTS.md`          | The contract every agent session loads.                       |
 | `PROCESS.md`         | The full process description.                                 |
-| `ADOPTING.md`        | Wiring Workbench into your harness.                           |
+| `guides/`            | User-facing documentation. Start at `getting-started.md`.     |
 | `VISION.md`          | The project's purpose and direction. Replace ours with yours. |
 | `proposals/`         | One document per change, kept as history after it ships.      |
 | `policies/`          | Rules future work must keep enforcing.                        |
@@ -164,7 +164,7 @@ depends on the agent remembering.
 
 `AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral, which
 means no harness reads them natively without a small one-time adaptation — see
-[`ADOPTING.md`](ADOPTING.md). This is deliberate: shipping configuration for four harnesses when
+[`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). This is deliberate: shipping configuration for four harnesses when
 only one can be genuinely verified is worse than an honest adaptation step.
 
 The checks that matter most — the validator, continuous integration, and the commit hook — do not
