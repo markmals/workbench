@@ -2,7 +2,7 @@
 id: proposal.0001
 title: Workbench 2.0
 authors: [markmals, Claude]
-status: awaiting-implementation
+status: active-review
 pull-request: https://github.com/markmals/workbench/pull/1
 issues: []
 supersedes: []
