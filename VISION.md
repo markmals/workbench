@@ -1,6 +1,6 @@
 ---
 title: A Vision for Workbench
-updated: 2026-08-25
+updated: 2026-08-26
 ---
 
 # A Vision for Workbench
@@ -109,5 +109,7 @@ impossible, and treating it as though it does would be the most expensive mistak
 
 ## Revision history
 
+- **2026-08-26** — Recorded the guides as part of the minimum viable product, after
+  [proposal.0001](proposals/0001-workbench-2.md) brought them into scope and delivered them.
 - **2026-08-25** — Initial vision, written alongside
   [proposal.0001](proposals/0001-workbench-2.md).

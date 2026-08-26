@@ -57,7 +57,7 @@ program, so an installable executable is a preview for a CLI.
 
 ## Wire one recipe
 
-[`../.github/workflows/preview.yml`](../.github/workflows/preview.yml) ships a
+`.github/workflows/preview.yml` ships a
 working documentation deployment because Workbench is documentation and process.
 It also contains commented recipes for the other repository shapes.
 
@@ -98,7 +98,7 @@ A site served beneath a subpath must receive that base path at build time. Other
 its assets resolve against the domain root and the page loads blank.
 
 The shipped workflow sets `DOCS_BASE` to the preview path, and
-[`docs/.vitepress/config.ts`](../docs/.vitepress/config.ts) reads it at build time.
+`docs/.vitepress/config.ts` reads it at build time.
 Workbench encountered this bug twice: once for assets and once for homepage links.
 
 Open the deployed preview. Confirm that the page renders and that the homepage links

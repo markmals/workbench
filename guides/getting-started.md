@@ -38,6 +38,15 @@ mise run check
 `mise run check` succeeds only when formatting verification, record validation, tests, and the
 documentation build all finish without an error. The documentation build also catches dead links.
 
+**One tool `mise` does not install: the [GitHub CLI](https://cli.github.com).** The process runs
+on pull requests, so `gh` must be present and authenticated against your remote:
+
+```sh
+gh auth login
+```
+
+Without it, `mise run status` cannot see the pull request and will say so rather than guess.
+
 When you need to diagnose the nonformatting parts of the gate, run:
 
 ```sh
@@ -72,27 +81,31 @@ the harness you actually use, commit that one-time setup, and then forget about 
 process material in `.agents/` remains the source of truth. Follow
 [Adapting Your Harness](./adapting-your-harness.md) before starting feature work.
 
+## Read the worked example
+
+This clone ships Workbench's own record and guides, which are the clearest available answer to
+what good output looks like. Read them before you write or delete anything: `VISION.md` for the
+shape of a vision, `proposals/0001-*.md` for a real proposal, and
+[Running a Feature](./running-a-feature.md) for the loop you are about to run.
+
 ## Write your project's vision
 
-Before the first feature, write `VISION.md` from
-`.agents/templates/VISION.md` in conversation with the agent. Describe your
-project's purpose, minimum viable product, principles, direction, and non-goals — not a list of the
-first feature's tasks.
+Now replace `VISION.md`, using `.agents/templates/VISION.md`, in conversation with the agent.
+Describe your project's purpose, minimum viable product, principles, direction, and non-goals —
+not a list of the first feature's tasks.
 
 The vision is the standard against which later proposals are evaluated. Without it, the agent
-silently substitutes its assumptions for the direction you did not write down. Keep the vision
-current when accepted work changes what the project is.
+silently substitutes its assumptions for the direction you did not write down. Keep it current
+when accepted work changes what the project is.
 
-## Clear the worked example
+## Clear the rest of the example
 
-This clone contains Workbench's own record and guides. Read `VISION.md`,
-`proposals/0001-*.md`, and every guide first as a worked example of the process. In particular,
-read [Running a Feature](./running-a-feature.md) before you remove the sample guides.
+Remove `proposals/0001-*.md` and the six guides. **Keep `guides/README.md`** — it documents the
+frontmatter every future guide needs, and the site's navigation points at it while you have no
+guides of your own. Keep the `README.md` in each record directory for the same reason.
 
-After reading them, remove `proposals/0001-*.md` and every file in `guides/`, including this guide.
-You have already replaced this repository's vision with your own. Keep `policies/` and
-`decisions/` empty until a real feature establishes one; speculative policies are the ones nobody
-follows.
+Keep `policies/` and `decisions/` empty until a real feature establishes one; speculative
+policies are the ones nobody follows.
 
 ## Run your first feature
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useData } from "vitepress";
+import { useData, withBase } from "vitepress";
 
 interface Reference {
     id: string;
@@ -155,7 +155,9 @@ const visible = computed(
                 <dt>{{ relationship.label }}</dt>
                 <dd>
                     <template v-for="reference in relationship.references" :key="reference.id">
-                        <a v-if="reference.link" :href="reference.link">{{ reference.id }}</a>
+                        <a v-if="reference.link" :href="withBase(reference.link)">{{
+                            reference.id
+                        }}</a>
                         <code v-else>{{ reference.id }}</code>
                     </template>
                 </dd>

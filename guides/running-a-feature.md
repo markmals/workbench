@@ -175,8 +175,10 @@ repeats the relevant implementation and review work. It cannot accept the featur
 
 At `active-review`, it reports **Phase 4 — Human review** and tells you to
 review the diff and preview, then comment or accept. At
-`returned-for-revisions`, it reports the return from human review to the
-proposal or implementation work the feedback requires.
+`returned-for-revisions`, it reports **Phase 4 → 3 — Human review →
+Implementation**, and its next action covers the conditional case: update the
+proposal first if the design changed. The tool cannot know which your feedback
+requires, so it names the common path and leaves the judgement in the text.
 
 ## Phase 5 — Completion and release
 
@@ -199,17 +201,17 @@ merged pull request, it reports that the feature is done.
 
 ## Status reference
 
-| Status                    | Phase                      | Who decides |
-| ------------------------- | -------------------------- | ----------- |
-| `draft`                   | 2 — proposal               | Agent       |
-| `awaiting-implementation` | 3 — implementation         | You         |
-| `active-review`           | 4 — human review           | Agent       |
-| `returned-for-revisions`  | 4 → 2 or 3                 | You         |
-| `accepted`                | 5 — completion and release | You         |
-| `implemented`             | 5 complete                 | Agent       |
-| `rejected`                | closed                     | You         |
-| `withdrawn`               | closed                     | Either      |
-| `superseded`              | closed                     | Either      |
+| Status                    | Phase                          | Who decides |
+| ------------------------- | ------------------------------ | ----------- |
+| `draft`                   | 2 — proposal                   | Agent       |
+| `awaiting-implementation` | 3 — implementation             | You         |
+| `active-review`           | 4 — human review               | Agent       |
+| `returned-for-revisions`  | 4 → 3 — back to implementation | You         |
+| `accepted`                | 5 — completion and release     | You         |
+| `implemented`             | 5 complete                     | Agent       |
+| `rejected`                | closed                         | You         |
+| `withdrawn`               | closed                         | Either      |
+| `superseded`              | closed                         | Either      |
 
 “Who decides” means the judgement, not the keystroke. You can direct the agent
 to update a status you decided; it cannot make either approval decision alone.

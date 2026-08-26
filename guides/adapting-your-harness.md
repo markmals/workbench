@@ -101,8 +101,19 @@ the only line of defence.
 The readiness report comes from a service account so the pull request distinguishes statements the
 agent made from statements you made.
 
-Create a bot account or GitHub App, give it write access to the repository, and expose its token to
-the agent as `GH_TOKEN`. Without one, the agent uses the available identity and says so in the
+Create a bot account or GitHub App, give it write access to the repository, and expose its token
+to the agent as `SERVICE_ACCOUNT_TOKEN`:
+
+```sh
+export SERVICE_ACCOUNT_TOKEN=<the bot's token>
+```
+
+The name matters. The agent reads exactly that variable and sets `GH_TOKEN` from it for the two
+commands that post the report and mark the pull request ready — everything else it does stays
+under your identity. Export the token as `GH_TOKEN` instead and you get the inverse of what you
+wanted: every other call becomes bot-authored while the report itself falls back to you.
+
+Without a service account the agent uses whatever identity is available and says so in the
 report. That is degraded, not broken.
 
 ## Start from your own project record

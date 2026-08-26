@@ -97,7 +97,7 @@ the proposal records the individual change.
 1. State the knowledge in one sentence.
 2. Apply the outlives-the-proposal test.
 3. For a rule, try a check, task, or template before prose.
-4. If it is durable, discuss the policy or decision with the human and link it to the establishing proposal.
+4. If it is durable, settle it with the agent, then have the entry written and linked to the proposal that established it.
 5. At completion, update the vision if accepted work changed it.
 
 For the surrounding feature flow, see [Running a Feature](./running-a-feature.md).

@@ -71,7 +71,7 @@ in this change. A future reader should be able to see the boundary and decide wh
 makes sense.
 
 Do not use it to excuse work that the proposal requires but you have not done. An earlier
-[revision of proposal 0001](https://github.com/markmals/workbench/blob/e5e3315b7321/proposals/0001-workbench-2.md#L129-L132)
+[revision of proposal 0001](https://github.com/markmals/workbench/blob/e5e3315b7321/proposals/0001-workbench-2.md#L173-L176)
 excluded Workbench's own guides as “its own proposal.” That was an omission wearing a scope
 decision, not a defensible boundary. The exclusion was removed, and the current proposal puts
 writing the guides in Scope.
