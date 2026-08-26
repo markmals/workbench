@@ -84,10 +84,10 @@ You leave Phase 2 knowing what's different between working and broken.
 
 ### Phase 4: Implementation
 
-1. **Write a failing test.** The simplest possible reproduction of the bug. Use the `test-driven-development` skill.
+1. **Write a failing test.** The simplest possible reproduction of the bug. Use the `implementing-a-proposal` skill.
 2. **Verify the test fails for the right reason.** Same red-green discipline as TDD.
 3. **Implement a single fix.** One change. No "while I'm here" improvements. No bundled refactors.
-4. **Verify the fix.** Test passes? Other tests still pass? Issue actually resolved? Use the `verification-before-completion` skill.
+4. **Verify the fix.** Test passes? Other tests still pass? Issue actually resolved? Use `.agents/rules/verification.md`.
 
 ### When 3+ fixes have failed: question the architecture
 
@@ -169,6 +169,6 @@ Do **not** bundle a "while I'm here" cleanup, an unrelated refactor, or a fix fo
 
 ## Related skills
 
-- `test-driven-development` — for the failing-test step in Phase 4
-- `verification-before-completion` — the gate before claiming the bug is fixed
+- `implementing-a-proposal` — for the failing-test step in Phase 4
+- `.agents/rules/verification.md` — the gate before claiming the bug is fixed
 - `writing-a-proposal` — when a fix changes intended behavior, revise the proposal before implementation.

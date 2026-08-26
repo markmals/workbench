@@ -27,13 +27,40 @@ that can be checked against what it actually built.
    into whichever harness you use — a one-time change you commit and forget.
 3. Write your project's vision with your agent, from
    [`.agents/templates/VISION.md`](.agents/templates/VISION.md).
-4. Start your first feature. Your agent branches, opens a draft pull request, and writes a
-   proposal before it writes any code.
+4. Start your first feature. Say what you want built. Your agent branches, opens a draft pull
+   request, and writes a proposal before it writes any code.
 
 ```sh
 mise install
 mise run check
 ```
+
+## You never have to remember a command
+
+There is one, and it takes no arguments:
+
+```sh
+mise run status
+```
+
+It reads the branch, the pull request, and the proposal's status, then tells you where the work
+is and what happens next:
+
+```
+proposal.0001  Workbench 2.0  ·  draft
+PR #1 (draft)  https://github.com/markmals/workbench/pull/1
+branch workbench-2
+
+Phase 2 — Proposal
+  The proposal is published and being iterated on.
+
+Next (you): Edit the proposal directly, or tell the agent what to change.
+            Move it to awaiting-implementation when you are satisfied.
+```
+
+Your agent runs it too, at the start of every session. So "keep going" is a complete instruction —
+it can work out the rest. Skills exist for the agent to read; you are not expected to know their
+names.
 
 ## The process
 
@@ -110,7 +137,7 @@ came from. Deferred defects are linked from the pull request, so the decision to
 | `guides/`            | User-facing documentation.                                    |
 | `docs/`              | The site. Publishes the vision, the record, and the guides.   |
 | `tools/`             | The record validator. Dependency-free.                        |
-| `.agents/skills/`    | One skill per phase of the process.                           |
+| `.agents/skills/`    | Seven skills, roughly one per phase. For the agent, not you.  |
 | `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.       |
 | `.agents/templates/` | The canonical shape of every artifact.                        |
 | `.github/workflows/` | Continuous integration and the preview.                       |
@@ -123,7 +150,7 @@ Prose is the tier most likely to be missed, so anything checkable is a check.
 mise run check       # everything below
 mise run fmt         # format
 mise run validate    # record frontmatter, ids, cross-references
-mise run test        # the validator's own tests
+mise run test        # the tools' own tests
 mise run docs:build  # the site builds
 ```
 

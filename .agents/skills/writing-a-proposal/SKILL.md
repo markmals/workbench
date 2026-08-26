@@ -19,8 +19,9 @@ Create exactly one `proposals/<NNNN>-<slug>.md`. Copy [`.agents/templates/PROPOS
 
 - Use the next unused four-digit number and a kebab-case slug.
 - Complete the template frontmatter: `id: proposal.<NNNN>`, Title Case `title`, `status: draft`, the draft PR URL or number, and `supersedes`.
-- Complete every template section: Summary, Motivation, Proposed solution, Detailed design, Acceptance criteria, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
-- Write the Acceptance criteria section with `writing-acceptance-criteria`.
+- Complete every template section: Summary, Motivation, Proposed solution, Detailed design, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
+- **Detailed design is what tests derive from.** Write it precisely enough that someone who is not the author could implement it without asking questions.
+- Usually delete the template's Acceptance criteria section. Restating Detailed design as a checklist duplicates the specification in a form that drifts from it. Keep it only for a change with discrete outcomes the prose cannot express naturally — a structural change touching many independent things, or a migration with separable steps.
 
 ## Size before detail
 

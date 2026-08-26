@@ -32,6 +32,10 @@ run = "node tools/validate.mjs"
 description = "Run the record validator's tests"
 run = "node --test tools/*.test.mjs"
 
+[tasks.status]
+description = "Show where this project is in the process and what happens next"
+run = "node tools/status.mjs"
+
 [tasks.check]
 description = "Run project quality gates"
 depends = ["fmt:check", "validate", "test", "docs:build"]

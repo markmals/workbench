@@ -76,12 +76,21 @@ scoping — none of which depend on a harness noticing anything.
 `describes` on guides. Templates in `.agents/templates/` are derived from the Swift Evolution
 templates, carrying instructional prose rather than bare section labels.
 
-**Process skills.** Fourteen under `.agents/skills/`, one per phase plus the cross-cutting
-disciplines: `writing-a-proposal`, `writing-acceptance-criteria`, `test-driven-development`,
-`writing-guides`, `implementing-a-proposal`, `cross-artifact-review`, `adversarial-review`,
-`producing-a-preview`, `reporting-readiness`, `completing-a-feature`,
-`recording-policies-and-decisions`, `tracking-defects`, `systematic-debugging`, and
-`verification-before-completion`.
+**Process skills.** Seven under `.agents/skills/` — roughly one per phase, not one per step:
+`writing-a-proposal` (phase 2), `implementing-a-proposal` (phase 3: tests, guides, code),
+`reviewing-an-implementation` (phase 4: cross-artifact review, preview, readiness report),
+`adversarial-review` (phase 4, kept standalone because it is dispatched to a subagent with fresh
+context that reads only that file), `completing-a-feature` (phase 5, including recording policies
+and decisions), plus `tracking-defects` and `systematic-debugging` as cross-cutting.
+
+A skill per stage was tried first and rejected. It recreated 1.0's central failure: a surface
+nobody could remember. Standing rules that always apply — verification before completion, code
+quality, commit discipline, the enforcement hierarchy — live in `.agents/rules/` instead, because
+a rule you invoke is a rule you forget to invoke.
+
+**Orientation.** `mise run status` derives the current phase from the branch, the pull request,
+and the active proposal's status, then prints what happens next and who acts. It takes no
+arguments. The human is never expected to remember a command, a skill name, or a step.
 
 **Ordering.** Implementation is strictly failing tests, then guides written from the proposal,
 then code. Guides are compared against the tests before code is written; any behavior in one and
@@ -264,5 +273,5 @@ The artifact templates are adapted from the
 documents. The instructional-prose approach — a template that teaches rather than labels — is
 theirs, and it is the single largest improvement to this proposal's design.
 
-The review discipline in `adversarial-review` and `test-driven-development` originated in
+The review and test-first disciplines in `adversarial-review` and `implementing-a-proposal` originated in
 [Superpowers](https://github.com/obra/superpowers) and survives from Workbench 1.0.

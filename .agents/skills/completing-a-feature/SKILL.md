@@ -5,50 +5,83 @@ description: Use after a human has reviewed a pull request and the accepted chan
 
 # Completing a Feature
 
-**Phase 5.** Complete work in this order: **process feedback → vision update → merge → release → dependent-repo updates → cleanup**.
+**Phase 5.** Complete work in this order: **process feedback → record policies and decisions → update the vision → merge → release → dependent-repo updates → cleanup**.
 
 ## 1. Process feedback
 
-Read the human's PR comments and any direct commits before acting. Classify each item:
+Read the human's PR comments and direct commits before acting. Classify each item:
 
 | Feedback changes   | Action                                                                                                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
 | The implementation | Fix it, then rerun the affected implementation loop and review evidence.                                                  |
-| Intended design    | Update the proposal first with the human, then rerun tests → guides → code → quality gates → Review against the revision. |
+| Intended design    | Update the proposal first with the human, then rerun tests → guides → code → quality gates → review against the revision. |
 
-This judgment matters most. Never encode a design change in code, tests, or guides while leaving the proposal stale.
+Never encode a design change in code, tests, or guides while leaving the proposal stale.
 
-While revisions are outstanding the proposal sits at `status: returned-for-revisions`, which the human sets when requesting changes. Return it to `active-review` when you repost the readiness report. If reworking the design reopens a question, record it as a clarification marker — that status is exempt from the marker rule precisely so an honest rework is possible.
+While revisions are outstanding, the proposal is `returned-for-revisions`, which the human sets when requesting changes. Set it to `active-review` when you repost the readiness report. If reworking the design reopens a question, record a clarification marker — `returned-for-revisions` is exempt from the marker rule so honest rework remains possible.
 
-## 2. Update the vision
+## 2. Record policies and decisions
+
+After feedback establishes the feature's final shape, record only knowledge that outlives its proposal.
+
+| Record   | Distinguishing test                                                              |
+| -------- | -------------------------------------------------------------------------------- |
+| Policy   | It constrains future work: “always or never do X.”                               |
+| Decision | It explains a choice future work must understand: “we chose X over Y because Z.” |
+
+If it does not outlive this proposal, it belongs in the proposal and nowhere else.
+
+Before recording either:
+
+1. Discuss it with the human. Neither is an agent-only conclusion.
+2. Confirm the originating proposal id.
+3. Use the canonical template. Both records carry `established-by: proposal.<NNNN>`.
+
+### Enforce policies first
+
+A policy that can be enforced by a check **must** be. Before writing prose, try to express it as a validator rule, continuous-integration step, or template section, per `.agents/rules/enforcement-hierarchy.md`.
+
+Keep prose for judgment a deterministic check cannot decide. Prose policies are the ones that rot.
+
+### Supersede; never rewrite history
+
+Never edit a policy or decision into a different meaning. Never delete one.
+
+1. Write a new record with `supersedes: [<old id>]`.
+2. Set the old record's `status: superseded`.
+3. Preserve the old rationale and link.
+
+The validator enforces the pairing. A correction that does not change meaning may amend the existing record; a changed rule or rationale requires supersession.
+
+## 3. Update the vision
 
 Reread `VISION.md`. Update it when the accepted change alters the project's capabilities, MVP, or direction. Bump `updated` to the current date.
 
 Consult the human before a substantial rewrite. Do not turn a narrow completion change into a new vision exercise.
 
-## 3. Merge
+## 4. Merge
 
 Merge only after human acceptance. Preserve the record of what was proposed, what was implemented, why decisions were made, what review found, and how the final state differs from earlier revisions.
 
 Choose a merge strategy that retains that context in the PR and its history. Do not squash the work into one opaque commit that discards the discussion.
 
-Status through this phase: the human sets `accepted` when they accept the work. You set `implemented` once it is merged and released — not before, because a proposal marked implemented that has not shipped misrepresents the record.
+The human sets `accepted` when they accept the work. Set `implemented` only after it is merged and released — not before, because an unshipped proposal marked implemented misrepresents the record.
 
-## 4. Release
+## 5. Release
 
 Release through the project's existing CI/CD process. Inspect `mise tasks` for the project's release path.
 
 **Never publish without explicit human confirmation.** Approval to merge is not approval to release.
 
-## 5. Update dependent repositories
+## 6. Update dependent repositories
 
 For each draft PR consuming a preview version, move it to the production release. Mark it ready for review when appropriate after the preview dependency is gone.
 
-## 6. Clean up
+## 7. Clean up
 
 After release and dependent updates, remove temporary files, tear down preview configuration and published prerelease artifacts, and prune the feature branch locally and remotely.
 
-> **Explicit human confirmation required:** Branch deletion and force-push are the most destructive operations in this process. Ask before either one, even when cleanup appears routine.
+> **Explicit human confirmation required:** Branch deletion, force-push, and tearing down published prerelease artifacts are the most destructive operations in this process. Ask before any of them, even when cleanup appears routine.
 
 Cleanup runs when confidence is highest. Treat it as a separate destructive operation, not an automatic epilogue.
 
@@ -56,15 +89,17 @@ Cleanup runs when confidence is highest. Treat it as a separate destructive oper
 
 - You fixed a design-change comment without revising the proposal.
 - You ignored a direct human commit.
+- You recorded a policy or decision without the human.
+- You wrote a prose policy before checking whether automation can enforce it.
+- You changed an old policy or decision's meaning in place.
 - You merged without preserving why the final state differs.
 - You released because the PR merged.
 - A dependent PR still uses a preview version after release.
 - A preview or prerelease artifact outlives its PR.
-- You deleted a branch or force-pushed without explicit human confirmation.
+- You deleted a branch, force-pushed, or tore down a published prerelease artifact without explicit human confirmation.
 
 Any of these means stop and return to the relevant ordered step.
 
 ## Related skills
 
-- `producing-a-preview` — previews are torn down here.
-- `reporting-readiness` — the record consumed during human review.
+- `reviewing-an-implementation` — produces the preview and readiness record consumed during human review.

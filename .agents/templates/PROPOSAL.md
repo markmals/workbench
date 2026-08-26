@@ -76,12 +76,15 @@ Someone who is not the author must be able to implement it without asking questi
 ## Acceptance criteria
 
 <!--
-List independently verifiable, observable outcomes. Each criterion proves one part of
-the proposal without relying on another; use .agents/skills/writing-acceptance-criteria/.
+Usually delete this section. Detailed design is what tests derive from, and restating it as a
+checklist duplicates the specification in a form that drifts from it.
+
+Keep it only when the change has discrete outcomes that Detailed design cannot express naturally
+— a structural change touching many independent things, or a migration with separable steps.
+If every criterion is a restatement of a sentence above, delete the section.
 -->
 
-- [ ] <Actor can observe the required outcome under stated conditions.>
-- [ ] <Independent boundary, failure, or integration outcome.>
+- [ ] <Discrete, independently verifiable outcome.>
 
 ## Compatibility
 
@@ -124,7 +127,7 @@ scope are filed as GitHub issues, not folded in; use .agents/skills/tracking-def
 
 <!--
 Choose the artifact from the preview table that exercises this change and explain why it is the cheapest
-realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use .agents/skills/producing-a-preview/.
+realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use .agents/skills/reviewing-an-implementation/.
 -->
 
 - Artifact: <preview artifact>

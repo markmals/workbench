@@ -106,8 +106,8 @@ Any of these → you reverted to confirmation. Restart from the refute-by-defaul
 
 ## Related skills
 
-- `cross-artifact-review` — the confirmatory comparison that precedes this stage.
-- `test-driven-development` — the discipline whose tests this stage tries to defeat.
+- `reviewing-an-implementation` — the confirmatory comparison that precedes this stage.
+- `implementing-a-proposal` — the discipline whose tests this stage tries to defeat.
 - `systematic-debugging` — once a defect is confirmed, used to find its root cause before the fix.
-- `verification-before-completion` — the gate this stage feeds; a proposal is not done until the adversary converges.
-- `reporting-readiness` — declined findings are surfaced here; never drop them silently.
+- `.agents/rules/verification.md` — the gate this stage feeds; a proposal is not done until the adversary converges.
+- `reviewing-an-implementation` — declined findings are surfaced here; never drop them silently.

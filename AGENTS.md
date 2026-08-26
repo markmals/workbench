@@ -9,6 +9,20 @@ independently so that disagreement between them is visible before release.
 
 You do not move directly from a request to an implementation.
 
+## Start here, every session
+
+```sh
+mise run status
+```
+
+It reads the branch, the pull request, and the active proposal's status, then prints which phase
+the work is in and what happens next. Run it before asking the human where things stand, and run
+it again whenever you are unsure.
+
+The human is never expected to remember a command, a skill name, or an argument. "Keep going",
+"start a feature for X", or a plain description of a problem is enough — orient yourself from
+`mise run status` and proceed.
+
 ## Artifacts
 
 | Artifact      | Lives in       | What it is                                                                     |
@@ -65,28 +79,29 @@ Skill: `.agents/skills/writing-a-proposal/`.
 Strictly ordered. Each step is an independent representation of the same intent, and writing them
 out of order lets the code decide what "correct" means.
 
-1. **Tests first.** Failing tests for the behavior the proposal specifies.
-   Skill: `.agents/skills/test-driven-development/`.
+1. **Tests first.** Failing tests for the behavior the proposal's Detailed design specifies.
 2. **Guides next.** User-facing docs written from the proposal, not from the code. Then compare
    them against the tests and confirm they describe the same behavior.
-   Skill: `.agents/skills/writing-guides/`.
 3. **Code last.** Implement against proposal, tests, and guides until `mise run check` passes.
+
+Skill: `.agents/skills/implementing-a-proposal/`.
 
 Passing the quality gates is necessary, never sufficient.
 
 ### 4. Review
 
 1. **Cross-artifact review** — read proposal, tests, guides, and code together and find where they
-   disagree. Skill: `.agents/skills/cross-artifact-review/`.
+   disagree.
 2. **Adversarial review** — an independent subagent, **fresh context and a different model**, tries
    to falsify the claim that the work is done. It reports; it does not fix. Findings you decline
    are surfaced in the readiness report, never silently dropped.
    Skill: `.agents/skills/adversarial-review/`.
 3. **Preview** — publish the cheapest real artifact through which the human can exercise the
    changed behavior. Review of prose is not review of behavior.
-   Skill: `.agents/skills/producing-a-preview/`.
-4. **Readiness report** — post the report to the PR, linking the preview, and mark it ready for
-   review. Skill: `.agents/skills/reporting-readiness/`.
+4. **Readiness report** — post it to the PR linking the preview, set the proposal to
+   `active-review`, and mark the PR ready. Those three happen together.
+
+Skill for stages 1, 3, and 4: `.agents/skills/reviewing-an-implementation/`.
 
 A preview is keyed to what the repository _is_, not to a fixed mechanism:
 
@@ -115,7 +130,7 @@ clean up. Skill: `.agents/skills/completing-a-feature/`.
 - **Never write production code before its failing test.** If you did, delete it and start over.
 - **Never write guides from the finished code.** They are derived from the proposal.
 - **Never claim work is done without running the verifying command this turn** and reading its
-  output. Skill: `.agents/skills/verification-before-completion/`.
+  output. See [`.agents/rules/verification.md`](.agents/rules/verification.md).
 - **Never fix a bug before finding its root cause.**
   Skill: `.agents/skills/systematic-debugging/`.
 - **Never let the adversarial reviewer edit code.** It reports; the implementer fixes.
@@ -134,7 +149,7 @@ A policy that can be enforced by a check **must** be — see
 [`.agents/rules/enforcement-hierarchy.md`](.agents/rules/enforcement-hierarchy.md). Prose is the
 tier most likely to be missed.
 
-Skill: `.agents/skills/recording-policies-and-decisions/`.
+Skill: `.agents/skills/completing-a-feature/`.
 
 ## Defects
 

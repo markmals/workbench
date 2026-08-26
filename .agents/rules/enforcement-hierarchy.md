@@ -21,7 +21,7 @@ hierarchy first.
 - Keep judgment in prose. Good naming, the right abstraction, and a justified deviation are not
   cheap deterministic checks.
 
-This hierarchy is why `recording-policies-and-decisions` requires attempting a check before writing
+This hierarchy is why `completing-a-feature` requires attempting a check before writing
 a prose policy.
 
 ## Worked example — policies and decisions

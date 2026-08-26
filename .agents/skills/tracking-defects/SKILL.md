@@ -77,4 +77,4 @@ Any of these means stop and repair the record.
 
 ## Related skills
 
-- `reporting-readiness` — lists linked, deliberately deferred defects for human review.
+- `reviewing-an-implementation` — lists linked, deliberately deferred defects for human review.
