@@ -9,7 +9,7 @@
                 where they disagree.
             </p>
             <div class="wb-hero__actions">
-                <a href="/VISION" class="wb-hero__button wb-hero__button--primary"> Vision </a>
+                <a :href="visionLink" class="wb-hero__button wb-hero__button--primary"> Vision </a>
                 <a v-if="firstGuideLink" :href="firstGuideLink" class="wb-hero__button"> Guides </a>
             </div>
         </div>
@@ -20,14 +20,15 @@
 </template>
 
 <script setup>
-import { useData } from "vitepress";
+import { withBase, useData } from "vitepress";
 import { computed } from "vue";
 import heroImage from "../../../public/workbench-hero.png?url";
 
 const { theme } = useData();
+const visionLink = withBase("/VISION");
 const firstGuideLink = computed(() => {
     const guidesNav = theme.value?.nav?.find?.((item) => item.text === "Guides");
-    return typeof guidesNav?.link === "string" ? guidesNav.link : null;
+    return typeof guidesNav?.link === "string" ? withBase(guidesNav.link) : null;
 });
 </script>
 

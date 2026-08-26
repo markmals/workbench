@@ -1,10 +1,61 @@
 import assert from "node:assert/strict";
+import {
+    mkdirSync,
+    mkdtempSync,
+    readFileSync,
+    readdirSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
 
-import { validateArtifacts, withoutCode } from "./validate.mjs";
+import { collectArtifacts, parseFrontmatter, validateArtifacts, withoutCode } from "./validate.mjs";
 
 function artifact(path, frontmatter, content = "") {
     return { path, frontmatter, content };
+}
+
+const templateDirectory = new URL("../.agents/templates/", import.meta.url);
+
+function readTemplate(name) {
+    return readFileSync(new URL(name, templateDirectory), "utf8");
+}
+
+function temporaryRoot(t) {
+    const root = mkdtempSync(path.join(tmpdir(), "workbench-validate-"));
+    t.after(() => rmSync(root, { force: true, recursive: true }));
+    return root;
+}
+
+function proposalSource(id = "proposal.0001") {
+    return [
+        "---",
+        `id: ${id}`,
+        "title: Record Validation",
+        "authors: [Ada]",
+        "status: draft",
+        "pull-request: 42",
+        "supersedes: []",
+        "---",
+        "",
+    ].join("\n");
+}
+
+function hasClarificationViolation(content) {
+    return validateArtifacts([proposalArtifact("accepted", content)]).some(({ message }) =>
+        message.includes("NEEDS CLARIFICATION"),
+    );
+}
+
+function assertCodeIgnoresButProseReports(content) {
+    assert.equal(hasClarificationViolation(content), false);
+    assert.equal(
+        hasClarificationViolation(`${content}\n\n[NEEDS CLARIFICATION: What remains unresolved?]`),
+        true,
+    );
 }
 
 function validArtifacts() {
@@ -419,11 +470,204 @@ test("rule 5 still fires on a prose marker beside a quoted one", () => {
     );
 });
 
-test("withoutCode strips fences and spans but keeps surrounding prose", () => {
+test("withoutCode strips code while preserving surrounding prose", () => {
     assert.equal(withoutCode("before `x` after"), "before  after");
-    assert.equal(withoutCode("a\n\n```\nb\n```\n\nc"), "a\n\n\n\nc");
+
+    const stripped = withoutCode("before\n\n```\nexample\n```\n\nafter");
+    assert.equal(stripped.includes("example"), false);
+    assert.match(stripped, /^before/);
+    assert.match(stripped, /after$/);
 });
 
 test("a valid full record set has no violations", () => {
     assert.deepEqual(validateArtifacts(validArtifacts()), []);
+});
+
+test("parseFrontmatter accepts blank lines and full-line comments without stripping values", () => {
+    const source = [
+        "---",
+        "",
+        "  # A YAML comment",
+        "\t",
+        "id: proposal.0001",
+        "title: A title # with a literal hash",
+        "authors: [Ada, Grace]",
+        "---",
+        "Body",
+    ].join("\n");
+
+    assert.deepEqual(parseFrontmatter(source), {
+        frontmatter: {
+            id: "proposal.0001",
+            title: "A title # with a literal hash",
+            authors: ["Ada", "Grace"],
+        },
+        content: source,
+    });
+});
+
+test("parseFrontmatter rejects malformed input and duplicate keys", () => {
+    assert.deepEqual(parseFrontmatter("title: Missing delimiters"), {
+        error: "missing YAML frontmatter",
+    });
+    assert.deepEqual(parseFrontmatter("---\ntitle: First\ntitle: Second\n---"), {
+        error: 'duplicate frontmatter key "title"',
+    });
+    assert.deepEqual(parseFrontmatter("---\nnot valid\n---"), {
+        error: 'cannot parse frontmatter line "not valid"',
+    });
+});
+
+test("every record template has parsable frontmatter", () => {
+    const templates = readdirSync(templateDirectory, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => [entry.name, readTemplate(entry.name)]);
+    const frontmatterTemplates = templates.filter(([, source]) => source.startsWith("---"));
+
+    assert.deepEqual(frontmatterTemplates.map(([name]) => name).sort(), [
+        "DECISION.md",
+        "GUIDE.md",
+        "POLICY.md",
+        "PROPOSAL.md",
+        "VISION.md",
+    ]);
+    for (const [name, source] of frontmatterTemplates) {
+        const parsed = parseFrontmatter(source);
+        assert.equal(parsed.error, undefined, `${name}: ${parsed.error}`);
+    }
+});
+
+test("a filled-in proposal template validates", () => {
+    const source = readTemplate("PROPOSAL.md")
+        .replace("id: proposal.<NNNN>", "id: proposal.0001")
+        .replace("title: <Title Case>", "title: Template Validation")
+        .replace("authors: [<name>]", "authors: [Ada]")
+        .replace("pull-request: <url or number, empty while unopened>", "pull-request: 42");
+    const parsed = parseFrontmatter(source);
+
+    assert.equal(parsed.error, undefined);
+    assert.deepEqual(
+        validateArtifacts([
+            artifact("proposals/0001-template.md", parsed.frontmatter, parsed.content),
+        ]),
+        [],
+    );
+});
+
+test("collectArtifacts validates symlinked regular files without traversing symlinked directories", (t) => {
+    const root = temporaryRoot(t);
+    const proposals = path.join(root, "proposals");
+    const nested = path.join(root, "nested");
+    mkdirSync(proposals);
+    mkdirSync(nested);
+    writeFileSync(path.join(root, "record.md"), proposalSource("proposal.9999"));
+    writeFileSync(path.join(nested, "hidden.md"), proposalSource());
+    symlinkSync(path.join(root, "record.md"), path.join(proposals, "0001-records.md"));
+    symlinkSync(nested, path.join(proposals, "nested"));
+
+    const collected = collectArtifacts(root);
+
+    assert.deepEqual(collected.violations, []);
+    assert.deepEqual(
+        collected.artifacts.map(({ path: artifactPath }) => artifactPath),
+        ["proposals/0001-records.md"],
+    );
+    assert.deepEqual(validateArtifacts(collected.artifacts), [
+        {
+            path: "proposals/0001-records.md",
+            message: 'ID "proposal.9999" must be "proposal.0001" for this filename',
+        },
+    ]);
+});
+
+test("collectArtifacts rejects markdown nested beneath record directories", (t) => {
+    const root = temporaryRoot(t);
+    const nested = path.join(root, "proposals", "drafts");
+    mkdirSync(nested, { recursive: true });
+    writeFileSync(path.join(nested, "0001-record.md"), proposalSource());
+
+    assert.deepEqual(collectArtifacts(root), {
+        artifacts: [],
+        violations: [
+            {
+                path: "proposals/drafts/0001-record.md",
+                message: "nested record file; move it to proposals/ or remove it",
+            },
+        ],
+    });
+});
+
+test("rule 2 rejects guide filenames that are not kebab-case", () => {
+    const records = validArtifacts();
+    records[4] = artifact("guides/My Guide (DRAFT)!.md", {
+        id: "guide.My Guide (DRAFT)!",
+        title: "Record Validation Guide",
+        describes: ["proposal.0002"],
+    });
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ path: file }) => file.startsWith("guides/")),
+        [
+            {
+                path: "guides/My Guide (DRAFT)!.md",
+                message: "guide filename must be kebab-case",
+            },
+        ],
+    );
+});
+
+test("rule 4 rejects a self-supersession", () => {
+    const records = policySupersession("superseded");
+    records[2].frontmatter.status = "superseded";
+    records[2].frontmatter.supersedes = ["policy.0002"];
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ message }) => message.includes("supersession cycle")),
+        [
+            {
+                path: "policies/0002-new.md",
+                message: "supersession cycle: policy.0002 -> policy.0002",
+            },
+        ],
+    );
+});
+
+test("rule 4 rejects a supersession cycle", () => {
+    const records = policySupersession("superseded");
+    records[1].frontmatter.supersedes = ["policy.0002"];
+    records[2].frontmatter.status = "superseded";
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ message }) => message.includes("supersession cycle")),
+        [
+            {
+                path: "policies/0001-old.md",
+                message: "supersession cycle: policy.0001 -> policy.0002 -> policy.0001",
+            },
+        ],
+    );
+});
+
+test("rule 5 ignores markers inside tilde fences but detects surrounding prose", () => {
+    assertCodeIgnoresButProseReports("~~~md\n[NEEDS CLARIFICATION: This is code.]\n~~~");
+});
+
+test("rule 5 respects a backtick fence's opening length", () => {
+    assertCodeIgnoresButProseReports(
+        "````md\n```\n[NEEDS CLARIFICATION: This is code.]\n```\n````",
+    );
+});
+
+test("rule 5 does not open a fence whose info string contains a backtick", () => {
+    assert.equal(
+        hasClarificationViolation("``` `note`\n[NEEDS CLARIFICATION: This remains prose.]\n```\n"),
+        true,
+    );
+});
+
+test("rule 5 does not mistake inline code for an opening fence", () => {
+    assert.equal(
+        hasClarificationViolation("`note`\n[NEEDS CLARIFICATION: This remains prose.]"),
+        true,
+    );
 });

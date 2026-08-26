@@ -5,13 +5,13 @@ description: Use when a new or substantial change needs definition before tests,
 
 # Writing a Proposal
 
-A proposal is the one durable record of one coherent change. It makes intent concrete enough to derive tests, guides, and code without returning to the original conversation.
+**Phase 2 — Proposal development.** A proposal is the one durable record of one coherent change. It makes intent concrete enough to derive tests, guides, and code without returning to the original conversation.
 
-## Open only after Preparation
+## Open only after Phase 1 — Preparation
 
 Confirm that the change has a branch pushed to `origin` and an open draft pull request. The pull request is the durable workspace.
 
-If either is absent, stop. Complete **Preparation** before asking discovery questions or creating a proposal. An urgent request, existing code, or a request to skip pull-request work does not create an exception.
+If either is absent, stop. Complete Phase 1 — Preparation before asking discovery questions or creating a proposal. An urgent request, existing code, or a request to skip pull-request work does not create an exception.
 
 ## Output
 
@@ -91,13 +91,13 @@ Never write tests, guides, or code until all of these are true:
 2. It contains zero `[NEEDS CLARIFICATION:` markers.
 3. The human has set `status: awaiting-implementation`.
 
-After the gate, enter **Implementation** with `implementing-a-proposal`: failing tests → guides → code → the project's quality gates from `mise tasks`.
+After the gate, enter Phase 3 — Implementation with `implementing-a-proposal`: failing tests → guides → code → the project's quality gates from `mise tasks`.
 
 ## Red flags — stop and correct
 
 | Symptom                                                     | Required response                                                   |
 | ----------------------------------------------------------- | ------------------------------------------------------------------- |
-| No pushed branch or draft pull request                      | Return to **Preparation**.                                          |
+| No pushed branch or draft pull request                      | Return to Phase 1 — Preparation.                                    |
 | Two unrelated motivations or more than roughly six criteria | Split the proposal.                                                 |
 | A record conflicts with the change                          | Surface it; the human chooses revision or supersession.             |
 | An unknown detail has no clarification marker               | Ask or add the marker.                                              |
@@ -110,5 +110,5 @@ After the gate, enter **Implementation** with `implementing-a-proposal`: failing
 - **Proposal as a conversation summary.** Record decisions and observable behavior, not chat history.
 - **Folder-shaped planning.** The proposal is one document. Do not distribute its sections across files.
 - **Approval by silence.** `draft` is not accepted. Only the human changes the status.
-- **Preview at review time.** Decide it during **Proposal**, then make it in **Review**.
+- **Preview at review time.** Decide it during Phase 2, then make it during Phase 3.
 - **Implementation-led intent.** Existing code does not resolve open questions.

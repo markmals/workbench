@@ -11,8 +11,8 @@ Phase 3 preserves proposal intent in independent tests, guides, and code.
 
 ## Preconditions
 
-- The proposal has `status: awaiting-implementation` and no unresolved clarification marker.
-- Phase 1 already created the branch, pushed it to `origin`, and opened a draft pull request.
+- The proposal has `status: awaiting-implementation`, or the human returned it for implementation with `status: returned-for-revisions`; neither has an unresolved clarification marker.
+- Phase 1 — preparation — created the branch, pushed it to `origin`, and opened a draft pull request.
 - Read the proposal's **Detailed design**, relevant vision, policies, decisions, affected tests, guides, and project conventions.
 - Tests derive from **Detailed design**. Acceptance criteria are an occasional supplement, never the primary source.
 - Raise a conflict or ambiguity. Do not silently choose behavior or expand scope.
@@ -159,18 +159,17 @@ The proposal-compliance reviewer returns approval or concrete gaps. The code-qua
 
 ## Handoff to review
 
-After both inline reviews are clean, set the proposal to `status: active-review`; the agent decides that transition.
+After both inline reviews are clean, set no proposal status.
 
-1. Hand off to [`.agents/skills/reviewing-an-implementation/SKILL.md`](../reviewing-an-implementation/SKILL.md).
-2. Hand off to [`.agents/skills/adversarial-review/SKILL.md`](../adversarial-review/SKILL.md) at the sequential gate that review procedure specifies.
+1. Hand off to [`.agents/skills/reviewing-an-implementation/SKILL.md`](../reviewing-an-implementation/SKILL.md). It owns every remaining Phase 3 review stage, dispatches `adversarial-review`, produces the preview, and performs the final coupled transition.
 
 The adversarial reviewer is fresh-context, report-only, and uses a model distinct from the implementer where possible. It never edits implementation. Declined findings remain visible for human review.
 
 ## Dispatch constraints and model selection
 
 - Never let an implementer commit.
-- Never let self-review substitute for proposal-compliance, code-quality, review-phase, or adversarial review.
-- Never start the review phase before both inline gates are clean.
+- Never let self-review substitute for proposal-compliance, code-quality, cross-artifact, or adversarial review.
+- Never begin the Phase 3 cross-artifact review before both inline gates are clean.
 - Use the harness’s standard capable model for implementation and inline reviews.
 - Use the strongest available model distinct from the implementer for adversarial review; cognitive diversity is the point.
 - Escalate an implementer only for a reasoning shortfall, never for missing context.

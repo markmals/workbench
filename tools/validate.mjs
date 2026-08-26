@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const RECORD_TYPES = {
@@ -58,7 +58,9 @@ function artifactType(file) {
 
 function expectedId(file, type) {
     const filename = path.basename(file, ".md");
-    if (type === "guide") return `guide.${filename}`;
+    if (type === "guide") {
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(filename) ? `guide.${filename}` : null;
+    }
 
     const match = filename.match(/^(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$/);
     return match ? `${type}.${match[1]}` : null;
@@ -89,7 +91,34 @@ function referencesFor(artifact, type) {
 // Only prose counts as an unresolved question, so fenced blocks and inline spans are stripped
 // before the check. An author raising a real question writes it as prose, not as code.
 export function withoutCode(markdown) {
-    return markdown.replace(/^```[\s\S]*?^```/gm, "").replace(/`[^`\n]*`/g, "");
+    const parts = markdown.split(/(\r?\n)/);
+    let fence;
+
+    for (let index = 0; index < parts.length; index += 2) {
+        const line = parts[index];
+        if (fence) {
+            const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
+            if (closing && closing[1][0] === fence.character && closing[1].length >= fence.length) {
+                fence = undefined;
+            } else {
+                parts[index + 1] = "";
+            }
+            parts[index] = "";
+            continue;
+        }
+
+        const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+        if (opening && !opening[2].includes("`")) {
+            fence = { character: opening[1][0], length: opening[1].length };
+            parts[index] = "";
+            parts[index + 1] = "";
+            continue;
+        }
+
+        parts[index] = line.replace(/`[^`\n]*`/g, "");
+    }
+
+    return parts.join("");
 }
 
 export function parseFrontmatter(source) {
@@ -101,7 +130,8 @@ export function parseFrontmatter(source) {
 
     const frontmatter = {};
     for (const line of lines.slice(1, end)) {
-        if (line === "") continue;
+        const trimmed = line.trim();
+        if (trimmed === "" || trimmed.startsWith("#")) continue;
 
         const match = line.match(/^([a-z][a-z-]*):[ \t]*(.*)$/);
         if (!match) return { error: `cannot parse frontmatter line "${line}"` };
@@ -191,7 +221,9 @@ export function validateArtifacts(inputArtifacts) {
             violations.push(
                 violation(
                     artifact.path,
-                    "filename must begin with a four-digit record number and slug",
+                    type === "guide"
+                        ? "guide filename must be kebab-case"
+                        : "filename must begin with a four-digit record number and slug",
                 ),
             );
         } else if (frontmatter.id !== expected) {
@@ -256,6 +288,36 @@ export function validateArtifacts(inputArtifacts) {
         }
     }
 
+    const graph = new Map();
+    for (const [id, artifact] of ids) {
+        graph.set(
+            id,
+            Array.isArray(artifact.frontmatter.supersedes)
+                ? artifact.frontmatter.supersedes.filter((target) => ids.has(target))
+                : [],
+        );
+    }
+
+    const states = new Map();
+    const visit = (id, trail) => {
+        states.set(id, "visiting");
+        for (const target of graph.get(id)) {
+            if (states.get(target) === "visiting") {
+                const cycle = [...trail.slice(trail.indexOf(target)), target];
+                violations.push(
+                    violation(ids.get(target).path, `supersession cycle: ${cycle.join(" -> ")}`),
+                );
+            } else if (!states.has(target)) {
+                visit(target, [...trail, target]);
+            }
+        }
+        states.set(id, "visited");
+    };
+
+    for (const id of graph.keys()) {
+        if (!states.has(id)) visit(id, [id]);
+    }
+
     return violations;
 }
 
@@ -271,16 +333,41 @@ export function collectArtifacts(root = process.cwd()) {
             artifacts.push({ path: relativePath, ...parsed });
         }
     };
+    const isRegularFile = (entry, absolutePath) => {
+        if (entry.isFile()) return true;
+        if (!entry.isSymbolicLink()) return false;
+        try {
+            return statSync(absolutePath).isFile();
+        } catch {
+            return false;
+        }
+    };
+    const collectDirectory = (directory, relativeDirectory, nested = false) => {
+        const absoluteDirectory = path.join(root, relativeDirectory);
+        for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
+            const relativePath = path.join(relativeDirectory, entry.name);
+            const absolutePath = path.join(root, relativePath);
+            if (entry.isDirectory()) {
+                collectDirectory(directory, relativePath, true);
+            } else if (entry.name.endsWith(".md") && isRegularFile(entry, absolutePath)) {
+                if (nested) {
+                    violations.push(
+                        violation(
+                            relativePath,
+                            `nested record file; move it to ${directory}/ or remove it`,
+                        ),
+                    );
+                } else if (entry.name !== "README.md") {
+                    add(relativePath);
+                }
+            }
+        }
+    };
 
     if (existsSync(path.join(root, "VISION.md"))) add("VISION.md");
     for (const directory of Object.keys(RECORD_TYPES)) {
         const absoluteDirectory = path.join(root, directory);
-        if (!existsSync(absoluteDirectory)) continue;
-        for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
-            if (entry.isFile() && entry.name.endsWith(".md") && entry.name !== "README.md") {
-                add(path.join(directory, entry.name));
-            }
-        }
+        if (existsSync(absoluteDirectory)) collectDirectory(directory, directory);
     }
 
     return { artifacts, violations };

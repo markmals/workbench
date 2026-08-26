@@ -1,6 +1,6 @@
 # Readiness report — <proposal-id>
 
-<!-- Post this as the phase 4 pull-request comment after review and preview. -->
+<!-- Post this as the Phase 3 pull-request comment after review and preview. -->
 
 ## Proposal
 

@@ -7,7 +7,7 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 
 Random fixes waste time and create new bugs. Quick patches mask underlying issues. Always find the root cause **before** attempting a fix.
 
-**Lifted from superpowers' systematic-debugging skill.** Slimmed; the four-phase structure is unchanged.
+**Lifted from superpowers' systematic-debugging skill.** Slimmed; the four-stage debugging flow is unchanged.
 
 ## The Iron Law
 
@@ -15,7 +15,7 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 ```
 
-If you haven't completed Phase 1, you cannot propose a fix.
+If you have not completed debugging stage 1, you cannot propose a fix.
 
 ## When to use
 
@@ -40,11 +40,11 @@ Use for any technical issue:
 - Issue seems simple — simple bugs still have root causes
 - You're in a hurry — systematic is faster than thrashing
 
-## The four phases
+## The four debugging stages
 
-Complete each phase before proceeding to the next.
+Complete each stage before proceeding to the next.
 
-### Phase 1: Root cause investigation
+### Debugging stage 1: Root cause investigation
 
 **Before attempting any fix:**
 
@@ -62,9 +62,9 @@ Complete each phase before proceeding to the next.
     Run once. Read the evidence to identify the failing layer. Then investigate **that** layer.
 5. **Trace data flow backward.** Where does the bad value originate? What called this with the bad value? Keep tracing up until you find the source. Fix at the source, not the symptom.
 
-You leave Phase 1 with a clear, evidence-backed hypothesis about what is broken and where.
+You leave debugging stage 1 with a clear, evidence-backed hypothesis about what is broken and where.
 
-### Phase 2: Pattern analysis
+### Debugging stage 2: Pattern analysis
 
 Find the pattern before fixing:
 
@@ -73,16 +73,16 @@ Find the pattern before fixing:
 3. **Identify differences.** What's different between the working example and the broken code? List every difference, however small. Don't assume "that can't matter".
 4. **Understand dependencies.** What other components, settings, or environment does the working code rely on?
 
-You leave Phase 2 knowing what's different between working and broken.
+You leave debugging stage 2 knowing what differs between working and broken.
 
-### Phase 3: Hypothesis and minimal test
+### Debugging stage 3: Hypothesis and minimal test
 
 1. **State the hypothesis clearly.** "I think X is the root cause because Y." Be specific.
 2. **Test minimally.** Make the smallest possible change to test the hypothesis. **One variable at a time.**
-3. **Verify.** Did the change confirm the hypothesis? Yes → Phase 4. No → form a new hypothesis. Don't pile fixes on top.
+3. **Verify.** Did the change confirm the hypothesis? Yes → debugging stage 4. No → form a new hypothesis. Do not pile fixes on top.
 4. **When you don't know:** say "I don't understand X yet". Don't pretend. Ask, research, or trace further.
 
-### Phase 4: Implementation
+### Debugging stage 4: Implementation
 
 1. **Write a failing test.** The simplest possible reproduction of the bug. Use the `implementing-a-proposal` skill.
 2. **Verify the test fails for the right reason.** Same red-green discipline as TDD.
@@ -121,7 +121,7 @@ If you catch yourself thinking:
 - "The pattern says X but I'll adapt it differently"
 - "One more fix attempt" (after 2+ failures)
 
-All of these mean: **stop, return to Phase 1**.
+All of these mean: **stop, return to debugging stage 1**.
 
 ## User signals you're doing it wrong
 
@@ -133,7 +133,7 @@ Watch for these redirections from the user:
 - "Question the fundamentals" — you're fixing symptoms, not causes
 - "We're stuck?" (frustrated) — your approach isn't working
 
-When you see these: **return to Phase 1**.
+When you see these: **return to debugging stage 1**.
 
 ## Common rationalizations
 
@@ -149,7 +149,7 @@ When you see these: **return to Phase 1**.
 
 ## Quick reference
 
-| Phase             | Activities                                                                      | Success criteria                     |
+| Debugging stage   | Activities                                                                      | Success criteria                     |
 | ----------------- | ------------------------------------------------------------------------------- | ------------------------------------ |
 | 1. Root cause     | Read errors, reproduce, check changes, gather boundary evidence, trace backward | Understand WHAT is broken and WHERE  |
 | 2. Pattern        | Find working example, read fully, identify differences                          | Know how working differs from broken |
@@ -158,17 +158,17 @@ When you see these: **return to Phase 1**.
 
 ## Commit
 
-Once the failing test passes, the fix is verified, and the broader suite is green, commit. See `.claude/rules/commit-discipline.md` for message style.
+Once the failing test passes, the fix is verified, and the broader suite is green, commit. See [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md) for message style.
 
 Natural boundaries for a debugging session:
 
-- **Regression test + fix:** one commit. Subject: `fix: <user-observable bug description>`. Body explains the root cause uncovered in Phase 1, not the symptom.
-- **Split into two commits** when the failing test is independently valuable (e.g. it pins behavior that wasn't previously tested): `test: add regression test for <bug>` then `fix: <bug>`.
+- **Regression test + fix:** one commit. For a tooling bug, subject: `tools: fix <user-observable bug description>`. The body explains the root cause uncovered in debugging stage 1, not the symptom.
+- **Split into two commits** when the failing test is independently valuable, such as pinning previously untested behavior: `tools: add regression test for <bug>` then `tools: fix <bug>`.
 
 Do **not** bundle a "while I'm here" cleanup, an unrelated refactor, or a fix for a second bug into the same commit. One root cause, one commit. Other findings get their own commits or their own debugging sessions.
 
 ## Related skills
 
-- `implementing-a-proposal` — for the failing-test step in Phase 4
+- `implementing-a-proposal` — for the failing-test step in debugging stage 4
 - `.agents/rules/verification.md` — the gate before claiming the bug is fixed
 - `writing-a-proposal` — when a fix changes intended behavior, revise the proposal before implementation.

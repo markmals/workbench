@@ -18,7 +18,7 @@ Read the human's PR comments and direct commits before acting. Classify each ite
 
 Never encode a design change in code, tests, or guides while leaving the proposal stale.
 
-While revisions are outstanding, the proposal is `returned-for-revisions`, which the human sets when requesting changes. Set it to `active-review` when you repost the readiness report. If reworking the design reopens a question, record a clarification marker — `returned-for-revisions` is exempt from the marker rule so honest rework remains possible.
+While revisions are outstanding, the proposal is `returned-for-revisions`, which the human sets when requesting changes. Return to Phase 2 for a design revision or Phase 3 for implementation. If reworking the design reopens a question, record a clarification marker — `returned-for-revisions` is exempt from the marker rule so honest rework remains possible. At the end of Phase 3, hand off to `reviewing-an-implementation`, which alone owns the coupled status, readiness-report, and pull-request transition. Do not set proposal status when reposting.
 
 ## 2. Record policies and decisions
 

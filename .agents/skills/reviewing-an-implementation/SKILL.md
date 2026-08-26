@@ -1,11 +1,11 @@
 ---
 name: reviewing-an-implementation
-description: Use when an implemented proposal has fresh validation evidence and needs its phase-4 comparison, independent refutational review, human-exercisable preview, and ready-for-review handoff.
+description: Use when an implemented proposal has fresh validation evidence and needs its Phase 3 comparison, independent refutational review, human-exercisable preview, and ready-for-review handoff.
 ---
 
 # Reviewing an Implementation
 
-**Phase 4.** Compare the independent representations before asking a human to review the changed behavior. This procedure owns the confirmatory review, adversarial dispatch, preview, and readiness handoff. It does not decide whether the human accepts the work.
+**Phase 3 — Implementation.** Compare the independent representations before asking a human to review the changed behavior. This procedure owns the confirmatory review, adversarial dispatch, preview, and readiness handoff. It does not decide whether the human accepts the work.
 
 ## Inputs and order
 
@@ -144,15 +144,15 @@ GH_TOKEN="$SERVICE_ACCOUNT_TOKEN" gh pr ready <pr-number>
 
 Without a service account, post from the available authenticated identity and say in the report: `Posted from <identity>; no service account is configured.` Do not imply bot authorship.
 
-### Make the coupled transition
+### Make the coupled transition into Phase 4
 
-These three actions form one transition and MUST NOT be separated:
+At the end of Phase 3, these three actions form one transition and MUST NOT be separated:
 
 1. Move the proposal to `status: active-review`.
 2. Post the readiness report.
 3. Flip the pull request from draft to ready with `gh pr ready <pr-number>`.
 
-Do not leave the proposal, report, and pull-request state disagreeing. Ready means the work is human-reviewable, not correct or accepted. Never set `accepted`; only the human judges finished work in Phase 5.
+Do not leave the proposal, report, and pull-request state disagreeing. Ready means the work is human-reviewable, not correct or accepted. Never set `accepted`; only the human may do so in Phase 4, which starts Phase 5 completion.
 
 ## Red flags
 

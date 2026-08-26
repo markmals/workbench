@@ -46,9 +46,12 @@ disagree with what you are about to build, stop and raise it — do not quietly 
 
 ```
 branch → draft PR → proposal → tests → guides → code → validation
-       → cross-artifact review → adversarial review → readiness report
+       → cross-artifact review → adversarial review → preview → readiness report
        → human review → revision → vision update → merge → release → cleanup
 ```
+
+Numbered phases below follow [`PROCESS.md`](PROCESS.md). Agent review is the end of
+implementation, not a phase of its own.
 
 ### 1. Preparation
 
@@ -76,32 +79,29 @@ Skill: `.agents/skills/writing-a-proposal/`.
 
 ### 3. Implementation
 
-Strictly ordered. Each step is an independent representation of the same intent, and writing them
-out of order lets the code decide what "correct" means.
+Strictly ordered, and it ends with review. Each artifact is an independent representation of the
+same intent; writing them out of order lets the code decide what "correct" means.
 
 1. **Tests first.** Failing tests for the behavior the proposal's Detailed design specifies.
 2. **Guides next.** User-facing docs written from the proposal, not from the code. Then compare
    them against the tests and confirm they describe the same behavior.
 3. **Code last.** Implement against proposal, tests, and guides until `mise run check` passes.
 
-Skill: `.agents/skills/implementing-a-proposal/`.
+Passing the quality gates is necessary, never sufficient. Then, still within this phase:
 
-Passing the quality gates is necessary, never sufficient.
-
-### 4. Review
-
-1. **Cross-artifact review** — read proposal, tests, guides, and code together and find where they
+4. **Cross-artifact review** — read proposal, tests, guides, and code together and find where they
    disagree.
-2. **Adversarial review** — an independent subagent, **fresh context and a different model**, tries
+5. **Adversarial review** — an independent subagent, **fresh context and a different model**, tries
    to falsify the claim that the work is done. It reports; it does not fix. Findings you decline
    are surfaced in the readiness report, never silently dropped.
    Skill: `.agents/skills/adversarial-review/`.
-3. **Preview** — publish the cheapest real artifact through which the human can exercise the
+6. **Preview** — publish the cheapest real artifact through which the human can exercise the
    changed behavior. Review of prose is not review of behavior.
-4. **Readiness report** — post it to the PR linking the preview, set the proposal to
-   `active-review`, and mark the PR ready. Those three happen together.
+7. **Readiness report** — post it to the PR linking the preview, set the proposal to
+   `active-review`, and mark the PR ready for review. Those three are one action.
 
-Skill for stages 1, 3, and 4: `.agents/skills/reviewing-an-implementation/`.
+Skills: `.agents/skills/implementing-a-proposal/` for steps 1–3,
+`.agents/skills/reviewing-an-implementation/` for steps 4, 6, and 7.
 
 A preview is keyed to what the repository _is_, not to a fixed mechanism:
 
@@ -110,19 +110,23 @@ A preview is keyed to what the repository _is_, not to a fixed mechanism:
 | Library    | prerelease package                          |
 | Web app    | preview deployment                          |
 | API        | preview endpoint deployment                 |
-| Docs       | rendered documentation build                |
+| Docs       | deployed documentation site                 |
 | CLI        | installable executable                      |
 | Desktop    | installable build                           |
 | Mobile     | installable build (ad-hoc / internal track) |
 
-### 5. Human review and completion
+### 4. Human review
 
 The human reviews the report, the diff, and the preview. They comment on the PR; they may also
 commit directly. When feedback changes the intended design rather than correcting its
-implementation, **update the proposal first**, then re-run the implementation loop against it.
+implementation, **update the proposal first**, then re-run phase 3 against it.
 
-Once accepted: update `VISION.md` if the feature changed what the project is, merge, release, then
-clean up. Skill: `.agents/skills/completing-a-feature/`.
+Their verdict sets the status: `returned-for-revisions` to send it back, `accepted` to take it.
+
+### 5. Completion and release
+
+Update `VISION.md` if the feature changed what the project is, merge, release, update dependent
+projects, then clean up. Skill: `.agents/skills/completing-a-feature/`.
 
 ## Hard rules
 

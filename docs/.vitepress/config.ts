@@ -11,6 +11,28 @@ const sidebar = generateSidebar();
 // asset URL resolves against the domain root and the deployed site loads blank.
 const base = process.env.DOCS_BASE ?? "/";
 
+function baseAwareVoidZeroHeaderPlugin() {
+    return {
+        name: "base-aware-voidzero-header",
+        enforce: "pre" as const,
+        transform(code: string, id: string) {
+            if (!id.includes("@voidzero-dev/vitepress-theme/src/components/oss/Header.vue")) {
+                return null;
+            }
+
+            return code
+                .replace(
+                    "import { useData, useRoute } from 'vitepress'",
+                    "import { useData, useRoute, withBase } from 'vitepress'",
+                )
+                .replace(
+                    '<a href="/" class="flex flex-col items-start justify-center -mx-2 px-2">',
+                    '<a :href="withBase(\'/\')" class="flex flex-col items-start justify-center -mx-2 px-2">',
+                );
+        },
+    };
+}
+
 const config = defineConfig({
     base,
     title: "Workbench",
@@ -44,12 +66,12 @@ const config = defineConfig({
         // `srcDir: ".."` moves VitePress's default public directory to the repo root, so
         // docs/public was never copied into the build. Point Vite back at it explicitly.
         publicDir: fileURLToPath(new URL("../public", import.meta.url)),
-        plugins: [groupIconVitePlugin()],
+        plugins: [baseAwareVoidZeroHeaderPlugin(), groupIconVitePlugin()],
     },
     themeConfig: {
         logo: "/favicon.svg",
         outline: { level: "deep" },
-        socialLinks: [{ icon: "github", link: "https://github.com/" }],
+        socialLinks: [{ icon: "github", link: "https://github.com/markmals/workbench" }],
         nav: [
             { text: "Vision", link: "/VISION" },
             {

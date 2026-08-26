@@ -16,20 +16,17 @@ Delete this instruction and replace every <placeholder>. A proposal is the durab
 specification for one change; write for someone without the pull-request conversation.
 
 Lifecycle:
-- `draft` — being written with the human; may carry clarification markers.
-- `awaiting-implementation` — the human approved implementation; it is underway or not started.
-- `active-review` — readiness is posted and the pull request is ready for human evaluation.
-- `returned-for-revisions` — the human requested changes; return to implementation or proposal.
-- `accepted` — the human accepted the work; vision update, merge, and release are underway.
-- `implemented` — merged and released.
+- `draft` — Phase 2 proposal development with the human; may carry clarification markers.
+- `awaiting-implementation` — Phase 3 implementation may begin.
+- `active-review` — Phase 4 human evaluation; readiness is posted and the pull request is ready.
+- `returned-for-revisions` — Phase 4 human feedback returned the work to Phase 2 or Phase 3.
+- `accepted` — Phase 5 vision update, merge, and release are underway.
+- `implemented` — merged and released; done.
 - `rejected` — the human declined the change; retained as a record.
 - `withdrawn` — the author pulled it; retained as a record.
 - `superseded` — a later proposal replaced it; retained as a record.
 Normal path: `draft` → `awaiting-implementation` → `active-review` → `accepted` → `implemented`.
-Who decides: the human decides `awaiting-implementation`, `returned-for-revisions`, `accepted`,
-and `rejected`; the agent decides `active-review` and `implemented`. The human may ask the agent
-to make the edit — deciding is the part an agent must never do alone. Permission to begin
-implementing is `awaiting-implementation`, never `accepted`.
+Who decides: the human decides `awaiting-implementation`, `returned-for-revisions`, `accepted`, and `rejected`. At the end of Phase 3, `reviewing-an-implementation` alone moves the proposal to `active-review` while posting the readiness report and making the pull request ready. The agent moves `implemented`. The human may ask the agent to make an edit — deciding is the part an agent must never do alone. Permission to begin implementing is `awaiting-implementation`, never `accepted`.
 
 -->
 
@@ -161,6 +158,8 @@ If an alternative wins, change the proposal, explain why the new idea won, and u
 - <Alternative> — <why it was not chosen>
 
 ## Open questions
+
+<!--
 
 Put every unresolved question in the exact marker below. Resolve every marker before the human
 approves implementation; the validator enforces this. Do not guess an answer merely to make the

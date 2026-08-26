@@ -9,11 +9,11 @@ The preceding cross-artifact review is **confirmatory** — it compares the impl
 
 **Core principle:** a green suite and a clause-by-clause match prove the code does what someone thought to check. The adversary's whole value is in what nobody thought to check.
 
-Lifts the adversarial-refinement idea from VDD. Adapted to this repo: Phase 4, stage 2, fresh context, refute-by-default, convergence by exhaustion.
+Lifts the adversarial-refinement idea from VDD. Adapted to this repo: Phase 3, stage 2, fresh context, refute-by-default, convergence by exhaustion.
 
 ## When to use
 
-- The final stage of Review, after cross-artifact review.
+- Phase 3, after cross-artifact review.
 - Before declaring any proposal done.
 - Any time code "looks correct, tests pass" but no one has tried to break it.
 - Standalone, against an existing implementation you distrust.
@@ -106,8 +106,7 @@ Any of these → you reverted to confirmation. Restart from the refute-by-defaul
 
 ## Related skills
 
-- `reviewing-an-implementation` — the confirmatory comparison that precedes this stage.
+- `reviewing-an-implementation` — the confirmatory comparison that precedes this stage and surfaces declined findings.
 - `implementing-a-proposal` — the discipline whose tests this stage tries to defeat.
 - `systematic-debugging` — once a defect is confirmed, used to find its root cause before the fix.
 - `.agents/rules/verification.md` — the gate this stage feeds; a proposal is not done until the adversary converges.
-- `reviewing-an-implementation` — declined findings are surfaced here; never drop them silently.

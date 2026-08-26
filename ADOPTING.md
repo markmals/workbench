@@ -53,11 +53,7 @@ ln -s AGENTS.md .harness-instructions.md
 `description` in frontmatter, procedural instructions in the body. The `description` is what the
 agent sees when deciding whether to load the skill.
 
-If your harness auto-discovers skills from a specific directory, symlink the whole tree:
-
-```sh
-mkdir -p .claude && ln -s ../.agents/skills .claude/skills
-```
+If your harness auto-discovers skills from a specific directory, make a symlink from that documented directory to `.agents/skills`. Keep `.agents/skills` canonical; the harness-specific location is configuration, not a second copy.
 
 If it has no skill mechanism, that is not fatal — `AGENTS.md` names every skill by path at the
 point in the process where it applies, so the agent can read them directly. Confirm your agent
@@ -137,7 +133,6 @@ When you are ready:
 
 ```sh
 rm proposals/0001-*.md
-git rm -r --cached docs/.vitepress/dist 2>/dev/null || true
 ```
 
 Then rewrite `VISION.md` for your project, from `.agents/templates/VISION.md`. Do this with your
