@@ -3,7 +3,7 @@ id: proposal.0001
 title: Workbench 2.0
 authors: [markmals, Claude]
 status: accepted
-pull-request:
+pull-request: https://github.com/markmals/workbench/pull/1
 issues: []
 supersedes: []
 ---
