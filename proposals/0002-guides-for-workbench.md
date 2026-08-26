@@ -3,7 +3,7 @@ id: proposal.0002
 title: Guides for Workbench
 authors: [markmals, Claude]
 status: draft
-pull-request:
+pull-request: https://github.com/markmals/workbench/pull/2
 issues: []
 supersedes: []
 ---
