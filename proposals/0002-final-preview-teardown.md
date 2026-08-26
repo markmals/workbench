@@ -3,7 +3,7 @@ id: proposal.0002
 title: Make Preview Teardown Final
 authors: [markmals, Claude]
 status: draft
-pull-request:
+pull-request: https://github.com/markmals/workbench/pull/5
 issues: [https://github.com/markmals/workbench/issues/3]
 supersedes: []
 ---
