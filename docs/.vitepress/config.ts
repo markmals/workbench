@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
 import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
 import { extendConfig } from "@voidzero-dev/vitepress-theme/config";
@@ -7,23 +7,48 @@ import { clarificationMarkerPlugin } from "./markdown/clarification";
 
 const sidebar = generateSidebar();
 
+// Preview deployments land on a subpath (/<repo>/pr-preview/pr-N/). Without a matching base every
+// asset URL resolves against the domain root and the deployed site loads blank.
+const base = process.env.DOCS_BASE ?? "/";
+
+function baseAwareVoidZeroHeaderPlugin() {
+    return {
+        name: "base-aware-voidzero-header",
+        enforce: "pre" as const,
+        transform(code: string, id: string) {
+            if (!id.includes("@voidzero-dev/vitepress-theme/src/components/oss/Header.vue")) {
+                return null;
+            }
+
+            return code
+                .replace(
+                    "import { useData, useRoute } from 'vitepress'",
+                    "import { useData, useRoute, withBase } from 'vitepress'",
+                )
+                .replace(
+                    '<a href="/" class="flex flex-col items-start justify-center -mx-2 px-2">',
+                    '<a :href="withBase(\'/\')" class="flex flex-col items-start justify-center -mx-2 px-2">',
+                );
+        },
+    };
+}
+
 const config = defineConfig({
+    base,
     title: "Workbench",
-    description: "A spec-driven multiplatform app harness — web, native, desktop, and CLI.",
+    description: "A platform-agnostic, harness-agnostic agentic development process kit.",
     srcDir: "..",
     srcExclude: [
         "**/node_modules/**",
-        ".claude/**",
+        ".agents/**",
         ".git/**",
         ".github/**",
+        "tools/**",
         "docs/.vitepress/**",
         "docs/public/**",
-        "apps/**",
-        "services/**",
-        // GitHub/agent orientation docs — read on GitHub, not rendered as site
-        // pages. They link to repo files (.claude/, mise.toml) that aren't pages.
         "README.md",
-        "CLAUDE.md",
+        "PROCESS.md",
+        "AGENTS.md",
     ],
     rewrites: {
         "docs/index.md": "index.md",
@@ -37,25 +62,50 @@ const config = defineConfig({
         },
     },
     vite: {
-        plugins: [groupIconVitePlugin() as any],
+        // `srcDir: ".."` moves VitePress's default public directory to the repo root, so
+        // docs/public was never copied into the build. Point Vite back at it explicitly.
+        publicDir: fileURLToPath(new URL("../public", import.meta.url)),
+        plugins: [baseAwareVoidZeroHeaderPlugin(), groupIconVitePlugin()],
     },
     themeConfig: {
         logo: "/favicon.svg",
         outline: { level: "deep" },
-        socialLinks: [{ icon: "github", link: "https://github.com/" }],
+        socialLinks: [{ icon: "github", link: "https://github.com/markmals/workbench" }],
         nav: [
-            { text: "Specs", link: "/specs/CONVENTIONS", activeMatch: "/specs/" },
-            { text: "Features", link: sidebar.firstFeatureLink ?? "/", activeMatch: "/features/" },
-            { text: "Stack", link: "/specs/STACK" },
+            { text: "Vision", link: "/VISION" },
+            {
+                text: "Decisions",
+                link: sidebar.firstDecisionLink ?? "/decisions/README",
+                activeMatch: "/decisions/",
+            },
+            {
+                text: "Policies",
+                link: sidebar.firstPolicyLink ?? "/policies/README",
+                activeMatch: "/policies/",
+            },
+            {
+                text: "Proposals",
+                link: sidebar.firstProposalLink ?? "/proposals/README",
+                activeMatch: "/proposals/",
+            },
+            {
+                text: "Guides",
+                link: sidebar.firstGuideLink ?? "/guides/README",
+                activeMatch: "/guides/",
+            },
         ],
         sidebar: {
-            "/specs/": sidebar.specs,
-            "/features/": sidebar.features,
+            "/decisions/": sidebar.decisions,
+            "/policies/": sidebar.policies,
+            "/proposals/": sidebar.proposals,
+            "/guides/": sidebar.guides,
         },
+        recordLinks: sidebar.recordLinks,
         search: { provider: "local" },
     },
     head: [
-        ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+        // VitePress prefixes themeConfig paths with `base`, but not raw `head` hrefs.
+        ["link", { rel: "icon", type: "image/svg+xml", href: `${base}favicon.svg` }],
         ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
         [
             "link",

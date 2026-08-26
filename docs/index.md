@@ -1,6 +1,6 @@
 ---
 title: Workbench
-titleTemplate: A spec-driven multiplatform app harness
+titleTemplate: A platform-agnostic agentic development process kit
 layout: home
 theme: dark
 ---
