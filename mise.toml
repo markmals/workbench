@@ -1,21 +1,4 @@
-# Root mise config — orchestrates docs and per-platform tasks, and pins the
-# few project-wide tools. Per-platform toolchains live in their own mise.toml
-# under apps/<platform>/ and services/<service>/, created when you scaffold that
-# platform:
-#   web / website        → node, pnpm        ios → swift, tuist
-#   android              → jdk, kotlin       windows → dotnet
-#   linux                → rust, cargo       convex → node, pnpm
-#   cli                  → node,pnpm | rust,cargo | go   (CLI stack chosen at /setup)
-#
-# Environment variables are managed by Varlock: the committed `.env.schema`
-# (repo root) is the typed contract; real values live in `.env` / `.env.local`
-# (gitignored). Run env-dependent commands through `varlock run -- <cmd>`, or
-# wire Varlock into a platform's mise task. See https://varlock.dev.
-#
-# When you scaffold a platform, add its root orchestration task here (e.g.
-# `web:dev`, `ios:test`) so cross-platform commands work from the repo root.
-#
-# Run `mise tasks` from any directory to see what's available.
+# Adopting projects add their own fmt, lint, test, and build tasks, then wire them into check.
 
 [settings]
 experimental = true
@@ -24,28 +7,34 @@ experimental = true
 node = "24"
 pnpm = "11"
 "npm:oxfmt" = "latest"
-"npm:varlock" = "latest"
-# Browser-driving CLI for web/website visual verification (provides the
-# `chrome-devtools` command — see the web-verification skill). Root-pinned so
-# it's on PATH repo-wide, since the agent runs it as a bare command from the
-# repo root. /setup drops it when both the web app and website are pruned.
-"npm:chrome-devtools-mcp" = "latest"
 
 [env]
-# VitePress tooling installs at the repo root so markdown rendered via `srcDir`
-# (specs/ and features/) can resolve vue/vitepress during the build.
 _.path = ['{{config_root}}/node_modules/.bin']
 
 [hooks]
 postinstall = "pnpm install"
 
+# Bare `mise run fmt` formats the whole project; trailing paths narrow it to those files,
+# which is what the after-edit lifecycle hook uses.
 [tasks.fmt]
-# Repo-root formatter (the `format-on-edit` hook calls this for root-level files,
-# and each platform defines its own `fmt`). Accepts optional file paths:
-#   mise run fmt                 → format the whole project
-#   mise run fmt -- path/to.ts   → format just those files
-description = "Format the project (or the files passed as arguments)"
+description = "Format the project, or only the files passed"
 run = "oxfmt"
+
+[tasks."fmt:check"]
+description = "Check formatting"
+run = "oxfmt --check"
+
+[tasks.validate]
+description = "Validate the project record"
+run = "node tools/validate.mjs"
+
+[tasks.test]
+description = "Run the record validator's tests"
+run = "node --test tools/*.test.mjs"
+
+[tasks.check]
+description = "Run project quality gates"
+depends = ["fmt:check", "validate", "test", "docs:build"]
 
 [tasks."docs:dev"]
 description = "Run the docs site (VitePress) dev server"

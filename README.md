@@ -1,351 +1,161 @@
 # Workbench
 
-![Workbench hero image](./docs/public/workbench-hero.png)
+![Workbench](./docs/public/workbench-hero.png)
 
-> A Claude-Native Spec-Driven Development Template
+A development process for working with coding agents, packaged as a repository you can clone.
 
-A GitHub template for building **spec-driven multiplatform apps with Claude Code** as your primary collaborator. Specs are the source of truth; every platform implements them natively. There is no shared code — reconciliation across platforms happens through agent-mediated regeneration, not through a shared library.
+Workbench is built on one idea: **no single artifact defines a feature by itself.** A proposal
+records intent, tests encode behavior, guides explain behavior, code implements behavior, and a
+preview lets a human exercise it. Each is written independently, so when they disagree, you find
+out before release instead of after.
 
-This template assumes you will work with [Claude Code](https://claude.com/claude-code) every day. Every convention, file, and workflow in here is shaped by that assumption.
+It assumes nothing about your language, framework, platform, or coding harness.
+
+## Why
+
+An agent that goes straight from a request to an implementation produces code nobody specified,
+tests that agree with whatever got written, and documentation reverse-engineered from the result.
+Everything corroborates everything else, and none of it is evidence.
+
+The fix is not more review. It is making the agent commit to what it intends to build, in a form
+that can be checked against what it actually built.
 
 ## Quick start
 
-1. Click **"Use this template"** on GitHub to create your repo.
-2. Clone it locally and open it in your editor.
-3. **Run [`/setup`](.claude/commands/setup.md) in Claude.** This template ships as the _superset_ of every platform the stack supports (see [`STACK.md`](specs/STACK.md)). `/setup` asks which platforms and backend you're actually shipping and prunes the skills, hooks, permissions, and docs for everything else — turning the superset into just your project.
-4. Customize the seed content:
-    - [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md) — fill in the `[NEEDS CLARIFICATION]` product overview and out-of-scope sections.
-    - [`specs/DESIGN_SYSTEM.md`](specs/DESIGN_SYSTEM.md) — adjust tokens once branding is settled.
-    - [`.env.schema`](.env.schema) — declare your environment variables (Varlock's typed contract).
-    - `docs/index.md`, `docs/.vitepress/config.ts`, `docs/.vitepress/theme/components/Hero.vue` — set the project title.
-    - `docs/public/` — replace `workbench-hero.png`, `workbench-icon.png`, `favicon.svg` with your own brand art.
-5. Author your first feature: invoke the `brainstorming-feature` skill in Claude. It populates `features/0001-<your-slug>/`.
-6. Scaffold your reference platform under `apps/<platform>/`. Add the per-platform `CLAUDE.md` and `mise.toml`. (See [`CLAUDE.md`](CLAUDE.md) for the recommended layout.)
-7. Implement the feature on the reference platform with the `implementing-a-spec` skill, then mirror to other platforms via `/sdd-apply <spec-id> <platform>`.
-
-## What "Claude-native" means
-
-Lots of templates can be _used with_ an AI assistant. This one is _designed for_ one. Concretely:
-
-- **The spec is the contract; the agent is the implementer.** Specs in [`specs/`](specs/) and `features/<NNNN>-<slug>/` describe behavior in a form Claude can read, reason about, and translate into native code on each platform. Implementations carry `// SPEC: <id>` reverse pointers so Claude can trace from a line of code back to the spec it came from — and detect drift in the other direction.
-- **Workflows live as skills, not in your head.** Recurring procedures (writing a story, implementing a spec, debugging, verifying before claiming done) are encoded in [`.claude/skills/`](.claude/skills/) so that any session — yours, a teammate's, a fresh agent — picks up the same discipline.
-- **Cross-cutting checks live as subagents.** Audits like drift detection, spec review, test-coverage gaps, and visual verification run as isolated subagents in [`.claude/agents/`](.claude/agents/) so they don't pollute the main conversation context.
-- **Repetitive judgment is automated as hooks.** Formatting on edit (per language), blocking edits to generated files, regenerating Convex / Tuist projects, reminding you to regenerate OpenAPI clients when the contract changes, linting on stop, surfacing reconciliation reminders when a spec changes — all in [`.claude/hooks/`](.claude/hooks/).
-- **The orientation file is the orientation file.** [`CLAUDE.md`](CLAUDE.md) loads on every session and tells Claude how this repo works. There is no second README that drifts from the first.
-
-You can absolutely work in this repo without Claude — the specs, tests, and code are all human-readable, the docs site renders the spec library, and `mise` runs everything from the terminal. But the workflows assume Claude is doing a lot of the typing.
-
-## Native everywhere: spec-as-framework, not lowest-common-denominator
-
-The other half of this template's thesis: **each platform is built in its own native language, framework, and tooling — and the spec is what holds them together instead of a shared runtime.**
-
-The conventional way to ship "the same app" across web, mobile, and desktop is to pick a cross-platform framework — React Native, Flutter, Capacitor, Kotlin Multiplatform — and accept the trade-offs that come with it: a thin abstraction over each platform's UI layer, generic interaction patterns, a JS/Dart/Kotlin runtime layered on top of the OS, and a shared codebase that is structurally biased toward whatever the framework finds easy to express. You ship faster initially, you ship more uniformly forever, and the app feels approximately right on every platform.
-
-This template makes the opposite bet:
-
-- **Web is React + TanStack Start + Convex + Tailwind v4 + React Aria.** Server functions, reactive Convex queries, the actual web platform — and the reference every other client mirrors.
-- **Websites are Astro + React islands.** Content-first marketing and docs surfaces that ship HTML and hydrate sparingly.
-- **Apple is UIKit + Observation + SwiftData.** One Swift codebase across iOS / iPadOS / macOS / tvOS / watchOS / visionOS — UIKit on iOS · iPadOS · tvOS · visionOS, AppKit on macOS, SwiftUI on watchOS; native navigation, gestures, accessibility, the HIG as a real constraint.
-- **Android is Jetpack Compose + Material 3 + Kotlin coroutines/Flow + Room.** Material You theming, predictive back, the real Android system behaviors.
-- **Windows is C# + WinUI 3 + MVVM Toolkit + EF Core.** Native XAML, the real Windows shell.
-- **Linux is Rust + GTK 4 + Adwaita + Relm4.** Native GNOME, the real desktop.
-- **The CLI is one of Node (TS-Rest + Bombshell), Rust (Clap + charmed_rust), or Go (Cobra/Fang + Charm).** Headless automation and/or a rich TUI.
-- **Backend is Convex (Clerk for auth), reached contract-first.** Web and the website talk to Convex directly through its TypeScript client — reactive subscriptions, mutations, codegen-driven types. Native and CLI clients consume a **generated OpenAPI client** (Swift OpenAPI Generator, Kotlin OpenAPI Generator, Kiota, Progenitor, oapi-codegen) over the platform's own HTTP stack, with an on-device database (SwiftData / Room / EF Core / Diesel) as a local-first cache. No platform hand-rolls a transport or mirrors the protocol by hand — the contract is the only thing that crosses the wire.
-
-There is no shared package between any of these. There is no transpilation step, no bridge layer, no abstracted UI primitive. Each app ships the platform's native idioms — the kind of detail that distinguishes "an app" from "a website wrapped in a chrome." When something is genuinely different between platforms (a swipe gesture, a system share sheet, a context menu, a haptic), the platform implements it the platform's way, marked `// SPEC: <id> (deviates: <reason>)` so that divergence is explicit rather than smuggled.
-
-**One product, or several related ones.** Most of this document describes the common case: one product, projected across platforms, unified by specs. But a monorepo here can also hold _several logically-related apps_ — not just native projections of a single product, but distinct apps that share specs at some level (a common domain, shared cross-cutting conventions) and, where they run on the same stack, actual code. They're disambiguated by **name**, not platform alone: if you need a second CLI, that's a second named app with its own platform projections — not a second per-language CLI folder bolted onto the first. The no-shared-code rule is specifically about _cross-platform_ projections of one app; ordinary library reuse between same-runtime sibling apps is just good engineering.
-
-**The spec is what fills the role a shared framework usually plays.** It is the contract that says "every client must support _these_ states, _these_ transitions, _these_ errors, _these_ acceptance criteria." Each platform satisfies the contract idiomatically. The spec is the framework — written in markdown, enforced by reverse pointers and Gherkin scenarios, kept honest by `/sdd-drift` and `/sdd-verify`.
-
-Why is this tractable now when historically it wasn't? Because **agents close the cost gap**. Implementing a feature once per platform across a half-dozen native stacks used to be prohibitively expensive — N times the engineering effort, N sources of bugs, N drift trajectories. With Claude doing most of the per-platform translation from a shared spec, the cost flattens dramatically. You write the spec once, dispatch `/sdd-apply <spec-id> <platform>` for each target, and the agent produces idiomatic native code on each platform that satisfies the same behavioral contract. Drift is detected mechanically; reconciliation is a command, not a project.
-
-The result: an app that feels at home on every platform — not a uniform skin over a uniform runtime — without paying the historical cost of writing and maintaining a fleet of native apps by hand.
-
-## Why this template invents its own skills, agents, hooks, and conventions
-
-There are several mature ecosystems for AI-assisted development — [**Superpowers**](https://github.com/obra/superpowers) (a curated skill library) and [**Beads**](https://github.com/steveyegge/beads) (an issue tracker designed for AI workflows) being two we drew inspiration from. We deliberately don't depend on either. Here's why.
-
-### vs. Superpowers
-
-Superpowers is a fantastic, broad skill library — debugging, brainstorming, code review, plan execution, worktree management, and more. We took the **patterns** but rewrote them lighter and tighter for this template's specific shape:
-
-- **No plan documents, no branch ceremony.** Superpowers leans on plan files and worktree branches to coordinate multi-step work. This template uses TodoWrite + per-spec subagents (see the [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md) skill) because the unit of work is "satisfy this spec on this platform" — finer-grained than a plan doc, larger than a single edit.
-- **Reverse pointers replace task tracking.** Every line of code points back to its spec via `// SPEC: <id>`. Drift detection is `rg`-able, not ticket-shaped. You don't need a separate issue tracker to know what's done — `/sdd-drift` and `/sdd-cover` derive it from the code.
-- **Smaller surface area = faster onboarding.** Superpowers ships ~50 skills. This template ships a focused set tuned to the spec-driven workflow — the cross-cutting process skills plus one development skill per platform. Run `/setup` and the platform skills you don't use are pruned, so each copy stays readable in a sitting.
-- **`[NEEDS CLARIFICATION]` is the missing-info convention.** Borrowed in spirit from Superpowers' brainstorming flow but adapted: any unresolved question lives inline in the spec as `[NEEDS CLARIFICATION: ...]` and is resolved by the [`/sdd-clarify`](.claude/commands/sdd-clarify.md) command.
-
-Several skills (notably [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md), [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md), [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md), [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md)) lift their core moves directly from Superpowers — see the attribution in each `SKILL.md` header. The originals are excellent; we just wanted them shaped to this repo's grain.
-
-### vs. Beads
-
-Beads is a thoughtful ticket tracker built around the way agents actually work — claim/release semantics, dependency graphs, ready-task surfacing. We chose to **derive the same information from the spec library itself** instead:
-
-- **The spec ID _is_ the ticket ID.** When `vm.items.list` exists in `specs/`, that is the source of work. Tracking it separately in a ticket system means two systems to keep in sync — and the spec already has frontmatter (`id`, `kind`, `depends-on`, `[NEEDS CLARIFICATION]`) that subsumes most ticket fields.
-- **"Ready work" is `/sdd-drift` + `/sdd-cover`.** Specs that exist but lack implementation, or whose implementation has drifted, are the ready queue. The [`drift-hunter`](.claude/agents/drift-hunter.md) subagent produces a prioritized punch list on demand.
-- **Cross-platform coverage is structural, not a query.** Every spec maps to N platforms; `/sdd-cover <spec-id>` shows you which platforms implement it and which tests pass. No ticket joins required.
-- **Fewer dependencies for a template.** Bringing in a tracker means everyone who clones the template installs and configures it before doing useful work. Specs and reverse pointers are just markdown and grep.
-
-If your project _grows_ to need a ticket tracker (especially for cross-team coordination beyond the repo), Beads is a great choice — it composes cleanly alongside this template. We just didn't want it to be a precondition.
-
-The one class of work that _isn't_ derivable from the spec library is **sub-spec defects**: platform-local cosmetic / polish / quirk issues that the cross-platform spec deliberately doesn't speak to. For those, each platform keeps an [`apps/<platform>/DEFECTS.md`](.claude/templates/platform/DEFECTS.md) drain file — filed via [`/sdd-defect`](.claude/commands/sdd-defect.md), drained via the [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md) skill, deleted on fix. It's a tiny convention with no status fields, severity labels, or assignees on purpose: the file wants to be empty, and the fix commit is the durable record.
-
-### vs. generic tooling
-
-Most "AI-friendly" templates are AI-agnostic templates with a `CLAUDE.md` bolted on. This one inverts that: the spec format, the slash commands, the hook lifecycle, and the per-platform discipline were all designed assuming you'll be reading and writing markdown _alongside_ an agent that can navigate the repo. If we end up using a different agent later, much of the structure will still hold — but the optimization target is Claude Code today.
-
-## How SDD works here
-
-The flow is the same on every platform:
-
-1. **Brainstorm a feature** — invoke the [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md) skill. It walks narrative → stories → models → view-models → flows → errors and populates a `features/<NNNN>-<slug>/` folder using the templates in [`.claude/templates/feature/`](.claude/templates/feature/). Anything unresolved becomes `[NEEDS CLARIFICATION: ...]`.
-2. **Clarify** — run [`/sdd-clarify <feature>`](.claude/commands/sdd-clarify.md) to resolve outstanding markers with you, the human.
-3. **Review the spec** — dispatch the [`spec-reviewer`](.claude/agents/spec-reviewer.md) subagent for a P0/P1/P2 audit before implementation.
-4. **Implement on the reference platform** — invoke the [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md) skill, or run [`/sdd-apply <spec-id> web`](.claude/commands/sdd-apply.md). The skill writes failing tests first ([`test-driven-development`](.claude/skills/test-driven-development/SKILL.md)), then the minimum implementation to pass them, then runs spec-compliance and code-quality reviews.
-5. **Mirror to other platforms** — `/sdd-apply <spec-id> ios`, `/sdd-apply <spec-id> android`. The web implementation becomes a worked example alongside the spec; the agent translates idiomatically.
-6. **Verify** — `/sdd-verify <platform>` runs the platform's behavioral tests. The [`visual-verifier`](.claude/agents/visual-verifier.md) subagent walks the Gherkin scenarios through the actual UI (Chrome DevTools / iOS simulator / Android emulator).
-7. **Audit drift over time** — `/sdd-drift <platform>` (or the [`drift-hunter`](.claude/agents/drift-hunter.md) subagent for a multi-platform sweep) lists spec IDs whose implementation has drifted.
-
-The discipline is enforced by hooks: `block-generated.sh` refuses edits to generated artifacts, `format-on-edit.sh` formats every touched file, `spec-reconcile.sh` reminds you to `/sdd-apply` when a spec changes, and `stop-lint.sh` runs lint on dirty platforms before letting Claude declare done.
-
-### The standard flow, command by command
-
-The prose above is the shape; this is the runbook. It's the sequence to run **per feature**, with concrete arguments. The example feature is `0001-managing-items`, whose folder contains the specs `domain.item`, `vm.items.list`, and `story.item.create`.
-
-**Phase 0 — once, on a fresh copy of the template**
-
-```text
-/setup                              # choose platforms + backend; prune the rest
-```
-
-**Phase 1 — author the feature (specs only; no code yet)**
-
-```text
-invoke skill: brainstorming-feature # narrative → stories → models → view-models → flows → errors
-                                    #   ↳ writes features/0001-managing-items/
-/sdd-clarify 0001                   # resolve every [NEEDS CLARIFICATION] marker with you
-/sdd-analyze 0001                   # read-only: gaps, contradictions, dangling depends-on
-dispatch subagent: spec-reviewer    # P0/P1/P2 audit of the spec before any code
-```
-
-Loop Phase 1 until `/sdd-analyze` is clean and the spec-reviewer has no P0/P1 issues. **The spec is the leverage — sharpen it here, before it forks across N platforms.**
-
-**Phase 2 — implement on the reference platform (web)**
-
-Apply each spec in the feature in `depends-on` order — models, then view-models, then stories/errors:
-
-```text
-/sdd-apply domain.item       web    # writes failing tests first, then minimum impl
-/sdd-apply vm.items.list     web
-/sdd-apply story.item.create web
-/sdd-verify web                      # run web's behavioral suite, keyed by spec ID
-dispatch subagent: visual-verifier   # walk the Gherkin scenarios through the real UI
-```
-
-`/sdd-apply` runs the [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md) loop internally (test → impl → spec-compliance review → code-quality review → adversarial pass) and commits at natural boundaries. If it reports the spec itself is wrong, stop and fix the spec, then re-apply.
-
-**Phase 3 — mirror to every other platform**
-
-Same spec IDs, same order, once per target platform. Web is now a worked example alongside the spec:
-
-```text
-/sdd-apply domain.item       ios
-/sdd-apply vm.items.list     ios
-/sdd-apply story.item.create ios
-/sdd-verify ios
-
-/sdd-apply domain.item       android
-/sdd-apply vm.items.list     android
-/sdd-apply story.item.create android
-/sdd-verify android
-#   … repeat per platform: website · windows · linux · cli
-```
-
-**Phase 4 — confirm coverage, then keep it honest over time**
-
-```text
-/sdd-cover story.item.create        # which platforms implement it + which tests pass
-/sdd-drift web                       # periodically, per platform: what's gone stale
-/sdd-reconcile ios                   # when a platform raced ahead — fold its change back into the spec + others
-/sdd-defect ios "list scrollbar flickers on first paint"   # capture platform-local polish; drain via triaging-defects
-```
-
-**Two recurring sub-flows once the feature exists:**
-
-- **Changing a spec** → edit the spec file, then `/sdd-apply <id> <platform>` for every platform that implements it. The `spec-reconcile.sh` hook reminds you which ones.
-- **Fixing a platform-only bug the spec already requires** → just fix it and `/sdd-verify <platform>`. No spec edit. (If the _behavior_ changed rather than getting _corrected_, that's `/sdd-reconcile` instead.)
-
-You drive the commands; the hooks (format-on-edit, codegen, lint-on-stop) and the per-spec review stages run on their own. The throughput is in Phases 2–3 fanning out across platforms; the judgment is in Phase 1.
-
-## Repo layout
-
-```
-.
-├── CLAUDE.md                          ← orientation doc Claude loads every session
-├── README.md                          ← this file (orientation for humans)
-├── .env.schema                        ← Varlock environment contract
-├── .claude/                           ← everything Claude-shaped (see catalog below)
-├── docs/                              ← VitePress site rendering specs/ and features/
-├── specs/                             ← cross-cutting specs (CONVENTIONS, ARCHITECTURE, DESIGN_SYSTEM, STACK)
-├── mise.toml                          ← root task runner (docs:* + per-platform orchestration)
-│
-├── features/                          ← (you create) feature-scoped specs as <NNNN>-<slug>/
-├── apps/                              ← (you create) platform implementations
-│   ├── web/                           ←   React + TanStack Start + Convex (reference)
-│   ├── website/                       ←   Astro + React islands
-│   ├── ios/                           ←   Swift / UIKit / SwiftData (Apple family)
-│   ├── android/                       ←   Kotlin / Jetpack Compose / Room
-│   ├── windows/                       ←   C# / WinUI 3 / EF Core
-│   ├── linux/                         ←   Rust / GTK 4 + Adwaita / Relm4
-│   └── cli/                           ←   the CLI — one stack: Node (TS-Rest) · Rust (charmed_rust) · Go (Charm)
-└── services/                          ← (you create) backend services
-    └── convex/                        ←   Convex backend + Clerk auth
-```
-
-The `apps/` and `services/` directories aren't committed in this template — you scaffold them per-platform as you start that platform's work. Each scaffolded directory will have its own `CLAUDE.md` (with stack idioms) and `mise.toml` (with build/test/lint tasks).
-
-## Catalog of Claude-specific files
-
-Everything below is what makes this template "Claude-native." If you copied just these files into another repo, you'd have most of the spec-driven workflow.
-
-### Root-level
-
-| Path                         | Purpose                                                                                                                                                                                                       |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`CLAUDE.md`](CLAUDE.md)     | Loaded on every Claude Code session. The top-level orientation: how the repo works, where to read first, slash command index, skill index. `@includes` the rule files below so they're part of every session. |
-| [`STACK.md`](specs/STACK.md) | The canonical toolchain catalog — every tool, framework, and service this template knows how to wire up, by layer. The superset `/setup` prunes from.                                                         |
-| [`.env.schema`](.env.schema) | [Varlock](https://varlock.dev) environment contract: the committed, typed declaration of the project's env vars. Real values live in gitignored `.env` / `.env.local`.                                        |
-| `apps/<platform>/CLAUDE.md`  | Per-platform orientation (created when you scaffold the platform). Stack idioms, test commands, where reverse pointers go in that language.                                                                   |
-| `services/convex/CLAUDE.md`  | Backend orientation (created when you scaffold Convex). Schema-as-protocol conventions, mutation/query patterns.                                                                                              |
-
-### `.claude/settings.json`
-
-Project-level Claude Code settings. Wires up:
-
-- **Permissions** — auto-allow safe read-only and build commands (`mise`, `pnpm`, `cargo`, `dotnet`, `xcodebuild`, `adb`, `rustfmt`, `oxfmt`, `rg`, etc.); ask before `git push`, `convex deploy`, `wrangler deploy`, `railway up`, `rm -rf`.
-- **Hooks** — registers every script in `.claude/hooks/` to its lifecycle event (`PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`, `Notification`).
-- **Default permission mode** — `auto` (continuous execution).
-
-### `.claude/rules/` — `@included` into orientation docs
-
-Loaded on every session via `@includes` from `CLAUDE.md`.
-
-| Path                                                                       | Purpose                                                                                                        |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [`.claude/rules/code-quality.md`](.claude/rules/code-quality.md)           | The "what good code looks like in this repo" rules — file size, naming, comments, abstraction, error handling. |
-| [`.claude/rules/commit-discipline.md`](.claude/rules/commit-discipline.md) | When to commit, what one commit contains, message format, staging policy, push policy.                         |
-| [`.claude/rules/spec-conventions.md`](.claude/rules/spec-conventions.md)   | The compact between specs, tests, and implementations. Loaded by every per-platform `CLAUDE.md`.               |
-
-### `.claude/skills/` — procedural workflows
-
-Skills are markdown files that encode "how we do X here." Claude invokes them via the `Skill` tool.
-
-| Skill                                                                                      | When to use                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`brainstorming-feature`](.claude/skills/brainstorming-feature/SKILL.md)                   | Before starting any new feature. Walks narrative → stories → models → view-models → flows → errors.                                                            |
-| [`writing-user-stories`](.claude/skills/writing-user-stories/SKILL.md)                     | When authoring or reviewing a story file. Enforces Gherkin discipline.                                                                                         |
-| [`implementing-a-spec`](.claude/skills/implementing-a-spec/SKILL.md)                       | The default "how to write code" workflow. Per-spec subagent dispatch + two-stage review. Used by `/sdd-apply`.                                                 |
-| [`test-driven-development`](.claude/skills/test-driven-development/SKILL.md)               | When writing any production code. Iron Law: no production code without a failing test first.                                                                   |
-| [`verification-before-completion`](.claude/skills/verification-before-completion/SKILL.md) | Before claiming any work is complete. Run the verifying command in this turn; evidence before claims.                                                          |
-| [`systematic-debugging`](.claude/skills/systematic-debugging/SKILL.md)                     | When encountering any bug or unexpected behavior. Find the root cause before proposing a fix.                                                                  |
-| [`triaging-defects`](.claude/skills/triaging-defects/SKILL.md)                             | When `apps/<platform>/DEFECTS.md` is non-empty. Classify each entry as fix-in-place / promote-to-spec / won't-fix and drain.                                   |
-| [`web-development`](.claude/skills/web-development/SKILL.md)                               | When writing web-app code. React + TanStack suite + Convex + Clerk + Tailwind + React Aria + Motion + Zod idioms.                                              |
-| [`web-verification`](.claude/skills/web-verification/SKILL.md)                             | When verifying web UI in a browser. Wraps the `chrome-devtools` CLI (pinned in the root `mise.toml`).                                                          |
-| [`website-development`](.claude/skills/website-development/SKILL.md)                       | When writing the marketing/content site. Astro + React islands + content collections idioms.                                                                   |
-| [`ios-development`](.claude/skills/ios-development/SKILL.md)                               | When writing Apple-family code. UIKit (AppKit on macOS, SwiftUI on watchOS) + Observation + SwiftData + Swift Testing + generated OpenAPI client.              |
-| [`ios-simulator-control`](.claude/skills/ios-simulator-control/SKILL.md)                   | When verifying Apple UI changes. Wraps `xcrun simctl` + `idb`.                                                                                                 |
-| [`android-development`](.claude/skills/android-development/SKILL.md)                       | When writing Android code. Compose + Material 3 + coroutines/Flow + Room + Ktor (OkHttp) + OpenAPI idioms.                                                     |
-| [`android-emulator-control`](.claude/skills/android-emulator-control/SKILL.md)             | When verifying Android UI changes. Wraps `adb` + `uiautomator`.                                                                                                |
-| [`windows-development`](.claude/skills/windows-development/SKILL.md)                       | When writing Windows code. C# + WinUI 3 + MVVM Toolkit + EF Core + Kiota; Fluent Design; Roslyn MCP bridge.                                                    |
-| [`windows-app-control`](.claude/skills/windows-app-control/SKILL.md)                       | When verifying Windows UI changes **on Windows**. Wraps the `winapp` CLI (`winapp run` + `winapp ui`). Inert on a macOS-hosted agent.                          |
-| [`linux-development`](.claude/skills/linux-development/SKILL.md)                           | When writing Linux desktop code. Rust + GTK 4 + Adwaita + Relm4 + Diesel + Progenitor idioms.                                                                  |
-| [`node-cli-development`](.claude/skills/node-cli-development/SKILL.md)                     | When writing the **Node** CLI stack (`apps/cli`). TS-Rest + Bombshell + Drizzle + plainjob; hosts the OpenAPI contract in OpenAPI mode.                        |
-| [`rust-cli-development`](.claude/skills/rust-cli-development/SKILL.md)                     | When writing the **Rust** CLI stack (`apps/cli`). Clap + charmed_rust (bubbletea/bubbles/lipgloss/huh/glamour/harmonica/wish) + Diesel + reqwest + Progenitor. |
-| [`go-cli-development`](.claude/skills/go-cli-development/SKILL.md)                         | When writing the **Go** CLI stack (`apps/cli`). Cobra/Fang + Bubble Tea + Bubbles + Lip Gloss + Huh + Glamour + database/sql (go-sqlite) + oapi-codegen.       |
-
-### `.claude/agents/` — cross-cutting subagents
-
-Subagents run in their own context window and return a single message back to the main conversation. Use them for audits and isolated checks.
-
-| Agent                                                  | Purpose                                                                                                                                                             |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`drift-hunter`](.claude/agents/drift-hunter.md)       | Audits cross-platform spec/impl drift. Runs `/sdd-drift` across platforms, cross-references with `/sdd-verify` output, returns a prioritized punch list. Read-only. |
-| [`spec-reviewer`](.claude/agents/spec-reviewer.md)     | Reviews a spec file before it lands. Frontmatter, Gherkin discipline, `[NEEDS CLARIFICATION]` markers, reverse-pointer health. P0/P1/P2 issue list.                 |
-| [`test-gap-finder`](.claude/agents/test-gap-finder.md) | Finds Gherkin scenarios that don't have a matching `[scenario.<id>]`-tagged test on a given platform. Test-coverage drift (vs. drift-hunter's code drift).          |
-| [`visual-verifier`](.claude/agents/visual-verifier.md) | Drives Chrome DevTools / iOS simulator / Android emulator through each Gherkin scenario in a `story.*` spec, screenshots each state, reports rendering mismatches.  |
-| [`handoff-builder`](.claude/agents/handoff-builder.md) | At the end of a development pass, generates or updates `HANDOFF.md` so a future session can pick up the branch with full context.                                   |
-
-### `.claude/commands/` — slash commands
-
-User-typed commands. Each is intent-only at the moment — the agent uses `rg`, `Edit`, `AskUserQuestion`, etc. to fulfill them; no automation script behind them yet.
-
-| Command                                                                 | Purpose                                                                                           |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [`/setup`](.claude/commands/setup.md)                                   | **Run once on a fresh copy.** Choose which platforms + backend you ship; prune everything else.   |
-| [`/sdd-apply <spec-id> <platform>`](.claude/commands/sdd-apply.md)      | Regenerate a spec's implementation and tests on a target platform.                                |
-| [`/sdd-verify <platform>`](.claude/commands/sdd-verify.md)              | Run the platform's behavioral test suite and report which spec IDs pass.                          |
-| [`/sdd-drift <platform>`](.claude/commands/sdd-drift.md)                | List spec IDs whose implementation has drifted from the spec on a platform.                       |
-| [`/sdd-cover <spec-id>`](.claude/commands/sdd-cover.md)                 | Show which platforms implement a spec and which of their tests pass.                              |
-| [`/sdd-reconcile <source-platform>`](.claude/commands/sdd-reconcile.md) | Bring the spec + other platforms in line with this platform's impl (when a platform raced ahead). |
-| [`/sdd-clarify <feature-or-spec>`](.claude/commands/sdd-clarify.md)     | Scan a feature or spec for `[NEEDS CLARIFICATION]` markers and resolve them with the user.        |
-| [`/sdd-analyze <feature>`](.claude/commands/sdd-analyze.md)             | Read-only cross-artifact consistency check for a feature folder.                                  |
-| [`/sdd-defect <platform> <desc>`](.claude/commands/sdd-defect.md)       | File a sub-spec defect into `apps/<platform>/DEFECTS.md` without breaking flow.                   |
-
-### `.claude/hooks/` — lifecycle scripts
-
-Bash scripts wired up in `settings.json`. Each runs at a specific Claude Code lifecycle event. Failures are logged but don't crash the agent (except where blocking is intentional, e.g. `stop-lint.sh`).
-
-| Hook                                                             | Event                                       | Purpose                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`block-generated.sh`](.claude/hooks/block-generated.sh)         | `PreToolUse` (Edit/Write/MultiEdit)         | Refuses edits to tool-generated files (Convex `_generated/`, Xcode-derived data, Cargo `target/`, .NET `obj/`+`bin/`, Astro `.astro/`, etc.).                                                                                                                                                                   |
-| [`scoped-commits.sh`](.claude/hooks/scoped-commits.sh)           | `PreToolUse` (Bash, gated to `git commit*`) | Requires a [Scoped Commits](https://scopedcommits.com/) subject (`<scope>: <description>`) whose scope is **defined** — a spec/feature `id:` (a reverse pointer), an `apps/*`/`services/*` dir, a harness area, a name in `.claude/commit-scopes`, or `treewide`. Rejects the Conventional `type(scope):` form. |
-| [`format-on-edit.sh`](.claude/hooks/format-on-edit.sh)           | `PostToolUse` (Edit/Write/MultiEdit)        | Formats the touched file by dispatching to its platform's `fmt` mise task (`mise run -C <dir> fmt -- <file>`). The formatter lives in each platform's `fmt` task, not the hook, so adding a platform never touches it.                                                                                          |
-| [`convex-codegen.sh`](.claude/hooks/convex-codegen.sh)           | `PostToolUse` (Edit/Write/MultiEdit)        | Regenerates Convex types when `schema.ts` changes.                                                                                                                                                                                                                                                              |
-| [`openapi-codegen.sh`](.claude/hooks/openapi-codegen.sh)         | `PostToolUse` (Edit/Write/MultiEdit)        | When the OpenAPI contract changes, reminds you to regenerate the per-platform typed clients (reminder only — the producer is a project choice).                                                                                                                                                                 |
-| [`tuist-regen.sh`](.claude/hooks/tuist-regen.sh)                 | `PostToolUse` (Edit/Write/MultiEdit)        | Regenerates the Xcode project when `Project.swift` changes.                                                                                                                                                                                                                                                     |
-| [`spec-reconcile.sh`](.claude/hooks/spec-reconcile.sh)           | `PostToolUse` (Edit/Write/MultiEdit)        | When a spec is edited, lists implementations that reference its ID and suggests `/sdd-apply` per platform. When code is edited, surfaces drift hints.                                                                                                                                                           |
-| [`stop-lint.sh`](.claude/hooks/stop-lint.sh)                     | `Stop`                                      | Runs lint on whichever platforms have uncommitted changes since `HEAD`. **Blocks the stop** if any lint fails — Claude can't declare "done" with a dirty lint.                                                                                                                                                  |
-| [`user-prompt-context.sh`](.claude/hooks/user-prompt-context.sh) | `UserPromptSubmit`                          | Injects current branch + uncommitted changes into the agent's context, so natural commit points are obvious.                                                                                                                                                                                                    |
-| [`notify-long-task.sh`](.claude/hooks/notify-long-task.sh)       | `Notification`                              | Surfaces a macOS notification when Claude Code needs attention (long-running task, permission prompt).                                                                                                                                                                                                          |
-
-### `.claude/templates/` — canonical scaffolds
-
-Markdown templates for new specs and features. Used by the `brainstorming-feature` skill and by anyone authoring a spec by hand.
-
-| Path                                                                             | Purpose                                                                                                                                                                                                              |
-| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`.claude/templates/feature/`](.claude/templates/feature/)                       | Full structure for a new `features/<NNNN>-<slug>/` folder: `NARRATIVE.md`, `stories/STORY.md`, `models/MODEL.md`, `view-models/VIEW_MODEL.md`, `use-cases/USE_CASE.md`, `user-flow/USER_FLOW.md`, `errors/ERROR.md`. |
-| [`.claude/templates/spec/MODEL.md`](.claude/templates/spec/MODEL.md)             | Canonical template for a cross-cutting spec under `specs/`.                                                                                                                                                          |
-| [`.claude/templates/platform/DEFECTS.md`](.claude/templates/platform/DEFECTS.md) | Seed file for per-platform sub-spec defect tracking. Copied to `apps/<platform>/DEFECTS.md` on first `/sdd-defect`.                                                                                                  |
-
-## Local tooling
-
-[`mise`](https://mise.jdx.dev) manages toolchains and runs tasks. The root [`mise.toml`](mise.toml) ships `docs:*` tasks and `fmt`; per-platform tasks live in `apps/*/mise.toml` and `services/*/mise.toml` once you scaffold them. Environment variables are managed by [Varlock](https://varlock.dev) against the committed [`.env.schema`](.env.schema) — run env-dependent commands with `varlock run -- <cmd>`.
+1. Click **Use this template** on GitHub, then clone your repository.
+2. Ask your agent to adopt it, pointing it at [`ADOPTING.md`](ADOPTING.md). That wires Workbench
+   into whichever harness you use — a one-time change you commit and forget.
+3. Write your project's vision with your agent, from
+   [`.agents/templates/VISION.md`](.agents/templates/VISION.md).
+4. Start your first feature. Your agent branches, opens a draft pull request, and writes a
+   proposal before it writes any code.
 
 ```sh
-mise run docs:dev          # docs site (VitePress) at http://localhost:5173
-mise run docs:build        # static build to docs/.vitepress/dist
-mise run docs:preview      # preview the built site
-mise run fmt               # format the entire project (oxfmt)
-mise tasks                 # list everything available
+mise install
+mise run check
 ```
 
-When you scaffold a platform, define `fmt` and `lint` tasks in its `mise.toml` (its formatter / linter — `fmt` accepts optional file paths) so the `format-on-edit` and `stop-lint` hooks can call them, and add its orchestration task at the root (e.g. `web:dev`, `ios:test`) so cross-platform commands work from the repo root.
+## The process
 
----
+Per feature:
 
-## What's deliberately not included
+```
+branch → draft PR → proposal → tests → guides → code → validation
+       → cross-artifact review → adversarial review → preview → readiness report
+       → human review → revision → vision update → merge → release → cleanup
+```
 
-- **`apps/` and `services/` directories.** Scaffold these when you choose your stack — different teams will want different platforms in different orders.
-- **Automation behind the `/sdd-*` commands.** They are intent-only at the moment; the agent uses `rg`, `Edit`, `AskUserQuestion`, etc. to fulfill them. As patterns stabilize, some of this will move into shell scripts or a small CLI.
-- **A worked example feature.** The original repo this was extracted from has a contacts-app pass; this template ships clean so you can put your own thing in `features/0001-*/`.
-- **A ticket tracker.** As discussed above — the spec library is the source of work. Bring in Beads or your tracker of choice if you outgrow that.
+**Preparation.** The agent branches, pushes, and opens a draft pull request. The pull request is
+the durable workspace — proposal, implementation, review discussion, and status reports all
+accumulate in one reviewable place.
+
+**Proposal.** You and the agent write `proposals/<NNNN>-<slug>.md` and iterate until it is right.
+It has to be concrete enough that tests, guides, and an implementation can be derived from it
+without rereading your conversation. Unresolved questions are marked and answered, never guessed.
+
+**Implementation.** Failing tests first, then guides written from the proposal, then code. The
+order matters: tests written after the code agree with the code, and guides written after the
+implementation document its accidents.
+
+**Review.** A cross-artifact pass looks for disagreement between proposal, tests, guides, and
+code. Then an adversarial reviewer — fresh context, different model — tries to prove the work is
+broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the
+readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a
+readiness report and marks the pull request ready.
+
+**Human review.** You read the report, the diff, and the preview, and comment. If your feedback
+changes the design rather than correcting the implementation, the proposal is updated first and
+the loop runs again. When you accept it: vision update, merge, release, cleanup.
+
+The full description is in [`PROCESS.md`](PROCESS.md). The operative contract your agent reads
+every session is [`AGENTS.md`](AGENTS.md).
+
+## Previews
+
+A preview is the cheapest realistic artifact through which you can exercise a change. _Cheapest_
+rules out standing up production infrastructure to review a pull request; _realistic_ rules out
+screenshots and descriptions of what would happen.
+
+| Project           | Preview                                            |
+| ----------------- | -------------------------------------------------- |
+| Library           | prerelease package                                 |
+| Web application   | preview deployment                                 |
+| API               | preview endpoint deployment                        |
+| Documentation     | rendered documentation build                       |
+| Command-line tool | installable executable                             |
+| Desktop           | installable build                                  |
+| Mobile            | installable build, ad-hoc or internal distribution |
+
+Wire the row matching your project and delete the rest. Previews are private by default.
+
+## Defects
+
+Defects an agent finds along the way get filed as issues, not folded into whatever it happens to
+be building. A defect that stops the current work from satisfying its proposal is the current
+work and gets fixed; a defect that is out of scope, pre-existing, or someone else's problem
+becomes a GitHub issue written so a future reader can reproduce it without the conversation it
+came from. Deferred defects are linked from the pull request, so the decision to defer is visible.
+
+## What's in here
+
+| Path                 | What it is                                                    |
+| -------------------- | ------------------------------------------------------------- |
+| `AGENTS.md`          | The contract every agent session loads.                       |
+| `PROCESS.md`         | The full process description.                                 |
+| `ADOPTING.md`        | Wiring Workbench into your harness.                           |
+| `VISION.md`          | The project's purpose and direction. Replace ours with yours. |
+| `proposals/`         | One document per change, kept as history after it ships.      |
+| `policies/`          | Rules future work must keep enforcing.                        |
+| `decisions/`         | Architectural choices and the context that produced them.     |
+| `guides/`            | User-facing documentation.                                    |
+| `docs/`              | The site. Publishes the vision, the record, and the guides.   |
+| `tools/`             | The record validator. Dependency-free.                        |
+| `.agents/skills/`    | One skill per phase of the process.                           |
+| `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.       |
+| `.agents/templates/` | The canonical shape of every artifact.                        |
+| `.github/workflows/` | Continuous integration and the preview.                       |
+
+## Enforcement
+
+Prose is the tier most likely to be missed, so anything checkable is a check.
+
+```sh
+mise run check       # everything below
+mise run fmt         # format
+mise run validate    # record frontmatter, ids, cross-references
+mise run test        # the validator's own tests
+mise run docs:build  # the site builds
+```
+
+`mise run validate` enforces that identifiers match filenames and are unique, that every
+`supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks
+the superseded one, and that no accepted proposal still carries an unresolved question. A
+`commit-msg` git hook enforces commit scoping. Continuous integration runs all of it, so no gate
+depends on the agent remembering.
+
+## Harness support
+
+`AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral, which
+means no harness reads them natively without a small one-time adaptation — see
+[`ADOPTING.md`](ADOPTING.md). This is deliberate: shipping configuration for four harnesses when
+only one can be genuinely verified is worse than an honest adaptation step.
+
+The checks that matter most — the validator, continuous integration, and the commit hook — do not
+depend on the harness noticing anything.
+
+## Coming from Workbench 1.0
+
+1.0 was a spec-driven multiplatform application template: platform skills, a toolchain catalog,
+reverse pointers, drift detection, and a `/sdd-*` command surface. It is preserved at the `v1.0`
+tag and remains usable.
+
+There is no upgrade path. The two versions share almost nothing — 2.0 deletes the stack and keeps
+the process. If you want the multiplatform apparatus, use the tag.
 
 ## Read next
 
-- [`CLAUDE.md`](CLAUDE.md) — the orientation doc Claude Code loads on every session. Read this even if you're working without an agent; it's the canonical "how this repo works."
-- [`specs/CONVENTIONS.md`](specs/CONVENTIONS.md) — the spec contract: IDs, kinds, frontmatter, reverse pointers, deviation markers, drift detection.
-- [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md) — top-level layering, data flow, deployment.
-- [`specs/DESIGN_SYSTEM.md`](specs/DESIGN_SYSTEM.md) — design tokens, component vocabulary, parity rules across platforms.
-- [`.claude/skills/brainstorming-feature/SKILL.md`](.claude/skills/brainstorming-feature/SKILL.md) — how to author a feature folder.
-- [`.claude/skills/implementing-a-spec/SKILL.md`](.claude/skills/implementing-a-spec/SKILL.md) — the default "how to write code" workflow.
+- [`PROCESS.md`](PROCESS.md) — the process in full.
+- [`AGENTS.md`](AGENTS.md) — what your agent is actually bound by.
+- [`proposals/0001-workbench-2.md`](proposals/0001-workbench-2.md) — this rewrite, proposed through
+  its own process. The most useful thing to read if you want to know what a good proposal looks
+  like.

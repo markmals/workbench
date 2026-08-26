@@ -1,0 +1,55 @@
+# Guides remain private by default: this artifact inherits repository permissions and is available only to authorized repository users.
+name: Preview
+
+on:
+    pull_request:
+
+jobs:
+    docs:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: jdx/mise-action@v4
+            - run: mise install
+            - run: mise run docs:build
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: pr-${{ github.event.pull_request.number }}-docs-preview
+                  path: docs/.vitepress/dist
+                  if-no-files-found: error
+
+# A project wires exactly the row matching its shape and deletes the rest.
+#
+# ------------------------------------------------------------------------------
+# PREVIEW RECIPE MENU — ADAPT EXACTLY ONE
+# ------------------------------------------------------------------------------
+# Library
+#   1. Build and publish a prerelease package under a prerelease tag.
+#   2. Link the prerelease package from the readiness report.
+#   Warning: a public registry publication is public forever.
+#   Human exercises: install the prerelease in a dependent project.
+#
+# Web app
+#   1. Build the project and deploy a preview environment.
+#   2. Link the private preview deployment from the readiness report.
+#   Human exercises: changed behavior in the running web app.
+#
+# API
+#   1. Deploy a preview endpoint with isolated preview configuration.
+#   2. Link the endpoint and access instructions from the readiness report.
+#   Human exercises: changed requests against the preview endpoint.
+#
+# CLI
+#   1. Build an installable executable for the target operating systems.
+#   2. Upload it as a pull-request artifact and link it from the readiness report.
+#   Human exercises: install and run the changed command.
+#
+# Desktop
+#   1. Build an installable desktop package.
+#   2. Upload it as a pull-request artifact and link it from the readiness report.
+#   Human exercises: install and use the changed desktop behavior.
+#
+# Mobile
+#   1. Build an installable mobile package for ad-hoc or internal distribution.
+#   2. Link the install path from the readiness report.
+#   Human exercises: install and use the changed mobile behavior.

@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { defineConfig } from "vitepress";
 import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
 import { extendConfig } from "@voidzero-dev/vitepress-theme/config";
@@ -9,21 +8,20 @@ const sidebar = generateSidebar();
 
 const config = defineConfig({
     title: "Workbench",
-    description: "A spec-driven multiplatform app harness — web, native, desktop, and CLI.",
+    description: "A platform-agnostic, harness-agnostic agentic development process kit.",
     srcDir: "..",
     srcExclude: [
         "**/node_modules/**",
-        ".claude/**",
+        ".agents/**",
         ".git/**",
         ".github/**",
+        "tools/**",
         "docs/.vitepress/**",
         "docs/public/**",
-        "apps/**",
-        "services/**",
-        // GitHub/agent orientation docs — read on GitHub, not rendered as site
-        // pages. They link to repo files (.claude/, mise.toml) that aren't pages.
         "README.md",
-        "CLAUDE.md",
+        "PROCESS.md",
+        "AGENTS.md",
+        "ADOPTING.md",
     ],
     rewrites: {
         "docs/index.md": "index.md",
@@ -37,21 +35,42 @@ const config = defineConfig({
         },
     },
     vite: {
-        plugins: [groupIconVitePlugin() as any],
+        plugins: [groupIconVitePlugin()],
     },
     themeConfig: {
         logo: "/favicon.svg",
         outline: { level: "deep" },
         socialLinks: [{ icon: "github", link: "https://github.com/" }],
         nav: [
-            { text: "Specs", link: "/specs/CONVENTIONS", activeMatch: "/specs/" },
-            { text: "Features", link: sidebar.firstFeatureLink ?? "/", activeMatch: "/features/" },
-            { text: "Stack", link: "/specs/STACK" },
+            { text: "Vision", link: "/VISION" },
+            {
+                text: "Decisions",
+                link: sidebar.firstDecisionLink ?? "/decisions/README",
+                activeMatch: "/decisions/",
+            },
+            {
+                text: "Policies",
+                link: sidebar.firstPolicyLink ?? "/policies/README",
+                activeMatch: "/policies/",
+            },
+            {
+                text: "Proposals",
+                link: sidebar.firstProposalLink ?? "/proposals/README",
+                activeMatch: "/proposals/",
+            },
+            {
+                text: "Guides",
+                link: sidebar.firstGuideLink ?? "/guides/README",
+                activeMatch: "/guides/",
+            },
         ],
         sidebar: {
-            "/specs/": sidebar.specs,
-            "/features/": sidebar.features,
+            "/decisions/": sidebar.decisions,
+            "/policies/": sidebar.policies,
+            "/proposals/": sidebar.proposals,
+            "/guides/": sidebar.guides,
         },
+        recordLinks: sidebar.recordLinks,
         search: { provider: "local" },
     },
     head: [
