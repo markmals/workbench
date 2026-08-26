@@ -12,18 +12,37 @@ interface Relationship {
     references: Reference[];
 }
 
+interface Issue {
+    reference: string;
+    link: string | null;
+}
+
 const { frontmatter, theme } = useData();
 
 const meta = computed(() => {
     const fm = frontmatter.value as Record<string, unknown>;
     const id = typeof fm.id === "string" ? fm.id : null;
-    const isRecord =
-        id?.startsWith("proposal.") || id?.startsWith("policy.") || id?.startsWith("decision.");
+    const isProposal = id?.startsWith("proposal.") ?? false;
+    const isRecord = isProposal || id?.startsWith("policy.") || id?.startsWith("decision.");
 
     return {
         id,
+        isProposal,
         isRecord,
         status: typeof fm.status === "string" ? fm.status : null,
+        authors:
+            isProposal && Array.isArray(fm.authors)
+                ? fm.authors.filter((value): value is string => typeof value === "string")
+                : [],
+        issues:
+            isProposal && Array.isArray(fm.issues)
+                ? fm.issues
+                      .filter((value): value is string => typeof value === "string")
+                      .map((reference) => ({
+                          reference,
+                          link: /^https?:\/\//.test(reference) ? reference : null,
+                      }))
+                : [],
         establishedBy: typeof fm["established-by"] === "string" ? fm["established-by"] : null,
         supersedes: Array.isArray(fm.supersedes)
             ? fm.supersedes.filter((value): value is string => typeof value === "string")
@@ -100,7 +119,27 @@ const visible = computed(
             </span>
         </div>
 
-        <dl v-if="relationships.length > 0 || meta.pullRequest" class="record-header__details">
+        <dl
+            v-if="
+                meta.authors.length > 0 ||
+                relationships.length > 0 ||
+                meta.issues.length > 0 ||
+                meta.pullRequest
+            "
+            class="record-header__details"
+        >
+            <div v-if="meta.authors.length > 0" class="record-header__detail">
+                <dt>authors</dt>
+                <dd>
+                    <span
+                        v-for="(author, index) in meta.authors"
+                        :key="`${author}-${index}`"
+                        class="record-header__value"
+                    >
+                        {{ author }}
+                    </span>
+                </dd>
+            </div>
             <div
                 v-for="relationship in relationships"
                 :key="relationship.label"
@@ -111,6 +150,20 @@ const visible = computed(
                     <template v-for="reference in relationship.references" :key="reference.id">
                         <a v-if="reference.link" :href="reference.link">{{ reference.id }}</a>
                         <code v-else>{{ reference.id }}</code>
+                    </template>
+                </dd>
+            </div>
+            <div v-if="meta.issues.length > 0" class="record-header__detail">
+                <dt>issues</dt>
+                <dd>
+                    <template
+                        v-for="(issue, index) in meta.issues"
+                        :key="`${issue.reference}-${index}`"
+                    >
+                        <a v-if="issue.link" :href="issue.link" target="_blank" rel="noreferrer">
+                            {{ issue.reference }}
+                        </a>
+                        <span v-else class="record-header__value">{{ issue.reference }}</span>
                     </template>
                 </dd>
             </div>
@@ -173,20 +226,23 @@ const visible = computed(
     letter-spacing: 0.05em;
 }
 
-.record-header__status--draft {
+.record-header__status--draft,
+.record-header__status--proposed {
     background-color: rgba(245, 158, 11, 0.15);
     color: rgb(180, 83, 9);
 }
 
-.record-header__status--accepted {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: rgb(37, 99, 235);
-}
-
-.record-header__status--implemented,
-.record-header__status--active {
+.record-header__status--active,
+.record-header__status--accepted,
+.record-header__status--implemented {
     background-color: rgba(34, 197, 94, 0.15);
     color: rgb(21, 128, 61);
+}
+
+.record-header__status--rejected,
+.record-header__status--withdrawn {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: rgb(185, 28, 28);
 }
 
 .record-header__status--superseded {
@@ -223,7 +279,8 @@ const visible = computed(
 }
 
 .record-header__detail a,
-.record-header__detail code {
+.record-header__detail code,
+.record-header__value {
     font-family: var(--vp-font-family-mono);
     font-size: 0.75rem;
 }

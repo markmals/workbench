@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateArtifacts } from "./validate.mjs";
+import { validateArtifacts, withoutCode } from "./validate.mjs";
 
 function artifact(path, frontmatter, content = "") {
     return { path, frontmatter, content };
@@ -12,6 +12,7 @@ function validArtifacts() {
         artifact("proposals/0001-records.md", {
             id: "proposal.0001",
             title: "Record Validation",
+            authors: ["Ada"],
             status: "superseded",
             "pull-request": "42",
             supersedes: [],
@@ -19,6 +20,7 @@ function validArtifacts() {
         artifact("proposals/0002-replaces.md", {
             id: "proposal.0002",
             title: "Replacement Record",
+            authors: ["Ada"],
             status: "accepted",
             "pull-request": "43",
             supersedes: ["proposal.0001"],
@@ -53,6 +55,7 @@ test("rule 1 rejects missing required keys and invalid statuses", () => {
     const records = validArtifacts();
     records[0] = artifact("proposals/0001-records.md", {
         id: "proposal.0001",
+        authors: ["Ada"],
         status: "retired",
         "pull-request": "42",
         supersedes: [],
@@ -77,6 +80,118 @@ test("rule 1 accepts every required key and allowed status", () => {
             ({ message }) => message.includes("required key") || message.includes("invalid status"),
         ),
         false,
+    );
+});
+
+test("rule 1 requires a non-empty authors list on proposals", () => {
+    const missingAuthors = validArtifacts();
+    delete missingAuthors[0].frontmatter.authors;
+
+    assert.deepEqual(
+        validateArtifacts(missingAuthors).filter(({ message }) => message.includes("authors")),
+        [
+            {
+                path: "proposals/0001-records.md",
+                message: 'missing required key "authors"',
+            },
+        ],
+    );
+
+    const presentAuthors = validArtifacts();
+    presentAuthors[0].frontmatter.authors = ["Ada"];
+
+    assert.equal(
+        validateArtifacts(presentAuthors).some(({ message }) => message.includes("authors")),
+        false,
+    );
+});
+
+test("rule 1 rejects an empty authors list on proposals", () => {
+    const records = validArtifacts();
+    records[0].frontmatter.authors = [];
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ message }) => message.includes("authors")),
+        [
+            {
+                path: "proposals/0001-records.md",
+                message: 'key "authors" must be a non-empty inline list',
+            },
+        ],
+    );
+});
+
+test("rule 1 accepts newly allowed statuses for their record kinds", () => {
+    const cases = [
+        ["proposal", 1, "rejected"],
+        ["proposal", 1, "withdrawn"],
+        ["policy", 2, "draft"],
+        ["decision", 3, "proposed"],
+    ];
+
+    for (const [type, index, status] of cases) {
+        const records = validArtifacts();
+        records[index].frontmatter.status = status;
+
+        assert.equal(
+            validateArtifacts(records).some(
+                ({ message }) => message === `invalid status "${status}" for ${type}`,
+            ),
+            false,
+        );
+    }
+});
+
+test("rule 1 rejects statuses that belong to another record kind", () => {
+    const records = validArtifacts();
+    records[0].frontmatter.status = "active";
+    records[2].frontmatter.status = "implemented";
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ message }) => message.includes("invalid status")),
+        [
+            {
+                path: "policies/0001-records.md",
+                message: 'invalid status "implemented" for policy',
+            },
+            {
+                path: "proposals/0001-records.md",
+                message: 'invalid status "active" for proposal',
+            },
+        ],
+    );
+});
+
+test("rule 1 accepts absent, empty, and populated proposal issues lists", () => {
+    const absentIssues = validArtifacts();
+    const emptyIssues = validArtifacts();
+    const populatedIssues = validArtifacts();
+    emptyIssues[0].frontmatter.issues = [];
+    populatedIssues[0].frontmatter.issues = [
+        "#12",
+        "https://github.com/example/workbench/issues/34",
+    ];
+
+    for (const records of [absentIssues, emptyIssues, populatedIssues]) {
+        assert.equal(
+            validateArtifacts(records).some(({ message }) => message.includes("issues")),
+            false,
+        );
+    }
+});
+
+test("rule 1 rejects a proposal issues value that is not a list", () => {
+    const records = validArtifacts();
+    records[0].frontmatter.issues = "#12";
+
+    assert.deepEqual(
+        validateArtifacts(records).filter(({ message }) => message.includes("issues")),
+        [
+            {
+                path: "proposals/0001-records.md",
+                message: 'key "issues" must be an inline list',
+            },
+        ],
     );
 });
 
@@ -140,6 +255,7 @@ function policySupersession(status) {
         artifact("proposals/0001-records.md", {
             id: "proposal.0001",
             title: "Record Validation",
+            authors: ["Ada"],
             status: "accepted",
             "pull-request": "42",
             supersedes: [],
@@ -208,6 +324,57 @@ test("rule 5 permits clarification markers in draft proposals", () => {
         validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
         false,
     );
+});
+
+test("rule 5 permits clarification markers in withdrawn proposals", () => {
+    const records = validArtifacts();
+    records[1].frontmatter.status = "withdrawn";
+    records[1].content = "[NEEDS CLARIFICATION: What is the release boundary?]";
+
+    assert.equal(
+        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
+        false,
+    );
+});
+
+test("rule 5 ignores a marker inside an inline code span", () => {
+    const records = validArtifacts();
+    records[1].frontmatter.status = "accepted";
+    records[1].content = "Rule 5 rejects a `[NEEDS CLARIFICATION:` marker in a final proposal.";
+
+    assert.equal(
+        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
+        false,
+    );
+});
+
+test("rule 5 ignores a marker inside a fenced code block", () => {
+    const records = validArtifacts();
+    records[1].frontmatter.status = "accepted";
+    records[1].content = "Example:\n\n```md\n- [NEEDS CLARIFICATION: how?]\n```\n";
+
+    assert.equal(
+        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
+        false,
+    );
+});
+
+test("rule 5 still fires on a prose marker beside a quoted one", () => {
+    const records = validArtifacts();
+    records[1].frontmatter.status = "accepted";
+    records[1].content =
+        "The `[NEEDS CLARIFICATION:` form is the convention.\n\n" +
+        "- [NEEDS CLARIFICATION: is this genuinely unresolved?]\n";
+
+    assert.equal(
+        validateArtifacts(records).some(({ message }) => message.includes("NEEDS CLARIFICATION")),
+        true,
+    );
+});
+
+test("withoutCode strips fences and spans but keeps surrounding prose", () => {
+    assert.equal(withoutCode("before `x` after"), "before  after");
+    assert.equal(withoutCode("a\n\n```\nb\n```\n\nc"), "a\n\n\n\nc");
 });
 
 test("a valid full record set has no violations", () => {

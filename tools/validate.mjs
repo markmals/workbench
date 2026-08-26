@@ -10,19 +10,21 @@ const RECORD_TYPES = {
 
 const SCHEMAS = {
     proposal: {
-        required: ["id", "title", "status", "pull-request", "supersedes"],
-        lists: ["supersedes"],
-        statuses: ["draft", "accepted", "implemented", "superseded"],
+        required: ["id", "title", "authors", "status", "pull-request", "supersedes"],
+        lists: ["authors", "supersedes"],
+        optionalLists: ["issues"],
+        nonEmptyLists: ["authors"],
+        statuses: ["draft", "accepted", "implemented", "rejected", "withdrawn", "superseded"],
     },
     policy: {
         required: ["id", "title", "status", "established-by", "supersedes"],
         lists: ["supersedes"],
-        statuses: ["active", "superseded"],
+        statuses: ["draft", "active", "superseded"],
     },
     decision: {
         required: ["id", "title", "status", "established-by", "supersedes"],
         lists: ["supersedes"],
-        statuses: ["accepted", "superseded"],
+        statuses: ["proposed", "accepted", "superseded"],
     },
     guide: {
         required: ["id", "title", "describes"],
@@ -71,6 +73,13 @@ function referencesFor(artifact, type) {
             ? frontmatter[field].map((id) => ({ field, id }))
             : [];
     });
+}
+
+// A proposal that documents the clarification convention necessarily writes the marker down.
+// Only prose counts as an unresolved question, so fenced blocks and inline spans are stripped
+// before the check. An author raising a real question writes it as prose, not as code.
+export function withoutCode(markdown) {
+    return markdown.replace(/^```[\s\S]*?^```/gm, "").replace(/`[^`\n]*`/g, "");
 }
 
 export function parseFrontmatter(source) {
@@ -136,9 +145,16 @@ export function validateArtifacts(inputArtifacts) {
                 violations.push(violation(artifact.path, `key "${key}" must be a scalar`));
             }
         }
-        for (const key of schema.lists) {
+        for (const key of [...schema.lists, ...(schema.optionalLists ?? [])]) {
             if (Object.hasOwn(frontmatter, key) && !Array.isArray(frontmatter[key])) {
                 violations.push(violation(artifact.path, `key "${key}" must be an inline list`));
+            }
+        }
+        for (const key of schema.nonEmptyLists ?? []) {
+            if (Array.isArray(frontmatter[key]) && frontmatter[key].length === 0) {
+                violations.push(
+                    violation(artifact.path, `key "${key}" must be a non-empty inline list`),
+                );
             }
         }
         if (
@@ -213,7 +229,7 @@ export function validateArtifacts(inputArtifacts) {
         if (
             type === "proposal" &&
             ["accepted", "implemented", "superseded"].includes(artifact.frontmatter.status) &&
-            artifact.content.includes("[NEEDS CLARIFICATION:")
+            withoutCode(artifact.content).includes("[NEEDS CLARIFICATION:")
         ) {
             violations.push(
                 violation(
