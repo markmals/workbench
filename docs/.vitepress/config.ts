@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
 import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
 import { extendConfig } from "@voidzero-dev/vitepress-theme/config";
@@ -40,6 +41,9 @@ const config = defineConfig({
         },
     },
     vite: {
+        // `srcDir: ".."` moves VitePress's default public directory to the repo root, so
+        // docs/public was never copied into the build. Point Vite back at it explicitly.
+        publicDir: fileURLToPath(new URL("../public", import.meta.url)),
         plugins: [groupIconVitePlugin()],
     },
     themeConfig: {
