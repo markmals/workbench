@@ -1,4 +1,4 @@
-# Agentic Development Process
+# Workbench Agentic Development Process
 
 This document describes the process I use for agentic development (“vibe coding”).
 
@@ -8,7 +8,7 @@ The process is built around a simple principle: the agent should not move direct
 
 ## Goals
 
-This process has several goals:
+The Workbench process has several goals:
 
 - Preserve a coherent long-term vision for the project even as individual features are developed independently.
 - Make the intended behavior and scope of a feature explicit before implementation begins.
