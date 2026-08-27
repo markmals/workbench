@@ -26,37 +26,68 @@ permissions:
     pull-requests: write
 
 jobs:
-    docs:
+    deploy:
+        if: github.event.action != 'closed'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
 
             - uses: jdx/mise-action@v4
-              if: github.event.action != 'closed'
 
             - run: mise install
-              if: github.event.action != 'closed'
 
             # The base must match the path the preview is served from, or every asset 404s.
             - run: mise run docs:build
-              if: github.event.action != 'closed'
               env:
                   DOCS_BASE: /${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.pull_request.number }}/
 
-            # Deploys on open and update; removes the preview and its comment when the PR closes,
-            # which is the teardown that phase 5 cleanup requires.
+            # Concurrency cannot order runs that never overlap. A run created after the closing
+            # run has already finished will happily publish a preview for a merged pull request,
+            # because its event payload still describes an open one. Ask for live state instead of
+            # trusting the payload — and ask here, after the build, so the window between this
+            # answer and the publish below is as small as it can be.
+            - id: state
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR: ${{ github.event.pull_request.number }}
+              run: echo "pr=$(gh pr view "$PR" --json state --jq .state)" >>"$GITHUB_OUTPUT"
+
+            - if: steps.state.outputs.pr == 'OPEN'
+              uses: rossjrw/pr-preview-action@v1.8.1
+              with:
+                  source-dir: docs/.vitepress/dist
+                  preview-branch: gh-pages
+                  umbrella-dir: pr-preview
+                  action: deploy
+
+            # Skipping is the correct outcome, not a failure. Failing here would put a red mark on
+            # a merged pull request for something nobody needs to act on.
+            - if: steps.state.outputs.pr != 'OPEN'
+              run: echo "::notice::Pull request is ${{ steps.state.outputs.pr }} — not publishing a preview."
+
+    remove:
+        if: github.event.action == 'closed'
+        runs-on: ubuntu-latest
+        # No job-level permissions block: it would replace the workflow's grant wholesale, and
+        # this job comments on the pull request as well as writing to gh-pages.
+        steps:
+            - uses: actions/checkout@v7
+
             - uses: rossjrw/pr-preview-action@v1.8.1
               with:
                   source-dir: docs/.vitepress/dist
                   preview-branch: gh-pages
                   umbrella-dir: pr-preview
-                  action: auto
+                  action: remove
 
 # ------------------------------------------------------------------------------
 # PREVIEW RECIPE MENU — ADAPT EXACTLY ONE, DELETE THE REST
 #
 # A preview must be something the human can actually exercise. Match the row to what the
 # repository is, not to what is easiest to wire.
+#
+# Whichever you adapt: if it publishes on `synchronize`, keep the live-state guard above. An
+# event payload describes the world at the moment the event fired, not the moment you act on it.
 # ------------------------------------------------------------------------------
 #
 # Documentation, but private
