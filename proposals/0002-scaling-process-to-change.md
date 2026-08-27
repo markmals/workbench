@@ -3,7 +3,7 @@ id: proposal.0002
 title: Scaling Process to the Change
 authors: [markmals, Claude]
 status: draft
-pull-request:
+pull-request: https://github.com/markmals/workbench/pull/6
 issues: []
 supersedes: []
 ---
