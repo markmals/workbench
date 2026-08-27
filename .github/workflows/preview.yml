@@ -23,7 +23,7 @@ concurrency:
 
 permissions:
     contents: write
-    pull-requests: read
+    pull-requests: write
 
 jobs:
     deploy:
@@ -68,8 +68,8 @@ jobs:
     remove:
         if: github.event.action == 'closed'
         runs-on: ubuntu-latest
-        permissions:
-            contents: write
+        # No job-level permissions block: it would replace the workflow's grant wholesale, and
+        # this job comments on the pull request as well as writing to gh-pages.
         steps:
             - uses: actions/checkout@v7
 
