@@ -74,6 +74,21 @@ the deployment and comment when the pull request closes.
 Do not keep a menu of inactive preview mechanisms as configuration. The comments are
 examples for adoption; your workflow should express one maintained choice.
 
+## The published site is separate from previews
+
+Previews answer "does this change work." A published documentation site answers "where do I read
+the guides." They are different jobs, and Workbench wires them in different workflows —
+`preview.yml` on pull requests, `docs.yml` on the default branch.
+
+Both write to `gh-pages`: the published site at the root, previews beneath `pr-preview/`. The
+production deploy excludes that directory when it cleans, so publishing does not delete the
+previews of open pull requests.
+
+**`docs.yml` skips itself on a private repository.** Publishing guides is the one place the
+private-by-default rule can be broken by accident, so the job is gated rather than trusting
+whoever adopts the kit to remember. If your repository is public and your guides should not be,
+delete that workflow.
+
 ## Keep previews private by default
 
 A preview is private unless you deliberately decide otherwise. A public preview can

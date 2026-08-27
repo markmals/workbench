@@ -140,7 +140,7 @@ came from. Deferred defects are linked from the pull request, so the decision to
 | `.agents/skills/`    | Seven skills, roughly one per phase. For the agent, not you.  |
 | `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.       |
 | `.agents/templates/` | The canonical shape of every artifact.                        |
-| `.github/workflows/` | Continuous integration and the preview.                       |
+| `.github/workflows/` | Continuous integration, the preview, and the published site.  |
 
 ## Enforcement
 
