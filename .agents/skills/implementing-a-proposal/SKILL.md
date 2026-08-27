@@ -106,7 +106,9 @@ Watch the property fail in RED. Keep clear example tests alongside it; they docu
 
 ## 2. Guides
 
-Write the interface as prose from the proposal before production code exists. That forces the behavior to be explainable independently of how it was built. A guide written from finished code documents whatever was implemented, including its accidents.
+Not every change needs a guide. Ask whether it alters what a user does, sees, or must know. A workflow fix, an internal refactor, or a validator rule with no user-facing surface needs none, and writing one produces documentation describing behavior nobody observes. When in doubt, ask rather than manufacturing a guide to satisfy a list.
+
+When a change does warrant one, write the interface as prose from the proposal before production code exists. That forces the behavior to be explainable independently of how it was built. A guide written from finished code documents whatever was implemented, including its accidents.
 
 Write for someone who has never read the proposal and never will. Explain what they can do, what they observe, prerequisites, errors, and durable effects — not private data structures, control flow, file layout, or implementation rationale.
 

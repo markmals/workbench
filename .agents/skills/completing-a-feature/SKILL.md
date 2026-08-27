@@ -24,6 +24,8 @@ While revisions are outstanding, the proposal is `returned-for-revisions`, which
 
 After feedback establishes the feature's final shape, record only knowledge that outlives its proposal.
 
+**The usual answer is that there is none.** Most features establish no policy and no decision, and recording nothing is the correct outcome rather than a step you skipped. Empty `policies/` and `decisions/` directories are healthy. A record written because the phase has a slot for it is one nobody follows and everybody has to read.
+
 | Record   | Distinguishing test                                                              |
 | -------- | -------------------------------------------------------------------------------- |
 | Policy   | It constrains future work: “always or never do X.”                               |

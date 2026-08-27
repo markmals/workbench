@@ -31,6 +31,21 @@ request, and active proposal, then names the next actor.
 The agent owns the work between those decisions. Comment on the pull request
 or commit directly to its branch; the agent reads a direct commit as instruction.
 
+## Not every change needs all of this
+
+What follows describes substantial work — new or changed behavior, anything where a reasonable
+person could build it differently. Plenty of changes are not that.
+
+A typo, a dead link, or a bug whose correct behavior was never in question does not need a
+proposal, and often does not need a pull request either. The useful question is whether the change
+**decides** something. If the intended behavior already exists — because a proposal promised it, or
+because the contract is too obvious to write down — the agent is correcting an implementation, not
+defining one, and it should just fix it.
+
+The agent judges this and tells you which it thinks the change is. You can ask for the full process
+on anything, at any time, without explaining why. Escalating is always available; the agent quietly
+deciding your feature is a small fix is the failure mode to watch for.
+
 Here is the status command run in this repository while its proposal was ready
 for implementation:
 

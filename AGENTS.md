@@ -53,6 +53,19 @@ branch → draft PR → proposal → tests → guides → code → validation
 Numbered phases below follow [`PROCESS.md`](PROCESS.md). Agent review is the end of
 implementation, not a phase of its own.
 
+**Scale the process to the change.** What follows is written for substantial work — new or
+changed behavior, anything where a reasonable person could build it differently. Not every change
+is that. A typo, a dead link, or a bug whose correct behavior was never in question does not need
+a proposal, and often does not need a pull request either; fixing it is faster than describing it.
+
+Use judgement, and lean on one question: **does this change decide something?** If intent already
+exists — because a proposal promised the behavior, or because the contract is too obvious to write
+down — you are correcting an implementation, not defining one. Say which you think it is and why,
+in a line, before you start. The human can always ask for more process; give it without argument.
+
+When you are genuinely unsure, ask. When you discover partway through a small fix that there was a
+real design choice hiding in it, stop and treat it as substantial work from that point.
+
 ### 1. Preparation
 
 Create a branch, push it to `origin`, and open a **draft** pull request before writing anything.
@@ -86,6 +99,14 @@ same intent; writing them out of order lets the code decide what "correct" means
 2. **Guides next.** User-facing docs written from the proposal, not from the code. Then compare
    them against the tests and confirm they describe the same behavior.
 3. **Code last.** Implement against proposal, tests, and guides until `mise run check` passes.
+
+**Which of these a change needs is a judgement.** The order is not — when you write two of them,
+write them in this order. But a change with no user-visible surface needs no guide, and inventing
+one produces documentation nobody reads describing behavior nobody sees. A change with nothing
+meaningfully testable needs no test, though say so out loud rather than skipping quietly, because
+"hard to test" and "not worth testing" are different claims and only one of them is a reason.
+
+Ask what a reader or a future maintainer would actually need, not what the list contains.
 
 Passing the quality gates is necessary, never sufficient. Then, still within this phase:
 
@@ -130,9 +151,12 @@ projects, then clean up. Skill: `.agents/skills/completing-a-feature/`.
 
 ## Hard rules
 
-- **Never implement without an approved proposal.** A conversational request is not a proposal.
-- **Never write production code before its failing test.** If you did, delete it and start over.
-- **Never write guides from the finished code.** They are derived from the proposal.
+- **Never implement substantial work without an approved proposal.** A conversational request is
+  not a proposal. Corrections and fixes with unambiguous intent are not substantial work.
+- **Never write production code before its failing test.** If the behavior warrants a test at all
+  and you wrote the code first, delete it and start over.
+- **Never write guides from the finished code.** When a change warrants a guide, it is derived
+  from the proposal. Whether it warrants one is a judgement; the direction of derivation is not.
 - **Never claim work is done without running the verifying command this turn** and reading its
   output. See [`.agents/rules/verification.md`](.agents/rules/verification.md).
 - **Never fix a bug before finding its root cause.**
@@ -149,7 +173,12 @@ When a feature establishes a rule future work must keep enforcing, record a **po
 establishes an architectural choice future work must understand, record a **decision**. Discuss
 both with the human before writing them; neither is a substitute for a proposal.
 
-A policy that can be enforced by a check **must** be — see
+**Most features establish neither, and that is the normal case.** The test is whether the
+knowledge outlives the change: if it does not, it belongs in the proposal and nowhere else. Both
+directories being empty is a healthy state, not a gap to fill. A record written speculatively is
+one nobody follows and everybody has to read.
+
+A policy that can be enforced by a check should be — see
 [`.agents/rules/enforcement-hierarchy.md`](.agents/rules/enforcement-hierarchy.md). Prose is the
 tier most likely to be missed.
 

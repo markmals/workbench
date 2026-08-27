@@ -23,6 +23,14 @@ The vision is living. Policies and decisions preserve a specific rule or choice 
 that established it. A proposal is still the specification for its own change; the record does not
 replace it.
 
+**Most features add nothing here, and that is the point.** Recording nothing is the ordinary
+outcome, not a step anyone forgot. Both directories being empty means no feature has yet
+established a rule or a choice worth outliving itself — a healthy state, not a gap to fill.
+
+A policy written speculatively is one nobody follows and everybody has to read. Wait until a
+feature actually establishes the rule, which is why every entry names the proposal that
+established it.
+
 ## Apply the test
 
 Ask which sentence describes the knowledge:

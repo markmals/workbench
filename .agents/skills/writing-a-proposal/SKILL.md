@@ -7,11 +7,17 @@ description: Use when a new or substantial change needs definition before tests,
 
 **Phase 2 — Proposal development.** A proposal is the one durable record of one coherent change. It makes intent concrete enough to derive tests, guides, and code without returning to the original conversation.
 
-## Open only after Phase 1 — Preparation
+## First, decide whether this needs a proposal
 
-Confirm that the change has a branch pushed to `origin` and an open draft pull request. The pull request is the durable workspace.
+Proposals are for changes that decide something: new or changed behavior, a real choice between approaches, anything establishing a policy or decision, anything touching the vision.
 
-If either is absent, stop. Complete Phase 1 — Preparation before asking discovery questions or creating a proposal. An urgent request, existing code, or a request to skip pull-request work does not create an exception.
+They are not for changes whose intent already exists. A bug has its correct behavior specified already — by the proposal that promised it, or by a contract too obvious to write down. Correcting an implementation is not defining one. Fixing a typo, a dead link, or a workflow whose behavior was never in question needs no proposal and often no pull request; describing it costs more than doing it.
+
+Say which you think it is and why, in a line, before starting. The human can ask for more process at any time and does not have to justify it. If you find partway through a small fix that a real design choice was hiding in it, stop and write the proposal — that direction is always right, and the reverse never is.
+
+## Preparation comes first
+
+For work that does warrant a proposal, confirm the change has a branch pushed to `origin` and an open draft pull request before writing one. The pull request is the durable workspace, and a proposal iterated anywhere else is a proposal the human cannot comment on.
 
 ## Output
 
@@ -83,15 +89,17 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     Never decide this yourself. `accepted` is a different and much later state — it records the human accepting the finished implementation, not permission to begin. An agent that reaches either conclusion unaided is an agent approving its own work.
 
-## Hard gate
+## The gate, once a proposal exists
 
-Never write tests, guides, or code until all of these are true:
+This gate applies to work you judged proposal-worthy. It does not turn every change into one — that decision was made at the top of this skill, and a correction never reaches here.
+
+Once a proposal exists, never write tests, guides, or code until all of these are true:
 
 1. The proposal file exists.
 2. It contains zero `[NEEDS CLARIFICATION:` markers.
 3. The human has set `status: awaiting-implementation`.
 
-After the gate, enter Phase 3 — Implementation with `implementing-a-proposal`: failing tests → guides → code → the project's quality gates from `mise tasks`.
+Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 
 ## Red flags — stop and correct
 
