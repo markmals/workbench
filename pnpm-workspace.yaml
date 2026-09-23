@@ -4,5 +4,7 @@
 #
 # `packages:` is intentionally absent. This is a single-package repository.
 allowBuilds:
-    esbuild: true
-    vue-demi: true
+  esbuild: true
+  onnxruntime-node: true
+  protobufjs: true
+  vue-demi: true

@@ -17,7 +17,7 @@ mise run status
 
 It reads the branch, the pull request, and the active proposal's status, then prints which phase the work is in and what happens next. Run it before asking the human where things stand, and run it again whenever you are unsure.
 
-The human is never expected to remember a command, a skill name, or an argument. "Keep going", "start a feature for X", or a plain description of a problem is enough — orient yourself from `mise run status` and proceed.
+The human is never expected to remember a command, a skill name, or an argument. "Keep going", "start a feature for X", or a plain description of a problem is enough to orient from `mise run status`. None of those phrases authorizes a proposal or draft pull request.
 
 ## Reasoning order
 
@@ -99,10 +99,16 @@ It challenges premises, boundaries, abstractions, and diagnoses. It is not merel
 
 The adversary receives fresh context and attempts to falsify the finished work. It reports defects and proposal gaps; it does not fix them.
 
+## Orchestrating agents
+
+In Oh My Pi, `.omp/tools/dynamic-workflows/` registers the `workflow` tool. Use it when several independent agent branches feed a later decision or synthesis, or when a result determines which agents run next. A deterministic JavaScript script can call `agent`, `parallel` with zero-argument functions, and `pipeline`; it can label phases and return a final result.
+
+For a single bounded task, work inline or use one agent. For a fixed batch of independent slices with no dependent stages, use `task`. The workflow tool earns its overhead when the dependency graph, fan-out/fan-in, or result-driven branching matters. Give each agent a bounded brief and separate ownership of edited files; a final synthesis agent should reconcile independent findings. A failed branch returns `null`, so inspect it rather than treating it as success. The workflow tool coordinates execution; it does not approve proposals, replace the strategist, or bypass tests and review.
+
 ## The feature loop
 
 ```text
-branch → draft PR
+human opts into proposal → branch → draft PR
        → grounding → baseline study → proposal
        → tests → guides → code → validation
        → excellence pass → inline reviews → cross-artifact review → adversarial review
@@ -116,13 +122,13 @@ Numbered phases below follow [`PROCESS.md`](PROCESS.md). Agent review is the end
 
 **Scale the process to the change.** What follows is written for substantial work — new or changed behavior, anything where a reasonable person could build it differently. Not every change is that. A typo, a dead link, or a bug whose correct behavior was never in question does not need a proposal, and often does not need a pull request either; fixing it is faster than describing it.
 
-Use judgement, and lean on one question: **does this change decide something?** If intent already exists — because a proposal promised the behavior, or because the contract is too obvious to write down — you are correcting an implementation, not defining one. Say which you think it is and why, in a line, before you start. The human can always ask for more process; give it without argument.
+Use judgement, and lean on one question: **does this change decide something?** If intent already exists because a proposal promised the behavior or the contract is obvious, correct the implementation directly. Say which you think it is and why, in a line, before you start. If a proposal may help, ask the human whether they want one for this change before opening a branch or draft PR. A request to "start a feature" or even "write a proposal" does not replace this explicit question.
 
-When you are genuinely unsure, ask. When you discover partway through a small fix that there was a real design choice hiding in it, stop and treat it as substantial work from that point.
+The human's answer applies to that proposed change, including later edits to its proposal. If they decline, do not create a proposal or a draft PR for it. Proceed directly when intent is unambiguous; if a design decision remains unresolved, clarify the intended behavior or narrow the work with the human before implementing. If a small fix reveals a design choice, stop and ask again before entering the proposal path.
 
 ### 1. Preparation
 
-Create a branch, push it to `origin`, and open a **draft** pull request before writing anything. The PR is the durable workspace for the feature: it collects the proposal, the implementation, review discussion, and status reports. It stays a draft until the agent believes the work is ready.
+Only after the human opts into a proposal for this change, create a branch, push it to `origin`, and open a **draft** pull request before writing the proposal. The PR is the durable workspace for the proposal, implementation, review discussion, and status reports. It stays a draft until the agent believes the work is ready.
 
 ### 2. Grounding and Proposal
 
@@ -314,6 +320,7 @@ Use systematic debugging when the intended behavior is sound and the implementat
 - **Never use an existing implementation as the sole source of domain truth when independent domain knowledge is available.** Ground the problem first; then inspect the implementation.
 - **Never silently encode an ontology decision.** If implementation changes what kinds of things exist, their identity, relationships, lifecycle, states, or vocabulary, route that decision upstream.
 - **Never let an implementer redefine product intent or architecture merely to make implementation easier.** Return strategic conflicts to the strategist.
+- **Never create a proposal, feature branch, or draft PR for the proposal path before asking whether the human wants a proposal for this change and receiving an explicit yes.** Do not infer consent from the size of a request, a command's suggested next step, or a request to "start a feature".
 - **Never implement substantial work without an approved proposal.** A conversational request is not a proposal. Corrections and fixes with unambiguous intent are not substantial work.
 - **Never write production code before its failing test.** If the behavior warrants a test at all and you wrote the code first, delete it and start over.
 - **Never write guides from the finished code.** When a change warrants a guide, it is derived from the proposal. Whether it warrants one is a judgement; the direction of derivation is not.

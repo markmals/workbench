@@ -108,9 +108,15 @@ The full feature loop applies to changes that decide new behavior or resolve a m
 
 The primary agent is the strategist: it owns domain understanding, conceptual modeling, proposal intent, delegation, and the excellence pass. Implementers realize bounded, already-understood behavior without redefining the proposal. A reframer challenges the problem formulation when it no longer explains the evidence. An independent adversary tries to falsify the finished work and reports findings without editing it.
 
+Before entering the proposal path for a change, the agent asks the human whether they want a proposal, even if the request sounds like a feature or asks for one. An explicit yes for this change authorizes its proposal and later revisions, not future proposals. A no rules out the proposal and its draft pull request: proceed directly when intent is already clear, or clarify and narrow the work before implementation when a consequential design choice remains. This question precedes branch creation and PR preparation so unnecessary draft PRs are not opened.
+
+### Agent orchestration
+
+The project's Oh My Pi `workflow` tool under `.omp/tools/dynamic-workflows/` is for a dependency graph of agent work: independent branches that feed a later synthesis, or result-driven branches and pipelines. A single small task stays inline; a fixed batch of independent slices uses ordinary task delegation. Workflow scripts orchestrate subagents deterministically and expose phases, but the agents still need bounded ownership and the strategist still owns intent and review. A failed branch yields `null`; treat it as a missing result, not evidence of success.
+
 ## Preparation
 
-Work on a feature begins in an isolated Git branch.
+After the human opts into a proposal for this change, work on the feature begins in an isolated Git branch.
 
 The agent creates the branch, pushes it to the project's `origin` remote, and creates a draft pull request for the work.
 
@@ -391,7 +397,7 @@ At the project level:
 
 For each feature:
 
-**branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → tests → guides → code → validation → excellence pass → inline reviews → cross-artifact review → adversarial review → preview → ready pull request → human review → revision or acceptance → vision update → merge → release → dependent updates → cleanup**
+**human opts into proposal → branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → tests → guides → code → validation → excellence pass → inline reviews → cross-artifact review → adversarial review → preview → ready pull request → human review → revision or acceptance → vision update → merge → release → dependent updates → cleanup**
 
 The central invariant of the process is that no single artifact defines the feature by itself.
 
