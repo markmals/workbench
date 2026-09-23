@@ -25,7 +25,7 @@ Create exactly one `proposals/<NNNN>-<slug>.md`. Copy [`.agents/templates/PROPOS
 
 - Use the next unused four-digit number and a kebab-case slug.
 - Complete the template frontmatter: `id: proposal.<NNNN>`, Title Case `title`, `status: draft`, the draft PR URL or number, and `supersedes`.
-- Complete every template section: Summary, Motivation, Proposed solution, Detailed design, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
+- Complete every required template section: Summary, Motivation, Domain grounding, Existing baseline, Proposed solution, Detailed design, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
 - **Detailed design is what tests derive from.** Write it precisely enough that someone who is not the author could implement it without asking questions.
 - Usually delete the template's Acceptance criteria section. Restating Detailed design as a checklist duplicates the specification in a form that drifts from it. Keep it only for a change with discrete outcomes the prose cannot express naturally — a structural change touching many independent things, or a migration with separable steps.
 
@@ -44,7 +44,13 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     If the change conflicts with a policy or decision, surface the conflict in that section. The human chooses either to revise the proposal or to supersede the record. Never quietly violate it.
 
-2. **Discover one answer at a time.** Ask one question, wait for its answer, then ask the next. Use multiple-choice questions when the answer space is finite. Cover:
+2. **Ground the problem.** When the change depends on domain knowledge that cannot safely be inferred from the request, use `grounding-a-problem` before comparing solutions. Prefer primary or authoritative evidence and separate it from repository observations, inference, and hypotheses. In **Domain grounding**, record the concepts, constraints, quality bar, and remaining uncertainty needed to assess the proposal. If no independent grounding is needed, state why there.
+
+3. **Review the ontology when material.** If the change alters important concepts, identity, relationships, states, or vocabulary, use `ontology-review` against the grounded domain before settling the design. Resolve material conflicts in the proposal; do not encode them silently.
+
+4. **Study the baseline.** After grounding, inspect the closest existing implementation, prototype, workflow, or prior attempt. In **Existing baseline**, name what to preserve and what is incidental or compromised. If there is no relevant baseline, state that explicitly rather than inventing one.
+
+5. **Discover one answer at a time.** Ask one question, wait for its answer, then ask the next. Use multiple-choice questions when the answer space is finite. Cover:
     - who needs the change and the outcome they seek;
     - the trigger, success condition, and boundaries;
     - dependencies, constraints, and affected records; and
@@ -52,40 +58,40 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     Do not guess. Ask, or record `[NEEDS CLARIFICATION: <question>]` in **Open questions** and continue.
 
-3. **Compare approaches.** Present two or three viable approaches with tradeoffs. Recommend one and explain why. Ask the human to select an approach or direct a revision before treating the design as settled.
+6. **Compare approaches.** Present two or three viable approaches with tradeoffs. Recommend one and explain why. Ask the human to select an approach or direct a revision before treating the design as settled.
 
-4. **Choose the preview now.** Select exactly one artifact through which the human will exercise the changed behavior. Record the repository shape, artifact, private access path, and completion cleanup in **Preview**.
+7. **Choose the preview now.** When the change has an exercisable surface, select the cheapest realistic artifact through which the human will exercise it. Record the repository shape, artifact, private access path, and completion cleanup in **Preview**. For a pure refactor without such a surface, record that no preview applies and why.
 
     | Repository shape | Preview artifact                            |
     | ---------------- | ------------------------------------------- |
     | Library          | prerelease package                          |
     | Web app          | preview deployment                          |
     | API              | preview endpoint deployment                 |
-    | Docs             | rendered documentation build                |
+    | Docs             | deployed documentation site                 |
     | CLI              | installable executable                      |
     | Desktop          | installable build                           |
     | Mobile           | installable build (ad-hoc / internal track) |
 
     Keep the preview private unless the project deliberately opts into publication. Do not configure unused preview mechanisms.
 
-5. **Author the proposal.** Fill the template from the answers and selected approach. State behavior and boundaries plainly. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
+8. **Author the proposal.** Fill the template from the grounding, baseline, answers, and selected approach. State behavior and boundaries plainly. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
 
-6. **File unrelated defects.** If discovery reveals a defect outside this proposal's scope, file it as a GitHub issue. Discovering a defect is never a reason to expand the proposal or forget it. Use [`.agents/skills/tracking-defects/`](../tracking-defects/) for the judgment and filing process.
+9. **File unrelated defects.** If discovery reveals a defect outside this proposal's scope, file it as a GitHub issue. Discovering a defect is never a reason to expand the proposal or forget it. Use [`.agents/skills/tracking-defects/`](../tracking-defects/) for the judgment and filing process.
 
-7. **Self-review.** Before showing the human, check:
+10. **Self-review.** Before showing the human, check:
     - every template section and frontmatter field is complete;
-    - the motivation, behavior, criteria, scope, preview, and record check agree;
+    - the grounding, baseline, motivation, behavior, criteria, scope, preview, and record check agree;
     - no unstated assumption remains outside an explicit clarification marker;
     - no rejected approach or out-of-scope item reappears as promised behavior; and
     - the proposal remains one coherent change.
 
     Fix clear defects. Count remaining clarification markers and present them to the human.
 
-8. **Publish the draft.** Commit the proposal and push it as soon as it is coherent enough to react to. Do not polish it privately first — the draft pull request exists so the human can read and edit the proposal in place, and a proposal held back is a proposal being decided by the agent alone.
+11. **Publish the draft.** Commit the proposal and push it as soon as it is coherent enough to react to. Do not polish it privately first — the draft pull request exists so the human can read and edit the proposal in place, and a proposal held back is a proposal being decided by the agent alone.
 
-9. **Iterate on the pull request.** The human comments, requests changes, and may commit edits to the proposal directly. Read those commits before responding; they are instructions, not conflicts to resolve. Keep iterating — answering questions, revising the design, resolving markers — until the human is satisfied. This can take many rounds, and the proposal stays `draft` throughout.
+12. **Iterate on the pull request.** The human comments, requests changes, and may commit edits to the proposal directly. Read those commits before responding; they are instructions, not conflicts to resolve. Keep iterating — answering questions, revising the design, resolving markers — until the human is satisfied. This can take many rounds, and the proposal stays `draft` throughout.
 
-10. **Wait for the human to close the draft.** The human decides when the proposal is settled and moves it to `status: awaiting-implementation`. They may ask you to make that edit; making it when asked is fine, deciding it is not.
+13. **Wait for the human to close the draft.** The human decides when the proposal is settled and moves it to `status: awaiting-implementation`. They may ask you to make that edit; making it when asked is fine, deciding it is not.
 
     Never decide this yourself. `accepted` is a different and much later state — it records the human accepting the finished implementation, not permission to begin. An agent that reaches either conclusion unaided is an agent approving its own work.
 
@@ -109,9 +115,11 @@ Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 | Two unrelated motivations or more than roughly six criteria | Split the proposal.                                                 |
 | A record conflicts with the change                          | Surface it; the human chooses revision or supersession.             |
 | An unknown detail has no clarification marker               | Ask or add the marker.                                              |
-| Preview names no exerciseable artifact                      | Choose and record one before approval.                              |
+| Preview names no exercisable artifact for a behavior change | Choose and record one before approval.                              |
 | A newly discovered defect expands scope                     | File a GitHub issue; keep the proposal bounded.                     |
 | Existing code suggests the design                           | Treat it as evidence, not authority; settle intent in the proposal. |
+
+**Do not use the existing implementation to teach yourself the domain when independent domain knowledge is available. Ground yourself first; then inspect the implementation as a specimen.**
 
 ## Anti-patterns
 

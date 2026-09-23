@@ -36,6 +36,7 @@ Who decides: the human decides `awaiting-implementation`, `returned-for-revision
 Write no more than 50 words. The proposal list displays this out of context, so name
 the change and its value plainly. It does not need to flow into the next section.
 -->
+
 <What changes and why it matters.>
 
 ## Motivation
@@ -46,6 +47,52 @@ current workaround. Do not propose a solution; establish why the problem is wort
 -->
 
 <Concrete problem, affected people, impact, and current workaround.>
+
+## Domain grounding
+
+<!--
+Record the knowledge necessary to evaluate this proposal on the problem's own
+terms.
+
+Distinguish established facts from repository observations, inferences, and
+remaining uncertainties. Link primary or authoritative sources for important
+external claims.
+
+This section explains the world the proposed solution must fit. It is not an
+implementation plan.
+
+If no independent domain research is needed, state why rather than filling the
+subsections with generic claims. Use “None” for remaining uncertainty when resolved.
+-->
+
+### Established context
+
+- ...
+
+### Relevant constraints and principles
+
+- ...
+
+### Quality bar
+
+- ...
+
+### Remaining uncertainty
+
+- ...
+
+## Existing baseline
+
+<!--
+After grounding in the domain, inspect the closest existing implementation,
+prototype, prior art, or workflow that already accomplishes the intended result.
+
+Describe what it demonstrates, what should be preserved, and what appears to be
+incidental, compromised, or incorrect. Existing behavior is evidence, not
+authority. If there is no relevant baseline, state that explicitly.
+-->
+
+<The closest usable baseline and what can be learned from it.>
 
 ## Proposed solution
 
@@ -124,7 +171,7 @@ scope are filed as GitHub issues, not folded in; use .agents/skills/tracking-def
 
 <!--
 Choose the artifact from the preview table that exercises this change and explain why it is the cheapest
-realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use .agents/skills/reviewing-an-implementation/.
+realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use .agents/skills/reviewing-an-implementation/. For a pure refactor with no exercisable surface, state why no preview applies.
 -->
 
 - Artifact: <preview artifact>

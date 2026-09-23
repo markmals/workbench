@@ -7,7 +7,7 @@ description: Use when an approved proposal is ready for Phase 3 implementation, 
 
 Phase 3 preserves proposal intent in independent tests, guides, and code.
 
-**Hard order:** failing tests → guides → code → quality gates. Do not reverse, combine, or defer these stages.
+**Hard order when stages apply:** failing tests → guides → code → quality gates. Do not reverse, combine, or defer them.
 
 ## Preconditions
 
@@ -36,14 +36,27 @@ For each slice, in the order that protects shared boundaries:
 3. Dispatch one implementer and instruct it not to commit.
 4. Require the ordered cycle below and clean quality gates before the next review gate.
 5. Resolve its reported status. Never silently retry an identical dispatch.
-6. After every slice is integrated and clean, run the proposal-wide inline reviews.
+6. After every slice is integrated and clean, the strategist runs `excellence-pass`, then the proposal-wide inline reviews.
 
-| Implementer status   | Controller action                                                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DONE`               | Continue only after the reported gates are clean.                                                                                                                   |
-| `DONE_WITH_CONCERNS` | Resolve correctness or scope concerns before review; retain observations for reviewers.                                                                             |
-| `NEEDS_CONTEXT`      | Supply the missing material and re-dispatch. Never ask it to guess intent.                                                                                          |
-| `BLOCKED`            | Classify missing context, reasoning shortfall, oversized slice, or proposal conflict; supply context, escalate the model, re-slice, or stop and raise the conflict. |
+Each implementation handoff contains:
+
+- the bounded behavior being implemented;
+- the applicable Detailed design;
+- the domain concepts necessary to understand that behavior;
+- relevant domain constraints and invariants;
+- the quality bar established during grounding;
+- the existing baseline when relevant;
+- applicable policies and decisions;
+- scope and non-goals;
+- verification commands.
+
+| Implementer status   | Controller action                                                                                                                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DONE`               | Continue only after the reported gates are clean.                                                                                                                                                                                                                                  |
+| `DONE_WITH_CONCERNS` | Resolve correctness or scope concerns before review; retain observations for reviewers.                                                                                                                                                                                            |
+| `NEEDS_CONTEXT`      | Supply the missing material and re-dispatch. Never ask it to guess intent.                                                                                                                                                                                                         |
+| `NEEDS_STRATEGY`     | Stop the affected slice. Verify the conflict with domain evidence; the strategist decides whether to revisit grounding, ontology, or the proposal with the human. Use `reframing-a-problem` when repeated fixes stop explaining the evidence. Resume only after intent is settled. |
+| `BLOCKED`            | Classify missing context, reasoning shortfall, oversized slice, or proposal conflict; supply context, escalate the model, re-slice, or stop and raise the conflict.                                                                                                                |
 
 ## Do inline only when trivial
 
@@ -61,12 +74,12 @@ Do it inline. The required order still applies whenever production behavior chan
 ### Iron Law
 
 ```text
-NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+NO TEST-WORTHY PRODUCTION BEHAVIOR WITHOUT A FAILING TEST FIRST
 ```
 
-If you wrote production code first, **delete it and start over**. Do not keep it as reference, adapt it while writing the test, or inspect it for the test design. **Delete means delete.**
+If you wrote test-worthy production code before its failing test, **delete it and start over**. Do not keep it as reference, adapt it while writing the test, or inspect it for the test design. **Delete means delete.**
 
-The test is evidence only when you watched it fail for missing behavior. A test that first runs against finished code can describe what was built rather than what the proposal requires.
+When behavior warrants a test, that test is evidence only if you watched it fail for missing behavior. A test that first runs against finished code can describe what was built rather than what the proposal requires. If no behavior can be meaningfully tested, state why before writing code.
 
 ### Red → green → refactor
 
@@ -74,9 +87,10 @@ The test is evidence only when you watched it fail for missing behavior. A test 
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **RED**          | Write one focused test for one observable behavior from Detailed design. Name it idiomatically with the proposal id and behavior it verifies.         |
 | **Verify RED**   | Run it. Confirm an expected assertion fails because behavior is missing — not because of setup, an import, or a typo. If it passes, correct the test. |
+| **Guide**        | For user-facing behavior, write the guide from the proposal and compare it with the failing test before writing code.                                 |
 | **GREEN**        | Write the minimum production code that makes the test pass. Do not add untested defenses, future flexibility, or unrelated refactors.                 |
 | **Verify GREEN** | Run the test and the relevant suite. Confirm they pass with no warnings, leaked logs, or skipped success.                                             |
-| **Refactor**     | Remove duplication and improve the design while tests stay green. Add no behavior. Then begin the next RED test.                                      |
+| **Refactor**     | Remove duplication and improve the design while tests stay green. Add no behavior. For the next behavior, start again at RED.                         |
 
 Never commit while red. At a green natural boundary, follow [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md).
 
@@ -98,7 +112,7 @@ Watch the property fail in RED. Keep clear example tests alongside it; they docu
 
 | Red flag                                        | Required correction                                                |
 | ----------------------------------------------- | ------------------------------------------------------------------ |
-| Code exists before its failing test             | Delete the code. Start again with RED.                             |
+| Test-worthy code exists before its failing test | Delete the code. Start again with RED.                             |
 | A new test passes immediately                   | Correct the test until it fails for the required missing behavior. |
 | A test errors before asserting behavior         | Fix setup and rerun until the expected assertion fails.            |
 | “I will test after” or “keep this as reference” | Delete the code. Start again with RED.                             |
@@ -112,8 +126,7 @@ When a change does warrant one, write the interface as prose from the proposal b
 
 Write for someone who has never read the proposal and never will. Explain what they can do, what they observe, prerequisites, errors, and durable effects — not private data structures, control flow, file layout, or implementation rationale.
 
-Guides live at `guides/<slug>.md`. Find the guide that already owns the workflow and extend it in the usual case. Add a guide only when no guide covers the workflow or combining them would make audience or behavior ambiguous. Do not duplicate overlapping instructions.
-Use [`.agents/templates/GUIDE.md`](../../templates/GUIDE.md) when adding a guide.
+Guides live at `guides/<slug>.md`. Find the guide that already owns the workflow and extend it in the usual case. Add a guide only when no guide covers the workflow or combining them would make audience or behavior ambiguous. Do not duplicate overlapping instructions. Use [`.agents/templates/GUIDE.md`](../../templates/GUIDE.md) when adding a guide.
 
 Preserve required guide frontmatter. Its `id` matches the path, `title` remains accurate, and `describes` preserves earlier proposal ids while adding the current one.
 
@@ -129,33 +142,34 @@ Every worked example **must actually run** against the real interface exactly as
 
 Before any production code:
 
-1. Read the proposal-derived guide and failing tests side by side.
+1. Read the proposal-derived guide and failing tests side by side when both exist.
 2. List every behavior each artifact mentions.
 3. Treat anything in one list and not the other as a defect in one of them.
 4. Resolve every difference by correcting the guide, correcting the test, or revising the proposal with the human.
-5. Only then give the agreement to the implementer as the code contract.
+5. Only then give the agreement to the implementer as the code contract. When one artifact is inapplicable, compare the remaining one directly with Detailed design.
 
-This comparison is load-bearing. Without it, the guide is decorative and the tests are an unreviewed interpretation.
-If a guide was written or rewritten from implementation, discard the code-shaped prose, derive it again from the proposal, and repeat the comparison.
+This comparison is load-bearing. Without it, the guide is decorative and the tests are an unreviewed interpretation. If a guide was written or rewritten from implementation, discard the code-shaped prose, derive it again from the proposal, and repeat the comparison.
 
 ## 3. Code
 
-Implement only the agreement among Detailed design, failing tests, and guide. Keep the production change minimal; do not add behavior that those artifacts do not require.
+Implement only Detailed design and its applicable failing tests and guide. Keep the production change minimal; do not add behavior those artifacts do not require.
 
 When a test is difficult to write, simplify the interface rather than compensate with excessive mocking or setup. Test real code; isolate only inputs you cannot control, such as network, time, or randomness.
 
 If an unknown failure appears, stop implementation and use [`.agents/skills/systematic-debugging/SKILL.md`](../systematic-debugging/SKILL.md) to establish root cause before changing code.
 
-## 4. Quality gates and inline reviews
+## 4. Quality gates, excellence pass, and inline reviews
 
 Run `mise run check`, then the applicable project-specific gates identified through `mise tasks`. Follow [`.agents/rules/verification.md`](../../rules/verification.md) for completion evidence.
 
-Perform these reviews sequentially. A finding returns the affected behavior to tests, guides, or code; rerun its gates and repeat the review that found it. Self-review can catch clear mistakes but never substitutes for either review.
+The strategist uses `excellence-pass` on the working implementation before inline reviews. Substantive implementation improvements return to the implementer; rerun validation and the pass. A finding that changes product intent goes back to the human and proposal before code changes.
 
-| Gate                | Reviewer examines                                                                                                  | May start when                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| Proposal compliance | Detailed design, tests, guides, code, scope, and every required behavior                                           | All implementation slices and quality gates are clean |
-| Code quality        | Project conventions, names, duplication, boundaries, errors, complexity, and tests that assert observable behavior | Proposal-compliance is clean                          |
+Perform the inline reviews sequentially. A finding returns the affected behavior to tests, guides, or code; rerun its gates and repeat the review that found it. Self-review can catch clear mistakes but never substitutes for either review.
+
+| Gate                | Reviewer examines                                                                                                  | May start when                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Proposal compliance | Detailed design, tests, guides, code, scope, and every required behavior                                           | All implementation slices, quality gates, and excellence pass are clean |
+| Code quality        | Project conventions, names, duplication, boundaries, errors, complexity, and tests that assert observable behavior | Proposal-compliance is clean                                            |
 
 The proposal-compliance reviewer returns approval or concrete gaps. The code-quality reviewer reports only concrete, important issues. Do not start code-quality review while proposal-compliance has open findings.
 

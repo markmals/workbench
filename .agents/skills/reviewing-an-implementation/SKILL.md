@@ -25,7 +25,7 @@ Proceed in this order:
 3. Produce the preview.
 4. Post the readiness report and make the pull request ready together.
 
-Begin after applicable validation has fresh evidence under `.agents/rules/verification.md`.
+Begin after applicable validation has fresh evidence under `.agents/rules/verification.md` and the strategist's excellence pass and ordered inline reviews have no open findings. A substantive fix re-enters those gates before cross-artifact review.
 
 ## 1. Cross-artifact review
 
