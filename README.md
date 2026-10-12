@@ -124,7 +124,7 @@ vp run test          # the tools' own tests
 vp run docs:build    # the site builds
 ```
 
-`vp run validate` enforces that identifiers match filenames and are unique, that every `supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks the superseded one, and that no accepted proposal still carries an unresolved question. A `commit-msg` git hook enforces commit scoping. Continuous integration runs all of it, so no gate depends on the agent remembering.
+`vp run validate` enforces that identifiers match filenames and are unique, that every `supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks the superseded one, and that no accepted proposal still carries an unresolved question. A `commit-msg` git hook, installed by `vp install`, enforces commit scoping on commits made from Oh My Pi, and CI checks every commit in a pull request. Continuous integration runs all of it, so no gate depends on the agent remembering.
 
 ## Harness support
 

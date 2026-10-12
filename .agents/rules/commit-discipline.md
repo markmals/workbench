@@ -49,7 +49,7 @@ Examples:
 - `hooks: enforce scoped commit subjects`
 - `0007-export-queue: reject duplicate export jobs`
 
-Mechanical merge, revert, fixup, and squash commits are exempt. The `commit-msg` hook enforces ordinary subjects and scopes.
+Mechanical merge, revert, fixup, and squash commits are exempt. The `commit-msg` hook enforces ordinary subjects and scopes on commits made from Oh My Pi, and CI checks every commit in a pull request.
 
 ## Staging
 

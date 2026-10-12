@@ -16,22 +16,22 @@ Ask your agent to make the harness-specific changes below. You should review and
 
 ## What ships
 
-| Path                 | What it contains                                                |
-| -------------------- | --------------------------------------------------------------- |
-| `AGENTS.md`          | The agent contract — the one file every harness must load.      |
-| `PROCESS.md`         | The full process description.                                   |
-| `VISION.md`          | Your project's vision; replace Workbench's.                     |
-| `proposals/`         | One document per change, preserved as history.                  |
-| `policies/`          | Rules future work must keep enforcing.                          |
-| `decisions/`         | Architectural choices and the context that produced them.       |
-| `guides/`            | User-facing documentation.                                      |
-| `docs/`              | The site that publishes the vision, record, and guides.         |
-| `tools/`             | The artifact validator.                                         |
-| `.agents/skills/`    | One skill directory per process phase or cross-cutting concern. |
-| `.agents/rules/`     | Code quality, commit discipline, and enforcement hierarchy.     |
-| `.agents/templates/` | The canonical shape of every artifact.                          |
-| `.agents/hooks/`     | The commit-message git hook.                                    |
-| `.github/workflows/` | Continuous integration and the preview workflow.                |
+| Path                 | What it contains                                                  |
+| -------------------- | ----------------------------------------------------------------- |
+| `AGENTS.md`          | The agent contract — the one file every harness must load.        |
+| `PROCESS.md`         | The full process description.                                     |
+| `VISION.md`          | Your project's vision; replace Workbench's.                       |
+| `proposals/`         | One document per change, preserved as history.                    |
+| `policies/`          | Rules future work must keep enforcing.                            |
+| `decisions/`         | Architectural choices and the context that produced them.         |
+| `guides/`            | User-facing documentation.                                        |
+| `docs/`              | The site that publishes the vision, record, and guides.           |
+| `tools/`             | The artifact validator.                                           |
+| `.agents/skills/`    | One skill directory per process phase or cross-cutting concern.   |
+| `.agents/rules/`     | Code quality, commit discipline, and enforcement hierarchy.       |
+| `.agents/templates/` | The canonical shape of every artifact.                            |
+| `.agents/hooks/`     | The commit-message git hook and the Scoped Commits check it runs. |
+| `.github/workflows/` | Continuous integration and the preview workflow.                  |
 
 When a harness needs its own configuration, generate it from `.agents/` rather than replacing the source. This prevents two copies of the process from becoming two different processes.
 
@@ -71,13 +71,9 @@ Workbench needs these events attached where your harness allows them:
 | Before the agent ends its turn | `vp run check`   |
 | At session start               | Load `AGENTS.md` |
 
-Install the commit-message hook as well. It is harness-independent and catches commits made by hand:
+`vp install` installs the commit-message hook through Vite+'s hook dispatcher, and `vp hooks status` shows whether it is active in a clone. The hook holds commits made from Oh My Pi to Scoped Commits, recognizing them by the `OMPCODE=1` that Oh My Pi exports to every command it runs, and lets every other commit through. To hold your harness's commits to the same rule, add the environment variable it exports to the check in `.agents/hooks/commit-msg`.
 
-```sh
-ln -s ../../.agents/hooks/commit-msg .git/hooks/commit-msg
-```
-
-Continuous integration runs the same validation, so the hook is a fast local signal rather than the only line of defence.
+Continuous integration checks every commit in a pull request wherever it was made, so the hook is a fast local signal rather than the only line of defence.
 
 ## Configure the readiness-report account
 

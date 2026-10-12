@@ -2,6 +2,9 @@
     "name": "workbench",
     "private": true,
     "type": "module",
+    "scripts": {
+        "prepare": "vp config --hooks-dir .agents/hooks --no-agent"
+    },
     "devDependencies": {
         "@oh-my-pi/pi-coding-agent": "latest",
         "@types/node": "^26.6.4",

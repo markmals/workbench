@@ -24,7 +24,7 @@ The project's toolchain is [Vite+](https://viteplus.dev). Install its `vp` comma
 curl -fsSL https://vite.plus | bash
 ```
 
-From the repository root, install the project's dependencies. Vite+ uses the Node version in `.node-version` and the pnpm version in `package.json`, downloading either when it is missing:
+From the repository root, install the project's dependencies. Vite+ uses the Node version in `.node-version` and the pnpm version in `package.json`, downloading either when it is missing, and installs the commit-message hook that holds commits made from Oh My Pi to [Scoped Commits](https://scopedcommits.com/):
 
 ```sh
 vp install
