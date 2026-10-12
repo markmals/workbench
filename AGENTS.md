@@ -353,7 +353,7 @@ Skill: `.agents/skills/tracking-defects/`.
 
 ## Quality gates
 
-[Vite+](https://viteplus.dev) runs the toolchain. `.node-version` pins Node, which runs the TypeScript in `tools/` directly; `package.json#devEngines` pins pnpm.
+[Vite+](https://viteplus.dev) runs the toolchain. `.node-version` pins Node, which runs the TypeScript in `tools/` directly; `package.json#devEngines` pins pnpm. `vp run test` also needs [Bun](https://bun.sh) on the `PATH`: one test loads the `workflow` tool through Oh My Pi's real loader, which runs on Bun.
 
 ```sh
 vp install           # dependencies, with the pinned pnpm

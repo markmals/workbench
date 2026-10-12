@@ -593,10 +593,17 @@ describe("OMP custom-tool discovery (real loader boundary)", () => {
             `}));`,
         ].join("\n");
 
-        let out = execFileSync("bun", ["-e", script], { cwd, encoding: "utf8" });
+        // Cold Bun and OMP startup can exceed Vitest's five-second default on CI, so the subprocess
+        // gets its own bound and the test a little more to report it.
+        let out = execFileSync("bun", ["-e", script], {
+            cwd,
+            encoding: "utf8",
+            killSignal: "SIGKILL",
+            timeout: 30_000,
+        });
         let loaded = JSON.parse(out) as { errors: unknown[]; tools: string[] };
 
         expect(loaded.errors).toEqual([]);
         expect(loaded.tools).toContain("workflow");
-    });
+    }, 35_000);
 });

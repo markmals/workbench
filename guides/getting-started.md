@@ -30,6 +30,12 @@ From the repository root, install the project's dependencies. Vite+ uses the Nod
 vp install
 ```
 
+The gate also needs [Bun](https://bun.sh), which Vite+ does not install. One test loads the `workflow` tool through Oh My Pi's real loader, and that loader runs on Bun:
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+```
+
 Then run the complete local gate:
 
 ```sh
@@ -38,7 +44,7 @@ vp run check
 
 `vp run check` succeeds only when formatting, lint, and type checks, record validation, tests, and the documentation build all finish without an error. The documentation build also catches dead links.
 
-**One tool Vite+ does not install: the [GitHub CLI](https://cli.github.com).** The process runs on pull requests, so `gh` must be present and authenticated against your remote:
+**Vite+ does not install the [GitHub CLI](https://cli.github.com) either.** The process runs on pull requests, so `gh` must be present and authenticated against your remote:
 
 ```sh
 gh auth login
