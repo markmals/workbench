@@ -1,14 +1,43 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, type Dirent } from "node:fs";
 import path from "node:path";
 
-const RECORD_TYPES = {
+type RecordType = "proposal" | "policy" | "decision" | "guide";
+type ArtifactType = RecordType | "vision";
+
+export type FrontmatterValue = string | string[];
+export type Frontmatter = Record<string, FrontmatterValue>;
+
+export interface Artifact {
+    path: string;
+    frontmatter: Frontmatter;
+    content: string;
+}
+
+export interface Violation {
+    path: string;
+    message: string;
+}
+
+export type ParsedFrontmatter =
+    | { error: string; frontmatter?: undefined; content?: undefined }
+    | { error?: undefined; frontmatter: Frontmatter; content: string };
+
+interface Schema {
+    required: readonly string[];
+    lists: readonly string[];
+    optionalLists?: readonly string[];
+    nonEmptyLists?: readonly string[];
+    statuses?: readonly string[];
+}
+
+const RECORD_TYPES: Record<string, RecordType> = {
     proposals: "proposal",
     policies: "policy",
     decisions: "decision",
     guides: "guide",
 };
 
-const SCHEMAS = {
+const SCHEMAS: Record<ArtifactType, Schema> = {
     proposal: {
         required: ["id", "title", "authors", "status", "pull-request", "supersedes"],
         lists: ["authors", "supersedes"],
@@ -46,58 +75,65 @@ const SCHEMAS = {
     },
 };
 
-function violation(file, message) {
+// Proposals in these statuses have a finished design, so an open question is a defect.
+const FINAL_PROPOSAL_STATUSES: readonly string[] = [
+    "awaiting-implementation",
+    "active-review",
+    "accepted",
+    "implemented",
+    "superseded",
+];
+
+function violation(file: string, message: string): Violation {
     return { path: file, message };
 }
 
-function artifactType(file) {
-    const normalized = file.split(path.sep).join("/");
+function artifactType(file: string): ArtifactType | undefined {
+    let normalized = file.split(path.sep).join("/");
     if (normalized === "VISION.md") return "vision";
-    return RECORD_TYPES[normalized.split("/").at(-2)];
+    let directory = normalized.split("/").at(-2);
+    return directory === undefined ? undefined : RECORD_TYPES[directory];
 }
 
-function expectedId(file, type) {
-    const filename = path.basename(file, ".md");
+function expectedId(file: string, type: RecordType): string | null {
+    let filename = path.basename(file, ".md");
     if (type === "guide") {
         return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(filename) ? `guide.${filename}` : null;
     }
 
-    const match = filename.match(/^(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    let match = filename.match(/^(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$/);
     return match ? `${type}.${match[1]}` : null;
 }
 
-function referencesFor(artifact, type) {
-    const { frontmatter } = artifact;
-    const fields =
+function referencesFor(artifact: Artifact, type: ArtifactType): { field: string; id: string }[] {
+    let { frontmatter } = artifact;
+    let fields =
         type === "guide"
             ? ["describes"]
             : type === "vision"
               ? []
               : ["supersedes", "established-by"];
 
-    return fields.flatMap((field) => {
+    return fields.flatMap(field => {
+        let value = frontmatter[field];
         if (field === "established-by") {
-            return typeof frontmatter[field] === "string"
-                ? [{ field, id: frontmatter[field] }]
-                : [];
+            return typeof value === "string" ? [{ field, id: value }] : [];
         }
-        return Array.isArray(frontmatter[field])
-            ? frontmatter[field].map((id) => ({ field, id }))
-            : [];
+        return Array.isArray(value) ? value.map(id => ({ field, id })) : [];
     });
 }
 
 // A proposal that documents the clarification convention necessarily writes the marker down.
 // Only prose counts as an unresolved question, so fenced blocks and inline spans are stripped
 // before the check. An author raising a real question writes it as prose, not as code.
-export function withoutCode(markdown) {
-    const parts = markdown.split(/(\r?\n)/);
-    let fence;
+export function withoutCode(markdown: string): string {
+    let parts = markdown.split(/(\r?\n)/);
+    let fence: { character: string; length: number } | undefined;
 
     for (let index = 0; index < parts.length; index += 2) {
-        const line = parts[index];
+        let line = parts[index];
         if (fence) {
-            const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
+            let closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
             if (closing && closing[1][0] === fence.character && closing[1].length >= fence.length) {
                 fence = undefined;
             } else {
@@ -107,7 +143,7 @@ export function withoutCode(markdown) {
             continue;
         }
 
-        const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+        let opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
         if (opening && !opening[2].includes("`")) {
             fence = { character: opening[1][0], length: opening[1].length };
             parts[index] = "";
@@ -121,22 +157,22 @@ export function withoutCode(markdown) {
     return parts.join("");
 }
 
-export function parseFrontmatter(source) {
-    const lines = source.split(/\r?\n/);
+export function parseFrontmatter(source: string): ParsedFrontmatter {
+    let lines = source.split(/\r?\n/);
     if (lines[0] !== "---") return { error: "missing YAML frontmatter" };
 
-    const end = lines.indexOf("---", 1);
+    let end = lines.indexOf("---", 1);
     if (end === -1) return { error: "unterminated YAML frontmatter" };
 
-    const frontmatter = {};
-    for (const line of lines.slice(1, end)) {
-        const trimmed = line.trim();
+    let frontmatter: Frontmatter = {};
+    for (let line of lines.slice(1, end)) {
+        let trimmed = line.trim();
         if (trimmed === "" || trimmed.startsWith("#")) continue;
 
-        const match = line.match(/^([a-z][a-z-]*):[ \t]*(.*)$/);
+        let match = line.match(/^([a-z][a-z-]*):[ \t]*(.*)$/);
         if (!match) return { error: `cannot parse frontmatter line "${line}"` };
 
-        const [, key, rawValue] = match;
+        let [, key, rawValue] = match;
         if (Object.hasOwn(frontmatter, key)) return { error: `duplicate frontmatter key "${key}"` };
 
         if (!rawValue.startsWith("[")) {
@@ -145,12 +181,12 @@ export function parseFrontmatter(source) {
         }
 
         if (!rawValue.endsWith("]")) return { error: `cannot parse list value for "${key}"` };
-        const contents = rawValue.slice(1, -1).trim();
+        let contents = rawValue.slice(1, -1).trim();
         if (contents.includes("[") || contents.includes("]"))
             return { error: `cannot parse list value for "${key}"` };
 
-        const values = contents === "" ? [] : contents.split(",").map((value) => value.trim());
-        if (values.some((value) => value === ""))
+        let values = contents === "" ? [] : contents.split(",").map(value => value.trim());
+        if (values.some(value => value === ""))
             return { error: `cannot parse list value for "${key}"` };
         frontmatter[key] = values;
     }
@@ -158,25 +194,23 @@ export function parseFrontmatter(source) {
     return { frontmatter, content: source };
 }
 
-export function validateArtifacts(inputArtifacts) {
-    const artifacts = [...inputArtifacts].sort((left, right) =>
-        left.path.localeCompare(right.path),
-    );
-    const violations = [];
-    const ids = new Map();
+export function validateArtifacts(inputArtifacts: readonly Artifact[]): Violation[] {
+    let artifacts = [...inputArtifacts].sort((left, right) => left.path.localeCompare(right.path));
+    let violations: Violation[] = [];
+    let ids = new Map<string, Artifact>();
 
-    for (const artifact of artifacts) {
-        const type = artifactType(artifact.path);
-        const schema = SCHEMAS[type];
-        if (!schema) continue;
+    for (let artifact of artifacts) {
+        let type = artifactType(artifact.path);
+        if (!type) continue;
 
-        const frontmatter = artifact.frontmatter ?? {};
-        for (const key of schema.required) {
+        let schema = SCHEMAS[type];
+        let { frontmatter } = artifact;
+        for (let key of schema.required) {
             if (!Object.hasOwn(frontmatter, key) || frontmatter[key] === undefined) {
                 violations.push(violation(artifact.path, `missing required key "${key}"`));
             }
         }
-        for (const key of schema.required) {
+        for (let key of schema.required) {
             if (
                 Object.hasOwn(frontmatter, key) &&
                 !schema.lists.includes(key) &&
@@ -185,38 +219,40 @@ export function validateArtifacts(inputArtifacts) {
                 violations.push(violation(artifact.path, `key "${key}" must be a scalar`));
             }
         }
-        for (const key of [...schema.lists, ...(schema.optionalLists ?? [])]) {
+        for (let key of [...schema.lists, ...(schema.optionalLists ?? [])]) {
             if (Object.hasOwn(frontmatter, key) && !Array.isArray(frontmatter[key])) {
                 violations.push(violation(artifact.path, `key "${key}" must be an inline list`));
             }
         }
-        for (const key of schema.nonEmptyLists ?? []) {
-            if (Array.isArray(frontmatter[key]) && frontmatter[key].length === 0) {
+        for (let key of schema.nonEmptyLists ?? []) {
+            let value = frontmatter[key];
+            if (Array.isArray(value) && value.length === 0) {
                 violations.push(
                     violation(artifact.path, `key "${key}" must be a non-empty inline list`),
                 );
             }
         }
+        let { status, updated, id } = frontmatter;
         if (
             schema.statuses &&
             Object.hasOwn(frontmatter, "status") &&
-            !schema.statuses.includes(frontmatter.status)
+            !(typeof status === "string" && schema.statuses.includes(status))
         ) {
             violations.push(
-                violation(artifact.path, `invalid status "${frontmatter.status}" for ${type}`),
+                violation(artifact.path, `invalid status "${String(status)}" for ${type}`),
             );
         }
         if (
             type === "vision" &&
             Object.hasOwn(frontmatter, "updated") &&
-            !/^\d{4}-\d{2}-\d{2}$/.test(frontmatter.updated)
+            !/^\d{4}-\d{2}-\d{2}$/.test(String(updated))
         ) {
             violations.push(violation(artifact.path, 'key "updated" must use YYYY-MM-DD'));
         }
 
-        if (type === "vision" || typeof frontmatter.id !== "string") continue;
+        if (type === "vision" || typeof id !== "string") continue;
 
-        const expected = expectedId(artifact.path, type);
+        let expected = expectedId(artifact.path, type);
         if (expected === null) {
             violations.push(
                 violation(
@@ -226,34 +262,28 @@ export function validateArtifacts(inputArtifacts) {
                         : "filename must begin with a four-digit record number and slug",
                 ),
             );
-        } else if (frontmatter.id !== expected) {
+        } else if (id !== expected) {
             violations.push(
-                violation(
-                    artifact.path,
-                    `ID "${frontmatter.id}" must be "${expected}" for this filename`,
-                ),
+                violation(artifact.path, `ID "${id}" must be "${expected}" for this filename`),
             );
         }
 
-        const first = ids.get(frontmatter.id);
+        let first = ids.get(id);
         if (first) {
             violations.push(
-                violation(
-                    artifact.path,
-                    `duplicate ID "${frontmatter.id}"; first declared in ${first.path}`,
-                ),
+                violation(artifact.path, `duplicate ID "${id}"; first declared in ${first.path}`),
             );
         } else {
-            ids.set(frontmatter.id, artifact);
+            ids.set(id, artifact);
         }
     }
 
-    for (const artifact of artifacts) {
-        const type = artifactType(artifact.path);
+    for (let artifact of artifacts) {
+        let type = artifactType(artifact.path);
         if (!type) continue;
 
-        for (const { field, id } of referencesFor(artifact, type)) {
-            const target = ids.get(id);
+        for (let { field, id } of referencesFor(artifact, type)) {
+            let target = ids.get(id);
             if (!target) {
                 violations.push(
                     violation(artifact.path, `reference "${id}" in ${field} does not resolve`),
@@ -262,50 +292,46 @@ export function validateArtifacts(inputArtifacts) {
                 violations.push(
                     violation(
                         target.path,
-                        `record superseded by ${artifact.frontmatter.id} must have status "superseded"`,
+                        `record superseded by ${String(artifact.frontmatter.id)} must have status "superseded"`,
                     ),
                 );
             }
         }
 
+        let { status } = artifact.frontmatter;
         if (
             type === "proposal" &&
-            [
-                "awaiting-implementation",
-                "active-review",
-                "accepted",
-                "implemented",
-                "superseded",
-            ].includes(artifact.frontmatter.status) &&
+            typeof status === "string" &&
+            FINAL_PROPOSAL_STATUSES.includes(status) &&
             withoutCode(artifact.content).includes("[NEEDS CLARIFICATION:")
         ) {
             violations.push(
                 violation(
                     artifact.path,
-                    `proposal status "${artifact.frontmatter.status}" does not allow a [NEEDS CLARIFICATION:] marker`,
+                    `proposal status "${status}" does not allow a [NEEDS CLARIFICATION:] marker`,
                 ),
             );
         }
     }
 
-    const graph = new Map();
-    for (const [id, artifact] of ids) {
+    let graph = new Map<string, string[]>();
+    for (let [id, artifact] of ids) {
+        let { supersedes } = artifact.frontmatter;
         graph.set(
             id,
-            Array.isArray(artifact.frontmatter.supersedes)
-                ? artifact.frontmatter.supersedes.filter((target) => ids.has(target))
-                : [],
+            Array.isArray(supersedes) ? supersedes.filter(target => ids.has(target)) : [],
         );
     }
 
-    const states = new Map();
-    const visit = (id, trail) => {
+    let states = new Map<string, "visiting" | "visited">();
+    let visit = (id: string, trail: string[]): void => {
         states.set(id, "visiting");
-        for (const target of graph.get(id)) {
+        for (let target of graph.get(id) ?? []) {
             if (states.get(target) === "visiting") {
-                const cycle = [...trail.slice(trail.indexOf(target)), target];
+                let cycle = [...trail.slice(trail.indexOf(target)), target];
+                // The graph only holds targets present in `ids`.
                 violations.push(
-                    violation(ids.get(target).path, `supersession cycle: ${cycle.join(" -> ")}`),
+                    violation(ids.get(target)!.path, `supersession cycle: ${cycle.join(" -> ")}`),
                 );
             } else if (!states.has(target)) {
                 visit(target, [...trail, target]);
@@ -314,26 +340,29 @@ export function validateArtifacts(inputArtifacts) {
         states.set(id, "visited");
     };
 
-    for (const id of graph.keys()) {
+    for (let id of graph.keys()) {
         if (!states.has(id)) visit(id, [id]);
     }
 
     return violations;
 }
 
-export function collectArtifacts(root = process.cwd()) {
-    const artifacts = [];
-    const violations = [];
-    const add = (relativePath) => {
-        const source = readFileSync(path.join(root, relativePath), "utf8");
-        const parsed = parseFrontmatter(source);
-        if (parsed.error) {
+export function collectArtifacts(root = process.cwd()): {
+    artifacts: Artifact[];
+    violations: Violation[];
+} {
+    let artifacts: Artifact[] = [];
+    let violations: Violation[] = [];
+    let add = (relativePath: string): void => {
+        let source = readFileSync(path.join(root, relativePath), "utf8");
+        let parsed = parseFrontmatter(source);
+        if (parsed.error !== undefined) {
             violations.push(violation(relativePath, parsed.error));
         } else {
             artifacts.push({ path: relativePath, ...parsed });
         }
     };
-    const isRegularFile = (entry, absolutePath) => {
+    let isRegularFile = (entry: Dirent, absolutePath: string): boolean => {
         if (entry.isFile()) return true;
         if (!entry.isSymbolicLink()) return false;
         try {
@@ -342,11 +371,11 @@ export function collectArtifacts(root = process.cwd()) {
             return false;
         }
     };
-    const collectDirectory = (directory, relativeDirectory, nested = false) => {
-        const absoluteDirectory = path.join(root, relativeDirectory);
-        for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
-            const relativePath = path.join(relativeDirectory, entry.name);
-            const absolutePath = path.join(root, relativePath);
+    let collectDirectory = (directory: string, relativeDirectory: string, nested = false): void => {
+        let absoluteDirectory = path.join(root, relativeDirectory);
+        for (let entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
+            let relativePath = path.join(relativeDirectory, entry.name);
+            let absolutePath = path.join(root, relativePath);
             if (entry.isDirectory()) {
                 collectDirectory(directory, relativePath, true);
             } else if (entry.name.endsWith(".md") && isRegularFile(entry, absolutePath)) {
@@ -365,23 +394,23 @@ export function collectArtifacts(root = process.cwd()) {
     };
 
     if (existsSync(path.join(root, "VISION.md"))) add("VISION.md");
-    for (const directory of Object.keys(RECORD_TYPES)) {
-        const absoluteDirectory = path.join(root, directory);
+    for (let directory of Object.keys(RECORD_TYPES)) {
+        let absoluteDirectory = path.join(root, directory);
         if (existsSync(absoluteDirectory)) collectDirectory(directory, directory);
     }
 
     return { artifacts, violations };
 }
 
-function main() {
-    const json = process.argv.slice(2).includes("--json");
-    const collected = collectArtifacts();
-    const violations = [...collected.violations, ...validateArtifacts(collected.artifacts)];
+function main(): void {
+    let json = process.argv.slice(2).includes("--json");
+    let collected = collectArtifacts();
+    let violations = [...collected.violations, ...validateArtifacts(collected.artifacts)];
 
     if (json) {
         console.log(JSON.stringify({ violations, count: violations.length }));
     } else if (violations.length > 0) {
-        for (const { path: file, message } of violations) console.log(`${file}: ${message}`);
+        for (let { path: file, message } of violations) console.log(`${file}: ${message}`);
         console.log(`${violations.length} violation${violations.length === 1 ? "" : "s"}`);
     } else {
         console.log("Validation passed: 0 violations");

@@ -1,7 +1,9 @@
 import type { Theme } from "vitepress";
+
 import { themeContextKey, VoidZeroTheme } from "@voidzero-dev/vitepress-theme";
-import footerBg from "@voidzero-dev/vitepress-theme/src/assets/vitest/footer-background.jpg";
 import monoIcon from "@voidzero-dev/vitepress-theme/src/assets/icons/vitest-mono.svg";
+import footerBg from "@voidzero-dev/vitepress-theme/src/assets/vitest/footer-background.jpg";
+
 import logo from "../../public/workbench-icon.png";
 import RecordHeader from "./components/RecordHeader.vue";
 import RecordLayout from "./layouts/RecordLayout.vue";

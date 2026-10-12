@@ -1,27 +1,28 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { expect, test } from "vite-plus/test";
 
-import { deriveStatus, formatStatus } from "./status.mjs";
+import { deriveStatus, formatStatus, type Facts, type Proposal, type Step } from "./status.ts";
 
-function facts(overrides = {}) {
+let openPullRequest = {
+    number: 1,
+    isDraft: true,
+    url: "https://github.com/owner/repo/pull/1",
+    title: "Feature",
+    isMerged: false,
+};
+
+function facts(overrides: Partial<Facts> = {}): Facts {
     return {
         branch: "feature",
         isDefaultBranch: false,
         hasUpstream: true,
         unpushedCommits: 0,
-        pullRequest: {
-            number: 1,
-            isDraft: true,
-            url: "https://github.com/owner/repo/pull/1",
-            title: "Feature",
-            isMerged: false,
-        },
+        pullRequest: openPullRequest,
         pullRequestState: "known",
         proposal: null,
         ...overrides,
     };
 }
-function proposal(status, clarificationCount = 0, overrides = {}) {
+function proposal(status: string, clarificationCount = 0, overrides: Partial<Proposal> = {}) {
     return {
         id: "proposal.0001",
         title: "Feature",
@@ -33,15 +34,12 @@ function proposal(status, clarificationCount = 0, overrides = {}) {
 
 // Asserts the derived routing — phase, who acts, which skill. The `next` sentence is human-facing
 // copy that will be reworded; pinning it here would make every wording change a test failure.
-function assertPhase(input, expected) {
-    const status = deriveStatus(input);
+function assertPhase(input: Facts, expected: Pick<Step, "phase" | "title" | "actor" | "skill">) {
+    let status = deriveStatus(input);
 
-    assert.equal(status.phase, expected.phase);
-    assert.equal(status.title, expected.title);
-    assert.equal(status.actor, expected.actor);
-    assert.equal(status.skill, expected.skill);
-    assert.ok(status.next.length > 0, "every phase must say what happens next");
-    assert.ok(status.situation.length > 0, "every phase must describe the situation");
+    expect(status).toMatchObject(expected);
+    expect(status.next.length, "every phase must say what happens next").toBeGreaterThan(0);
+    expect(status.situation.length, "every phase must describe the situation").toBeGreaterThan(0);
     return status;
 }
 
@@ -72,18 +70,19 @@ test("derives proposal work for a draft pull request without a proposal", () => 
     });
 });
 
-test("asks before opening a proposal workspace or drafting a proposal", () => {
-    const states = [
-        facts({ branch: "main", isDefaultBranch: true, pullRequest: null }),
-        facts({ pullRequest: null }),
-        facts(),
-    ];
-    for (const state of states) {
-        const { actor, next } = deriveStatus(state);
-        assert.equal(actor, "agent");
-        assert.match(next, /ask the human whether they want a proposal/i);
-        assert.match(next, /before (creating|pushing|writing)/i);
-    }
+test.each([
+    {
+        where: "on the default branch",
+        state: facts({ branch: "main", isDefaultBranch: true, pullRequest: null }),
+    },
+    { where: "on a branch without a pull request", state: facts({ pullRequest: null }) },
+    { where: "on a pull request without a proposal", state: facts() },
+])("asks before opening a proposal workspace or drafting a proposal $where", ({ state }) => {
+    let { actor, next } = deriveStatus(state);
+
+    expect(actor).toBe("agent");
+    expect(next).toMatch(/ask the human whether they want a proposal/i);
+    expect(next).toMatch(/before (creating|pushing|writing)/i);
 });
 
 test("keeps a draft proposal in proposal work", () => {
@@ -132,12 +131,18 @@ test("derives completion for an accepted proposal", () => {
 });
 
 test("derives done for an implemented merged pull request", () => {
-    assertPhase(facts({ proposal: proposal("implemented"), pullRequest: { isMerged: true } }), {
-        phase: "done",
-        title: "Done",
-        actor: "you",
-        skill: null,
-    });
+    assertPhase(
+        facts({
+            proposal: proposal("implemented"),
+            pullRequest: { ...openPullRequest, isMerged: true },
+        }),
+        {
+            phase: "done",
+            title: "Done",
+            actor: "you",
+            skill: null,
+        },
+    );
 });
 
 test("derives a closed state for a rejected proposal", () => {
@@ -159,48 +164,48 @@ test("derives a closed state for a withdrawn proposal", () => {
 });
 
 test("derives a closed state with its successor for a superseded proposal", () => {
-    const input = facts({
+    let input = facts({
         proposal: proposal("superseded"),
         proposalSuccessor: { id: "proposal.0002", title: "Replacement" },
     });
-    const status = assertPhase(input, {
+    let status = assertPhase(input, {
         phase: "done",
         title: "Closed",
         actor: "you",
         skill: null,
     });
 
-    assert.match(formatStatus(input, status), /proposal\.0002/);
+    expect(formatStatus(input, status)).toMatch(/proposal\.0002/);
 });
 
 test("names an implemented proposal with an unmerged pull request as inconsistent", () => {
-    const status = assertPhase(facts({ proposal: proposal("implemented") }), {
+    let status = assertPhase(facts({ proposal: proposal("implemented") }), {
         phase: "3 → 4",
         title: "Inconsistent record",
         actor: "you",
         skill: null,
     });
 
-    assert.deepEqual(status.notices, [{ kind: "implemented-unmerged" }]);
+    expect(status.notices).toStrictEqual([{ kind: "implemented-unmerged" }]);
 });
 
 test("flags a draft pull request when the proposal is in active review", () => {
-    const status = deriveStatus(facts({ proposal: proposal("active-review") }));
+    let status = deriveStatus(facts({ proposal: proposal("active-review") }));
 
-    assert.deepEqual(status.notices, [{ kind: "draft-active-review" }]);
+    expect(status.notices).toStrictEqual([{ kind: "draft-active-review" }]);
 });
 
 test("surfaces a heuristic proposal selection and its other candidates", () => {
-    const input = facts({
+    let input = facts({
         proposal: proposal("draft", 0, { pullRequest: "2" }),
         proposalSelection: {
             otherCandidates: [{ id: "proposal.0002", title: "Other feature" }],
             pullRequestMismatch: true,
         },
     });
-    const status = deriveStatus(input);
+    let status = deriveStatus(input);
 
-    assert.deepEqual(status.notices, [
+    expect(status.notices).toStrictEqual([
         {
             kind: "ambiguous-proposal-selection",
             selected: "proposal.0001",
@@ -210,20 +215,20 @@ test("surfaces a heuristic proposal selection and its other candidates", () => {
             pullRequestNumber: 1,
         },
     ]);
-    assert.match(formatStatus(input, status), /proposal\.0002/);
+    expect(formatStatus(input, status)).toMatch(/proposal\.0002/);
 });
 
 test("surfaces unresolved clarification markers and unpushed commits", () => {
-    const status = deriveStatus(facts({ proposal: proposal("draft", 2), unpushedCommits: 3 }));
+    let status = deriveStatus(facts({ proposal: proposal("draft", 2), unpushedCommits: 3 }));
 
-    assert.deepEqual(status.notices, [
+    expect(status.notices).toStrictEqual([
         { kind: "clarifications", count: 2 },
         { kind: "unpushed-commits", count: 3 },
     ]);
 });
 
 test("reports an unavailable pull request state instead of assuming no pull request", () => {
-    const status = assertPhase(
+    let status = assertPhase(
         facts({
             pullRequest: null,
             pullRequestState: "unknown",
@@ -237,11 +242,11 @@ test("reports an unavailable pull request state instead of assuming no pull requ
         },
     );
 
-    assert.equal(status.reason, "gh is unavailable");
+    expect(status.reason).toBe("gh is unavailable");
 });
 
 test("reports an unauthenticated pull request state", () => {
-    const status = assertPhase(
+    let status = assertPhase(
         facts({
             pullRequest: null,
             pullRequestState: "unknown",
@@ -255,7 +260,7 @@ test("reports an unauthenticated pull request state", () => {
         },
     );
 
-    assert.equal(status.reason, "gh is not authenticated");
+    expect(status.reason).toBe("gh is not authenticated");
 });
 
 test("reports an unknown branch role instead of recommending a pull request", () => {

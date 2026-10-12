@@ -1,9 +1,10 @@
+import type { DefaultTheme } from "vitepress";
+
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { DefaultTheme } from "vitepress";
 
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
+let repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 interface DocumentEntry {
     id: string | null;
@@ -32,13 +33,13 @@ interface SidebarBuild {
 }
 
 export function generateSidebar(): SidebarBuild {
-    const guides = buildGuidesSection();
-    const proposals = buildRecordSection("proposals");
-    const decisions = buildRecordSection("decisions");
-    const policies = buildRecordSection("policies");
-    const recordLinks: Record<string, string> = {};
+    let guides = buildGuidesSection();
+    let proposals = buildRecordSection("proposals");
+    let decisions = buildRecordSection("decisions");
+    let policies = buildRecordSection("policies");
+    let recordLinks: Record<string, string> = {};
 
-    for (const entry of [
+    for (let entry of [
         ...guides.entries,
         ...proposals.entries,
         ...decisions.entries,
@@ -61,9 +62,9 @@ export function generateSidebar(): SidebarBuild {
 }
 
 function buildGuidesSection(): SidebarSection {
-    const directory = "guides";
-    const absDir = join(repoRoot, directory);
-    const entries = listDocuments(absDir, `/${directory}/`).sort(
+    let directory = "guides";
+    let absDir = join(repoRoot, directory);
+    let entries = listDocuments(absDir, `/${directory}/`).sort(
         (a, b) =>
             a.text.localeCompare(b.text, "en", { sensitivity: "base" }) ||
             a.link.localeCompare(b.link),
@@ -77,20 +78,20 @@ function buildGuidesSection(): SidebarSection {
 }
 
 function buildRecordSection(directory: "proposals" | "decisions" | "policies"): SidebarSection {
-    const absDir = join(repoRoot, directory);
-    const entries = listDocuments(absDir, `/${directory}/`).sort((a, b) => {
-        const aNumber = Number.parseInt(a.filename, 10);
-        const bNumber = Number.parseInt(b.filename, 10);
-        const numberOrder =
+    let absDir = join(repoRoot, directory);
+    let entries = listDocuments(absDir, `/${directory}/`).sort((a, b) => {
+        let aNumber = Number.parseInt(a.filename, 10);
+        let bNumber = Number.parseInt(b.filename, 10);
+        let numberOrder =
             (Number.isNaN(bNumber) ? -1 : bNumber) - (Number.isNaN(aNumber) ? -1 : aNumber);
 
         return numberOrder || a.text.localeCompare(b.text, "en", { sensitivity: "base" });
     });
-    const current = entries.filter((entry) => entry.status !== "superseded");
-    const superseded = entries
-        .filter((entry) => entry.status === "superseded")
+    let current = entries.filter(entry => entry.status !== "superseded");
+    let superseded = entries
+        .filter(entry => entry.status === "superseded")
         .map(({ text, link }) => ({ text, link }));
-    const items = current.map(({ text, link }) => ({ text, link }));
+    let items: DefaultTheme.SidebarItem[] = current.map(({ text, link }) => ({ text, link }));
 
     if (superseded.length > 0) {
         items.push({ text: "Superseded", collapsed: true, items: superseded });
@@ -105,11 +106,11 @@ function buildRecordSection(directory: "proposals" | "decisions" | "policies"): 
 
 function listDocuments(absDir: string, urlPrefix: string): DocumentEntry[] {
     return readdirSyncSafe(absDir)
-        .filter((name) => name !== "README.md" && extname(name) === ".md")
-        .filter((name) => isFile(join(absDir, name)))
-        .map((filename) => {
-            const stem = filename.slice(0, -3);
-            const metadata = readMetadata(join(absDir, filename), stem);
+        .filter(name => name !== "README.md" && extname(name) === ".md")
+        .filter(name => isFile(join(absDir, name)))
+        .map(filename => {
+            let stem = filename.slice(0, -3);
+            let metadata = readMetadata(join(absDir, filename), stem);
 
             return {
                 id: metadata.id,
@@ -130,10 +131,10 @@ function readMetadata(
     title: string;
 } {
     try {
-        const content = readFileSync(filePath, "utf-8");
-        const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
-        const frontmatter = frontmatterMatch?.[1] ?? "";
-        const title = frontmatterValue(frontmatter, "title");
+        let content = readFileSync(filePath, "utf-8");
+        let frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+        let frontmatter = frontmatterMatch?.[1] ?? "";
+        let title = frontmatterValue(frontmatter, "title");
 
         return {
             id: frontmatterValue(frontmatter, "id"),
@@ -153,19 +154,19 @@ function readMetadata(
 }
 
 function frontmatterValue(frontmatter: string, key: string): string | null {
-    const value = frontmatter.match(new RegExp(`^${key}:\\s*(.+?)\\s*$`, "m"))?.[1];
+    let value = frontmatter.match(new RegExp(`^${key}:\\s*(.+?)\\s*$`, "m"))?.[1];
     if (!value) return null;
 
-    const trimmed = value.trim();
-    const quote = trimmed.at(0);
+    let trimmed = value.trim();
+    let quote = trimmed.at(0);
     return quote && (quote === '"' || quote === "'") && trimmed.endsWith(quote)
         ? trimmed.slice(1, -1)
         : trimmed;
 }
 
 function deSlugify(slug: string): string {
-    const words = slug.replace(/[-_.]+/g, " ");
-    return words.replace(/\b\w/g, (character) => character.toUpperCase());
+    let words = slug.replace(/[-_.]+/g, " ");
+    return words.replace(/\b\w/g, character => character.toUpperCase());
 }
 
 function sectionEntryLink(
@@ -179,7 +180,7 @@ function sectionEntryLink(
 
 function readdirSyncSafe(dir: string): string[] {
     try {
-        return readdirSync(dir).filter((name) => !name.startsWith(".") && name !== "node_modules");
+        return readdirSync(dir).filter(name => !name.startsWith(".") && name !== "node_modules");
     } catch {
         return [];
     }

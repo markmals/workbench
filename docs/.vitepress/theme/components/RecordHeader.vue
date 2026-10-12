@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { useData, withBase } from "vitepress";
+import { computed } from "vue";
 
 interface Reference {
     id: string;
@@ -17,13 +17,13 @@ interface Issue {
     link: string | null;
 }
 
-const { frontmatter, theme } = useData();
+let { frontmatter, theme } = useData();
 
-const meta = computed(() => {
-    const fm = frontmatter.value as Record<string, unknown>;
-    const id = typeof fm.id === "string" ? fm.id : null;
-    const isProposal = id?.startsWith("proposal.") ?? false;
-    const isRecord = isProposal || id?.startsWith("policy.") || id?.startsWith("decision.");
+let meta = computed(() => {
+    let fm = frontmatter.value as Record<string, unknown>;
+    let id = typeof fm.id === "string" ? fm.id : null;
+    let isProposal = id?.startsWith("proposal.") ?? false;
+    let isRecord = isProposal || id?.startsWith("policy.") || id?.startsWith("decision.");
 
     return {
         id,
@@ -38,7 +38,7 @@ const meta = computed(() => {
             isProposal && Array.isArray(fm.issues)
                 ? fm.issues
                       .filter((value): value is string => typeof value === "string")
-                      .map((reference) => ({
+                      .map(reference => ({
                           reference,
                           link: /^https?:\/\//.test(reference) ? reference : null,
                       }))
@@ -60,27 +60,27 @@ const meta = computed(() => {
 function displayStatus(status: string) {
     return status
         .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 }
 
-const recordLinks = computed(() => {
-    const config = theme.value as Record<string, unknown>;
-    const candidate = config.recordLinks;
-    const links: Record<string, string> = {};
+let recordLinks = computed(() => {
+    let config = theme.value as Record<string, unknown>;
+    let candidate = config.recordLinks;
+    let links: Record<string, string> = {};
 
     if (!candidate || typeof candidate !== "object") return links;
 
-    for (const [id, link] of Object.entries(candidate)) {
+    for (let [id, link] of Object.entries(candidate)) {
         if (typeof link === "string") links[id] = link;
     }
 
     return links;
 });
 
-const relationships = computed<Relationship[]>(() => {
-    const links = recordLinks.value;
-    const result: Relationship[] = [];
+let relationships = computed<Relationship[]>(() => {
+    let links = recordLinks.value;
+    let result: Relationship[] = [];
 
     if (meta.value.establishedBy) {
         result.push({
@@ -94,22 +94,22 @@ const relationships = computed<Relationship[]>(() => {
     if (meta.value.supersedes.length > 0) {
         result.push({
             label: "supersedes",
-            references: meta.value.supersedes.map((id) => ({ id, link: links[id] ?? null })),
+            references: meta.value.supersedes.map(id => ({ id, link: links[id] ?? null })),
         });
     }
 
     if (meta.value.describes.length > 0) {
         result.push({
             label: "describes",
-            references: meta.value.describes.map((id) => ({ id, link: links[id] ?? null })),
+            references: meta.value.describes.map(id => ({ id, link: links[id] ?? null })),
         });
     }
 
     return result;
 });
 
-const pullRequestIsUrl = computed(() => /^https?:\/\//.test(meta.value.pullRequest ?? ""));
-const visible = computed(
+let pullRequestIsUrl = computed(() => /^https?:\/\//.test(meta.value.pullRequest ?? ""));
+let visible = computed(
     () => meta.value.isRecord || relationships.value.length > 0 || meta.value.pullRequest !== null,
 );
 </script>

@@ -111,16 +111,16 @@ Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 
 ## Red flags — stop and correct
 
-| Symptom                                                     | Required response                                                   |
-| ----------------------------------------------------------- | ------------------------------------------------------------------- |
-| No explicit yes to the proposal question for this change    | Ask before creating a branch, draft PR, or proposal.                |
-| No pushed branch or draft pull request                      | Return to Phase 1 — Preparation.                                    |
-| Two unrelated motivations or more than roughly six criteria | Split the proposal.                                                 |
-| A record conflicts with the change                          | Surface it; the human chooses revision or supersession.             |
-| An unknown detail has no clarification marker               | Ask or add the marker.                                              |
-| Preview names no exercisable artifact for a behavior change | Choose and record one before approval.                              |
-| A newly discovered defect expands scope                     | File a GitHub issue; keep the proposal bounded.                     |
-| Existing code suggests the design                           | Treat it as evidence, not authority; settle intent in the proposal. |
+| Symptom | Required response |
+| --- | --- |
+| No explicit yes to the proposal question for this change | Ask before creating a branch, draft PR, or proposal. |
+| No pushed branch or draft pull request | Return to Phase 1 — Preparation. |
+| Two unrelated motivations or more than roughly six criteria | Split the proposal. |
+| A record conflicts with the change | Surface it; the human chooses revision or supersession. |
+| An unknown detail has no clarification marker | Ask or add the marker. |
+| Preview names no exercisable artifact for a behavior change | Choose and record one before approval. |
+| A newly discovered defect expands scope | File a GitHub issue; keep the proposal bounded. |
+| Existing code suggests the design | Treat it as evidence, not authority; settle intent in the proposal. |
 
 **Do not use the existing implementation to teach yourself the domain when independent domain knowledge is available. Ground yourself first; then inspect the implementation as a specimen.**
 

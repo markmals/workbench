@@ -37,13 +37,13 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
-            - uses: jdx/mise-action@v4
-
-            - run: mise install
+            - uses: voidzero-dev/setup-vp@v1.21.1
+              with:
+                  cache: true
 
             # Pages serves this repository at /<name>/, so the site's base must match or every
             # asset resolves against the domain root and the page loads blank.
-            - run: mise run docs:build
+            - run: vp run docs:build
               env:
                   DOCS_BASE: /${{ github.event.repository.name }}/
 

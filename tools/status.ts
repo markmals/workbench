@@ -1,8 +1,76 @@
+import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
 
-import { parseFrontmatter, withoutCode } from "./validate.mjs";
+import { parseFrontmatter, withoutCode, type FrontmatterValue } from "./validate.ts";
+
+type Actor = "agent" | "you";
+
+export interface Step {
+    phase: string;
+    title: string;
+    situation: string;
+    next: string;
+    actor: Actor;
+    skill: string | null;
+}
+
+export interface PullRequest {
+    number: number;
+    isDraft: boolean;
+    url: string;
+    title: string;
+}
+
+export interface Proposal {
+    id?: string;
+    title?: string;
+    status?: string;
+    pullRequest?: string;
+    supersedes?: string[];
+    clarificationCount: number;
+}
+
+type ProposalSummary = Pick<Proposal, "id" | "title">;
+
+export interface Facts {
+    branch: string | null;
+    isDefaultBranch: boolean | null;
+    hasUpstream: boolean;
+    unpushedCommits: number;
+    // `isMerged` is null when the default branch is unknown, so merge state cannot be checked.
+    pullRequest: (PullRequest & { isMerged: boolean | null }) | null;
+    pullRequestState: "known" | "unknown";
+    pullRequestReason?: string | null;
+    proposal: Proposal | null;
+    proposalSuccessor?: ProposalSummary | null;
+    proposalSelection?: {
+        otherCandidates: ProposalSummary[];
+        pullRequestMismatch: boolean;
+    };
+}
+
+type Notice =
+    | { kind: "clarifications"; count: number }
+    | { kind: "unpushed-commits"; count: number }
+    | { kind: "draft-active-review" }
+    | { kind: "implemented-unmerged" }
+    | {
+          kind: "ambiguous-proposal-selection";
+          selected: string | undefined;
+          otherCandidates: ProposalSummary[];
+          pullRequestMismatch: boolean;
+          proposalPullRequest: string | undefined;
+          pullRequestNumber: number | undefined;
+      };
+
+export type DerivedStatus = Step & { notices: Notice[]; reason?: string };
+
+interface PullRequestFacts {
+    pullRequest: PullRequest | null;
+    state: Facts["pullRequestState"];
+    reason: string | null;
+}
 
 const NON_TERMINAL_STATUSES = new Set([
     "draft",
@@ -18,7 +86,14 @@ const SKILLS = {
     completion: ".agents/skills/completing-a-feature/",
 };
 
-function step(phase, title, situation, next, actor, skill = null) {
+function step(
+    phase: string,
+    title: string,
+    situation: string,
+    next: string,
+    actor: Actor,
+    skill: string | null = null,
+): Step {
     return { phase, title, situation, next, actor, skill };
 }
 
@@ -126,8 +201,10 @@ const STEPS = {
         "you",
     ),
 };
+// Proposal statuses index STEPS directly; a status with no step of its own falls back to unknown.
+const STEPS_BY_STATUS: Record<string, Step | undefined> = STEPS;
 
-function unknownPullRequestStep(reason) {
+function unknownPullRequestStep(reason: string): Step & { reason: string } {
     return {
         ...step(
             "1",
@@ -140,7 +217,7 @@ function unknownPullRequestStep(reason) {
     };
 }
 
-function unknownBranchRoleStep() {
+function unknownBranchRoleStep(): Step {
     return step(
         "unknown",
         "Branch role unknown",
@@ -150,7 +227,7 @@ function unknownBranchRoleStep() {
     );
 }
 
-function supersededStep(successor) {
+function supersededStep(successor: ProposalSummary | null | undefined): Step {
     if (!successor) return STEPS.superseded;
     return step(
         "done",
@@ -161,18 +238,22 @@ function supersededStep(successor) {
     );
 }
 
-function defaultBranchFacts(branch, defaultReference, ghDefaultBranch) {
-    const defaultBranch =
+function defaultBranchFacts(
+    branch: string | null,
+    defaultReference: string | null,
+    ghDefaultBranch: string | null,
+): { defaultReference: string | null; isDefaultBranch: boolean | null } {
+    let defaultBranch =
         defaultReference?.split("/").at(-1) ??
         ghDefaultBranch ??
-        (CONVENTIONAL_DEFAULT_BRANCHES.has(branch) ? branch : null);
+        (branch !== null && CONVENTIONAL_DEFAULT_BRANCHES.has(branch) ? branch : null);
     return {
-        defaultReference: defaultReference ?? (defaultBranch && `origin/${defaultBranch}`),
+        defaultReference: defaultReference ?? (defaultBranch ? `origin/${defaultBranch}` : null),
         isDefaultBranch: defaultBranch ? branch === defaultBranch : null,
     };
 }
 
-function commandOutput(command, arguments_, root) {
+function commandOutput(command: string, arguments_: string[], root: string): string | null {
     try {
         return execFileSync(command, arguments_, {
             cwd: root,
@@ -184,7 +265,7 @@ function commandOutput(command, arguments_, root) {
     }
 }
 
-function commandSucceeds(command, arguments_, root) {
+function commandSucceeds(command: string, arguments_: string[], root: string): boolean {
     try {
         execFileSync(command, arguments_, { cwd: root, stdio: "ignore" });
         return true;
@@ -193,14 +274,10 @@ function commandSucceeds(command, arguments_, root) {
     }
 }
 
-function collectBranch(root) {
-    const branch = commandOutput("git", ["rev-parse", "--abbrev-ref", "HEAD"], root);
-    const defaultReference = commandOutput(
-        "git",
-        ["symbolic-ref", "refs/remotes/origin/HEAD"],
-        root,
-    );
-    const ghDefaultBranch = defaultReference
+function collectBranch(root: string) {
+    let branch = commandOutput("git", ["rev-parse", "--abbrev-ref", "HEAD"], root);
+    let defaultReference = commandOutput("git", ["symbolic-ref", "refs/remotes/origin/HEAD"], root);
+    let ghDefaultBranch = defaultReference
         ? null
         : commandOutput(
               "gh",
@@ -213,31 +290,32 @@ function collectBranch(root) {
     };
 }
 
-function collectUpstream(root) {
-    const upstream = commandOutput(
+function collectUpstream(root: string): { hasUpstream: boolean; unpushedCommits: number } {
+    let upstream = commandOutput(
         "git",
         ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"],
         root,
     );
-    const count =
-        upstream && commandOutput("git", ["rev-list", "--count", "@{upstream}..HEAD"], root);
+    let count = upstream
+        ? commandOutput("git", ["rev-list", "--count", "@{upstream}..HEAD"], root)
+        : null;
     return {
         hasUpstream: upstream !== null,
         unpushedCommits: Number.isSafeInteger(Number(count)) ? Number(count) : 0,
     };
 }
 
-function collectPullRequest(root) {
+function collectPullRequest(root: string): PullRequestFacts {
     if (commandOutput("gh", ["--version"], root) === null) {
         return { pullRequest: null, state: "unknown", reason: "gh is unavailable" };
     }
     if (!commandSucceeds("gh", ["auth", "status"], root)) {
         return { pullRequest: null, state: "unknown", reason: "gh is not authenticated" };
     }
-    const source = commandOutput("gh", ["pr", "view", "--json", "number,isDraft,url,title"], root);
+    let source = commandOutput("gh", ["pr", "view", "--json", "number,isDraft,url,title"], root);
     if (source === null) return { pullRequest: null, state: "known", reason: null };
     try {
-        const pullRequest = JSON.parse(source);
+        let pullRequest = JSON.parse(source) as PullRequest;
         return Number.isInteger(pullRequest.number)
             ? { pullRequest, state: "known", reason: null }
             : {
@@ -254,65 +332,65 @@ function collectPullRequest(root) {
     }
 }
 
-function countClarifications(content) {
-    return (withoutCode(content).match(/\[NEEDS CLARIFICATION:/g) ?? []).length;
+// Status reporting reads possibly malformed records; a field with the wrong shape reads as absent.
+function scalar(value: FrontmatterValue | undefined): string | undefined {
+    return typeof value === "string" ? value : undefined;
 }
 
-function readProposal(root, name) {
+function readProposal(root: string, name: string): Proposal | null {
     try {
-        const source = readFileSync(path.join(root, "proposals", name), "utf8");
-        const { frontmatter } = parseFrontmatter(source);
+        let source = readFileSync(path.join(root, "proposals", name), "utf8");
+        let { frontmatter } = parseFrontmatter(source);
         if (!frontmatter) return null;
         return {
-            id: frontmatter.id,
-            title: frontmatter.title,
-            status: frontmatter.status,
-            pullRequest: frontmatter["pull-request"],
-            supersedes: frontmatter.supersedes,
-            clarificationCount: countClarifications(source),
+            id: scalar(frontmatter.id),
+            title: scalar(frontmatter.title),
+            status: scalar(frontmatter.status),
+            pullRequest: scalar(frontmatter["pull-request"]),
+            supersedes: Array.isArray(frontmatter.supersedes) ? frontmatter.supersedes : undefined,
+            clarificationCount: (withoutCode(source).match(/\[NEEDS CLARIFICATION:/g) ?? []).length,
         };
     } catch {
         return null;
     }
 }
 
-function collectProposals(root) {
+function collectProposals(root: string): Proposal[] {
     try {
         return readdirSync(path.join(root, "proposals"), { withFileTypes: true })
             .filter(
-                (entry) =>
-                    entry.isFile() && entry.name.endsWith(".md") && entry.name !== "README.md",
+                entry => entry.isFile() && entry.name.endsWith(".md") && entry.name !== "README.md",
             )
-            .map((entry) => readProposal(root, entry.name))
-            .filter(Boolean);
+            .map(entry => readProposal(root, entry.name))
+            .filter(proposal => proposal !== null);
     } catch {
         return [];
     }
 }
 
-function proposalNumber(proposal) {
+function proposalNumber(proposal: Proposal): number {
     return Number(proposal.id?.match(/(\d+)$/)?.[1] ?? -1);
 }
 
-function matchesPullRequest(proposal, pullRequest) {
-    const number = String(pullRequest?.number);
+function matchesPullRequest(proposal: Proposal, pullRequest: PullRequest | null): boolean {
+    if (!pullRequest) return false;
+    let number = String(pullRequest.number);
     return (
-        pullRequest &&
-        (proposal.pullRequest === number || proposal.pullRequest?.endsWith(`/pull/${number}`))
+        proposal.pullRequest === number ||
+        Boolean(proposal.pullRequest?.endsWith(`/pull/${number}`))
     );
 }
 
-function selectProposal(proposals, pullRequest) {
-    const ordered = [...proposals].sort(
+function selectProposal(proposals: Proposal[], pullRequest: PullRequest | null) {
+    let ordered = [...proposals].sort(
         (left, right) => proposalNumber(right) - proposalNumber(left),
     );
-    const matched =
-        pullRequest && ordered.find((proposal) => matchesPullRequest(proposal, pullRequest));
-    const nonTerminal = ordered.filter(({ status }) => NON_TERMINAL_STATUSES.has(status));
-    const proposal = matched ?? nonTerminal[0] ?? null;
-    const otherCandidates = matched
-        ? []
-        : nonTerminal.filter((candidate) => candidate !== proposal);
+    let matched = ordered.find(proposal => matchesPullRequest(proposal, pullRequest));
+    let nonTerminal = ordered.filter(
+        ({ status }) => status !== undefined && NON_TERMINAL_STATUSES.has(status),
+    );
+    let proposal = matched ?? nonTerminal[0] ?? null;
+    let otherCandidates = matched ? [] : nonTerminal.filter(candidate => candidate !== proposal);
     return {
         proposal,
         otherCandidates,
@@ -325,35 +403,30 @@ function selectProposal(proposals, pullRequest) {
     };
 }
 
-function successorFor(proposals, proposal) {
+function successorFor(proposals: Proposal[], proposal: Proposal): Proposal | undefined {
+    let { id } = proposal;
+    if (id === undefined) return undefined;
     return [...proposals]
         .sort((left, right) => proposalNumber(right) - proposalNumber(left))
-        .find(({ supersedes }) => supersedes?.includes(proposal.id));
+        .find(({ supersedes }) => supersedes?.includes(id));
 }
 
-function isMergedIntoDefault(root, defaultReference) {
-    return (
-        defaultReference &&
-        commandSucceeds(
-            "git",
-            [
-                "merge-base",
-                "--is-ancestor",
-                "HEAD",
-                defaultReference.replace(/^refs\/remotes\//, ""),
-            ],
-            root,
-        )
+function isMergedIntoDefault(root: string, defaultReference: string | null): boolean | null {
+    if (!defaultReference) return null;
+    return commandSucceeds(
+        "git",
+        ["merge-base", "--is-ancestor", "HEAD", defaultReference.replace(/^refs\/remotes\//, "")],
+        root,
     );
 }
 
-export function gatherFacts(root = process.cwd()) {
-    const branch = collectBranch(root);
-    const upstream = collectUpstream(root);
-    const pullRequestFacts = collectPullRequest(root);
-    const proposals = collectProposals(root);
-    const selection = selectProposal(proposals, pullRequestFacts.pullRequest);
-    const proposalSuccessor =
+export function gatherFacts(root = process.cwd()): Facts {
+    let branch = collectBranch(root);
+    let upstream = collectUpstream(root);
+    let pullRequestFacts = collectPullRequest(root);
+    let proposals = collectProposals(root);
+    let selection = selectProposal(proposals, pullRequestFacts.pullRequest);
+    let proposalSuccessor =
         selection.proposal?.status === "superseded"
             ? successorFor(proposals, selection.proposal)
             : null;
@@ -377,38 +450,39 @@ export function gatherFacts(root = process.cwd()) {
     };
 }
 
-function noticesFor(facts) {
-    const notices = [];
-    if (facts.proposal?.clarificationCount > 0)
-        notices.push({ kind: "clarifications", count: facts.proposal.clarificationCount });
+function noticesFor(facts: Facts): Notice[] {
+    let { proposal, pullRequest, proposalSelection } = facts;
+    let notices: Notice[] = [];
+    if (proposal && proposal.clarificationCount > 0)
+        notices.push({ kind: "clarifications", count: proposal.clarificationCount });
     if (facts.unpushedCommits > 0)
         notices.push({ kind: "unpushed-commits", count: facts.unpushedCommits });
-    if (facts.proposal?.status === "active-review" && facts.pullRequest?.isDraft)
+    if (proposal?.status === "active-review" && pullRequest?.isDraft)
         notices.push({ kind: "draft-active-review" });
-    if (facts.proposal?.status === "implemented" && facts.pullRequest?.isMerged === false)
+    if (proposal?.status === "implemented" && pullRequest?.isMerged === false)
         notices.push({ kind: "implemented-unmerged" });
     if (
-        facts.proposal &&
-        (facts.proposalSelection?.otherCandidates?.length > 0 ||
-            facts.proposalSelection?.pullRequestMismatch)
+        proposal &&
+        proposalSelection &&
+        (proposalSelection.otherCandidates.length > 0 || proposalSelection.pullRequestMismatch)
     ) {
         notices.push({
             kind: "ambiguous-proposal-selection",
-            selected: facts.proposal.id,
-            otherCandidates: facts.proposalSelection.otherCandidates,
-            pullRequestMismatch: facts.proposalSelection.pullRequestMismatch,
-            proposalPullRequest: facts.proposal.pullRequest,
-            pullRequestNumber: facts.pullRequest?.number,
+            selected: proposal.id,
+            otherCandidates: proposalSelection.otherCandidates,
+            pullRequestMismatch: proposalSelection.pullRequestMismatch,
+            proposalPullRequest: proposal.pullRequest,
+            pullRequestNumber: pullRequest?.number,
         });
     }
     return notices;
 }
 
-function result(facts, status) {
+function result(facts: Facts, status: Step): DerivedStatus {
     return { ...status, notices: noticesFor(facts) };
 }
 
-export function deriveStatus(facts) {
+export function deriveStatus(facts: Facts): DerivedStatus {
     if (facts.isDefaultBranch) return result(facts, STEPS.defaultBranch);
     if (facts.isDefaultBranch === null) return result(facts, unknownBranchRoleStep());
     if (facts.pullRequestState === "unknown") {
@@ -419,23 +493,26 @@ export function deriveStatus(facts) {
     }
     if (!facts.pullRequest) return result(facts, STEPS.noPullRequest);
     if (!facts.proposal) return result(facts, STEPS.noProposal);
-    if (facts.proposal.status === "implemented")
+    let { status } = facts.proposal;
+    if (status === "implemented")
         return result(facts, facts.pullRequest.isMerged ? STEPS.done : STEPS.implementedUnmerged);
-    if (facts.proposal.status === "superseded")
-        return result(facts, supersededStep(facts.proposalSuccessor));
-    return result(facts, STEPS[facts.proposal.status] ?? STEPS.unknown);
+    if (status === "superseded") return result(facts, supersededStep(facts.proposalSuccessor));
+    return result(
+        facts,
+        (status === undefined ? undefined : STEPS_BY_STATUS[status]) ?? STEPS.unknown,
+    );
 }
 
-function noticeLine(notice) {
+function noticeLine(notice: Notice): string {
     if (notice.kind === "clarifications") return `Clarifications: ${notice.count} unresolved`;
     if (notice.kind === "unpushed-commits") return `Unpushed commits: ${notice.count}`;
     if (notice.kind === "draft-active-review")
         return "Warning: proposal is active-review, but the pull request remains draft.";
     if (notice.kind === "implemented-unmerged")
         return "Warning: proposal is implemented, but the pull request is not merged.";
-    const candidates = notice.otherCandidates.map(({ id, title }) => `${id} (${title})`).join(", ");
+    let candidates = notice.otherCandidates.map(({ id, title }) => `${id} (${title})`).join(", ");
     if (notice.pullRequestMismatch) {
-        const mismatch = `selected ${notice.selected} references ${notice.proposalPullRequest}, not current PR #${notice.pullRequestNumber}`;
+        let mismatch = `selected ${notice.selected} references ${notice.proposalPullRequest}, not current PR #${notice.pullRequestNumber}`;
         return candidates
             ? `Warning: ${mismatch}. Other candidates: ${candidates}.`
             : `Warning: ${mismatch}.`;
@@ -443,11 +520,11 @@ function noticeLine(notice) {
     return `Warning: heuristic selected ${notice.selected}. Other candidates: ${candidates}.`;
 }
 
-export function formatStatus(facts, derived = deriveStatus(facts)) {
-    const proposal = facts.proposal
+export function formatStatus(facts: Facts, derived: DerivedStatus = deriveStatus(facts)): string {
+    let proposal = facts.proposal
         ? `${facts.proposal.id}  ${facts.proposal.title}  ·  ${facts.proposal.status}`
         : "proposal — none";
-    const pullRequest = facts.pullRequest
+    let pullRequest = facts.pullRequest
         ? `PR #${facts.pullRequest.number} (${facts.pullRequest.isDraft ? "draft" : "open"})  ${facts.pullRequest.url}`
         : facts.pullRequestState === "unknown"
           ? `PR — unknown (${facts.pullRequestReason ?? "gh could not determine the pull request"})`
@@ -466,9 +543,9 @@ export function formatStatus(facts, derived = deriveStatus(facts)) {
     ].join("\n");
 }
 
-function main() {
-    const facts = gatherFacts();
-    const derived = deriveStatus(facts);
+function main(): void {
+    let facts = gatherFacts();
+    let derived = deriveStatus(facts);
     console.log(
         process.argv.includes("--json") ? JSON.stringify(derived) : formatStatus(facts, derived),
     );

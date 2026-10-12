@@ -12,12 +12,12 @@ You do not move directly from a request to a solution, or from a solution to an 
 ## Start here, every session
 
 ```sh
-mise run status
+vp run status
 ```
 
 It reads the branch, the pull request, and the active proposal's status, then prints which phase the work is in and what happens next. Run it before asking the human where things stand, and run it again whenever you are unsure.
 
-The human is never expected to remember a command, a skill name, or an argument. "Keep going", "start a feature for X", or a plain description of a problem is enough to orient from `mise run status`. None of those phrases authorizes a proposal or draft pull request.
+The human is never expected to remember a command, a skill name, or an argument. "Keep going", "start a feature for X", or a plain description of a problem is enough to orient from `vp run status`. None of those phrases authorizes a proposal or draft pull request.
 
 ## Reasoning order
 
@@ -41,18 +41,18 @@ A plausible implementation plan is not evidence that the problem is understood.
 
 ## Artifacts
 
-| Artifact      | Lives in       | What it is                                                                     |
-| ------------- | -------------- | ------------------------------------------------------------------------------ |
-| **Vision**    | `VISION.md`    | The project's purpose, MVP target, principles, and direction. Living document. |
-| **Policies**  | `policies/`    | Rules that future work must keep enforcing.                                    |
-| **Decisions** | `decisions/`   | Architectural choices, with the context that produced them.                    |
-| **Proposals** | `proposals/`   | The specification for one change. Preserved as history after it ships.         |
-| **Guides**    | `guides/`      | Human-facing prose explaining how a feature behaves and how it is used.        |
-| **Previews**  | CI             | The cheapest real artifact through which a human can exercise the change.      |
-| **Tests**     | project-native | Executable specifications of the behavior a proposal describes.                |
-| **Code**      | project-native | The implementation.                                                            |
+| Artifact | Lives in | What it is |
+| --- | --- | --- |
+| **Vision** | `VISION.md` | The project's purpose, MVP target, principles, and direction. Living document. |
+| **Policies** | `policies/` | Rules that future work must keep enforcing. |
+| **Decisions** | `decisions/` | Architectural choices, with the context that produced them. |
+| **Proposals** | `proposals/` | The specification for one change. Preserved as history after it ships. |
+| **Guides** | `guides/` | Human-facing prose explaining how a feature behaves and how it is used. |
+| **Previews** | CI | The cheapest real artifact through which a human can exercise the change. |
+| **Tests** | project-native | Executable specifications of the behavior a proposal describes. |
+| **Code** | project-native | The implementation. |
 
-Numbered artifacts use `<NNNN>-<slug>.md` and carry `id`, `status`, and `title` frontmatter. `.agents/templates/` holds the canonical shape of each. `mise run validate` enforces it.
+Numbered artifacts use `<NNNN>-<slug>.md` and carry `id`, `status`, and `title` frontmatter. `.agents/templates/` holds the canonical shape of each. `vp run validate` enforces it.
 
 Every proposal is evaluated against the current vision, policies, and decisions. When they disagree with what you are about to build, stop and raise it — do not quietly deviate.
 
@@ -241,7 +241,7 @@ Strictly ordered, and it ends with review. Each artifact is an independent repre
 
 1. **Tests first.** Failing tests for the behavior the proposal's Detailed design specifies.
 2. **Guides next.** User-facing docs written from the proposal, not from the code. Then compare them against the tests and confirm they describe the same behavior.
-3. **Code last.** Implement against proposal, tests, and guides until `mise run check` passes.
+3. **Code last.** Implement against proposal, tests, and guides until `vp run check` passes.
 
 **Which of these a change needs is a judgement.** The order is not — when you write two of them, write them in this order. But a change with no user-visible surface needs no guide, and inventing one produces documentation nobody reads describing behavior nobody sees. A change with nothing meaningfully testable needs no test, though say so out loud rather than skipping quietly, because "hard to test" and "not worth testing" are different claims and only one of them is a reason.
 
@@ -353,14 +353,19 @@ Skill: `.agents/skills/tracking-defects/`.
 
 ## Quality gates
 
+[Vite+](https://viteplus.dev) runs the toolchain. `.node-version` pins Node, which runs the TypeScript in `tools/` directly; `package.json#devEngines` pins pnpm.
+
 ```sh
-mise run check       # everything below, in order
-mise run fmt         # format
-mise run validate    # artifact frontmatter, IDs, and cross-references
-mise run docs:build  # the guides site builds
+vp install           # dependencies, with the pinned pnpm
+vp run check         # the full gate: vp check, validate, test, docs:build
+vp fmt               # format
+vp check             # format check, lint, and type-check
+vp run validate      # artifact frontmatter, IDs, and cross-references
+vp run test          # the record tools' and the workflow tool's tests
+vp run docs:build    # the guides site builds
 ```
 
-Run project-specific gates (type check, unit, integration, end-to-end) as they exist. `mise tasks` lists everything available.
+Run project-specific gates (unit, integration, end-to-end) as they exist. `vp run` with no task lists everything available.
 
 ## Also binding
 

@@ -1,19 +1,19 @@
-import type MarkdownIt from "markdown-it";
+import type { MarkdownRenderer } from "vitepress";
 
 /**
  * Styles `[NEEDS CLARIFICATION: <question>]` markers inline in draft proposals.
  */
-export function clarificationMarkerPlugin(md: MarkdownIt): void {
-    const pattern = /\[NEEDS CLARIFICATION:\s*([^\]]+)\]/g;
+export function clarificationMarkerPlugin(md: MarkdownRenderer): void {
+    let pattern = /\[NEEDS CLARIFICATION:\s*([^\]]+)\]/g;
 
-    md.core.ruler.after("inline", "clarification-marker", (state) => {
-        for (const token of state.tokens) {
+    md.core.ruler.after("inline", "clarification-marker", state => {
+        for (let token of state.tokens) {
             if (token.type !== "inline" || !token.children) continue;
 
-            for (const child of token.children) {
+            for (let child of token.children) {
                 if (child.type !== "text" || !pattern.test(child.content)) continue;
 
-                const text = child.content;
+                let text = child.content;
                 let cursor = 0;
                 let html = "";
                 let match: RegExpExecArray | null;

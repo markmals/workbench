@@ -22,12 +22,13 @@
 <script setup>
 import { withBase, useData } from "vitepress";
 import { computed } from "vue";
+
 import heroImage from "../../../public/workbench-hero.png?url";
 
-const { theme } = useData();
-const visionLink = withBase("/VISION");
-const firstGuideLink = computed(() => {
-    const guidesNav = theme.value?.nav?.find?.((item) => item.text === "Guides");
+let { theme } = useData();
+let visionLink = withBase("/VISION");
+let firstGuideLink = computed(() => {
+    let guidesNav = theme.value?.nav?.find?.(item => item.text === "Guides");
     return typeof guidesNav?.link === "string" ? withBase(guidesNav.link) : null;
 });
 </script>

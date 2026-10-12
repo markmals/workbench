@@ -1,15 +1,21 @@
+import { extendConfig } from "@voidzero-dev/vitepress-theme/config.js";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitepress";
+import { defineConfigWithTheme, type DefaultTheme } from "vitepress";
 import { groupIconMdPlugin, groupIconVitePlugin } from "vitepress-plugin-group-icons";
-import { extendConfig } from "@voidzero-dev/vitepress-theme/config";
-import { generateSidebar } from "./sidebar";
-import { clarificationMarkerPlugin } from "./markdown/clarification";
 
-const sidebar = generateSidebar();
+import { clarificationMarkerPlugin } from "./markdown/clarification.ts";
+import { generateSidebar } from "./sidebar.ts";
+
+// RecordHeader.vue resolves record IDs to page links through this extra theme key.
+interface WorkbenchThemeConfig extends DefaultTheme.Config {
+    recordLinks: Record<string, string>;
+}
+
+let sidebar = generateSidebar();
 
 // Preview deployments land on a subpath (/<repo>/pr-preview/pr-N/). Without a matching base every
 // asset URL resolves against the domain root and the deployed site loads blank.
-const base = process.env.DOCS_BASE ?? "/";
+let base = process.env.DOCS_BASE ?? "/";
 
 function baseAwareVoidZeroHeaderPlugin() {
     return {
@@ -33,7 +39,7 @@ function baseAwareVoidZeroHeaderPlugin() {
     };
 }
 
-const config = defineConfig({
+let config = defineConfigWithTheme<WorkbenchThemeConfig>({
     base,
     title: "Workbench",
     description: "A platform-agnostic, harness-agnostic agentic development process kit.",

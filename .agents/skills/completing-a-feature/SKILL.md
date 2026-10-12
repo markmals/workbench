@@ -11,10 +11,10 @@ description: Use after a human has reviewed a pull request and the accepted chan
 
 Read the human's PR comments and direct commits before acting. Classify each item:
 
-| Feedback changes   | Action                                                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| The implementation | Fix it, then rerun the affected implementation loop and review evidence.                                                  |
-| Intended design    | Update the proposal first with the human, then rerun tests → guides → code → quality gates → review against the revision. |
+| Feedback changes | Action |
+| --- | --- |
+| The implementation | Fix it, then rerun the affected implementation loop and review evidence. |
+| Intended design | Update the proposal first with the human, then rerun tests → guides → code → quality gates → review against the revision. |
 
 Never encode a design change in code, tests, or guides while leaving the proposal stale.
 
@@ -71,7 +71,7 @@ The human sets `accepted` when they accept the work. Set `implemented` only afte
 
 ## 5. Release
 
-Release through the project's existing CI/CD process. Inspect `mise tasks` for the project's release path.
+Release through the project's existing CI/CD process. Run `vp run` with no task to find the project's release path.
 
 **Never publish without explicit human confirmation.** Approval to merge is not approval to release.
 

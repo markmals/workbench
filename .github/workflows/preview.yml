@@ -32,12 +32,12 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
-            - uses: jdx/mise-action@v4
-
-            - run: mise install
+            - uses: voidzero-dev/setup-vp@v1.21.1
+              with:
+                  cache: true
 
             # The base must match the path the preview is served from, or every asset 404s.
-            - run: mise run docs:build
+            - run: vp run docs:build
               env:
                   DOCS_BASE: /${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.pull_request.number }}/
 

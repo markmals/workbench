@@ -5,7 +5,7 @@ import type { ExecutorOptions } from "@oh-my-pi/pi-coding-agent/task/executor";
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 
 import type { OmpWorkflowAgentDependencies } from "./agent.js";
 import type { WorkflowSnapshot } from "./display.js";
@@ -47,6 +47,12 @@ vi.mock("@oh-my-pi/pi-coding-agent/task", () => ({
         agents.find(agent => agent.name === name),
 }));
 vi.mock("@oh-my-pi/pi-coding-agent/task/executor", () => ({ runSubprocess: vi.fn() }));
+// Setting handles load `pi-utils` (crashes under vitest). These return each
+// setting's default, as the real handles do for an unconfigured session.
+vi.mock("@oh-my-pi/pi-coding-agent/task/settings", () => ({
+    cfgTaskDisabledAgents: { get: () => [] },
+    cfgTaskAgentModelOverrides: { get: () => ({}) },
+}));
 vi.mock("@oh-my-pi/pi-coding-agent/mcp/manager", () => ({
     MCPManager: class {
         getTools() {
@@ -98,7 +104,7 @@ let api = {
 let context = {
     sessionManager: { getArtifactsDir: () => null, getArtifactManager: () => null },
     modelRegistry: {},
-    settings: { get: () => undefined },
+    settings: {},
 } as unknown as CustomToolContext;
 
 // renderCall/renderResult only read `fg`/`bold`; identity styling keeps the raw

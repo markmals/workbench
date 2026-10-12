@@ -39,8 +39,7 @@ Measured baseline (this repo): a confirmatory reviewer handed an otherwise-corre
 
 - **Fresh context window.** The adversary must carry no memory of building the code. No accumulated goodwill, no "I know what I meant here."
 - **Use the strongest available portability rung:** different model family > different model > same model with fresh context and adversarial framing.
-- **Label the rung in the report.** A fresh-context-only run is weaker; never present it as a full adversarial pass.
-  Provide the adversary the proposal, tests, guides, and implementation.
+- **Label the rung in the report.** A fresh-context-only run is weaker; never present it as a full adversarial pass. Provide the adversary the proposal, tests, guides, and implementation.
 
 ## What to attack
 

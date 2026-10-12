@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 import {
     parseWorkflowScript,
@@ -34,7 +34,7 @@ describe("parseWorkflowScript", () => {
 
     it("rejects returns nested in class static blocks", () => {
         expect(() => parseWorkflowScript(`${header}\nclass C { static { return; } }`)).toThrow(
-            /return.*function body/i,
+            /return.*class static/i,
         );
     });
 
