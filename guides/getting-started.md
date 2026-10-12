@@ -78,7 +78,7 @@ Do not begin a feature with a failing baseline. Give the output to the agent and
 
 ## Adapt it to your harness
 
-No coding harness reads `.agents/` natively. Adapt its contract and skill-loading configuration for the harness you actually use, commit that one-time setup, and then forget about the wiring; the process material in `.agents/` remains the source of truth. Follow [Adapting Your Harness](./adapting-your-harness.md) before starting feature work.
+Workbench comes wired for [Oh My Pi](https://omp.sh): it loads the contract, discovers the skills, and runs the lifecycle extensions in `.omp/extensions/` with no further setup. For any other harness, adapt its contract and skill-loading configuration, commit that one-time setup, and then forget about the wiring; the process material in `.agents/` remains the source of truth. Follow [Adapting Your Harness](./adapting-your-harness.md) before starting feature work.
 
 ## Read the worked example
 

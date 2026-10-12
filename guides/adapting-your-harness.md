@@ -8,7 +8,7 @@ describes: [proposal.0001]
 
 ## How do I wire this into the agent I actually use?
 
-Workbench ships its infrastructure harness-neutral in `.agents/`. No coding harness reads that directory natively. Adapting it is a deliberate one-time trade: point your harness at the contract, make its skills discoverable, and wire the lifecycle events it supports. Commit that configuration, then leave `.agents/` as the source of truth.
+Workbench ships its infrastructure harness-neutral in `.agents/` and comes wired for [Oh My Pi](https://omp.sh). Any other harness needs a deliberate one-time adaptation: point it at the contract, make its skills discoverable, and wire the lifecycle events it supports. Commit that configuration, then leave `.agents/` as the source of truth.
 
 The checks that matter most do not depend on a harness noticing anything. The validator, continuous integration, and the commit hook run independently of the agent's instructions.
 
@@ -16,24 +16,37 @@ Ask your agent to make the harness-specific changes below. You should review and
 
 ## What ships
 
-| Path                 | What it contains                                                  |
-| -------------------- | ----------------------------------------------------------------- |
-| `AGENTS.md`          | The agent contract — the one file every harness must load.        |
-| `PROCESS.md`         | The full process description.                                     |
-| `VISION.md`          | Your project's vision; replace Workbench's.                       |
-| `proposals/`         | One document per change, preserved as history.                    |
-| `policies/`          | Rules future work must keep enforcing.                            |
-| `decisions/`         | Architectural choices and the context that produced them.         |
-| `guides/`            | User-facing documentation.                                        |
-| `docs/`              | The site that publishes the vision, record, and guides.           |
-| `tools/`             | The artifact validator.                                           |
-| `.agents/skills/`    | One skill directory per process phase or cross-cutting concern.   |
-| `.agents/rules/`     | Code quality, commit discipline, and enforcement hierarchy.       |
-| `.agents/templates/` | The canonical shape of every artifact.                            |
-| `.agents/hooks/`     | The commit-message git hook and the Scoped Commits check it runs. |
-| `.github/workflows/` | Continuous integration and the preview workflow.                  |
+| Path                 | What it contains                                                   |
+| -------------------- | ------------------------------------------------------------------ |
+| `AGENTS.md`          | The agent contract — the one file every harness must load.         |
+| `PROCESS.md`         | The full process description.                                      |
+| `VISION.md`          | Your project's vision; replace Workbench's.                        |
+| `proposals/`         | One document per change, preserved as history.                     |
+| `policies/`          | Rules future work must keep enforcing.                             |
+| `decisions/`         | Architectural choices and the context that produced them.          |
+| `guides/`            | User-facing documentation.                                         |
+| `docs/`              | The site that publishes the vision, record, and guides.            |
+| `tools/`             | The artifact validator.                                            |
+| `.agents/skills/`    | One skill directory per process phase or cross-cutting concern.    |
+| `.agents/rules/`     | Code quality, commit discipline, and enforcement hierarchy.        |
+| `.agents/templates/` | The canonical shape of every artifact.                             |
+| `.agents/hooks/`     | The commit-message git hook and the Scoped Commits check it runs.  |
+| `.github/workflows/` | Continuous integration and the preview workflow.                   |
+| `.omp/`              | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
 
 When a harness needs its own configuration, generate it from `.agents/` rather than replacing the source. This prevents two copies of the process from becoming two different processes.
+
+## If you use Oh My Pi
+
+Nothing needs adapting. Oh My Pi loads `AGENTS.md` from the repository root and discovers `.agents/skills/` on its own, and `.omp/` carries the rest:
+
+| Path | What it does |
+| --- | --- |
+| `.omp/tools/dynamic-workflows/` | Registers the `workflow` tool. |
+| `.omp/extensions/format-after-edit.ts` | Runs `vp fmt` on each file the `edit` or `write` tool changed, and tells the agent when it reformatted a file or could not parse it. |
+| `.omp/extensions/check-before-stop.ts` | Runs `vp run check` before the agent ends its turn. A failure, or a gate that does not finish within 25 seconds, sends the agent back once with the reason. |
+
+Continue at [Configure the readiness-report account](#configure-the-readiness-report-account).
 
 ## Point the harness at the contract
 
@@ -70,6 +83,8 @@ Workbench needs these events attached where your harness allows them:
 | After the agent edits a file   | `vp fmt <file>`  |
 | Before the agent ends its turn | `vp run check`   |
 | At session start               | Load `AGENTS.md` |
+
+`.omp/extensions/` is the Oh My Pi wiring for the first two events and a working reference for another harness's configuration.
 
 `vp install` installs the commit-message hook through Vite+'s hook dispatcher, and `vp hooks status` shows whether it is active in a clone. The hook holds commits made from Oh My Pi to Scoped Commits, recognizing them by the `OMPCODE=1` that Oh My Pi exports to every command it runs, and lets every other commit through. To hold your harness's commits to the same rule, add the environment variable it exports to the check in `.agents/hooks/commit-msg`.
 

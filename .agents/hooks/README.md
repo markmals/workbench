@@ -16,4 +16,4 @@ vp hooks enable --hooks-dir .agents/hooks
 | Before the agent declares a turn complete | `vp run check`   |
 | Session start                             | Read `AGENTS.md` |
 
-Harness lifecycle wiring is harness-specific, lives outside `.agents/`, and is covered by [`guides/adapting-your-harness.md`](../../guides/adapting-your-harness.md).
+Harness lifecycle wiring is harness-specific and lives outside `.agents/`. For Oh My Pi it is `.omp/extensions/`; for another harness, see [`guides/adapting-your-harness.md`](../../guides/adapting-your-harness.md).

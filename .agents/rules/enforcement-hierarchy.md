@@ -6,7 +6,7 @@ A rule an agent must remember is the weakest kind of rule. Under load, prose get
 
 | Tier | Mechanism | Role |
 | --- | --- | --- |
-| **Tier 0 — Checks** | `vp run validate` — the validator in `tools/` — CI workflows, and the `commit-msg` git hook | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
+| **Tier 0 — Checks** | `vp run validate` — the validator in `tools/` — CI workflows, the `commit-msg` git hook, and the harness lifecycle wiring in `.omp/extensions/` | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
 | **Tier 1 — Tasks** | Vite+ commands and tasks the process invokes by name: `vp fmt`, `vp run check`, `vp run docs:build` | Deterministic once invoked, but something must invoke them. |
 | **Tier 2 — Templates** | `.agents/templates/` | Shape the work so the correct thing is the path of least resistance. |
 | **Tier 3 — Prose** | `AGENTS.md`, `SKILL.md` files, and these rules | Necessary for judgment that cannot be mechanized; the tier most likely to be missed. |

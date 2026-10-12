@@ -17,7 +17,7 @@ The fix is not more review. It is making the agent commit to what it intends to 
 ## Quick start
 
 1. Click **Use this template** on GitHub, then clone your repository.
-2. Ask your agent to adopt it, pointing it at [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). That wires Workbench into whichever harness you use — a one-time change you commit and forget.
+2. If you use [Oh My Pi](https://omp.sh), Workbench is already wired. Otherwise, ask your agent to adopt it, pointing it at [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). That wires Workbench into whichever harness you use — a one-time change you commit and forget.
 3. Write your project's vision with your agent, from [`.agents/templates/VISION.md`](.agents/templates/VISION.md).
 4. Start your first feature. Say what you want built. Your agent branches, opens a draft pull request, and writes a proposal before it writes any code.
 
@@ -94,22 +94,23 @@ Defects an agent finds along the way get filed as issues, not folded into whatev
 
 ## What's in here
 
-| Path                 | What it is                                                    |
-| -------------------- | ------------------------------------------------------------- |
-| `AGENTS.md`          | The contract every agent session loads.                       |
-| `PROCESS.md`         | The full process description.                                 |
-| `guides/`            | User-facing documentation. Start at `getting-started.md`.     |
-| `VISION.md`          | The project's purpose and direction. Replace ours with yours. |
-| `proposals/`         | One document per change, kept as history after it ships.      |
-| `policies/`          | Rules future work must keep enforcing.                        |
-| `decisions/`         | Architectural choices and the context that produced them.     |
-| `guides/`            | User-facing documentation.                                    |
-| `docs/`              | The site. Publishes the vision, the record, and the guides.   |
-| `tools/`             | The record validator. Dependency-free.                        |
-| `.agents/skills/`    | Seven skills, roughly one per phase. For the agent, not you.  |
-| `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.       |
-| `.agents/templates/` | The canonical shape of every artifact.                        |
-| `.github/workflows/` | Continuous integration, the preview, and the published site.  |
+| Path                 | What it is                                                         |
+| -------------------- | ------------------------------------------------------------------ |
+| `AGENTS.md`          | The contract every agent session loads.                            |
+| `PROCESS.md`         | The full process description.                                      |
+| `guides/`            | User-facing documentation. Start at `getting-started.md`.          |
+| `VISION.md`          | The project's purpose and direction. Replace ours with yours.      |
+| `proposals/`         | One document per change, kept as history after it ships.           |
+| `policies/`          | Rules future work must keep enforcing.                             |
+| `decisions/`         | Architectural choices and the context that produced them.          |
+| `guides/`            | User-facing documentation.                                         |
+| `docs/`              | The site. Publishes the vision, the record, and the guides.        |
+| `tools/`             | The record validator. Dependency-free.                             |
+| `.agents/skills/`    | Seven skills, roughly one per phase. For the agent, not you.       |
+| `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.            |
+| `.agents/templates/` | The canonical shape of every artifact.                             |
+| `.github/workflows/` | Continuous integration, the preview, and the published site.       |
+| `.omp/`              | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
 
 ## Enforcement
 
@@ -128,7 +129,7 @@ vp run docs:build    # the site builds
 
 ## Harness support
 
-`AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral, which means no harness reads them natively without a small one-time adaptation — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). This is deliberate: shipping configuration for four harnesses when only one can be genuinely verified is worse than an honest adaptation step.
+`AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral. Workbench ships wiring for one harness, [Oh My Pi](https://omp.sh), in `.omp/`: the `workflow` tool, formatting after every edit, and the full gate before the agent ends its turn. Any other harness needs a small one-time adaptation — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). This is deliberate: shipping configuration for four harnesses when only one can be genuinely verified is worse than an honest adaptation step.
 
 The checks that matter most — the validator, continuous integration, and the commit hook — do not depend on the harness noticing anything.
 

@@ -18,6 +18,7 @@
         "docs/.vitepress/**/*.ts",
         "docs/.vitepress/**/*.vue",
         "docs/.vitepress/**/*.tsx",
+        ".omp/extensions/**/*.ts",
         ".omp/tools/**/*.ts"
     ]
 }

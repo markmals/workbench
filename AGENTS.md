@@ -382,4 +382,14 @@ Run project-specific gates (unit, integration, end-to-end) as they exist. `vp ru
 
 ## Harness setup
 
-This repo ships harness-neutral infrastructure in `.agents/`. If your coding harness expects a different location or filename, adapt it once — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md) — and commit the result. `.agents/` stays the source of truth.
+The process lives harness-neutral in `.agents/`, which stays the source of truth. This repository wires it into [Oh My Pi](https://omp.sh):
+
+| What | How Oh My Pi gets it |
+| --- | --- |
+| This contract | Loads `AGENTS.md` from the repository root |
+| Skills | Discovers `.agents/skills/` |
+| `workflow` tool | `.omp/tools/dynamic-workflows/` |
+| Format after every edit | `.omp/extensions/format-after-edit.ts` runs `vp fmt` on each file the `edit` or `write` tool changed and reports a reformat or a parse failure |
+| Gate before the turn ends | `.omp/extensions/check-before-stop.ts` runs `vp run check`; a failure sends the agent back once with the output |
+
+Another harness wires the same lifecycle events, listed in [`.agents/hooks/README.md`](.agents/hooks/README.md), into its own configuration; adapt it once — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md) — and commit the result rather than forking `.agents/`. The commit-message hook is a Git hook that `vp install` installs. It checks only commits made from Oh My Pi, which it recognizes by the `OMPCODE=1` that Oh My Pi exports to every command; another harness needs its own marker added there.
