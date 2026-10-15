@@ -5,7 +5,7 @@ description: Use after a human has reviewed a pull request and the accepted chan
 
 # Completing a Feature
 
-**Phase 5.** Complete work in this order: **process feedback → record policies and decisions → update the vision → merge → release → dependent-repo updates → cleanup**.
+**Phase 5.** Complete work in this order: **process feedback → record policies and decisions → update the vision → record `implemented` in the feature PR → merge → required release → dependent-repo updates → cleanup**.
 
 ## 1. Process feedback
 
@@ -61,27 +61,35 @@ Reread `VISION.md`. Update it when the accepted change alters the project's capa
 
 Consult the human before a substantial rewrite. Do not turn a narrow completion change into a new vision exercise.
 
-## 4. Merge
+## 4. Record the accepted implementation
 
-Merge only after human acceptance. Preserve the record of what was proposed, what was implemented, why decisions were made, what review found, and how the final state differs from earlier revisions.
+After human acceptance and the vision update, set the proposal to `implemented` in the same feature pull request that contains the implementation. This status records accepted implementation, not a merged pull request or completed release. Record acceptance and any outstanding delivery in the proposal or PR, then commit and verify the updated integration candidate before merging. Never open a follow-up PR solely to move this status.
 
-Choose a merge strategy that retains that context in the PR and its history. Do not squash the work into one opaque commit that discards the discussion.
+Confirm the record is present in the pull request revision before marking a draft PR ready or merging; a local file or unpushed commit is not proof. For an already merged pull request, inspect its merged revision before concluding a local `accepted` status means the record is missing. If absent, ask the human how to reconcile it and keep any required delivery visible. Do not try to amend a merged pull request or open a status-only PR.
 
-The human sets `accepted` when they accept the work. Set `implemented` only after it is merged and released — not before, because an unshipped proposal marked implemented misrepresents the record.
+## 5. Merge
 
-## 5. Release
+Merge only after human acceptance and fresh checks on the pull request revision that contains the implementation record. Preserve what was proposed, implemented, and learned in review, including why the final state differs from earlier revisions.
 
-Release through the project's existing CI/CD process. Run `vp run` with no task to find the project's release path.
+If the accepted pull request is still draft, mark it ready and verify the updated revision before merging. Draft status never authorizes skipping readiness or review.
+
+Choose a merge strategy that retains the proposal and PR discussion. Do not squash the work into one opaque commit that discards that context.
+
+## 6. Release
+
+When release is required and separately authorized, use the project's existing CI/CD process. Run `vp run` with no task to find the project's release path. Skip publication for approved merge-only delivery.
 
 **Never publish without explicit human confirmation.** Approval to merge is not approval to release.
 
-## 6. Update dependent repositories
+The implementation record does not complete a required release. Keep that obligation visible in the proposal or PR until the authorized release actually happens; do not call the feature delivered before then.
 
-For each draft PR consuming a preview version, move it to the production release. Mark it ready for review when appropriate after the preview dependency is gone.
+## 7. Update dependent repositories
 
-## 7. Clean up
+After an authorized release, update any dependent draft PRs consuming a preview version to the production release, then mark them ready for review when appropriate. No dependent-release update is needed for merge-only delivery.
 
-After release and dependent updates, remove temporary files, tear down preview configuration and published prerelease artifacts, and prune the feature branch locally and remotely.
+## 8. Clean up
+
+After the required delivery, remove temporary files and preview configuration and prune the feature branch only with the required authorization.
 
 > **Explicit human confirmation required:** Branch deletion, force-push, and tearing down published prerelease artifacts are the most destructive operations in this process. Ask before any of them, even when cleanup appears routine.
 
@@ -97,8 +105,10 @@ Cleanup runs when confidence is highest. Treat it as a separate destructive oper
 - You merged without preserving why the final state differs.
 - You released because the PR merged.
 - A dependent PR still uses a preview version after release.
-- A preview or prerelease artifact outlives its PR.
+- A preview or prerelease artifact outlives its PR without a tracked, authorized teardown plan.
 - You deleted a branch, force-pushed, or tore down a published prerelease artifact without explicit human confirmation.
+- You waited until after merge to move `implemented` and opened a bookkeeping-only PR.
+- You treated `implemented` as proof that a required release has already happened.
 
 Any of these means stop and return to the relevant ordered step.
 

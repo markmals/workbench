@@ -113,7 +113,7 @@ human opts into proposal → branch → draft PR
        → tests → guides → code → validation
        → excellence pass → inline reviews → cross-artifact review → adversarial review
        → preview → readiness report
-       → human review → revision → vision update → merge → release → cleanup
+       → human review → revision → vision update → implemented record in feature PR → merge → required release → cleanup
 ```
 
 Grounding and baseline study are part of proposal development, not separate proposal statuses. Use them when the problem requires substantive conceptual understanding; do not manufacture research ceremony for a trivial or already-understood change.
@@ -291,7 +291,7 @@ Their verdict sets the status: `returned-for-revisions` to send it back, `accept
 
 ### 5. Completion and release
 
-Update `VISION.md` if the feature changed what the project is, merge, release, update dependent projects, then clean up. Skill: `.agents/skills/completing-a-feature/`.
+Update `VISION.md` if the feature changed what the project is, record `implemented` on the accepted feature pull request before merge and verify that revision, then merge, complete any separately authorized required release, update dependent projects, and perform authorized cleanup. Skill: `.agents/skills/completing-a-feature/`.
 
 ## Reframing hard problems
 

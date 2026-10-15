@@ -149,11 +149,11 @@ After acceptance, explicitly confirm release and branch deletion when the agent 
 
 ### The agent
 
-If the feature changed what the project is, the agent updates `VISION.md`. It prepares merge, release, dependent-project updates where relevant, and cleanup. It merges only after acceptance and sets `implemented` only after release.
+If the feature changed what the project is, the agent updates `VISION.md`. It records `implemented` in the original feature pull request after acceptance and confirms the record is in the pull request revision before marking a draft pull request ready or merging. Merge and any required release remain separate; a release needs its own authorization. The agent tracks unfinished delivery and performs only authorized cleanup.
 
 ### What status reports
 
-At `accepted`, it reports **Phase 5 — Completion** and names the agent for the vision update, merge, release, and cleanup. Once `implemented` is recorded on a merged pull request, it reports that the feature is done.
+At `accepted`, it reports **Phase 5 — Completion** and names the agent for the vision update and implementation record. Once `implemented` is committed in the feature pull request, it still reports Phase 5 while merge or delivery remains. The pull request's merge state and any required release are tracked separately, so no follow-up pull request is needed just to change the proposal status.
 
 ## Status reference
 
@@ -164,7 +164,7 @@ At `accepted`, it reports **Phase 5 — Completion** and names the agent for the
 | `active-review`           | 4 — human review               | Agent       |
 | `returned-for-revisions`  | 4 → 3 — back to implementation | You         |
 | `accepted`                | 5 — completion and release     | You         |
-| `implemented`             | 5 complete                     | Agent       |
+| `implemented`             | 5 — completion                 | Agent       |
 | `rejected`                | closed                         | You         |
 | `withdrawn`               | closed                         | Either      |
 | `superseded`              | closed                         | Either      |

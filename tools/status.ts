@@ -17,6 +17,8 @@ export interface Step {
 
 export interface PullRequest {
     number: number;
+    state: "OPEN" | "CLOSED" | "MERGED";
+    baseRefName: string;
     isDraft: boolean;
     url: string;
     title: string;
@@ -35,11 +37,11 @@ type ProposalSummary = Pick<Proposal, "id" | "title">;
 
 export interface Facts {
     branch: string | null;
+    defaultBranch: string | null;
     isDefaultBranch: boolean | null;
     hasUpstream: boolean;
     unpushedCommits: number;
-    // `isMerged` is null when the default branch is unknown, so merge state cannot be checked.
-    pullRequest: (PullRequest & { isMerged: boolean | null }) | null;
+    pullRequest: PullRequest | null;
     pullRequestState: "known" | "unknown";
     pullRequestReason?: string | null;
     proposal: Proposal | null;
@@ -54,7 +56,6 @@ type Notice =
     | { kind: "clarifications"; count: number }
     | { kind: "unpushed-commits"; count: number }
     | { kind: "draft-active-review" }
-    | { kind: "implemented-unmerged" }
     | {
           kind: "ambiguous-proposal-selection";
           selected: string | undefined;
@@ -154,7 +155,23 @@ const STEPS = {
         "5",
         "Completion",
         "The feature has been accepted and awaits completion.",
-        "Update the vision, merge, release, clean up.",
+        "Update the vision, record the accepted implementation in this feature pull request, verify that revision, then merge and complete any separately authorized required delivery; clean up afterward.",
+        "agent",
+        SKILLS.completion,
+    ),
+    acceptedDraft: step(
+        "5",
+        "Completion",
+        "The feature has been accepted, but its pull request remains draft.",
+        "Update the vision, record the accepted implementation and confirm its status in the feature pull request, then mark the PR ready. Verify the latest integration candidate before requesting a merge.",
+        "agent",
+        SKILLS.completion,
+    ),
+    acceptedAfterMerge: step(
+        "5",
+        "Completion review",
+        "The feature pull request merged, but the local proposal still says accepted; the merged record has not been checked.",
+        "Confirm whether the implemented record is in the merged pull request; if absent, ask the human how to reconcile without a status-only PR. Track any required delivery separately; do not try to edit the merged PR.",
         "agent",
         SKILLS.completion,
     ),
@@ -179,18 +196,35 @@ const STEPS = {
         "Nothing outstanding.",
         "you",
     ),
-    implementedUnmerged: step(
-        "3 → 4",
-        "Inconsistent record",
-        "The proposal is marked implemented, but its pull request is not merged.",
-        "Resolve the record inconsistency before continuing.",
-        "you",
+    draftImplementation: step(
+        "5",
+        "Completion",
+        "The local proposal is implemented, but the feature pull request remains draft.",
+        "Confirm the implemented record is in the feature pull request, then mark it ready for review and verify the latest integration candidate before seeking a merge.",
+        "agent",
+        SKILLS.completion,
     ),
-    done: step(
-        "done",
-        "Done",
-        "The merged proposal is recorded as implemented.",
-        "Nothing outstanding. Start the next feature when ready.",
+    readyToMerge: step(
+        "5",
+        "Completion",
+        "The local proposal says implemented; its status in the feature pull request has not been verified.",
+        "Confirm the implemented record is in this feature pull request before the merge. Verify the latest integration candidate, then merge and complete any separately authorized delivery; clean up afterward.",
+        "agent",
+        SKILLS.completion,
+    ),
+    merged: step(
+        "5",
+        "Implementation merged",
+        "The feature pull request is merged; the local implemented status does not prove its record reached the target branch.",
+        "Confirm the implemented record is in the merged pull request; if missing, report the inconsistency rather than opening a status-only PR. Track any required release until authorized and delivered, then perform authorized cleanup.",
+        "agent",
+        SKILLS.completion,
+    ),
+    closedWithoutMerge: step(
+        "5",
+        "Completion blocked",
+        "The feature pull request closed without merging.",
+        "Ask the human whether to reopen the pull request or withdraw the proposal; do not attempt to merge a closed pull request.",
         "you",
     ),
     unknown: step(
@@ -210,7 +244,7 @@ function unknownPullRequestStep(reason: string): Step & { reason: string } {
             "1",
             "Preparation",
             `The pull request state is unknown because ${reason}.`,
-            "Restore access to gh, then check the pull request state.",
+            "Check gh access and the branch's pull request association before continuing.",
             "agent",
         ),
         reason,
@@ -242,13 +276,13 @@ function defaultBranchFacts(
     branch: string | null,
     defaultReference: string | null,
     ghDefaultBranch: string | null,
-): { defaultReference: string | null; isDefaultBranch: boolean | null } {
+): { defaultBranch: string | null; isDefaultBranch: boolean | null } {
     let defaultBranch =
         defaultReference?.split("/").at(-1) ??
         ghDefaultBranch ??
         (branch !== null && CONVENTIONAL_DEFAULT_BRANCHES.has(branch) ? branch : null);
     return {
-        defaultReference: defaultReference ?? (defaultBranch ? `origin/${defaultBranch}` : null),
+        defaultBranch,
         isDefaultBranch: defaultBranch ? branch === defaultBranch : null,
     };
 }
@@ -305,18 +339,48 @@ function collectUpstream(root: string): { hasUpstream: boolean; unpushedCommits:
     };
 }
 
-function collectPullRequest(root: string): PullRequestFacts {
+function collectPullRequest(root: string, branch: string | null): PullRequestFacts {
     if (commandOutput("gh", ["--version"], root) === null) {
         return { pullRequest: null, state: "unknown", reason: "gh is unavailable" };
     }
     if (!commandSucceeds("gh", ["auth", "status"], root)) {
         return { pullRequest: null, state: "unknown", reason: "gh is not authenticated" };
     }
-    let source = commandOutput("gh", ["pr", "view", "--json", "number,isDraft,url,title"], root);
-    if (source === null) return { pullRequest: null, state: "known", reason: null };
+    if (!branch) return { pullRequest: null, state: "unknown", reason: "branch is unknown" };
+    let source = commandOutput(
+        "gh",
+        [
+            "pr",
+            "list",
+            "--state",
+            "all",
+            "--head",
+            branch,
+            "--limit",
+            "2",
+            "--json",
+            "number,isDraft,url,title,state,baseRefName",
+        ],
+        root,
+    );
+    if (source === null)
+        return { pullRequest: null, state: "unknown", reason: "gh could not list pull requests" };
     try {
-        let pullRequest = JSON.parse(source) as PullRequest;
-        return Number.isInteger(pullRequest.number)
+        let pullRequests = JSON.parse(source) as PullRequest[];
+        if (!Array.isArray(pullRequests)) throw new Error("Invalid pull request list");
+        if (pullRequests.length > 1)
+            return {
+                pullRequest: null,
+                state: "unknown",
+                reason: `Multiple pull requests found for branch ${branch}; inspect their proposal links`,
+            };
+        let pullRequest = pullRequests[0];
+        if (!pullRequest) return { pullRequest: null, state: "known", reason: null };
+        return Number.isInteger(pullRequest.number) &&
+            typeof pullRequest.baseRefName === "string" &&
+            (pullRequest.state === "OPEN" ||
+                pullRequest.state === "CLOSED" ||
+                pullRequest.state === "MERGED")
             ? { pullRequest, state: "known", reason: null }
             : {
                   pullRequest: null,
@@ -411,19 +475,10 @@ function successorFor(proposals: Proposal[], proposal: Proposal): Proposal | und
         .find(({ supersedes }) => supersedes?.includes(id));
 }
 
-function isMergedIntoDefault(root: string, defaultReference: string | null): boolean | null {
-    if (!defaultReference) return null;
-    return commandSucceeds(
-        "git",
-        ["merge-base", "--is-ancestor", "HEAD", defaultReference.replace(/^refs\/remotes\//, "")],
-        root,
-    );
-}
-
 export function gatherFacts(root = process.cwd()): Facts {
     let branch = collectBranch(root);
     let upstream = collectUpstream(root);
-    let pullRequestFacts = collectPullRequest(root);
+    let pullRequestFacts = collectPullRequest(root, branch.branch);
     let proposals = collectProposals(root);
     let selection = selectProposal(proposals, pullRequestFacts.pullRequest);
     let proposalSuccessor =
@@ -433,12 +488,10 @@ export function gatherFacts(root = process.cwd()): Facts {
     return {
         branch: branch.branch,
         isDefaultBranch: branch.isDefaultBranch,
+        defaultBranch: branch.defaultBranch,
         hasUpstream: upstream.hasUpstream,
         unpushedCommits: upstream.unpushedCommits,
-        pullRequest: pullRequestFacts.pullRequest && {
-            ...pullRequestFacts.pullRequest,
-            isMerged: isMergedIntoDefault(root, branch.defaultReference),
-        },
+        pullRequest: pullRequestFacts.pullRequest,
         pullRequestState: pullRequestFacts.state,
         pullRequestReason: pullRequestFacts.reason,
         proposal: selection.proposal,
@@ -459,8 +512,6 @@ function noticesFor(facts: Facts): Notice[] {
         notices.push({ kind: "unpushed-commits", count: facts.unpushedCommits });
     if (proposal?.status === "active-review" && pullRequest?.isDraft)
         notices.push({ kind: "draft-active-review" });
-    if (proposal?.status === "implemented" && pullRequest?.isMerged === false)
-        notices.push({ kind: "implemented-unmerged" });
     if (
         proposal &&
         proposalSelection &&
@@ -494,8 +545,42 @@ export function deriveStatus(facts: Facts): DerivedStatus {
     if (!facts.pullRequest) return result(facts, STEPS.noPullRequest);
     if (!facts.proposal) return result(facts, STEPS.noProposal);
     let { status } = facts.proposal;
-    if (status === "implemented")
-        return result(facts, facts.pullRequest.isMerged ? STEPS.done : STEPS.implementedUnmerged);
+    if (
+        (status === "accepted" || status === "implemented") &&
+        facts.pullRequest.state === "MERGED" &&
+        (!facts.defaultBranch || facts.pullRequest.baseRefName !== facts.defaultBranch)
+    ) {
+        let destination = facts.defaultBranch;
+        return result(
+            facts,
+            step(
+                "5",
+                "Integration incomplete",
+                "The feature pull request is merged, but integration into the default branch is not established.",
+                destination
+                    ? `The pull request merged into ${facts.pullRequest.baseRefName}, not ${destination}. Ask the human how to integrate the accepted change into ${destination}; do not claim delivery.`
+                    : "Confirm the default branch before deciding whether the pull request merged into it; do not claim delivery.",
+                "you",
+            ),
+        );
+    }
+    if (status === "implemented") {
+        let completionStep =
+            facts.pullRequest.state === "MERGED"
+                ? STEPS.merged
+                : facts.pullRequest.state === "CLOSED"
+                  ? STEPS.closedWithoutMerge
+                  : facts.pullRequest.isDraft
+                    ? STEPS.draftImplementation
+                    : STEPS.readyToMerge;
+        return result(facts, completionStep);
+    }
+    if (status === "accepted" && facts.pullRequest.state === "MERGED")
+        return result(facts, STEPS.acceptedAfterMerge);
+    if (status === "accepted" && facts.pullRequest.state === "CLOSED")
+        return result(facts, STEPS.closedWithoutMerge);
+    if (status === "accepted" && facts.pullRequest.isDraft)
+        return result(facts, STEPS.acceptedDraft);
     if (status === "superseded") return result(facts, supersededStep(facts.proposalSuccessor));
     return result(
         facts,
@@ -508,8 +593,6 @@ function noticeLine(notice: Notice): string {
     if (notice.kind === "unpushed-commits") return `Unpushed commits: ${notice.count}`;
     if (notice.kind === "draft-active-review")
         return "Warning: proposal is active-review, but the pull request remains draft.";
-    if (notice.kind === "implemented-unmerged")
-        return "Warning: proposal is implemented, but the pull request is not merged.";
     let candidates = notice.otherCandidates.map(({ id, title }) => `${id} (${title})`).join(", ");
     if (notice.pullRequestMismatch) {
         let mismatch = `selected ${notice.selected} references ${notice.proposalPullRequest}, not current PR #${notice.pullRequestNumber}`;
@@ -525,7 +608,7 @@ export function formatStatus(facts: Facts, derived: DerivedStatus = deriveStatus
         ? `${facts.proposal.id}  ${facts.proposal.title}  ·  ${facts.proposal.status}`
         : "proposal — none";
     let pullRequest = facts.pullRequest
-        ? `PR #${facts.pullRequest.number} (${facts.pullRequest.isDraft ? "draft" : "open"})  ${facts.pullRequest.url}`
+        ? `PR #${facts.pullRequest.number} (${facts.pullRequest.isDraft && facts.pullRequest.state === "OPEN" ? "draft" : facts.pullRequest.state.toLowerCase()})  ${facts.pullRequest.url}`
         : facts.pullRequestState === "unknown"
           ? `PR — unknown (${facts.pullRequestReason ?? "gh could not determine the pull request"})`
           : "PR — none";
