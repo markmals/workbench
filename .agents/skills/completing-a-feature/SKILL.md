@@ -18,7 +18,7 @@ Read the human's PR comments and direct commits before acting. Classify each ite
 
 Never encode a design change in code, tests, or guides while leaving the proposal stale.
 
-While revisions are outstanding, the proposal is `returned-for-revisions`, which the human sets when requesting changes. Return to Phase 2 for a design revision or Phase 3 for implementation. If reworking the design reopens a question, record a clarification marker — `returned-for-revisions` is exempt from the marker rule so honest rework remains possible. At the end of Phase 3, hand off to `reviewing-an-implementation`, which alone owns the coupled status, readiness-report, and pull-request transition. Do not set proposal status when reposting.
+While revisions are outstanding, the proposal is `returned-for-revisions`, which the human sets when requesting changes. Return to Phase 2 for a design revision or Phase 3 for implementation. If reworking the design reopens a question, record a clarification marker — `returned-for-revisions` is exempt from the marker rule so honest rework remains possible. At the end of Phase 3, hand off to `reviewing-an-implementation`, which alone owns the status and readiness-report handoff. Do not set proposal status when reposting.
 
 ## 2. Record policies and decisions
 
@@ -67,13 +67,13 @@ Add the changeset if the work does not already carry one: `mise run changeset`, 
 
 After human acceptance and the vision update, set the proposal to `implemented` in the same feature pull request that contains the implementation. This status records accepted implementation, not a merged pull request or completed release. Record acceptance and any outstanding delivery in the proposal or PR, then commit and verify the updated integration candidate before merging. Never open a follow-up PR solely to move this status.
 
-Confirm the record is present in the pull request revision before marking a draft PR ready or merging; a local file or unpushed commit is not proof. For an already merged pull request, inspect its merged revision before concluding a local `accepted` status means the record is missing. If absent, ask the human how to reconcile it and keep any required delivery visible. Do not try to amend a merged pull request or open a status-only PR.
+Confirm the implemented record is present in the pull request revision before merging; a local file or unpushed commit is not proof. For an already merged pull request, inspect its merged revision before concluding a local `accepted` status means the record is missing. If absent, ask the human how to reconcile it and keep any required delivery visible. Do not try to amend a merged pull request or open a status-only PR.
 
 ## 5. Merge
 
 Merge only after human acceptance and fresh checks on the pull request revision that contains the implementation record. Preserve what was proposed, implemented, and learned in review, including why the final state differs from earlier revisions.
 
-If the accepted pull request is still draft, mark it ready and verify the updated revision before merging. Draft status never authorizes skipping readiness or review.
+An accepted PR still in draft is an anomalous state. Verify its pushed implementation, mark it ready, and verify the updated revision before merging. Draft status never authorizes skipping readiness or review.
 
 Choose a merge strategy that retains the proposal and PR discussion. Do not squash the work into one opaque commit that discards that context.
 

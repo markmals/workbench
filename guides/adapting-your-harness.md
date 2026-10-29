@@ -104,9 +104,9 @@ Create a bot account or GitHub App, give it write access to the repository, and 
 export SERVICE_ACCOUNT_TOKEN=<the bot's token>
 ```
 
-The name matters. The agent reads exactly that variable and sets `GH_TOKEN` from it for the two commands that post the report and mark the pull request ready — everything else it does stays under your identity. Export the token as `GH_TOKEN` instead and you get the inverse of what you wanted: every other call becomes bot-authored while the report itself falls back to you.
+The name matters. The agent sets `GH_TOKEN` from `SERVICE_ACCOUNT_TOKEN` only when posting its own readiness-report comment. Marking the pull request ready happens earlier, after a verified implementation is pushed, with the ordinary `gh pr ready` identity. Exporting the service token as a global `GH_TOKEN` would attribute unrelated GitHub actions to the bot.
 
-Without a service account the agent uses whatever identity is available and says so in the report. That is degraded, not broken.
+Without a service account the agent identifies the available account in the report, subject to your repository's identity rules.
 
 ## Start from your own project record
 

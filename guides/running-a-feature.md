@@ -48,7 +48,7 @@ branch workbench-2
 Phase 3 — Implementation
   The proposal is approved for implementation.
 
-Next (agent): Write failing tests, then guides, then code, and pass the gates. Self-check against the proposal, get one independent review, then post the readiness report and mark the pull request ready.
+Next (agent): Write failing tests, then guides, then code, and pass the gates. When a coherent implementation is pushed, mark the pull request ready. Then self-check against the proposal, get one independent review, and post the readiness report.
               Skill: .agents/skills/implementing-a-proposal/
 ```
 
@@ -62,7 +62,7 @@ Tell the agent: “Project members need to export a report.” Then do nothing w
 
 ### The agent
 
-The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal or implementation.
+The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. The PR becomes ready after the first coherent implementation is verified and pushed; agent review and the readiness report follow.
 
 The pull request exists this early because it is the durable workspace for one feature: its proposal, implementation, review discussion, and readiness report accumulate there as one reviewable thing.
 
@@ -113,15 +113,15 @@ The order is fixed:
 
 The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the proposal gives each an independent claim before code.
 
-Passing the gates is not the end. Still in Phase 3, the agent reviews the proposal, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings.
+Passing the gates is not the end. Once a coherent implementation is pushed, the agent marks the pull request ready so you can inspect the code. The proposal remains `awaiting-implementation`; a ready PR does not mean the feature was accepted.
 
-It then publishes the preview, posts the readiness report, and marks the pull request ready as one coupled action. That action also changes the proposal to `active-review`.
+Still in Phase 3, the agent reviews the proposal, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings. It then publishes the preview, posts the readiness report, and moves the proposal to `active-review`. The PR is already ready.
 
 For the preview, the agent chooses the cheapest realistic artifact through which you can exercise the change — a prerelease package, preview deployment or endpoint, deployed documentation site, installable executable, or installable desktop or mobile build. See [Choosing a Preview](./choosing-a-preview.md).
 
 ### What status reports
 
-Once you set `awaiting-implementation`, it reports **Phase 3 — Implementation** and names the agent as next. The command output above is a real example of that state. After the coupled final action, it reports **Phase 4 — Human review** and names you as next.
+Once you set `awaiting-implementation`, it reports **Phase 3 — Implementation** and names the agent as next. The command output above is a real example of that state. When the PR becomes ready after implementation is pushed, status still reports Phase 3 until the readiness report and `active-review` transition. Then it reports **Phase 4 — Human review** and names you as next.
 
 ## Phase 4 — Human review
 
@@ -153,7 +153,7 @@ After acceptance, explicitly confirm release and branch deletion when the agent 
 
 ### The agent
 
-If the feature changed what the project is, the agent updates `VISION.md`. It records `implemented` in the original feature pull request after acceptance and confirms the record is in the pull request revision before marking a draft pull request ready or merging. Merge and any required release remain separate; a release needs its own authorization. The agent tracks unfinished delivery and performs only authorized cleanup.
+If the feature changed what the project is, the agent updates `VISION.md`. It records `implemented` in the original feature pull request after acceptance and confirms the record is in the pull request revision before merging. Merge and any required release remain separate; a release needs its own authorization. The agent tracks unfinished delivery and performs only authorized cleanup.
 
 ### What status reports
 

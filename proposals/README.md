@@ -7,14 +7,16 @@ Name each file `<NNNN>-<slug>.md`, using the next four-digit number and a kebab-
 | Status | Meaning | Decided by | Phase |
 | --- | --- | --- | --- |
 | `draft` | Being written and iterated on in the draft pull request. May carry `[NEEDS CLARIFICATION:`. | agent | 2 |
-| `awaiting-implementation` | The human settled the proposal. Implementation is underway or not yet started. | human | 3 |
-| `active-review` | First full pass at tests, guides and code exists; report posted and pull request marked ready. | agent | 5 |
-| `returned-for-revisions` | The human requested changes. Back to implementation, or to the proposal if the design changed. | human | 5 → 3 or 2 |
+| `awaiting-implementation` | The human settled the proposal. Implementation is underway or not yet started; the feature pull request becomes ready once verified code is pushed. | human | 3 |
+| `active-review` | The readiness report is posted after Phase 3 reviews and preview; the pull request was made ready earlier. | agent | 4 |
+| `returned-for-revisions` | The human requested changes. Back to implementation, or to the proposal if the design changed. | human | 4 → 3 or 2 |
 | `accepted` | The human accepted the work. Vision update, merge and release are underway. | human | 5 |
 | `implemented` | The accepted implementation and final records are committed in the feature pull request before merge. Merge and any required release remain separate. | agent | 5 |
 | `rejected` | The human declined the change. Kept as record. | human | terminal |
 | `withdrawn` | The author pulled it. Kept as record. | either | terminal |
 | `superseded` | A later proposal replaced it. | either | terminal |
+
+Pull-request readiness and proposal status track different facts. A ready feature PR exposes implemented code for inspection while its proposal may still be `awaiting-implementation`; `active-review` records the later readiness-report handoff to human review.
 
 **Decided by** is about judgement, not keystrokes. The human may ask the agent to make the edit — that is fine. What an agent must never do is decide on its own that a proposal is settled enough to implement, or that finished work is good enough to accept. An agent that can reach those two conclusions unaided is an agent approving its own work.
 

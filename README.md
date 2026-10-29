@@ -56,7 +56,7 @@ Your agent runs it too, at the start of every session. So "keep going" is a comp
 Per feature:
 
 ```
-branch → draft PR → proposal → tests → guides → code → validation
+branch → draft PR → proposal → tests → guides → code → validation → ready PR
        → self-check → adversarial review → preview → readiness report
        → human review → revision → vision update → merge → release → cleanup
 ```
@@ -65,9 +65,9 @@ branch → draft PR → proposal → tests → guides → code → validation
 
 **Proposal.** You and the agent write `proposals/<NNNN>-<slug>.md` and iterate until it is right. It has to be concrete enough that tests, guides, and an implementation can be derived from it without rereading your conversation. Unresolved questions are marked and answered, never guessed.
 
-**Implementation.** Failing tests first, then guides written from the proposal, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents.
+**Implementation.** Failing tests first, then guides written from the proposal, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents. Once a coherent implementation is verified and pushed, the agent marks the pull request ready for you to inspect. The proposal remains `awaiting-implementation` while agent review continues.
 
-**Review.** The agent reads proposal, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
+**Review.** The agent reads proposal, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and moves the proposal to `active-review`; the PR was already ready.
 
 **Human review.** You read the report, the diff, and the preview, and comment. Look-and-feel feedback is applied while the work stays in review. If your feedback changes what the feature does, or a design decision the proposal records, rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: vision update, merge, release, cleanup.
 
