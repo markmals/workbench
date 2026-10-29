@@ -12,7 +12,7 @@ Phase 3 turns an approved proposal into tests, guides, and code that agree with 
 ## Preconditions
 
 - The proposal has `status: awaiting-implementation`, or the human returned it with `status: returned-for-revisions`; neither has an unresolved clarification marker.
-- Phase 1 — preparation — created the branch, pushed it to `origin`, and opened a draft pull request for the proposal. It stays draft until a coherent implementation has passed applicable checks and reached the pushed branch.
+- Phase 1 — preparation — created the branch, pushed it to `origin`, and opened a draft pull request for the proposal. It stays draft until the complete implementation has passed applicable checks and reached the pushed branch.
 - Read the proposal's **Detailed design**, the code it touches, and the vision, policies, and decisions it names. Tests derive from Detailed design; acceptance criteria are an occasional supplement.
 - When the design is ambiguous or conflicts with a record in a way that changes behavior, raise it. Do not choose silently or expand scope.
 
@@ -54,7 +54,7 @@ Write the minimum production code that makes the tests pass and matches the guid
 
 Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
 
-At that verified implementation point, mark the feature pull request ready. Human review of the implementation can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff; PR readiness is neither acceptance nor permission to merge. If the push or PR state change cannot be made, report the blocker without claiming the implementation is reviewable in the PR.
+After the complete implementation passes the applicable checks and is pushed, mark the feature pull request ready for maintainer review. Human review can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff. If the push or PR state change cannot be made, report the blocker without claiming the implementation is reviewable in the PR.
 
 ## Then
 

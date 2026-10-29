@@ -123,9 +123,10 @@ test("derives implementation for an awaiting proposal", () => {
     });
 });
 
-test("guides the agent to ready a draft PR after implementation is verified and pushed", () => {
+test("guides the agent to ready a draft PR only after complete implementation", () => {
     let status = deriveStatus(facts({ proposal: proposal("awaiting-implementation") }));
 
+    assert.match(status.next, /complete implementation/i);
     assert.match(status.next, /implementation.*push.*mark.*ready/i);
     assert.match(status.next, /readiness report/i);
 });

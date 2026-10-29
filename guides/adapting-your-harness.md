@@ -104,7 +104,7 @@ Create a bot account or GitHub App, give it write access to the repository, and 
 export SERVICE_ACCOUNT_TOKEN=<the bot's token>
 ```
 
-The name matters. The agent sets `GH_TOKEN` from `SERVICE_ACCOUNT_TOKEN` only when posting its own readiness-report comment. Marking the pull request ready happens earlier, after a verified implementation is pushed, with the ordinary `gh pr ready` identity. Exporting the service token as a global `GH_TOKEN` would attribute unrelated GitHub actions to the bot.
+The name matters. The agent sets `GH_TOKEN` from `SERVICE_ACCOUNT_TOKEN` only when posting its own readiness-report comment. Marking the pull request ready happens after the complete implementation is verified and pushed, with the ordinary `gh pr ready` identity. Exporting the service token as a global `GH_TOKEN` would attribute unrelated GitHub actions to the bot.
 
 Without a service account the agent identifies the available account in the report, subject to your repository's identity rules.
 

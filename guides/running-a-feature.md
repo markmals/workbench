@@ -48,7 +48,7 @@ branch workbench-2
 Phase 3 — Implementation
   The proposal is approved for implementation.
 
-Next (agent): Write failing tests, then guides, then code, and pass the gates. When a coherent implementation is pushed, mark the pull request ready. Then self-check against the proposal, get one independent review, and post the readiness report.
+Next (agent): Write failing tests, then guides, then code, and pass the gates. When the complete implementation is pushed, mark the pull request ready for maintainer review. Then self-check against the proposal, get one independent review, and post the readiness report.
               Skill: .agents/skills/implementing-a-proposal/
 ```
 
@@ -62,7 +62,7 @@ Tell the agent: “Project members need to export a report.” Then do nothing w
 
 ### The agent
 
-The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. The PR becomes ready after the first coherent implementation is verified and pushed; agent review and the readiness report follow.
+The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. The PR becomes ready after the complete implementation is verified and pushed; agent review and the readiness report follow.
 
 The pull request exists this early because it is the durable workspace for one feature: its proposal, implementation, review discussion, and readiness report accumulate there as one reviewable thing.
 
@@ -113,7 +113,7 @@ The order is fixed:
 
 The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the proposal gives each an independent claim before code.
 
-Passing the gates is not the end. Once a coherent implementation is pushed, the agent marks the pull request ready so you can inspect the code. The proposal remains `awaiting-implementation`; a ready PR does not mean the feature was accepted.
+Passing the gates is not the end. Once the complete implementation is pushed, the agent marks the pull request ready so you can review the code. The proposal remains `awaiting-implementation` until the readiness report is posted.
 
 Still in Phase 3, the agent reviews the proposal, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings. It then publishes the preview, posts the readiness report, and moves the proposal to `active-review`. The PR is already ready.
 

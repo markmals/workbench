@@ -18,7 +18,7 @@ specification for one change; write for someone without the pull-request convers
 Lifecycle:
 - `draft` — Phase 2 proposal development with the human; may carry clarification markers.
 - `awaiting-implementation` — Phase 3 implementation may begin.
-- `active-review` — Phase 4 human evaluation; the readiness report is posted. The pull request became ready earlier, when the first verified implementation was pushed.
+- `active-review` — Phase 4 human evaluation; the readiness report is posted. The pull request became ready earlier, when the complete, verified implementation was pushed.
 - `returned-for-revisions` — Phase 4 human feedback returned the work to Phase 2 or Phase 3.
 - `accepted` — Phase 5 vision update, merge, and release are underway.
 - `implemented` — the accepted implementation and final records are committed in the feature pull request before merge. Merge and any required release remain separate.
@@ -26,7 +26,7 @@ Lifecycle:
 - `withdrawn` — the author pulled it; retained as a record.
 - `superseded` — a later proposal replaced it; retained as a record.
 Normal path: `draft` → `awaiting-implementation` → `active-review` → `accepted` → `implemented`.
-Who decides: the human decides `awaiting-implementation`, `returned-for-revisions`, `accepted`, and `rejected`. Once a coherent implementation is verified and pushed, mark the pull request ready while the proposal remains `awaiting-implementation`. At the end of Phase 3, `reviewing-an-implementation` moves the proposal to `active-review` and posts the readiness report. After acceptance, the agent moves `implemented` in that same pull request before merge. The human may ask the agent to make an edit — deciding is the part an agent must never do alone. Permission to begin implementing is `awaiting-implementation`, never `accepted`.
+Who decides: the human decides `awaiting-implementation`, `returned-for-revisions`, `accepted`, and `rejected`. Once the complete implementation is verified and pushed, mark the pull request ready while the proposal remains `awaiting-implementation`. At the end of Phase 3, `reviewing-an-implementation` moves the proposal to `active-review` and posts the readiness report. After acceptance, the agent moves `implemented` in that same pull request before merge. The human may ask the agent to make an edit — deciding is the part an agent must never do alone. Permission to begin implementing is `awaiting-implementation`, never `accepted`.
 
 -->
 
