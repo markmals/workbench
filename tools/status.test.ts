@@ -1,6 +1,14 @@
-import { expect, test } from "vite-plus/test";
+import assert from "node:assert/strict";
+import { test } from "node:test";
 
-import { deriveStatus, formatStatus, type Facts, type Proposal, type Step } from "./status.ts";
+import {
+    defaultBranchFacts,
+    deriveStatus,
+    formatStatus,
+    type Facts,
+    type Proposal,
+    type Step,
+} from "./status.ts";
 
 let openPullRequest = {
     number: 1,
@@ -37,8 +45,20 @@ function proposal(status: string, clarificationCount = 0, overrides: Partial<Pro
 function assertPhase(input: Facts, expected: Pick<Step, "phase" | "title" | "actor" | "skill">) {
     let status = deriveStatus(input);
 
-    expect(status).toMatchObject(expected);
+    assert.deepEqual(
+        {
+            phase: status.phase,
+            title: status.title,
+            actor: status.actor,
+            skill: status.skill,
+        },
+        expected,
+    );
     return status;
+}
+
+function assertContains(report: string, expected: string): void {
+    assert.ok(report.includes(expected), `expected report to contain ${expected}:\n${report}`);
 }
 
 test("derives preparation on the default branch", () => {
@@ -68,20 +88,22 @@ test("derives proposal work for a draft pull request without a proposal", () => 
     });
 });
 
-test.each([
+for (let { where, state } of [
     {
         where: "on the default branch",
         state: facts({ branch: "main", isDefaultBranch: true, pullRequest: null }),
     },
     { where: "on a branch without a pull request", state: facts({ pullRequest: null }) },
     { where: "on a pull request without a proposal", state: facts() },
-])("asks before opening a proposal workspace or drafting a proposal $where", ({ state }) => {
-    let { actor, next } = deriveStatus(state);
+]) {
+    test(`asks before opening a proposal workspace or drafting a proposal ${where}`, () => {
+        let { actor, next } = deriveStatus(state);
 
-    expect(actor).toBe("agent");
-    expect(next).toMatch(/ask the human whether they want a proposal/i);
-    expect(next).toMatch(/before (creating|pushing|writing)/i);
-});
+        assert.equal(actor, "agent");
+        assert.match(next, /ask the human whether they want a proposal/i);
+        assert.match(next, /before (creating|pushing|writing)/i);
+    });
+}
 
 test("keeps a draft proposal in proposal work", () => {
     assertPhase(facts({ proposal: proposal("draft") }), {
@@ -131,9 +153,9 @@ test("derives completion for an accepted proposal", () => {
 test("confirms the status record before readying an accepted draft PR", () => {
     let status = deriveStatus(facts({ proposal: proposal("accepted") }));
 
-    expect(status.phase).toBe("5");
-    expect(status.next).toMatch(/record.*confirm.*pull request.*mark.*ready/i);
-    expect(status.next).not.toMatch(/perform.*merge/i);
+    assert.equal(status.phase, "5");
+    assert.match(status.next, /record.*confirm.*pull request.*mark.*ready/i);
+    assert.doesNotMatch(status.next, /perform.*merge/i);
 });
 
 test("checks a merged PR before reconciling a locally accepted proposal", () => {
@@ -148,9 +170,9 @@ test("checks a merged PR before reconciling a locally accepted proposal", () => 
         skill: ".agents/skills/completing-a-feature/",
     });
 
-    expect(status.next).toMatch(/confirm.*merged.*if absent.*reconcil/i);
-    expect(status.next).not.toMatch(/perform.*merge|record.*in this feature pull request/i);
-    expect(formatStatus(input, status)).toContain("PR #1 (merged)");
+    assert.match(status.next, /confirm.*merged.*if absent.*reconcil/i);
+    assert.doesNotMatch(status.next, /perform.*merge|record.*in this feature pull request/i);
+    assertContains(formatStatus(input, status), "PR #1 (merged)");
 });
 
 test("keeps merged implementation in completion while release remains separate", () => {
@@ -165,9 +187,9 @@ test("keeps merged implementation in completion while release remains separate",
         skill: ".agents/skills/completing-a-feature/",
     });
 
-    expect(formatStatus(input, status)).toContain("PR #1 (merged)");
-    expect(status.next).toMatch(/required release/);
-    expect(status.next).not.toMatch(/perform.*merge/i);
+    assertContains(formatStatus(input, status), "PR #1 (merged)");
+    assert.match(status.next, /required release/);
+    assert.doesNotMatch(status.next, /perform.*merge/i);
 });
 
 test("does not treat an unpushed implementation record as merged", () => {
@@ -179,9 +201,9 @@ test("does not treat an unpushed implementation record as merged", () => {
     let status = deriveStatus(input);
     let report = formatStatus(input, status);
 
-    expect(status.phase).toBe("5");
-    expect(report).toContain("Unpushed commits: 1");
-    expect(report).toMatch(/confirm.*implemented record.*merged/i);
+    assert.equal(status.phase, "5");
+    assertContains(report, "Unpushed commits: 1");
+    assert.match(report, /confirm.*implemented record.*merged/i);
 });
 
 test("does not claim integration when a PR merged into a non-default branch", () => {
@@ -196,10 +218,10 @@ test("does not claim integration when a PR merged into a non-default branch", ()
     });
     let status = deriveStatus(input);
 
-    expect(status.phase).toBe("5");
-    expect(status.actor).toBe("you");
-    expect(status.next).toMatch(/staging.*main/i);
-    expect(status.title).not.toBe("Implementation merged");
+    assert.equal(status.phase, "5");
+    assert.equal(status.actor, "you");
+    assert.match(status.next, /staging.*main/i);
+    assert.notEqual(status.title, "Implementation merged");
 });
 
 test("does not claim integration when the target branch cannot be established", () => {
@@ -211,9 +233,9 @@ test("does not claim integration when the target branch cannot be established", 
         }),
     );
 
-    expect(status.phase).toBe("5");
-    expect(status.title).not.toBe("Implementation merged");
-    expect(status.next).toMatch(/default branch/i);
+    assert.equal(status.phase, "5");
+    assert.notEqual(status.title, "Implementation merged");
+    assert.match(status.next, /default branch/i);
 });
 
 test("derives a closed state for a rejected proposal", () => {
@@ -246,7 +268,7 @@ test("derives a closed state with its successor for a superseded proposal", () =
         skill: null,
     });
 
-    expect(formatStatus(input, status)).toMatch(/proposal\.0002/);
+    assert.match(formatStatus(input, status), /proposal\.0002/);
 });
 
 test("routes an implemented open PR to completion instead of declaring inconsistency", () => {
@@ -263,38 +285,37 @@ test("routes an implemented open PR to completion instead of declaring inconsist
         },
     );
 
-    expect(status.notices).toStrictEqual([]);
-    expect(status.next).toMatch(/confirm.*implemented record.*pull request.*before.*merge/i);
+    assert.deepEqual(status.notices, []);
+    assert.match(status.next, /confirm.*implemented record.*pull request.*before.*merge/i);
 });
 
 test("confirms the status record before readying an implemented draft PR", () => {
     let status = deriveStatus(facts({ proposal: proposal("implemented") }));
 
-    expect(status.phase).toBe("5");
-    expect(status.next).toMatch(/confirm.*implemented record.*pull request.*mark.*ready/i);
-    expect(status.next).not.toMatch(/perform.*merge/i);
+    assert.equal(status.phase, "5");
+    assert.match(status.next, /confirm.*implemented record.*pull request.*mark.*ready/i);
+    assert.doesNotMatch(status.next, /perform.*merge/i);
 });
 
-test.each(["accepted", "implemented"])(
-    "stops for a human decision when the %s proposal's PR closes without merging",
-    proposalStatus => {
+for (let proposalStatus of ["accepted", "implemented"]) {
+    test(`stops for a human decision when the ${proposalStatus} proposal's PR closes without merging`, () => {
         let input = facts({
             proposal: proposal(proposalStatus),
             pullRequest: { ...openPullRequest, isDraft: false, state: "CLOSED" },
         });
         let status = deriveStatus(input);
 
-        expect(status.phase).toBe("5");
-        expect(status.actor).toBe("you");
-        expect(status.next).toMatch(/reopen|withdraw/);
-        expect(formatStatus(input, status)).toContain("PR #1 (closed)");
-    },
-);
+        assert.equal(status.phase, "5");
+        assert.equal(status.actor, "you");
+        assert.match(status.next, /reopen|withdraw/);
+        assertContains(formatStatus(input, status), "PR #1 (closed)");
+    });
+}
 
 test("flags a draft pull request when the proposal is in active review", () => {
     let status = deriveStatus(facts({ proposal: proposal("active-review") }));
 
-    expect(status.notices).toStrictEqual([{ kind: "draft-active-review" }]);
+    assert.deepEqual(status.notices, [{ kind: "draft-active-review" }]);
 });
 
 test("surfaces a heuristic proposal selection and its other candidates", () => {
@@ -307,7 +328,7 @@ test("surfaces a heuristic proposal selection and its other candidates", () => {
     });
     let status = deriveStatus(input);
 
-    expect(status.notices).toStrictEqual([
+    assert.deepEqual(status.notices, [
         {
             kind: "ambiguous-proposal-selection",
             selected: "proposal.0001",
@@ -317,13 +338,13 @@ test("surfaces a heuristic proposal selection and its other candidates", () => {
             pullRequestNumber: 1,
         },
     ]);
-    expect(formatStatus(input, status)).toMatch(/proposal\.0002/);
+    assert.match(formatStatus(input, status), /proposal\.0002/);
 });
 
 test("surfaces unresolved clarification markers and unpushed commits", () => {
     let status = deriveStatus(facts({ proposal: proposal("draft", 2), unpushedCommits: 3 }));
 
-    expect(status.notices).toStrictEqual([
+    assert.deepEqual(status.notices, [
         { kind: "clarifications", count: 2 },
         { kind: "unpushed-commits", count: 3 },
     ]);
@@ -344,7 +365,7 @@ test("reports an unavailable pull request state instead of assuming no pull requ
         },
     );
 
-    expect(status.reason).toBe("gh is unavailable");
+    assert.equal(status.reason, "gh is unavailable");
 });
 
 test("reports an unauthenticated pull request state", () => {
@@ -362,7 +383,7 @@ test("reports an unauthenticated pull request state", () => {
         },
     );
 
-    expect(status.reason).toBe("gh is not authenticated");
+    assert.equal(status.reason, "gh is not authenticated");
 });
 
 test("reports an unknown branch role instead of recommending a pull request", () => {
@@ -371,6 +392,42 @@ test("reports an unknown branch role instead of recommending a pull request", ()
         title: "Branch role unknown",
         actor: "agent",
         skill: null,
+    });
+});
+
+test("takes the default branch from origin/HEAD before anything else", () => {
+    assert.deepEqual(defaultBranchFacts("feature", "refs/remotes/origin/trunk", "main", "main"), {
+        defaultBranch: "trunk",
+        isDefaultBranch: false,
+    });
+});
+
+test("recognizes a local default branch when origin/HEAD and gh are unavailable", () => {
+    assert.deepEqual(defaultBranchFacts("feature/x", null, null, "main"), {
+        defaultBranch: "main",
+        isDefaultBranch: false,
+    });
+    assert.deepEqual(defaultBranchFacts("main", null, null, "main"), {
+        defaultBranch: "main",
+        isDefaultBranch: true,
+    });
+});
+
+test("gives a branch cut from a local main the Phase 1 advice, not an unknown role", () => {
+    let { isDefaultBranch } = defaultBranchFacts("feature/x", null, null, "main");
+
+    assertPhase(facts({ branch: "feature/x", isDefaultBranch, pullRequest: null }), {
+        phase: "1",
+        title: "Preparation",
+        actor: "agent",
+        skill: null,
+    });
+});
+
+test("leaves the branch role unknown when no default branch can be found", () => {
+    assert.deepEqual(defaultBranchFacts("feature/x", null, null, null), {
+        defaultBranch: null,
+        isDefaultBranch: null,
     });
 });
 

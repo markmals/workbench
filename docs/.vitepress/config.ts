@@ -47,6 +47,7 @@ let config = defineConfigWithTheme<WorkbenchThemeConfig>({
     srcExclude: [
         "**/node_modules/**",
         ".agents/**",
+        ".changeset/**",
         ".git/**",
         ".github/**",
         "tools/**",

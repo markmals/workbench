@@ -1,14 +1,15 @@
+import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { expect, onTestFinished, test } from "vite-plus/test";
+import { test, type TestContext } from "node:test";
 
 let statusScript = new URL("./status.ts", import.meta.url).pathname;
 
-function statusWithPullRequests(pullRequests: object[]): string {
+function statusWithPullRequests(t: TestContext, pullRequests: object[]): string {
     let root = mkdtempSync(path.join(tmpdir(), "workbench-status-"));
-    onTestFinished(() => rmSync(root, { force: true, recursive: true }));
+    t.after(() => rmSync(root, { force: true, recursive: true }));
     execFileSync("git", ["init", "-q", "-b", "feature", root]);
     execFileSync("git", [
         "-C",
@@ -57,8 +58,12 @@ function statusWithPullRequests(pullRequests: object[]): string {
     });
 }
 
-test("finds a merged feature PR after it leaves the open PR list", () => {
-    let report = statusWithPullRequests([
+function assertContains(report: string, expected: string): void {
+    assert.ok(report.includes(expected), `expected report to contain ${expected}:\n${report}`);
+}
+
+test("finds a merged feature PR after it leaves the open PR list", t => {
+    let report = statusWithPullRequests(t, [
         {
             number: 1,
             state: "MERGED",
@@ -69,18 +74,69 @@ test("finds a merged feature PR after it leaves the open PR list", () => {
         },
     ]);
 
-    expect(report).toContain("PR #1 (merged)");
-    expect(report).toContain("Phase 5 — Implementation merged");
+    assertContains(report, "PR #1 (merged)");
+    assertContains(report, "Phase 5 — Implementation merged");
 });
 
-test("does not select an arbitrary PR when a branch name has been reused", () => {
-    let report = statusWithPullRequests([
+test("does not select an arbitrary PR when a branch name has been reused", t => {
+    let report = statusWithPullRequests(t, [
         { number: 1, state: "MERGED", baseRefName: "main", isDraft: false, title: "Earlier" },
         { number: 2, state: "CLOSED", baseRefName: "main", isDraft: false, title: "Later" },
     ]);
 
-    expect(report).toContain("PR — unknown (Multiple pull requests found for branch feature");
-    expect(report).toContain("inspect their proposal links");
-    expect(report).toContain("Check gh access and the branch's pull request association");
-    expect(report).not.toContain("Implementation merged");
+    assertContains(report, "PR — unknown (Multiple pull requests found for branch feature");
+    assertContains(report, "inspect their proposal links");
+    assertContains(report, "Check gh access and the branch's pull request association");
+    assert.ok(
+        !report.includes("Implementation merged"),
+        `expected report to omit "Implementation merged":\n${report}`,
+    );
+});
+
+function statusInRepositoryWithoutRemote(t: TestContext): string {
+    let root = mkdtempSync(path.join(tmpdir(), "workbench-status-local-"));
+    t.after(() => rmSync(root, { force: true, recursive: true }));
+    execFileSync("git", ["init", "-q", "-b", "main", root]);
+    execFileSync("git", [
+        "-C",
+        root,
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.com",
+        "commit",
+        "--allow-empty",
+        "-qm",
+        "fixture",
+    ]);
+    execFileSync("git", ["-C", root, "switch", "-q", "-c", "feature/x"]);
+
+    // No origin and no usable gh, so refs/heads/main is the only evidence of which
+    // branch is the default one.
+    let bin = path.join(root, "bin");
+    mkdirSync(bin);
+    let gh = path.join(bin, "gh");
+    writeFileSync(gh, `#!${process.execPath}\nprocess.exit(1);\n`);
+    chmodSync(gh, 0o755);
+
+    return execFileSync(process.execPath, [statusScript], {
+        cwd: root,
+        encoding: "utf8",
+        env: {
+            ...process.env,
+            PATH: `${bin}${path.delimiter}${process.env.PATH ?? ""}`,
+        },
+    });
+}
+
+test("recognizes a local default branch when there is no remote and no gh", t => {
+    let report = statusInRepositoryWithoutRemote(t);
+
+    assertContains(report, "branch feature/x");
+    assertContains(report, "PR — unknown (gh is unavailable)");
+    assertContains(report, "Phase 1 — Preparation");
+    assert.ok(
+        !report.includes("Branch role unknown"),
+        `expected report to omit "Branch role unknown":\n${report}`,
+    );
 });

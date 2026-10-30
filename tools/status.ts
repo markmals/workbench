@@ -80,7 +80,8 @@ const NON_TERMINAL_STATUSES = new Set([
     "returned-for-revisions",
     "accepted",
 ]);
-const CONVENTIONAL_DEFAULT_BRANCHES = new Set(["main", "master"]);
+// Ordered: `main` wins when a repository somehow carries both.
+const CONVENTIONAL_DEFAULT_BRANCHES: readonly string[] = ["main", "master"];
 const SKILLS = {
     proposal: ".agents/skills/writing-a-proposal/",
     implementation: ".agents/skills/implementing-a-proposal/",
@@ -272,15 +273,27 @@ function supersededStep(successor: ProposalSummary | null | undefined): Step {
     );
 }
 
-function defaultBranchFacts(
+/**
+ * Which branch this repository treats as its default, and whether HEAD is on it.
+ *
+ * The sources are tried in descending order of authority: `origin/HEAD`, then
+ * `gh repo view`, then a conventional branch that exists locally, then the name of
+ * the current branch. The last two keep a repository that has no remote yet — a
+ * fresh `git init -b main` — from reading as "role unknown": the local probe covers
+ * a feature branch cut from `main`, and the current-branch case covers `main`
+ * itself before its first commit creates `refs/heads/main`.
+ */
+export function defaultBranchFacts(
     branch: string | null,
     defaultReference: string | null,
     ghDefaultBranch: string | null,
+    localDefaultBranch: string | null,
 ): { defaultBranch: string | null; isDefaultBranch: boolean | null } {
     let defaultBranch =
         defaultReference?.split("/").at(-1) ??
         ghDefaultBranch ??
-        (branch !== null && CONVENTIONAL_DEFAULT_BRANCHES.has(branch) ? branch : null);
+        localDefaultBranch ??
+        (branch !== null && CONVENTIONAL_DEFAULT_BRANCHES.includes(branch) ? branch : null);
     return {
         defaultBranch,
         isDefaultBranch: defaultBranch ? branch === defaultBranch : null,
@@ -308,6 +321,15 @@ function commandSucceeds(command: string, arguments_: string[], root: string): b
     }
 }
 
+/** A conventional default branch that exists in this repository, `main` first. */
+function localDefaultBranch(root: string): string | null {
+    return (
+        CONVENTIONAL_DEFAULT_BRANCHES.find(candidate =>
+            commandSucceeds("git", ["rev-parse", "--verify", `refs/heads/${candidate}`], root),
+        ) ?? null
+    );
+}
+
 function collectBranch(root: string) {
     let branch = commandOutput("git", ["rev-parse", "--abbrev-ref", "HEAD"], root);
     let defaultReference = commandOutput("git", ["symbolic-ref", "refs/remotes/origin/HEAD"], root);
@@ -318,9 +340,11 @@ function collectBranch(root: string) {
               ["repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"],
               root,
           );
+    let localDefault =
+        defaultReference === null && ghDefaultBranch === null ? localDefaultBranch(root) : null;
     return {
         branch,
-        ...defaultBranchFacts(branch, defaultReference, ghDefaultBranch),
+        ...defaultBranchFacts(branch, defaultReference, ghDefaultBranch, localDefault),
     };
 }
 
