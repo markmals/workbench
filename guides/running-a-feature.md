@@ -13,7 +13,7 @@ Follow one small feature: project members need to export a report. You describe 
 Use one command whenever you want to orient yourself:
 
 ```sh
-vp run status
+mise run status
 ```
 
 It takes no arguments. It derives the current phase from the branch, pull request, and active proposal, then names the next actor.
@@ -105,9 +105,9 @@ The order is fixed:
 1. Write failing tests for the report export the proposal specifies.
 2. Write guides from the proposal and compare them with the tests.
 3. Implement the code.
-4. Run the gates with `vp run check`.
+4. Run the gate with `mise run check`.
 
-`vp run check` runs `validate`, `test`, and `docs:build`, then `vp check` for formatting, lint, and type checks.
+`mise run check` runs the tests, then `hk check --all` for formatting, lint, and type checks, then `validate` and `docs:build`.
 
 The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the proposal gives each an independent claim before code.
 

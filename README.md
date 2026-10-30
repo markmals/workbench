@@ -22,8 +22,9 @@ The fix is not more review. It is making the agent commit to what it intends to 
 4. Start your first feature. Say what you want built. Your agent branches, opens a draft pull request, and writes a proposal before it writes any code.
 
 ```sh
-vp install
-vp run check
+mise install     # the pinned toolchains from mise.toml
+mise run setup   # dependencies, the work tracker, and the git hooks
+mise run check   # the gate
 ```
 
 ## You never have to remember a command
@@ -31,7 +32,7 @@ vp run check
 There is one, and it takes no arguments:
 
 ```sh
-vp run status
+mise run status
 ```
 
 It reads the branch, the pull request, and the proposal's status, then tells you where the work is and what happens next:
@@ -90,42 +91,48 @@ Wire the row matching your project and delete the rest. Previews are private by 
 
 ## Defects
 
-Defects an agent finds along the way get filed as issues, not folded into whatever it happens to be building. A defect that stops the current work from satisfying its proposal is the current work and gets fixed; a defect that is out of scope, pre-existing, or someone else's problem becomes a GitHub issue written so a future reader can reproduce it without the conversation it came from. Deferred defects are linked from the pull request, so the decision to defer is visible.
+Defects an agent finds along the way get filed in [Beads](https://github.com/steveyegge/beads), not folded into whatever it happens to be building. A defect that stops the current work from satisfying its proposal is the current work and gets fixed; a defect that is out of scope, pre-existing, or someone else's problem becomes a work item written so a future reader can reproduce it without the conversation it came from. Deferred defects are linked from the pull request, so the decision to defer is visible.
 
 ## What's in here
 
-| Path                 | What it is                                                         |
-| -------------------- | ------------------------------------------------------------------ |
-| `AGENTS.md`          | The contract every agent session loads.                            |
-| `PROCESS.md`         | The full process description.                                      |
-| `guides/`            | User-facing documentation. Start at `getting-started.md`.          |
-| `VISION.md`          | The project's purpose and direction. Replace ours with yours.      |
-| `proposals/`         | One document per change, kept as history after it ships.           |
-| `policies/`          | Rules future work must keep enforcing.                             |
-| `decisions/`         | Architectural choices and the context that produced them.          |
-| `guides/`            | User-facing documentation.                                         |
-| `docs/`              | The site. Publishes the vision, the record, and the guides.        |
-| `tools/`             | The record validator. Dependency-free.                             |
-| `.agents/skills/`    | Seven skills, roughly one per phase. For the agent, not you.       |
-| `.agents/rules/`     | Code quality, commit discipline, enforcement hierarchy.            |
-| `.agents/templates/` | The canonical shape of every artifact.                             |
-| `.github/workflows/` | Continuous integration, the preview, and the published site.       |
-| `.omp/`              | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
+| Path | What it is |
+| --- | --- |
+| `AGENTS.md` | The contract every agent session loads. |
+| `PROCESS.md` | The full process description. |
+| `guides/` | User-facing documentation. Start at `getting-started.md`. |
+| `VISION.md` | The project's purpose and direction. Replace ours with yours. |
+| `proposals/` | One document per change, kept as history after it ships. |
+| `policies/` | Rules future work must keep enforcing. |
+| `decisions/` | Architectural choices and the context that produced them. |
+| `guides/` | User-facing documentation. |
+| `docs/` | The site. Publishes the vision, the record, and the guides. |
+| `tools/` | The record validator and the small scripts the tasks run. Dependency-free. |
+| `.agents/skills/` | Seven skills, roughly one per phase. For the agent, not you. |
+| `.agents/rules/` | Code quality, commit discipline, enforcement hierarchy. |
+| `.agents/templates/` | The canonical shape of every artifact. |
+| `.agents/commit-scopes` | The commit scopes the `commit-msg` hook accepts. |
+| `mise.toml` | Every pinned tool and every task. `mise.lock` pins the downloads. |
+| `hk.pkl` | Every git hook: formatting, Scoped Commits, Beads, the pre-push gate. |
+| `fnox.toml` | Secret names, never values. Workbench itself needs none. |
+| `.changeset/` | Pending changelog entries, applied by `mise run version`. |
+| `.github/workflows/` | Continuous integration, the release, the preview, and the published site. |
+| `.omp/` | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
 
 ## Enforcement
 
 Prose is the tier most likely to be missed, so anything checkable is a check.
 
 ```sh
-vp run check         # the full gate: vp check, validate, test, docs:build
-vp fmt               # format
-vp check             # format check, lint, and type-check
-vp run validate      # record frontmatter, ids, cross-references
-vp run test          # the tools' own tests
-vp run docs:build    # the site builds
+mise run check       # the gate: formatting, lint, types, tests, records, the site
+mise run fmt         # format in place; accepts file paths
+mise run lint        # lint, applying the safe fixes
+mise run typecheck   # type-check both TypeScript projects
+mise run test        # the tools' and the workflow tool's tests
+mise run validate    # record frontmatter, ids, cross-references
+mise run docs:build  # the site builds
 ```
 
-`vp run validate` enforces that identifiers match filenames and are unique, that every `supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks the superseded one, and that no accepted proposal still carries an unresolved question. A `commit-msg` git hook, installed by `vp install`, enforces commit scoping on commits made from Oh My Pi, and CI checks every commit in a pull request. Continuous integration runs all of it, so no gate depends on the agent remembering.
+`mise run validate` enforces that identifiers match filenames and are unique, that every `supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks the superseded one, and that no accepted proposal still carries an unresolved question. [hk](https://hk.jdx.dev) owns the git hooks: `commit-msg` holds every commit to [Scoped Commits](https://scopedcommits.com/) against the scopes in `.agents/commit-scopes`, and `pre-push` runs the gate. Continuous integration runs the same `mise run check`, so no gate depends on the agent remembering.
 
 ## Harness support
 

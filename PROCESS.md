@@ -46,6 +46,12 @@ A _proposal_ describes a specific change to the project in enough detail to serv
 
 Proposals record the motivation, intended behavior, scope, and relevant design decisions of a feature. They remain part of the project's history after implementation. A future proposal may revise or supersede an earlier proposal.
 
+### Work items
+
+A _work item_ is a tracked unit of work in Beads: a task, a blocker, a discovered defect, or a durable memory the project needs to survive a context reset.
+
+Work items answer a different question from proposals. The proposal records reviewed intent and is preserved as history; the Beads graph records what is ready, what is blocked, what was deliberately deferred, and what a future session must know. Neither substitutes for the other.
+
 ### Tests
 
 _Tests_ are executable specifications of the behavior described by a proposal.
@@ -193,7 +199,7 @@ Once the implementation passes its automated checks, the agent reads the proposa
 
 The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and reports without editing.
 
-The primary agent fixes confirmed defects inside the proposal's scope. A finding outside that scope is never a reason to widen the change: it is declined with reasoning or filed as an issue. Declined findings are preserved for human review rather than silently discarded. The adversarial reviewer does not decide whether the feature is acceptable.
+The primary agent fixes confirmed defects inside the proposal's scope. A finding outside that scope is never a reason to widen the change: it is declined with reasoning or filed in Beads. Declined findings are preserved for human review rather than silently discarded. The adversarial reviewer does not decide whether the feature is acceptable.
 
 ### Preview
 
@@ -244,65 +250,31 @@ Policies and decisions are therefore not substitutes for proposals. A proposal e
 
 Future proposals should be evaluated against the current vision, policies, and decisions.
 
-## Defect Tracking
+## Work Tracking
 
-During proposal development, implementation, automated validation, adversarial review, or human review, the agent may discover defects that should be preserved independently of the current pull request.
+During proposal development, implementation, automated validation, adversarial review, or human review, the agent discovers work that should be preserved independently of the current pull request. Beads (`bd`) holds it.
 
-A defect that prevents the current implementation from satisfying its proposal remains part of the current work and should normally be fixed before the pull request is accepted. The agent should not create an issue merely to defer work required by the proposal.
+A defect that prevents the current implementation from satisfying its proposal remains part of the current work and should be fixed before the pull request is accepted. The agent does not file a work item merely to defer work the proposal already requires.
 
-A defect may instead be recorded as a GitHub issue when it is outside the scope of the current proposal, already exists on the main branch, affects another feature or project, or otherwise represents legitimate future work that should survive beyond the current pull request.
+A defect is recorded in Beads instead when it is outside the scope of the current proposal, already exists on the main branch, affects another feature or project, or otherwise represents legitimate future work that should survive beyond the current pull request.
 
-Before creating a new issue, the agent checks the repository's existing open and closed issues for the same defect to avoid creating duplicates.
+Before creating a new item, the agent searches the existing graph — `bd ready` for what is startable, then `bd search` and `bd list` across every state, open through closed, with the result limit lifted — so the same defect is not filed twice.
 
-When a new issue is necessary, the agent creates it using the [`gh`](https://cli.github.com/) CLI. The issue should contain enough information for a future human or agent to understand and reproduce the defect without depending on the conversational context in which it was discovered.
-
-At minimum, a defect should record:
-
-- a concise description of the incorrect behavior;
-- the behavior that was expected instead;
-- reproduction steps or a minimal reproduction when available;
-- relevant environmental or version information;
-- links or references to the proposal, pull request, test, or code where the defect was discovered when useful; and
-- any known constraints, suspected causes, or related defects that would help a future investigation.
-
-For example:
+A work item should contain enough information for a future human or agent to understand and reproduce the defect without depending on the conversational context in which it was discovered: a concise description of the incorrect behavior, the behavior expected instead, reproduction steps or a minimal reproduction, relevant environment or version information, links to the proposal, pull request, test, or code where it was discovered, and any known constraints, suspected causes, or related defects.
 
 ```sh
-gh issue create \
-  --title "Parser rejects nested optional routes" \
-  --label bug \
-  --body-file - <<'EOF'
-## Description
-
-The route parser rejects nested optional route segments that should be valid.
-
-## Expected behavior
-
-`($lang).($region).products.tsx` should produce two nested optional route segments.
-
-## Actual behavior
-
-Route discovery fails with an invalid segment error.
-
-## Reproduction
-
-1. Create `app/routes/($lang).($region).products.tsx`.
-2. Run the route discovery command.
-3. Observe the invalid segment error.
-
-## Context
-
-Discovered while implementing #123.
-
-The current proposal does not alter optional-route parsing, so this defect is outside its scope.
-EOF
+bd create "Parser rejects nested optional routes" \
+  --type=bug --priority=1 \
+  --description="Expected: ($lang).($region).products.tsx produces two nested optional segments. Actual: route discovery fails with an invalid segment error. Repro: create that file and run route discovery. Found under proposal.0007 in PR #42; out of scope because that proposal does not change optional-route parsing."
 ```
 
-The agent applies the repository's normal issue labels, types, milestones, projects, parent issues, or dependency relationships when those conventions exist.
+The agent applies the project's existing types, priorities, labels, and dependency relationships when those conventions exist. Dependencies matter: an item blocked by another is linked so `bd ready` stays honest about what can actually be started.
 
-When a newly discovered defect is relevant to the current pull request but intentionally outside its scope, the agent links the resulting issue from the pull request or an appropriate review comment. This makes the decision to defer the defect explicit and leaves a durable path from the context in which it was discovered to the future work needed to resolve it.
+When a newly discovered defect is relevant to the current pull request but intentionally outside its scope, the agent links the work item from the pull request or an appropriate review comment. This makes the decision to defer the defect explicit and leaves a durable path from the context in which it was discovered to the future work needed to resolve it.
 
-If subsequent work fixes the defect incidentally, the agent updates or closes the issue with a reference to the pull request or commit that resolved it rather than leaving the issue stale.
+If subsequent work fixes the defect incidentally, the agent closes the item with a reference to the pull request or commit that resolved it rather than leaving it stale.
+
+Durable project knowledge — a constraint learned the hard way, a decision too small for a record but too costly to rediscover — goes in `bd remember`, not a memory file.
 
 ## Completion
 
@@ -315,6 +287,10 @@ The agent reviews the project vision and updates it when the completed feature c
 Because the vision is intended to describe the project as it currently exists and where it is heading, accepted work should not leave it stale.
 
 The agent may consult me before making substantial changes to the vision.
+
+### Changeset
+
+Every pull request carries a changeset. `mise run changeset` writes one into `.changeset/`, naming the bump and describing the change for the changelog a user will read — not for the reviewer who already saw the diff. A change with no user-visible effect still carries a changeset, created with `--empty`. CI rejects a pull request without one; the release pull request is exempt.
 
 ### Implementation Record
 

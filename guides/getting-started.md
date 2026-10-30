@@ -18,45 +18,45 @@ For the argument behind this structure, read the `README.md`. This guide starts 
 
 ## Install and verify
 
-The project's toolchain is [Vite+](https://viteplus.dev). Install its `vp` command once per machine, following the [Vite+ guide](https://viteplus.dev/guide/):
+[Mise](https://mise.jdx.dev) owns the toolchain and every task. Install it once per machine, following the [mise guide](https://mise.jdx.dev/getting-started.html):
 
 ```sh
-curl -fsSL https://vite.plus | bash
+curl https://mise.run | sh
 ```
 
-From the repository root, install the project's dependencies. Vite+ uses the Node version in `.node-version` and the pnpm version in `package.json`, downloading either when it is missing, and installs the commit-message hook that holds commits made from Oh My Pi to [Scoped Commits](https://scopedcommits.com/):
+From the repository root, provision the pinned tools. `mise.toml` pins them and `mise.lock` pins the exact downloads, so every machine and every CI runner gets the same versions — Node, pnpm, [Bun](https://bun.sh) (one test loads the `workflow` tool through Oh My Pi's real loader, and that loader runs on Bun), the [GitHub CLI](https://cli.github.com), [hk](https://hk.jdx.dev), [Fnox](https://fnox.jdx.dev), [Beads](https://github.com/steveyegge/beads) and [Worktrunk](https://worktrunk.dev):
 
 ```sh
-vp install
+mise install
 ```
 
-The gate also needs [Bun](https://bun.sh), which Vite+ does not install. One test loads the `workflow` tool through Oh My Pi's real loader, and that loader runs on Bun:
+Then bootstrap the repository. This installs the npm dependencies with the pinned pnpm, initializes the Beads work tracker, and installs every git hook — including the `commit-msg` hook that holds commits to [Scoped Commits](https://scopedcommits.com/). It is idempotent; run it again whenever the tooling changes:
 
 ```sh
-curl -fsSL https://bun.sh/install | bash
+mise run setup
 ```
 
 Then run the complete local gate:
 
 ```sh
-vp run check
+mise run check
 ```
 
-`vp run check` succeeds only when formatting, lint, and type checks, record validation, tests, and the documentation build all finish without an error. The documentation build also catches dead links.
+`mise run check` succeeds only when formatting, lint, and type checks, record validation, tests, and the documentation build all finish without an error. The documentation build also catches dead links.
 
-**Vite+ does not install the [GitHub CLI](https://cli.github.com) either.** The process runs on pull requests, so `gh` must be present and authenticated against your remote:
+**`gh` still needs your credentials.** The process runs on pull requests, so authenticate it against your remote:
 
 ```sh
 gh auth login
 ```
 
-Without it, `vp run status` cannot see the pull request and will say so rather than guess.
+Without it, `mise run status` cannot see the pull request and will say so rather than guess.
 
 When you need to diagnose the nonformatting parts of the gate, run:
 
 ```sh
-vp run validate
-vp run test
+mise run validate
+mise run test
 ```
 
 This repository produced this trimmed passing output:
@@ -65,12 +65,17 @@ This repository produced this trimmed passing output:
 $ node tools/validate.ts
 Validation passed: 0 violations
 
-$ vp test run
- Test Files  6 passed (6)
-      Tests  189 passed (189)
+$ node --test 'tools/**/*.test.ts'
+ℹ tests 120
+ℹ pass 120
+ℹ fail 0
+
+$ vitest run --dir .omp/tools
+ Test Files  4 passed (4)
+      Tests  107 passed (107)
 ```
 
-Run `vp run check` after changing the project; the agent runs it before claiming a feature is ready.
+`mise tasks` lists everything available. Run `mise run check` after changing the project; the agent runs it before claiming a feature is ready.
 
 ### If the gate fails
 
@@ -105,7 +110,7 @@ The [Running a Feature](./running-a-feature.md) guide you just read takes a chan
 ## The one command
 
 ```sh
-vp run status
+mise run status
 ```
 
 Run it with no arguments at the start of a session and whenever you need to orient yourself. It reads the branch, pull request, and proposal record, then reports the current phase, the next action, and who acts.
