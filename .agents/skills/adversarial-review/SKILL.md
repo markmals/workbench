@@ -60,9 +60,9 @@ A fabricated defect corrupts the review as surely as a missed one. The baseline 
 
 ## Convergence — the stopping signal
 
-This is hallucination-based termination. You are done when, and only when, you are **reduced to inventing problems that aren't there.**
+This is hallucination-based termination. Within one pass, you are done when, and only when, you are **reduced to inventing problems that aren't there.**
 
-- Real defect found → report it, it feeds back, you go again on the fixed code.
+- Real defect found → report it. It feeds back; another pass runs only when its fix was substantial.
 - Findings have decayed to wording nitpicks and stylistic preference → converged. Say so plainly.
 - You catch yourself manufacturing a flaw to have something to say → that is the exit signal, not a finding. Stop and report convergence.
 

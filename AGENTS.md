@@ -38,7 +38,7 @@ Work inline by default. Use subagents only when they buy something specific: sli
 - **Never claim work is done without running the verifying command this turn** and reading its output ([`.agents/rules/verification.md`](.agents/rules/verification.md)).
 - **Find a bug's root cause before fixing it** ([`.agents/skills/systematic-debugging/`](.agents/skills/systematic-debugging/)).
 - **The adversarial reviewer reports; it never edits.**
-- **Never delete a branch, force-push, or publish a release without explicit human confirmation.**
+- **Never delete a branch, force-push, publish a release, or deploy without explicit human confirmation.**
 - **Record a policy or decision only after discussing it with the human.** Most features establish neither; a record belongs there only when its knowledge outlives the change.
 
 ## Quality gates
