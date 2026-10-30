@@ -56,7 +56,7 @@ Per feature:
 
 ```
 branch → draft PR → proposal → tests → guides → code → validation
-       → cross-artifact review → adversarial review → preview → readiness report
+       → self-check → adversarial review → preview → readiness report
        → human review → revision → vision update → merge → release → cleanup
 ```
 
@@ -66,7 +66,7 @@ branch → draft PR → proposal → tests → guides → code → validation
 
 **Implementation.** Failing tests first, then guides written from the proposal, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents.
 
-**Review.** A cross-artifact pass looks for disagreement between proposal, tests, guides, and code. Then an adversarial reviewer — fresh context, different model — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
+**Review.** The agent reads proposal, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
 
 **Human review.** You read the report, the diff, and the preview, and comment. If your feedback changes the design rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: vision update, merge, release, cleanup.
 

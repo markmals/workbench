@@ -32,7 +32,7 @@ Skipping a step is lying.
 | Subagent finished | `git status` and `git diff` show the changes | The subagent's own success report |
 | Preview works | Load or install it, then exercise the changed behavior | The workflow going green |
 | Proposal implemented | `vp run check` exit 0, this turn | The code looking right |
-| All behavior implemented | The behavior inventory from phase 4 | Tests passing |
+| All behavior implemented | The self-check: each Detailed design behavior traced to its test, guide, and code | Tests passing |
 
 The red-green proof for a regression test:
 

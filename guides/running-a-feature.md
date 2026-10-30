@@ -46,7 +46,7 @@ branch workbench-2
 Phase 3 — Implementation
   The proposal is approved for implementation.
 
-Next (agent): Write failing tests, then guides, then code and gates. Complete cross-artifact and adversarial reviews, post the readiness report, and mark the pull request ready.
+Next (agent): Write failing tests, then guides, then code, and pass the gates. Self-check against the proposal, get one independent review, then post the readiness report and mark the pull request ready.
               Skill: .agents/skills/implementing-a-proposal/
 ```
 

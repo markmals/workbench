@@ -106,7 +106,7 @@ The process is iterative. Findings during implementation or review may cause the
 
 The full feature loop applies to changes that decide new behavior or resolve a meaningful design choice. A correction whose intent is already established, such as an unambiguous bug fix or dead link, may be handled directly. If investigation uncovers a design choice, return to proposal development before implementing it.
 
-The primary agent is the strategist: it owns domain understanding, conceptual modeling, proposal intent, delegation, and the excellence pass. Implementers realize bounded, already-understood behavior without redefining the proposal. A reframer challenges the problem formulation when it no longer explains the evidence. An independent adversary tries to falsify the finished work and reports findings without editing it.
+The primary agent owns domain understanding, conceptual modeling, and proposal intent, and it usually implements the work itself. It delegates only independent slices that can run in parallel, and it uses a reframer when the problem formulation no longer explains the evidence. An independent adversary tries to falsify the finished work and reports findings without editing it.
 
 Before entering the proposal path for a change, the agent asks the human whether they want a proposal, even if the request sounds like a feature or asks for one. An explicit yes for this change authorizes its proposal and later revisions, not future proposals. A no rules out the proposal and its draft pull request: proceed directly when intent is already clear, or clarify and narrow the work before implementation when a consequential design choice remains. This question precedes branch creation and PR preparation so unnecessary draft PRs are not opened.
 
@@ -152,7 +152,7 @@ Compare viable approaches against the grounded constraints, vision, policies, an
 
 ## Implementation
 
-After the human sets `awaiting-implementation`, the strategist delegates bounded implementation slices with their relevant detailed design, domain constraints, baseline, quality bar, governing records, and verification commands. If an implementer reports `NEEDS_STRATEGY` because the proposed model conflicts with evidence, stop that slice and return the conflict to the strategist. Use `reframing-a-problem` when repeated local fixes no longer explain the problem; revise intent with the human before continuing.
+After the human sets `awaiting-implementation`, the agent implements the proposal itself unless independent slices can run in parallel; a delegated slice gets its detailed design, constraints, scope, and verification commands. Use `reframing-a-problem` when repeated local fixes no longer explain the problem, or when a slice reports that the evidence contradicts the proposal's model; revise intent with the human before continuing.
 
 ### Behavioral Tests
 
@@ -185,53 +185,15 @@ Implementation continues until the project's quality gates pass. Depending on th
 
 Passing the quality gates is necessary but not sufficient for the feature to be considered complete.
 
-### Excellence Pass and Inline Reviews
+### Self-Check
 
-After behavior works and validation passes, the strategist uses `excellence-pass` to ask whether the implementation should remain: does it express the grounded model, reuse the right boundaries, and present a clear interface without inherited or speculative complexity? Substantive corrections return to implementation, then validation and this pass run again. A finding that changes intended behavior goes back to the proposal and the human.
-
-The strategist then obtains a proposal-compliance review and a code-quality review, in that order. Both must be clean before `reviewing-an-implementation` begins the cross-artifact review. These inline reviews do not replace the independent adversarial review.
-
-### Cross-Artifact Review
-
-Once the implementation passes its automated checks, the agent reviews the proposal, tests, guides, and code together.
-
-The purpose of this review is to find disagreement between the different representations of the feature.
-
-In particular, the agent verifies that:
-
-- the tests cover the behavior promised by the proposal;
-- the guides describe the same behavior exercised by the tests;
-- the code implements the behavior described by the proposal and guides;
-- no substantial documented behavior is missing from the implementation;
-- no substantial implemented behavior exists without being represented in the proposal or documentation; and
-- implementation details have not unintentionally changed the original scope or intent.
+Once the implementation passes its automated checks, the agent reads the proposal, tests, guides, and code together to find disagreement between the representations: tests that miss promised behavior, guides that describe something the tests do not exercise, code that implements behavior the proposal does not describe, or details that quietly changed scope or intent. It also asks whether this is the implementation that should remain — whether its structure expresses the proposal's model or leaks implementation conveniences into public behavior. It fixes what it finds, or records a deliberate divergence for the human.
 
 ### Adversarial Review
 
-The implementation is then reviewed independently by a subagent using a different model from the primary agent.
+The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and reports without editing.
 
-The reviewing agent receives the proposal, tests, guides, and implementation and attempts to find weaknesses rather than continue implementation.
-
-Its review considers issues such as:
-
-- weak, misleading, or incomplete tests;
-- implementation defects;
-- security vulnerabilities;
-- regressions;
-- scope creep;
-- undocumented behavior;
-- inconsistencies between artifacts;
-- violations of policies or decisions;
-- unnecessary complexity;
-- code smell;
-- fragile architecture; and
-- assumptions that have not been adequately validated.
-
-The reviewing agent reports its findings to the primary agent.
-
-The primary agent addresses findings it determines are legitimate. Findings it does not adopt are preserved and surfaced for human review rather than silently discarded.
-
-The adversarial reviewer does not decide whether the feature is acceptable. Its role is to produce an independent attempt to falsify the primary agent's claim that the work is complete.
+The primary agent fixes confirmed defects inside the proposal's scope. A finding outside that scope is never a reason to widen the change: it is declined with reasoning or filed as an issue. Declined findings are preserved for human review rather than silently discarded. The adversarial reviewer does not decide whether the feature is acceptable.
 
 ### Preview
 
@@ -239,7 +201,7 @@ Produce the preview selected in the proposal after review findings are resolved.
 
 ### Readiness Report
 
-After the cross-artifact and adversarial reviews and preview, the agent posts a readiness report describing implemented behavior, verification, any declined findings, and how to exercise the preview. `reviewing-an-implementation` owns this handoff. Moving the proposal to `active-review`, posting the report, and marking the pull request ready form one transition into human review.
+After the self-check, the adversarial review, and the preview, the agent posts a readiness report describing implemented behavior, verification, any declined findings, and how to exercise the preview. `reviewing-an-implementation` owns this handoff. Moving the proposal to `active-review`, posting the report, and marking the pull request ready form one transition into human review.
 
 ## Human Review
 
@@ -262,11 +224,11 @@ I then instruct the agent to process the review feedback. Additional context may
 
 If the feedback changes the intended design rather than merely correcting its implementation, the agent updates the proposal first.
 
-The agent then repeats the affected tests, guides, code, validation, excellence pass, cross-artifact review, and adversarial review against the revised proposal as necessary.
+The agent then repeats the affected tests, guides, code, validation, self-check, and adversarial review against the revised proposal as necessary.
 
 Implementation and human review therefore form a loop:
 
-**proposal → tests → guides → code → validation → excellence pass → inline reviews → cross-artifact review → adversarial review → preview → human review → revision**
+**proposal → tests → guides → code → validation → self-check → adversarial review → preview → human review → revision**
 
 The loop continues until I accept the feature.
 
@@ -401,7 +363,7 @@ At the project level:
 
 For each feature:
 
-**human opts into proposal → branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → tests → guides → code → validation → excellence pass → inline reviews → cross-artifact review → adversarial review → preview → ready pull request → human review → revision or acceptance → vision update → implemented record in the feature pull request → merge → required release → dependent updates → authorized cleanup**
+**human opts into proposal → branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → tests → guides → code → validation → self-check → adversarial review → preview → ready pull request → human review → revision or acceptance → vision update → implemented record in the feature pull request → merge → required release → dependent updates → authorized cleanup**
 
 The central invariant of the process is that no single artifact defines the feature by itself.
 

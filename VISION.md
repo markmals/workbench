@@ -1,6 +1,6 @@
 ---
 title: A Vision for Workbench
-updated: 2026-08-26
+updated: 2026-10-30
 ---
 
 # A Vision for Workbench
@@ -21,7 +21,7 @@ It is for someone who works with a coding agent daily, on projects they will sti
 
 **Keep several independent representations of that intent.** Proposal, tests, guides, code, and preview each describe the same behavior differently, so that a defect in one is visible against the others.
 
-**Make disagreement between them visible before release.** Cross-artifact review and adversarial review exist to find contradictions, not to confirm that work looks finished.
+**Make disagreement between them visible before release.** The implementing agent's self-check and an independent adversarial review exist to find contradictions, not to confirm that work looks finished.
 
 **Preserve the reasoning, not just the result.** Proposals, decisions, policies, and review discussion outlive the change. A future reader needs to know why, and the diff will not tell them.
 
@@ -58,7 +58,7 @@ Directions worth considering once the core is proven:
 - richer mechanical checks — proposals with no corresponding tests, guides describing behavior no test covers, policies no proposal has cited in a long time;
 - a dependent-project workflow, where a preview published by one repository is consumed by draft pull requests in others and moved onto the production release automatically;
 - worked examples of the process running end to end on projects of different shapes, since the hardest thing to convey about a process is what good output looks like;
-- measurement of whether adversarial review catches what confirmatory review misses, and which stages earn their cost in practice.
+- repeated measurement of which stages earn their cost as models change; [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) ran the first such experiment, and whether adversarial review catches what the self-check misses remains open.
 
 ## Non-goals
 
@@ -72,5 +72,6 @@ Directions worth considering once the core is proven:
 
 ## Revision history
 
+- **2026-10-30** — Replaced the separate cross-artifact review with the implementer's self-check and recorded the first stage-cost measurement, after [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) collapsed the implementation phase's review ceremony.
 - **2026-08-26** — Recorded the guides as part of the minimum viable product, after [proposal.0001](proposals/0001-workbench-2.md) brought them into scope and delivered them.
 - **2026-08-25** — Initial vision, written alongside [proposal.0001](proposals/0001-workbench-2.md).
