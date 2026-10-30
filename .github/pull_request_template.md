@@ -8,7 +8,7 @@
 - [ ] Tests written first
 - [ ] Guides written from the proposal
 - [ ] Quality gates pass
-- [ ] Cross-artifact review complete
+- [ ] Self-check against the proposal complete
 - [ ] Adversarial review complete
 - [ ] Preview published
 - [ ] Readiness report posted

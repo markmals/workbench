@@ -1,88 +1,50 @@
 ---
 name: reviewing-an-implementation
-description: Use when an implemented proposal has fresh validation evidence and needs its Phase 3 comparison, independent refutational review, human-exercisable preview, and ready-for-review handoff.
+description: Use when an implemented proposal has fresh validation evidence and needs its self-check, independent refutational review, human-exercisable preview, and ready-for-review handoff.
 ---
 
 # Reviewing an Implementation
 
-**Phase 3 — Implementation.** Compare the independent representations before asking a human to review the changed behavior. This procedure owns the confirmatory review, adversarial dispatch, preview, and readiness handoff. It does not decide whether the human accepts the work.
+**Phase 3 — Implementation.** Check the work against the proposal, have an agent without your context try to break it, then hand it to the human. This procedure does not decide whether the human accepts the work.
 
-## Inputs and order
+Begin after applicable validation has fresh evidence under `.agents/rules/verification.md`. Proceed in this order:
 
-Read these together before review. Add the current vision, policies, and decisions when they constrain the change.
-
-| Input                 | Read             |
-| --------------------- | ---------------- |
-| Intent                | Current proposal |
-| Executable behavior   | Changed tests    |
-| Human-facing behavior | Affected guides  |
-| Concrete behavior     | Implementation   |
-
-Proceed in this order:
-
-1. Cross-artifact review.
+1. Self-check.
 2. Dispatch `adversarial-review`; consume its report.
 3. Produce the preview.
 4. Post the readiness report and make the pull request ready together.
 
-Begin after applicable validation has fresh evidence under `.agents/rules/verification.md` and the strategist's excellence pass and ordered inline reviews have no open findings. A substantive fix re-enters those gates before cross-artifact review.
+## 1. Self-check
 
-## 1. Cross-artifact review
+Read the proposal, the changed tests, the affected guides, and the diff together. For each observable behavior in Detailed design — including boundary cases, errors, defaults, and side effects that could disagree — confirm that it is tested, described where a user would look when it is user-facing, and implemented. Then look the other way: anything implemented that the proposal and guides do not describe is scope creep or a gap in the proposal.
 
-This is a comparison of representations, not a code-quality review. Build a behavior inventory before judging alignment.
+Then ask whether this is the implementation that should remain. Does its structure fit the domain the proposal describes, or does it leak implementation conveniences into public behavior? Is there a simpler realization that expresses the proposal better, or complexity inherited from the baseline that no longer earns its place?
 
-### Build the behavior inventory
-
-Use one row per observable behavior. The four evidence columns are proposal, tests, guides, and code. Tick a source only when it explicitly covers the behavior. Investigate every row that is not fully ticked.
-
-| Behavior                 | Proposal | Tests | Guides | Code |
-| ------------------------ | -------- | ----- | ------ | ---- |
-| Reject malformed records | ✓        | ✓     | ✓      | ✓    |
-| Preserve input order     | ✓        | ✓     | —      | ✓    |
-
-Keep boundary cases, errors, defaults, and observable side effects as separate rows when they can disagree. Do not tick a source because it probably implies the behavior.
-
-### Make all six checks
-
-For every inventory row, establish all of these:
-
-1. Tests cover what the proposal promises.
-2. Guides describe what the tests exercise.
-3. Code implements what the proposal and guides describe.
-4. No documented behavior is missing from the implementation.
-5. No implemented behavior is absent from the proposal and guides — this catches scope creep.
-6. Implementation details have not silently changed scope or intent.
-
-### Resolve every gap
-
-Each non-full row resolves in exactly one way.
+Resolve each disagreement in exactly one way:
 
 | Resolution | Use when | Action |
 | --- | --- | --- |
-| Fix the wrong artifact | Intent has not changed | Correct the tests, guides, or code, then recheck the row. |
-| Revise the proposal | Intent or scope changed | Discuss with the human first. Then derive affected tests, guides, and code again. |
-| Record the divergence | It remains deliberate for human review | Name the behavior, affected sources, impact, and reason in the readiness report. |
+| Fix the wrong artifact | Intent has not changed | Correct the tests, guides, or code, and rerun the affected gates. |
+| Revise the proposal | Intent or scope changed | Discuss with the human first, then derive the affected artifacts again. |
+| Record the divergence | It remains deliberate for human review | Name the behavior, sources, impact, and reason in the readiness report. |
 
-You MAY edit tests, guides, and code to remove a disagreement. You MUST NOT revise a proposal without the human; that is a design change.
+You may edit tests, guides, and code. You must not revise a proposal without the human.
 
-Record the inventory, each gap, and its resolution. `ALIGNED` requires a fully ticked inventory. A record with deliberate gaps is `DIVERGENCES RECORDED`; a human design decision is `REVISION REQUIRED`.
+## 2. Independent review
 
-## 2. Dispatch and consume adversarial review
+Dispatch one subagent with fresh context for `adversarial-review`, on a different model from yours where the harness allows. Give it the proposal, the commit range, and the commands that verify the work. Tell it to try to show the work is not done — behavior missing or wrong relative to the proposal, edge cases the tests miss, tests that would still pass with a broken implementation, security or data-loss risks — to confirm findings by running code, to ignore style, naming, and formatting, and to report without editing.
 
-Dispatch a separate subagent with fresh context for `adversarial-review`. Use the strongest available portability rung: different model family, then different model, then a fresh-context run. Supply the current proposal, tests, guides, and implementation. The adversary reports only; it never edits the artifacts.
+Do not replace this dispatch with your own review. Consume its report:
 
-Do not replace this dispatch with your own review. The adversary attacks un-enumerated edges, test quality, interpretation, security surface, and proposal gaps from a refute-by-default stance.
+| Report item | Response |
+| --- | --- |
+| Confirmed defect inside the proposal's scope | Fix it and refresh the affected evidence. Run the review once more only when the fix was substantial. |
+| Suspicion | Verify it or drop it; never fix it blind. |
+| Proposal gap | Surface it to the human; do not silently choose an interpretation. |
+| Finding outside the proposal's scope | Never widen the change to fix it. Decline it with reasoning, or file it through `tracking-defects`. |
+| Declined finding | Preserve it with reasoning for the readiness report. |
 
-Consume its report before continuing:
-
-| Report item      | Response                                                                  |
-| ---------------- | ------------------------------------------------------------------------- |
-| Confirmed defect | Fix it, refresh affected evidence, and repeat the required review stages. |
-| Suspicion        | Verify it or drop it; never fix it blind.                                 |
-| Proposal gap     | Surface it to the human; do not silently choose an interpretation.        |
-| Declined finding | Preserve it with reasoning for the readiness report.                      |
-
-Repeat the adversarial stage after a defect fix. Continue until its verdict is `CONVERGED`. A disputed finding does not disappear because you decline it.
+A disputed finding does not disappear because you decline it.
 
 ## 3. Produce the preview
 
@@ -117,7 +79,7 @@ Previews are private by default. Do not publish one publicly unless the project 
 
 ## 4. Report readiness and mark ready
 
-Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. Fill every template section and add the cross-artifact inventory verdict, divergences, and resolutions.
+Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. Fill every template section and add the self-check's recorded divergences and their resolutions.
 
 | Report section | Required content |
 | --- | --- |
@@ -156,8 +118,9 @@ Do not leave the proposal, report, and pull-request state disagreeing. Ready mea
 
 ## Red flags
 
-- You reviewed code quality instead of comparing representations.
-- A behavior-inventory row is not fully ticked and has no recorded resolution.
+- Your self-check reviewed style instead of comparing the proposal, tests, guides, and code.
+- A disagreement between them has no recorded resolution.
+- You widened the change to fix a finding outside the proposal.
 - You changed proposal intent without the human.
 - You skipped independent adversarial review or dropped a declined finding.
 - The preview is fabricated, public by accident, detached from the pull request, or a bare URL.

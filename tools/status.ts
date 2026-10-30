@@ -132,7 +132,7 @@ const STEPS = {
         "3",
         "Implementation",
         "The proposal is approved for implementation.",
-        "Write failing tests, then guides, then code and gates. Complete cross-artifact and adversarial reviews, post the readiness report, and mark the pull request ready.",
+        "Write failing tests, then guides, then code, and pass the gates. Self-check against the proposal, get one independent review, then post the readiness report and mark the pull request ready.",
         "agent",
         SKILLS.implementation,
     ),
