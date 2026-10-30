@@ -1,9 +1,18 @@
 {
     "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
-    "changelog": ["@changesets/changelog-github", { "repo": "markmals/workbench" }],
+    "changelog": [
+        "@changesets/changelog-github",
+        {
+            "repo": "markmals/workbench"
+        }
+    ],
     "commit": false,
     "access": "restricted",
     "baseBranch": "main",
     "updateInternalDependencies": "patch",
-    "ignore": []
+    "ignore": [],
+    "privatePackages": {
+        "version": true,
+        "tag": true
+    }
 }
