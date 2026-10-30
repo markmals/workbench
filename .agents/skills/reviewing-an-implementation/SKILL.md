@@ -41,7 +41,7 @@ Do not replace this dispatch with your own review. Consume its report:
 | Confirmed defect inside the proposal's scope | Fix it and refresh the affected evidence. Run the review once more only when the fix was substantial. |
 | Suspicion | Verify it or drop it; never fix it blind. |
 | Proposal gap | Surface it to the human; do not silently choose an interpretation. |
-| Finding outside the proposal's scope | Never widen the change to fix it. Decline it with reasoning, or file it through `tracking-defects`. |
+| Finding outside the proposal's scope | Never widen the change to fix it. Decline it with reasoning, or file it through `tracking-work`. |
 | Declined finding | Preserve it with reasoning for the readiness report. |
 
 A disputed finding does not disappear because you decline it.
@@ -55,7 +55,7 @@ A preview is **the cheapest realistic artifact through which the human can exerc
 | Cheapest    | Do not stand up production infrastructure merely for review.              |
 | Realistic   | Do not substitute screenshots, transcripts, or descriptions for behavior. |
 
-Reviewing prose is not reviewing behavior. Use the configured project task and CI mechanism; run `vp run` with no task when the setup is unknown.
+Reviewing prose is not reviewing behavior. Use the configured project task and CI mechanism; run `mise tasks` when the setup is unknown.
 
 | Repository shape | Preview                                               |
 | ---------------- | ----------------------------------------------------- |
@@ -89,7 +89,7 @@ Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. F
 | Validation performed | Every command actually run in this session and its observed result, per `.agents/rules/verification.md`. Never report an unrun gate as passing. |
 | Adversarial findings adopted | Each accepted or fixed finding, or `- None.` |
 | Adversarial findings declined, with reasoning | Every declined finding and why it was declined, or `- None.` This section is always present. |
-| Defects discovered and deferred | Each deliberate, out-of-scope defect as a linked GitHub issue from `tracking-defects`, or `- None.` |
+| Defects discovered and deferred | Each deliberate, out-of-scope defect as a linked Beads item from `tracking-work`, or `- None.` |
 | Remaining limitations | Known behavior gaps or `- None.` |
 | What to look at first | The first behavior, preview action, or diff the human should inspect. |
 

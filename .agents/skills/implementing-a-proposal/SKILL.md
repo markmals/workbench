@@ -49,7 +49,7 @@ Write the minimum production code that makes the tests pass and matches the guid
 
 ## 4. Gates and commits
 
-Run `vp run check`, then the project-specific gates listed by `vp run`, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
+Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
 
 ## Then
 

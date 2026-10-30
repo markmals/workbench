@@ -91,7 +91,7 @@ VERDICT: BROKEN (n defects) | CONVERGED (no real defect found across all five le
 - **DEFECTS** → fixed when they fall inside the proposal's scope; the review runs once more only when a fix was substantial.
 - **SUSPICIONS** → verify or drop before acting. Never fix a suspicion blind.
 - **PROPOSAL GAPS** → surface to the user / route to the proposal. Do not let the implementation silently encode an answer.
-- **Findings outside the proposal's scope** → declined with reasoning or filed through `tracking-defects`; never fixed by widening the change.
+- **Findings outside the proposal's scope** → declined with reasoning or filed through `tracking-work`; never fixed by widening the change.
 
 ## Red flags — you're doing confirmatory review again
 

@@ -63,6 +63,8 @@ Consult the human before a substantial rewrite. Do not turn a narrow completion 
 
 ## 4. Record the accepted implementation
 
+Add the changeset if the work does not already carry one: `mise run changeset`, bump chosen deliberately, entry written for the person reading the changelog. A change with no user-visible effect still carries one, created with `--empty`. CI rejects a pull request without a changeset, so this is a gate, not a courtesy.
+
 After human acceptance and the vision update, set the proposal to `implemented` in the same feature pull request that contains the implementation. This status records accepted implementation, not a merged pull request or completed release. Record acceptance and any outstanding delivery in the proposal or PR, then commit and verify the updated integration candidate before merging. Never open a follow-up PR solely to move this status.
 
 Confirm the record is present in the pull request revision before marking a draft PR ready or merging; a local file or unpushed commit is not proof. For an already merged pull request, inspect its merged revision before concluding a local `accepted` status means the record is missing. If absent, ask the human how to reconcile it and keep any required delivery visible. Do not try to amend a merged pull request or open a status-only PR.
@@ -77,7 +79,7 @@ Choose a merge strategy that retains the proposal and PR discussion. Do not squa
 
 ## 6. Release
 
-When release is required and separately authorized, use the project's existing CI/CD process. Run `vp run` with no task to find the project's release path. Skip publication for approved merge-only delivery.
+When release is required and separately authorized, use the project's existing CI/CD process. Merging accumulates changesets on the default branch, and the release workflow opens a release pull request that runs `mise run version`: `changeset version` applies the pending changesets, bumping the version in the root `package.json` and writing `CHANGELOG.md`. Merging that release pull request is what publishes. Run `mise tasks` when the setup is unknown. Skip publication for approved merge-only delivery.
 
 **Never publish without explicit human confirmation.** Approval to merge is not approval to release.
 
@@ -104,6 +106,7 @@ Cleanup runs when confidence is highest. Treat it as a separate destructive oper
 - You changed an old policy or decision's meaning in place.
 - You merged without preserving why the final state differs.
 - You released because the PR merged.
+- You merged a pull request that carries no changeset.
 - A dependent PR still uses a preview version after release.
 - A preview or prerelease artifact outlives its PR without a tracked, authorized teardown plan.
 - You deleted a branch, force-pushed, or tore down a published prerelease artifact without explicit human confirmation.

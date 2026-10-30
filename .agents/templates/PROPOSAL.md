@@ -162,7 +162,7 @@ belongs elsewhere unless this change requires it.
 
 <!--
 Name deliberate exclusions and why. Defects discovered while writing this proposal that fall outside
-scope are filed as GitHub issues, not folded in; use .agents/skills/tracking-defects/.
+scope are filed in Beads, not folded in; use .agents/skills/tracking-work/.
 -->
 
 - <Excluded work and reason it is excluded.>
