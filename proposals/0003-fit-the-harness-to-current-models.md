@@ -2,7 +2,7 @@
 id: proposal.0003
 title: Fit the Harness to Current Models
 authors: [markmals, claude-opus-5-5]
-status: draft
+status: awaiting-implementation
 pull-request: 7
 issues: []
 supersedes: []
