@@ -117,9 +117,9 @@ Writing a proposal for an interface adapts the user-story guidance: say what the
 ### During human review
 
 - While a proposal is `active-review`, feedback that touches only look and feel is applied directly: the agent changes the code on the feature branch, runs `mise run check`, pushes, refreshes whatever the human is looking at (the pull-request preview, or a running build), and says what changed. The status stays `active-review`. The agent does not edit the proposal, post a readiness report, or run an adversarial review for it.
-- Feedback that changes what the feature does follows the existing path: the human sets `returned-for-revisions`, the agent updates the proposal first, and the affected tests, guides, code, gates, self-check, and review are repeated.
+- Feedback that changes what the feature does, or a design decision the proposal records, follows the existing path: the human sets `returned-for-revisions`, the agent updates the proposal first, and the affected tests, guides, code, gates, self-check, and review are repeated.
 - Feedback mixing both is split: the look-and-feel part is applied in review; the rest takes the existing path.
-- `PROCESS.md` (Human Review), `README.md`, and `guides/running-a-feature.md` (Phase 4) describe this, replacing "changes the design" with "changes what the feature does".
+- `PROCESS.md` (Human Review), `README.md`, and `guides/running-a-feature.md` (Phase 4) describe this, replacing "changes the design" with "changes what the feature does or a design decision the proposal records". `reviewing-an-implementation` routes feedback the same way.
 
 ### Between proposals
 
@@ -148,7 +148,7 @@ Wording only; phase derivation is unchanged.
 - Branch without a pull request (L114): adds that corrections and look-and-feel polish need no proposal.
 - Pull request without a proposal (L121): "Corrections and look-and-feel polish continue without a proposal. Otherwise ask the human whether they want a proposal for this change before writing one, unless they already answered for this change. If yes, draft and publish it."
 - `active-review` (L144): "Review the diff and the preview. Ask for look-and-feel changes as you go, comment on the pull request, or accept the work."
-- `returned-for-revisions` (L151): "Process the feedback; update the proposal first if what the feature does changed."
+- `returned-for-revisions` (L151): "Process the feedback; update the proposal first if what the feature does, or a design decision it records, changed."
 - `guides/running-a-feature.md`'s description of these messages matches.
 
 ### Supporting changes
@@ -210,6 +210,7 @@ Adopters update `AGENTS.md`, `PROCESS.md`, `README.md`, four skills, the proposa
 - **Accept first, polish afterward.** Review stays about behavior, but the human would accept an interface they have not finished shaping.
 - **Always a pull request with a preview for polish between proposals.** It is uniform, but it costs a pull request for a single spacing fix, where the project's normal direct-change path already applies.
 - **A polish tier with status detection or a pull-request label.** It is enforceable, but it is the tier framework with its own vocabulary and enforcement that proposal 0002 was withdrawn for.
+- **Route only changes to what the feature does back through the proposal.** The first implementation did this by replacing "changes the design" with "changes what the feature does". It would let review feedback overturn a technical decision the proposal records, such as a storage approach, without revising the proposal. The adversarial review found the gap, and the human chose to keep recorded design decisions on the proposal path.
 
 ## Open questions
 
