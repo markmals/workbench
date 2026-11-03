@@ -2,7 +2,7 @@
 id: proposal.0004
 title: Make Room for UI Polish
 authors: [markmals, claude-opus-5-5]
-status: accepted
+status: implemented
 pull-request: 8
 issues: []
 supersedes: []
