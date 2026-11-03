@@ -1,0 +1,1 @@
+import{t as e}from"./framework.DQW26gu-.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.CVCR_-kE.js`),[])};export{t as default};

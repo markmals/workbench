@@ -1,1 +1,0 @@
-import{t as e}from"./framework.DQW26gu-.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.2_cQWat7.js`),[])};export{t as default};
