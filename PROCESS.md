@@ -238,9 +238,9 @@ I leave general or inline pull request comments describing changes I want the ag
 
 I then instruct the agent to process the review feedback. Additional context may be supplied directly to the agent when it does not belong in a pull request comment.
 
-If the feedback changes what the feature does rather than merely correcting its implementation, the agent updates the proposal first.
+If the feedback changes what the feature does, or a design decision the proposal records, rather than merely correcting its implementation, the agent updates the proposal first.
 
-Feedback on look and feel alone is applied while the work stays in review: the agent changes the code, runs the quality gates, pushes, and refreshes the preview, without editing the proposal, changing its status, posting another readiness report, or repeating the adversarial review. Feedback that mixes both is split, and only the part that changes what the feature does goes back through the proposal.
+Feedback on look and feel alone is applied while the work stays in review: the agent changes the code, runs the quality gates, pushes, and refreshes the preview, without editing the proposal, changing its status, posting another readiness report, or repeating the adversarial review. Feedback that mixes both is split, and only the part that changes what the feature does or a recorded design decision goes back through the proposal.
 
 The agent then repeats the affected tests, guides, code, validation, self-check, and adversarial review against the revised proposal as necessary.
 

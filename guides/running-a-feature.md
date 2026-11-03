@@ -135,7 +135,7 @@ Ask for look-and-feel changes as you use it: tighter spacing, a different contro
 
 Then decide. Set `returned-for-revisions` when you want changes to what the feature does or to how it is built, or `accepted` when it is good enough to complete. You may ask the agent to update the status.
 
-Feedback that changes what the feature does sends the proposal back to Phase 2 first. Feedback correcting only implementation returns directly to Phase 3.
+Feedback that changes what the feature does, or a design decision the proposal records, sends the proposal back to Phase 2 first. Feedback correcting only implementation returns directly to Phase 3.
 
 ### The agent
 
@@ -143,7 +143,7 @@ The agent reads your comments and commits, updates the affected work, and repeat
 
 ### What status reports
 
-At `active-review`, it reports **Phase 4 — Human review** and tells you to review the diff and preview, ask for look-and-feel changes as you go, and then comment or accept. At `returned-for-revisions`, it reports **Phase 4 → 3 — Human review → Implementation**, and its next action covers the conditional case: update the proposal first if what the feature does changed. The tool cannot know which your feedback requires, so it names the common path and leaves the judgement in the text.
+At `active-review`, it reports **Phase 4 — Human review** and tells you to review the diff and preview, ask for look-and-feel changes as you go, and then comment or accept. At `returned-for-revisions`, it reports **Phase 4 → 3 — Human review → Implementation**, and its next action covers the conditional case: update the proposal first if what the feature does, or a design decision it records, changed. The tool cannot know which your feedback requires, so it names the common path and leaves the judgement in the text.
 
 ## Phase 5 — Completion and release
 

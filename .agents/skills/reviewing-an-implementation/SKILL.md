@@ -118,7 +118,7 @@ Do not leave the proposal, report, and pull-request state disagreeing. Ready mea
 
 ### Look-and-feel feedback in review
 
-While the proposal is `active-review`, apply feedback that touches only look and feel with [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md): change the code, run the gates, push, refresh the preview, and say what changed. Do not edit the proposal, change its status, post another readiness report, or rerun the adversarial review. Feedback that changes what the feature does goes through the proposal first, after the human returns the work with `returned-for-revisions`. Split feedback that mixes both.
+While the proposal is `active-review`, apply feedback that touches only look and feel with [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md): change the code, run the gates, push, refresh the preview, and say what changed. Do not edit the proposal, change its status, post another readiness report, or rerun the adversarial review. Feedback that changes what the feature does, or a design decision the proposal records, goes through the proposal first, after the human returns the work with `returned-for-revisions`. Split feedback that mixes both.
 
 ## Red flags
 

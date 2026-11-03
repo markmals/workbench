@@ -148,7 +148,7 @@ const STEPS = {
         "4 → 3",
         "Human review → Implementation",
         "The human returned the pull request for revisions.",
-        "Process the feedback; update the proposal first if what the feature does changed.",
+        "Process the feedback; update the proposal first if what the feature does, or a design decision it records, changed.",
         "agent",
         SKILLS.implementation,
     ),
