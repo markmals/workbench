@@ -1,7 +1,7 @@
 ---
 id: guide.running-a-feature
 title: Running a Feature
-describes: [proposal.0001]
+describes: [proposal.0001, proposal.0004]
 ---
 
 # Running a Feature
@@ -35,6 +35,8 @@ A typo, a dead link, or a bug whose correct behavior was never in question does 
 
 The agent judges this and tells you which it thinks the change is. You can ask for the full process on anything, at any time, without explaining why. Escalating is always available; the agent quietly deciding your feature is a small fix is the failure mode to watch for.
 
+Polishing an interface does not need a proposal either. A proposal says what a feature does: what a user can do and find out, what happens, and what they are told. Its look and feel — layout, sizes, spacing, type, color, motion, which control presents a choice, how it is operated, and the wording of labels — is yours to decide by looking at the running UI. Ask for changes as you see them. The agent keeps the UI running where you can see it, makes one change at a time, commits what you keep, and lands the work the way the project lands other changes made without a proposal. If a request would change what the feature does, such as keeping a provider's models listed after signing out, it stops and asks whether you want a proposal.
+
 Here is the status command run in this repository while its proposal was ready for implementation:
 
 ```text
@@ -66,13 +68,13 @@ The pull request exists this early because it is the durable workspace for one f
 
 ### What status reports
 
-Before a branch exists, it reports **Phase 1 — Preparation** and tells the agent to create one. On a feature branch without a pull request, it again reports Phase 1 and tells the agent to push the branch and open a draft pull request. You are not expected to perform either action.
+On the default branch, or on a branch without a pull request, it reports **Phase 1 — Preparation** and tells the agent to ask whether you want a proposal before it creates a branch or pull request for one; corrections and look-and-feel polish go ahead without one. You are not expected to create the branch or the pull request yourself.
 
 ## Phase 2 — Proposal
 
 ### You
 
-React to the proposal until it represents the change you intend. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds.
+React to the proposal until it represents the change you intend. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds. Spend it on what the feature does; how it looks is decided on the preview, not here.
 
 Do not leave an uncertainty for the agent to infer. It records one as:
 
@@ -90,7 +92,7 @@ The agent writes `proposals/<NNNN>-<slug>.md` and pushes it as soon as it is coh
 
 ### What status reports
 
-With a draft pull request but no proposal, it reports **Phase 2 — Proposal** and tells the agent to write and push one. Once a `draft` proposal exists, it still reports Phase 2 and tells you to edit it or request changes. It remains `draft` for every round until you settle it.
+With a draft pull request but no proposal, it reports **Phase 2 — Proposal** and tells the agent to ask whether you want one, unless you already answered; corrections and look-and-feel polish continue without one. Once a `draft` proposal exists, it still reports Phase 2 and tells you to edit it or request changes. It remains `draft` for every round until you settle it.
 
 ## Phase 3 — Implementation
 
@@ -104,7 +106,7 @@ The order is fixed:
 
 1. Write failing tests for the report export the proposal specifies.
 2. Write guides from the proposal and compare them with the tests.
-3. Implement the code.
+3. Implement the code. Where the proposal leaves look and feel open, the agent chooses it to fit the project's existing interface and its platform's conventions, for you to refine in review.
 4. Run the gate with `mise run check`.
 
 `mise run check` runs the tests, then `hk check --all` for formatting, lint, and type checks, then `validate` and `docs:build`.
@@ -129,17 +131,19 @@ Three things arrive together: a readiness-report comment, a diff, and a preview 
 
 Pay particular attention to the **Declined adversarial findings** section. It records findings the agent disagreed with rather than silently dropping them — the highest-signal part of the report.
 
-Then decide. Set `returned-for-revisions` when you want changes, or `accepted` when it is good enough to complete. You may ask the agent to update the status.
+Ask for look-and-feel changes as you use it: tighter spacing, a different control, clearer wording. The agent applies them on the pull request while the work stays in review, so there is no status to change and no proposal to edit.
 
-Feedback that changes the design sends the proposal back to Phase 2 first. Feedback correcting only implementation returns directly to Phase 3.
+Then decide. Set `returned-for-revisions` when you want changes to what the feature does or to how it is built, or `accepted` when it is good enough to complete. You may ask the agent to update the status.
+
+Feedback that changes what the feature does, or a design decision the proposal records, sends the proposal back to Phase 2 first. Feedback correcting only implementation returns directly to Phase 3.
 
 ### The agent
 
-The agent reads your comments and commits, updates the affected work, and repeats the relevant implementation and review work. It cannot accept the feature.
+The agent reads your comments and commits, updates the affected work, and repeats the relevant implementation and review work. A look-and-feel change needs only the code change, the gate, a push, and a refreshed preview; the agent tells you what changed and where to look. It cannot accept the feature.
 
 ### What status reports
 
-At `active-review`, it reports **Phase 4 — Human review** and tells you to review the diff and preview, then comment or accept. At `returned-for-revisions`, it reports **Phase 4 → 3 — Human review → Implementation**, and its next action covers the conditional case: update the proposal first if the design changed. The tool cannot know which your feedback requires, so it names the common path and leaves the judgement in the text.
+At `active-review`, it reports **Phase 4 — Human review** and tells you to review the diff and preview, ask for look-and-feel changes as you go, and then comment or accept. At `returned-for-revisions`, it reports **Phase 4 → 3 — Human review → Implementation**, and its next action covers the conditional case: update the proposal first if what the feature does, or a design decision it records, changed. The tool cannot know which your feedback requires, so it names the common path and leaves the judgement in the text.
 
 ## Phase 5 — Completion and release
 

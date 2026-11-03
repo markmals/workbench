@@ -1,7 +1,7 @@
 ---
 id: guide.writing-a-good-proposal
 title: Writing a Good Proposal
-describes: [proposal.0001]
+describes: [proposal.0001, proposal.0004]
 ---
 
 # Writing a Good Proposal
@@ -32,7 +32,30 @@ Detailed design is the source from which tests derive. It must specify observabl
 
 That is the Swift Evolution bar the template borrows. A sentence such as “make validation robust” does not meet it; it leaves a later person to invent what invalid input means, what the user observes, and which behavior wins at a boundary.
 
-Write the choices you expect the tests to prove. If two reasonable implementations would expose different behavior and the proposal does not choose, the design is incomplete. Raise the question with the human rather than allowing the agent to make an unreviewed decision.
+Write the choices you expect the tests to prove. If two reasonable implementations would expose different behavior and the proposal does not choose, the design is incomplete. Two implementations that differ only in look and feel do not count.
+
+## Leave look and feel to the running UI
+
+A proposal for an interface says what the feature does: what a user can do, what they can find out, what happens as a result, what they are told when something goes wrong, and anything the project guarantees. It does not say how the screen looks or how it is operated. Layout, sizes, spacing, type, color, motion, which control presents a choice, and the wording of labels are look and feel, and you decide them by looking at the running UI — in the preview during review, or in a polish session afterward.
+
+Pinning them in prose costs twice. The proposal becomes a screen specification that cannot be judged until it is built, and every visual tweak afterward looks like a change of intent. One Mac app's settings proposal fixed the window at 715 points wide and described Sign Out as a red button; it went through five revise-and-approve rounds while the panes were refined.
+
+Use the redesign test: would this sentence need to change if the screen were redesigned while the feature did the same thing? If so, leave it out.
+
+```text
+Before:
+- The provider page shows a red Sign Out button below the Account group.
+- The window is a fixed 715 points wide with a 215-point sidebar.
+- Add Provider… opens a sheet listing every provider.
+
+After:
+- A user can sign out of a provider from its page. Its models become unavailable;
+  if the default model was one of them, the default becomes the first available model.
+- A user can add any supported provider.
+- With no provider signed in, the user is told that no models are available.
+```
+
+Two exceptions keep the line honest. Wording stays out unless the exact words are themselves the requirement — legal text, text a user must type or match, or a term the project's vocabulary fixes; what a message must tell the user always belongs. Accessibility commitments, such as every action being reachable from the keyboard, are what the feature does, even though how a screen meets them is look and feel. For a command-line tool, commands, flags, exit codes, and machine-readable output are what it does; its colors, alignment, and help-text wording are look and feel.
 
 ## Do not create a second specification
 
@@ -85,6 +108,7 @@ For the full path from proposal to release, see [Running a Feature](./running-a-
 | Motivation begins with “Add” or “Build” | The fix is masquerading as the problem. | Restate the harm, affected people, evidence, and workaround without naming an answer. |
 | A design sentence leaves two observable outcomes possible | A later implementer must invent a decision. | Choose the behavior or add a clarification marker. |
 | Acceptance checkboxes repeat Detailed design | There are two specifications that can drift. | Delete Acceptance criteria. |
+| Detailed design names sizes, colors, or controls, or quotes words that are not themselves a requirement | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI. |
 | “Out of scope” means “not finished” | The proposal hides required work. | Put the work in scope or reduce the change honestly. |
 | Two motivations need separate explanations | The proposal is really two changes. | Split it into coherent proposals. |
 | An alternative is a weak caricature | The reader's real objection is unaddressed. | State the strongest version and explain the trade-off. |
