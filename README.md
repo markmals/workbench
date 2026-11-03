@@ -69,7 +69,7 @@ branch → draft PR → proposal → tests → guides → code → validation
 
 **Review.** The agent reads proposal, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
 
-**Human review.** You read the report, the diff, and the preview, and comment. If your feedback changes the design rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: vision update, merge, release, cleanup.
+**Human review.** You read the report, the diff, and the preview, and comment. Look-and-feel feedback is applied while the work stays in review. If your feedback changes what the feature does rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: vision update, merge, release, cleanup.
 
 The full description is in [`PROCESS.md`](PROCESS.md). The operative contract your agent reads every session is [`AGENTS.md`](AGENTS.md).
 
