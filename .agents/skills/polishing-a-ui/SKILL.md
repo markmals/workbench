@@ -19,6 +19,8 @@ Look and feel — how an interface looks and how it is operated — is decided b
 
 The test: would the sentence change if the screen were redesigned while the feature did the same thing? A change that removes something a user could do or find out is never polish. When a request could be either, ask the human which it is in one line before acting.
 
+A look-and-feel detail an earlier proposal happens to pin, such as a window width or a button's color, is still polish. Change it and leave the proposal alone; it is the history of what was decided then.
+
 ## The loop
 
 1. Get the interface running where the human can see it — a development server, a simulator or installed build, or the pull-request preview — and keep it current after every change.
