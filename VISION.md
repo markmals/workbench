@@ -1,6 +1,6 @@
 ---
 title: A Vision for Workbench
-updated: 2026-10-30
+updated: 2026-11-03
 ---
 
 # A Vision for Workbench
@@ -17,7 +17,7 @@ It is for someone who works with a coding agent daily, on projects they will sti
 
 ## Goals
 
-**Make intent explicit before implementation begins.** The proposal exists so that what was meant is recoverable independently of the conversation that produced it.
+**Make intent explicit before implementation begins.** The proposal exists so that what was meant is recoverable independently of the conversation that produced it. Intent is what a feature does; its look and feel is decided by the human on the running software, where a preview shows it better than prose can.
 
 **Keep several independent representations of that intent.** Proposal, tests, guides, code, and preview each describe the same behavior differently, so that a defect in one is visible against the others.
 
@@ -72,6 +72,7 @@ Directions worth considering once the core is proven:
 
 ## Revision history
 
+- **2026-11-03** — Limited intent to what a feature does and left look and feel to the human on the running software, after [proposal.0004](proposals/0004-make-room-for-ui-polish.md) gave interface polish a place outside proposals.
 - **2026-10-30** — Replaced the separate cross-artifact review with the implementer's self-check and recorded the first stage-cost measurement, after [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) collapsed the implementation phase's review ceremony.
 - **2026-08-26** — Recorded the guides as part of the minimum viable product, after [proposal.0001](proposals/0001-workbench-2.md) brought them into scope and delivered them.
 - **2026-08-25** — Initial vision, written alongside [proposal.0001](proposals/0001-workbench-2.md).
