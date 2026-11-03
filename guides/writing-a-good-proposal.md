@@ -108,7 +108,7 @@ For the full path from proposal to release, see [Running a Feature](./running-a-
 | Motivation begins with “Add” or “Build” | The fix is masquerading as the problem. | Restate the harm, affected people, evidence, and workaround without naming an answer. |
 | A design sentence leaves two observable outcomes possible | A later implementer must invent a decision. | Choose the behavior or add a clarification marker. |
 | Acceptance checkboxes repeat Detailed design | There are two specifications that can drift. | Delete Acceptance criteria. |
-| Detailed design names sizes, colors, controls, or labels | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI. |
+| Detailed design names sizes, colors, or controls, or quotes words that are not themselves a requirement | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI. |
 | “Out of scope” means “not finished” | The proposal hides required work. | Put the work in scope or reduce the change honestly. |
 | Two motivations need separate explanations | The proposal is really two changes. | Split it into coherent proposals. |
 | An alternative is a weak caricature | The reader's real objection is unaddressed. | State the strongest version and explain the trade-off. |

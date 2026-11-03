@@ -56,7 +56,8 @@ Stop on that request and keep polishing the rest. In review, it goes through the
 | --- | --- |
 | Edit a proposal to record look and feel | Commit the code; the running UI is the record |
 | Change a status or post a readiness report for a polish round | Push, refresh the preview, and say what changed |
-| Ask "Do you want a proposal?" for spacing, color, a control, or a label | Make the change |
+| Ask "Do you want a proposal?" for spacing, color, a control, or wording that is not a requirement | Make the change |
+| Change words a proposal makes a requirement (legal text, text a user types or matches, a fixed term) | Treat it as what the feature does: take the proposal path |
 | Polish without a running UI the human can see | Start one first |
 | Update a test's expected color, size, or label to match the new look | Rewrite the test to assert behavior |
 | Call a change to what a user can do "polish" | Stop and take the proposal path |

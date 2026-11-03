@@ -9,7 +9,7 @@ Run `mise run status` at the start of every session and whenever you are unsure 
 Ask one question: **does this change decide something?** Look and feel — how an interface looks and how it is operated — is the exception: the human decides it by looking at the running UI, not in a proposal.
 
 - If intent already exists — an approved proposal promises the behavior, or the correct behavior is obvious (a typo, a dead link, a bug whose fix is unambiguous) — implement it directly. Say which case it is, in one line, before you start.
-- If the human is shaping look and feel — layout, sizes, spacing, type, color, motion, which control presents a choice, how it is operated, wording — make the changes directly with `.agents/skills/polishing-a-ui/`. Say so in one line before you start.
+- If the human is shaping look and feel — layout, sizes, spacing, type, color, motion, which control presents a choice, how it is operated, and wording whose exact words are not themselves a requirement — make the changes directly with `.agents/skills/polishing-a-ui/`. Say so in one line before you start.
 - If the change decides something, ask the human whether they want a proposal for it. Only after an explicit yes: create a branch, push it, open a draft pull request, and write the proposal with `.agents/skills/writing-a-proposal/`. A request to "start a feature" or "write a proposal" is not that yes, and neither is `mise run status` output.
 - If a small fix turns out to need a design decision, or polish turns out to change what the feature does, stop and ask the proposal question then.
 

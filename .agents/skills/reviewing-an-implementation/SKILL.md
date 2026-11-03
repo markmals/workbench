@@ -16,7 +16,7 @@ Begin after applicable validation has fresh evidence under `.agents/rules/verifi
 
 ## 1. Self-check
 
-Read the proposal, the changed tests, the affected guides, and the diff together. For each observable behavior in Detailed design — including boundary cases, errors, defaults, and side effects that could disagree — confirm that it is tested, described where a user would look when it is user-facing, and implemented. Then look the other way: anything implemented that the proposal and guides do not describe is scope creep or a gap in the proposal. Look and feel the proposal leaves open is neither.
+Read the proposal, the changed tests, the affected guides, and the diff together. For each observable behavior in Detailed design — including boundary cases, errors, defaults, and side effects that could disagree — confirm that it is tested, described where a user would look when it is user-facing, and implemented. Then look the other way: anything implemented that the proposal and guides do not describe is scope creep or a gap in the proposal. Look and feel the proposal leaves open is neither, and neither is a look-and-feel detail the proposal pinned that the human has since changed through polish.
 
 Then ask whether this is the implementation that should remain. Does its structure fit the domain the proposal describes, or does it leak implementation conveniences into public behavior? Is there a simpler realization that expresses the proposal better, or complexity inherited from the baseline that no longer earns its place?
 

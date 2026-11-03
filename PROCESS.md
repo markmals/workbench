@@ -203,11 +203,11 @@ Passing the quality gates is necessary but not sufficient for the feature to be 
 
 ### Self-Check
 
-Once the implementation passes its automated checks, the agent reads the proposal, tests, guides, and code together to find disagreement between the representations: tests that miss promised behavior, guides that describe something the tests do not exercise, code that implements behavior the proposal does not describe, or details that quietly changed scope or intent. Look and feel the proposal leaves open is not such a disagreement. It also asks whether this is the implementation that should remain — whether its structure expresses the proposal's model or leaks implementation conveniences into public behavior. It fixes what it finds, or records a deliberate divergence for the human.
+Once the implementation passes its automated checks, the agent reads the proposal, tests, guides, and code together to find disagreement between the representations: tests that miss promised behavior, guides that describe something the tests do not exercise, code that implements behavior the proposal does not describe, or details that quietly changed scope or intent. Look and feel the proposal leaves open is not such a disagreement, and neither is a look-and-feel detail the proposal pinned that I have since changed through polish. It also asks whether this is the implementation that should remain — whether its structure expresses the proposal's model or leaks implementation conveniences into public behavior. It fixes what it finds, or records a deliberate divergence for the human.
 
 ### Adversarial Review
 
-The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and reports without editing.
+The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and look and feel, and reports without editing.
 
 The primary agent fixes confirmed defects inside the proposal's scope. A finding outside that scope is never a reason to widen the change: it is declined with reasoning or filed in Beads. Declined findings are preserved for human review rather than silently discarded. The adversarial reviewer does not decide whether the feature is acceptable.
 
