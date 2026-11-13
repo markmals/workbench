@@ -12,7 +12,7 @@ supersedes: []
 
 ## Summary
 
-Keep current requirements in Gherkin features, native contracts, and domain references. Keep proposals as change records. Define ten artifact roles and when each is required, revise policies and decisions in place, and update Workbench's process, validation, documentation, and own specifications to use this model.
+Keep current requirements in project-appropriate specifications, preserve proposals as change records, and revise policies and decisions in place. Document ten conditional artifact roles and supply reusable Gherkin guidance for projects that choose it. Update Workbench's process and existing tooling without introducing a specification framework.
 
 ## Motivation
 
@@ -24,6 +24,8 @@ The same pattern occurs in local adopting projects. Pico's `proposals/0008-backg
 
 The owner wants to preserve proposal development, human approval, tests before code, independently written guides, and review. Maintaining a second prose specification compiled from proposals would add another representation to synchronize. The requested change instead gives each current requirement an authoritative home, makes changes there directly, and preserves earlier states through Git and the change record.
 
+Review of the first draft exposed a second problem: mandatory Gherkin fits some application workflows better than library interfaces. Pitlane needs precise public declarations and semantic API contracts for developer and agent consumers. Requiring a Gherkin counterpart for every API promise would add a translation layer without establishing that it improves understanding or verification. The owner also wants reusable Gherkin guidance available to projects that benefit from it.
+
 ## Domain grounding
 
 ### Established context
@@ -33,6 +35,7 @@ The owner wants to preserve proposal development, human approval, tests before c
 - The [Gherkin parser and compiler](https://github.com/cucumber/gherkin) expose a document model and executable scenarios independently of Cucumber's runner. A project can keep Gherkin while using idiomatic test-framework bindings. Scenario outlines, backgrounds, and inherited tags have defined semantics that integrations must preserve.
 - [OpenSpec's concepts](https://github.com/Fission-AI/OpenSpec/blob/main/docs/concepts.md) distinguish current specifications from proposed changes. Workbench can use that distinction with ordinary branch diffs rather than adopting a second delta-specification language.
 - [Michael Nygard's architecture decision records](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) preserve the context and consequences of significant choices. This proposal retains that information while choosing mutable current decision files and Git history for previous versions.
+- Addy Osmani's _You're probably overprompting Claude_, supplied by the owner as four screenshots, recommends a clear goal, executable verification, removing instructions and adding back what is missed, and fresh-context review against the specification. It also discusses a single agent using skills. This is practitioner guidance for keeping the core process small and making specialized instructions available when relevant; the reported model evaluations were not independently verified here.
 
 ### Repository observations
 
@@ -43,6 +46,8 @@ The local SpecKit's `internal/coreassets/templates/rules/spec-conventions.md` al
 Mutable files still require coherent edits. Flexscope's `features/0017-flexmac/models/walker.md` contains changes explicitly described as "flagged here, not yet propagated" to the shared node-identity model. Appending an amendment without changing its owning definition leaves the same reconstruction problem inside the specification library.
 
 SpecKit's `docs/design/feature-loop.md` previously considered retaining contracts while consuming other specifications into tests and guides. That document is marked proposal / direction-setting. Its historical measurements and conclusions are context for this discussion, not validation of the design proposed here.
+
+Pitlane's `packages/content/README.md` specifies that `createContent()` returns synchronously without loading entries and that `getEntry()` returns `undefined` for a missing ID. Its `packages/assets/README.md` states that looking up a module's stylesheets never compiles that module for the browser. Those are behavioral requirements expressed directly as API contracts. The declarations alone cannot communicate every such guarantee, and these guarantees do not require a Given/When/Then representation.
 
 ### Relevant constraints and principles
 
@@ -59,7 +64,7 @@ The conceptual distinctions are:
 
 The ontology assessment is REVISE. The material conflation is a change record also acting as an indefinitely current definition of a capability. The missing distinction is between authority over current requirements and provenance explaining how those requirements changed. No new work-item or approval concept is needed.
 
-A format is separate from an artifact's role. A native schema can be both source code and a contract. A Gherkin rule can carry the authoritative requirement for a product policy. The ten roles below do not require ten independent files or ten copies of a fact.
+A format is separate from an artifact's role. Public declarations with semantic contract documentation can fulfill both behavioral and structural specification roles. A Gherkin rule can carry a product policy. The ten roles below account for information and responsibilities; they do not require ten independent files or a schema for every role.
 
 ### Quality bar
 
@@ -67,7 +72,7 @@ A reader can find a capability's current requirements without replaying proposal
 
 ### Remaining uncertainty
 
-The reusable Gherkin integrations will be designed separately, as the owner explicitly requested. Workbench currently runs its record-tool tests with `node:test` and its workflow-tool tests with Vitest. The integration and any necessary runner migration must be selected before implementation is approved; the open question below records that dependency. No claim about an available Swift Testing or Vitest integration is made here.
+Whether a specification is clear and discoverable remains a review judgment. The implementation must demonstrate the approach with a library contract and an application workflow, using the existing representations where they suffice. Reusable Vitest and Swift Testing integration APIs will be designed separately. Their availability is not a prerequisite for this process change, and this proposal does not claim that those integrations already exist.
 
 ## Existing baseline
 
@@ -86,181 +91,148 @@ Workbench has three existing implemented proposals, six guides, and no substanti
 
 ## Proposed solution
 
-Maintain the current contract directly, in the form suited to each fact. Use Gherkin for behavior, native formats for structural interfaces and data contracts, and short domain references for shared meanings that scenarios or schemas would otherwise leave implicit. Keep policies and decisions as current records. Keep proposals as historical explanations of changes.
+Maintain current requirements directly in the representation suited to the surface: public API contracts and declarations, native protocol schemas, current reference prose, or Gherkin rules and scenarios. Reuse an adequate existing source. Add a document only when necessary information has no adequate home. Keep policies and decisions current, and keep proposals as explanations of changes.
 
-A feature branch contains the proposed end state of those artifacts. The proposal identifies the intended delta and its reasons. The main branch contains the integrated contract, while a release tag identifies the contract shipped with that release. Tests exercise the implementation against that contract. The documentation site renders the current sources without committing a generated prose specification.
+A feature branch contains the proposed end state. The proposal bounds the authorized change and explains its reasons. Main contains the integrated contract; a release tag identifies the contract shipped with that release. Tests, guides, and implementation change with the affected requirements. Workbench supplies optional Gherkin guidance once, while projects retain their own documentation and testing tools.
 
 ## Detailed design
 
-### 1. The complete artifact inventory
+### 1. Ten roles as a complete accounting
 
-`PROCESS.md` defines the following ten durable roles, including their trigger and update responsibility. The contract, templates, skills, and guides use the same inventory. There is no requirement to create an empty artifact merely because the inventory has a row for it.
+`PROCESS.md` defines the following inventory and links to concise authoring guidance. These are conditional roles. A file can fulfill more than one role, and a feature need not produce an artifact for every row. The short agent contract points to that guidance instead of repeating the inventory or loading every specialized procedure.
 
 | Role | Current authority and expected home | Creation and maintenance trigger |
 | --- | --- | --- |
-| Behavioral specification | `specs/features/<slug>.feature`, organized by capability. Owns observable behavior, rules, failures, and scenarios. | Add or revise when required behavior changes. Extend the existing owner rather than making a file per proposal. |
-| Native contract | The owning subsystem's native schema, exported interface, protocol definition, or persisted-format definition. | Add or revise when that boundary changes. Keep a single source in its native format. |
-| Tests | The project's native test locations and frameworks. Behavioral tests exercise the feature scenarios; other tests provide additional evidence. | Change with behavior, contracts, implementation risks, and regressions. Preserve useful non-Gherkin tests. |
-| Guides | `guides/<slug>.md`, written for the feature's intended user, including consuming developers for libraries. | Add or revise when users must do or understand something differently. |
-| Implementation | Source code and executable configuration, including build definitions, task graphs, environment schemas, and design tokens. | Change to realize the approved behavior or technical change. |
-| Vision | `VISION.md`. Owns purpose, audience, goals, principles, boundaries, and direction. | Revise when these change. Avoid turning it into a complete feature catalogue. |
-| Domain references | `specs/domain/<slug>.md`. Own shared terminology, identities, relationships, and lifecycle meanings. | Add when feature-local explanations are insufficient or multiple features depend on a nontrivial shared meaning. Revise that owner when the meaning changes. |
-| Policies | `policies/<NNNN>-<slug>.md`. One logical continuing constraint, its applicability, rationale, and enforcement. | Add only after human agreement; revise in place or delete when retired. |
-| Decisions | `decisions/<NNNN>-<slug>.md`. One current significant choice, its context, alternatives, and consequences. | Add only after human agreement; revise in place or delete when the choice no longer applies. |
-| Proposals | `proposals/<NNNN>-<slug>.md`. One change and the reasons for it. | Create through the existing proposal process. Revise while the change is being designed or reviewed; retain the completed record as history. |
+| Behavioral specification | Public API contract documentation, current reference prose, or Gherkin files, organized by capability or interface. Owns observable behavior, defaults, failures, and guarantees. | Revise when required behavior changes. Reuse the source that already owns it. |
+| Native contract | The subsystem's declarations, schema, protocol definition, or persisted-format definition. | Revise when its structural boundary changes. Keep the native source rather than a Markdown copy. |
+| Tests | Native test locations and frameworks, including behavioral, type, property, integration, and other appropriate tests. | Verify the current contract and relevant implementation risks. Use Gherkin bindings when that representation is chosen. |
+| Guides | `guides/` or the project's existing user-documentation home, written for the intended user, including consuming developers. | Revise when users must do or understand something differently. |
+| Implementation | Code and executable configuration, including build definitions, tasks, environment schemas, and design tokens. | Change to realize the approved behavior or technical change. |
+| Vision | `VISION.md`: purpose, audience, goals, principles, boundaries, and direction. | Revise when these change. Avoid an exhaustive feature catalogue. |
+| Domain references | Short explanations near the owning specifications of shared terminology, identity, relationships, and lifecycle meanings. | Add only when existing feature or interface documentation cannot adequately explain a shared meaning. |
+| Policies | `policies/<NNNN>-<slug>.md`: one continuing constraint, its scope, rationale, and enforcement. | Add after human agreement, revise in place, and delete when retired. |
+| Decisions | `decisions/<NNNN>-<slug>.md`: one current significant choice, context, alternatives, and consequences. | Add after human agreement, revise in place, and delete when no longer applicable. |
+| Proposals | `proposals/<NNNN>-<slug>.md`: one change, its scope, approach, and reasons. | Revise while designing and reviewing the change; preserve the completed record as history. |
 
-The first five roles may be feature-local or shared. The four project-context roles are reused by the features that depend on them. A proposal changes whichever current artifacts it affects; it does not create a new version of each as an independently maintained document.
+The first five roles describe and realize the product. The next four provide project context. The proposal records a change to whichever current sources it affects.
 
-Work items, changesets and changelogs, review reports, previews, and Workbench's own process machinery retain their existing purposes. They are part of the complete process accounting, but they do not acquire authority over current product requirements.
+Work items, changesets and changelogs, review evidence, previews, and process machinery retain their existing purposes. Separate narrative, use-case, flow, error-catalogue, view-model, toolchain-prose, and architecture-overview documents are not required. A useful diagram can belong in a domain explanation or decision; an ERD can be generated from a schema. Look and feel remains subject to the existing running-product review.
 
-Separate narrative, use-case, user-flow, error-catalogue, view-model, toolchain-prose, and architecture-overview documents are not required. Their useful information has an owner in the table. A diagram can explain a domain reference or decision. An ERD can be generated from a schema. A navigation overview can link to current definitions without independently restating them. Look and feel continues to be judged on the running interface; design assets and tokens remain implementation or design material.
+### 2. Choose the representation by surface
 
-### 2. Current authority, scope, and approval
+Each normative fact has one current owner. A library can specify its public surface through declarations and contract documentation covering defaults, errors, side effects, ordering, lifecycle, and compatibility. A protocol can use a native schema with semantic requirements alongside it. An application workflow can use Gherkin or a current behavioral reference. One project may use all of these without selecting a project-wide mode.
 
-Each normative fact has one current owner. A feature states behavior, a native contract defines its exact structural boundary, and a domain reference defines shared meaning. They link where necessary. A policy can state its rule in its own file or point to the authoritative Gherkin rule or native contract; it does not maintain a second independent version of the same rule. Its scope, rationale, and enforcement information remain useful even when the rule is owned elsewhere.
+Contract text and type expectations are written or revised before implementation. Documentation colocated with source code can state intended behavior independently of the function body. Generated API reference publishes that source; it does not infer intended requirements from the implementation. A guide explains how to accomplish a task, while a reference states the contract on which that task depends.
 
-Guides explain the current behavior independently and tests verify it. Agreement is assessed during review; neither a passing test nor the existing implementation silently changes intended requirements. When two current sources disagree, the agent raises the disagreement with the human rather than selecting one by filename, date, or implementation convenience.
+For Pitlane, changing `getStylesheets()` means revising its authoritative API contract and the relevant native tests, then updating usage guidance where affected. There is no required `.feature` counterpart. For a project already using Gherkin, the same process updates its existing feature and bindings. Tests that only confirm a document exists, or that a test carries an identifier, do not establish behavioral conformance.
 
-During a change, the approved proposal bounds the authorized delta. The branch's current specifications express the resulting contract. If elaborating a specification introduces a new product or architectural decision, the agent resolves it with the human before implementing it. Completed proposals explain historical intent and do not override current specifications.
+Native tests, type checks, executable examples, consumer fixtures, and other checks can all provide evidence. Requirements involving security, convergence, performance, or human judgment require evidence appropriate to the claim. Reports state what was exercised and any limitations. Workbench introduces no universal scenario registry, coverage-report format, or automated/manual/excluded state machine.
 
-The proposal lifecycle, the consent question, and the owners of `awaiting-implementation`, `active-review`, and `accepted` remain unchanged. Approval of this proposal authorizes its implementation only after the existing approval conditions and the integration prerequisite below are satisfied. No agent may approve its own feature specification by deriving it from finished code.
+When current sources disagree, raise the conflict with the human. The approved proposal bounds the authorized delta, and the branch's specifications state the resulting contract. A new substantive decision discovered while elaborating them requires human input. Completed proposals do not override current definitions. Existing proposal approval ownership and the correction and polish paths remain unchanged.
 
-### 3. Behavioral specifications and native contracts
+### 3. Reusable, optional Gherkin guidance
 
-Gherkin files use the standard language. Feature descriptions explain purpose and local vocabulary. Rules state general requirements. Scenarios provide concrete observable examples, including relevant failures and boundaries. A scenario outline supplies examples of a rule; it does not establish a universal claim by enumeration alone. Additional property, model-based, fuzz, security, performance, or architectural tests remain appropriate where the requirement calls for them.
+Ship `.agents/skills/specifying-behavior-with-gherkin/` with a focused skill, linked examples, and an integration-adoption procedure. Add `.agents/templates/FEATURE.feature` and document its destination and use in the template inventory. The skill is discovered through the existing skill mechanism and triggered when authoring or maintaining `.feature` files, or when the human chooses Gherkin for a surface. The core process points to it without loading the full procedure for unrelated work.
 
-A `.feature` file has one `Feature` and at least one scenario. It carries `@feature.<slug>` above the feature, matching its filename. Every scenario or scenario outline carries a globally unique `@scenario.<feature-slug>.<scenario-slug>` tag. Example rows are executions of their owning scenario outline, rather than independently maintained requirements. Scenario identities stay stable while their wording or test implementation changes; removing a scenario removes its bindings in the same change. Names describe the capability and behavior, rather than a proposal number.
+The skill teaches:
 
-For example, a policy-change scenario belongs to the current record-validation feature:
+- Selecting Gherkin where rules and examples help, and selecting API contract documentation where that communicates the requirement more directly.
+- Organizing one coherent capability per feature file, stating general rules, and using scenarios to illustrate outcomes and boundaries rather than incidental UI mechanics.
+- Using feature descriptions, backgrounds, scenario outlines, examples, and data tables according to standard Gherkin semantics. Examples include success and failure behavior without claiming exhaustive verification.
+- Revising the owning requirement before implementation, then connecting it to real tests and preserving useful tests that need no Gherkin counterpart.
+- Sharing specifications across implementations where the same contract applies, making platform differences explicit, and reporting unexecuted behavior honestly.
+- Distinguishing binding completeness from assertions that actually establish the promised behavior.
 
-```gherkin
-@feature.record-validation
-Feature: Current record validation
-  Authors can revise a current policy without creating a replacement record.
+Provide a worked end-user workflow with a failure case and scenario outline, and a developer workflow example that explains why Gherkin is useful for that surface. Include the Pitlane API-contract contrast so the examples do not imply that all developer-facing behavior needs Gherkin. These examples are teaching resources within the skill and guides; they do not introduce production requirements or a second specification library.
 
-  Rule: A policy keeps its identity when its rule changes
+For a new project choosing Gherkin, recommend `specs/features/<slug>.feature` with capability-oriented names. Respect an existing coherent location. Use standard Gherkin and the selected integration's naming and identity conventions. Workbench does not require `@feature` or `@scenario` tags, a new metadata schema, or implementation reverse pointers.
 
-    @scenario.record-validation.revise-policy
-    Scenario: Revise an active policy in place
-      Given an active policy with a valid identity
-      When its rule is changed without adding a supersession record
-      Then record validation accepts the revised policy
-```
+The shared adoption procedure covers choosing and pinning a real compatible integration, using its documented binding API, wiring its check into the project's existing test task, and verifying failures as well as successful execution. For automated Gherkin coverage, missing or ambiguous bindings fail, outlines execute their applicable examples, and failures identify the relevant specification. Changed steps must not leave unrelated tests green solely because an old identifier still matches. Deliberate exclusions and manual verification remain visible in the existing review evidence rather than being reported as automated passes.
 
-The test must exercise actual validation behavior. Checking that the scenario exists or that a test carries its tag is insufficient.
+Framework-specific instructions belong with the corresponding integration and are linked from the shared guidance when available. This proposal neither invents APIs for the separate Vitest and Swift Testing libraries nor requires projects to install an unused runner. A project must use an actual working integration before claiming executable Gherkin coverage. Workbench's own process and record changes can be delivered using its current `node:test` and Vitest suites.
 
-Native contracts stay with their owners. Workbench does not require a second Markdown copy of an OpenAPI schema, a new registry for every exported type, or a manually synchronized ERD. The relevant project-native checks run through its `mise run check` task. Exact request shapes, enum members, and validation constraints are defined by the authoritative contract; scenarios describe behavior using that contract.
+### 4. Current records, ordinary links, and existing checks
 
-Human judgment and behavior requiring a special environment remain visible in verification. Each applicable scenario is accounted for as automated, explicitly manual, or excluded from a particular target with a reason. A manual scenario has a named review action and recorded evidence at acceptance; it is never reported as an automated pass. Workbench's own programmatically testable tool behavior must have executable bindings rather than manual exemptions.
+Keep a domain explanation only when it resolves meaning that would otherwise be ambiguous across requirements. It is ordinary documentation, with no required Workbench ID, frontmatter schema, status, or file-per-type rule. An existing explanation can be extended rather than duplicated into a new domain directory.
 
-### 4. Domain references and mutable records
+Policies and decisions keep their current numbered filenames and IDs. Revise the same logical record when its meaning changes; delete it when it no longer applies. Update affected current references in the same change, and do not recycle a retired identity for a different record. Supported compatibility obligations and incomplete migrations remain applicable constraints.
 
-A domain reference is a short current definition of a coherent topic. It explains the concepts, identity rules, relationships, or lifecycle meanings needed to read the specifications correctly. It links to behavioral and native-contract owners instead of duplicating their scenario lists or field catalogues. There is no file-per-class or file-per-table requirement. Its frontmatter contains `id: domain.<slug>` and `title`, with the ID matching the filename. It has no independent workflow status; proposal review controls changes.
+Required policy and decision frontmatter becomes `id`, `title`, and `status`. Policy statuses are `draft` and `active`; decision statuses are `proposed` and `accepted`. Proposed records stay on the change branch until agreed. `established-by` becomes optional historical provenance and, when present, retains its existing reference check. Remove `supersedes` and `superseded` from policy and decision schemas and templates; reject those obsolete forms with migration guidance. Preserve proposal supersession and its existing validation as historical change relationships.
 
-Policies and decisions retain their current numbered filenames and IDs. A meaning change updates the existing logical record. A record is deleted when it no longer applies, with affected current references updated in the same change. A supported compatibility obligation or incomplete migration is still an applicable constraint and cannot be deleted merely because the preferred design has changed.
+The policy template keeps its rule or link to the authoritative owner, scope and exceptions, rationale, and enforcement. The decision template keeps the current arrangement and choice, context, rationale, alternatives, and consequences. Remove mandatory in-document revision logs and the prohibition on revising or deleting current records. Product guarantees retain their product ownership; `.agents/rules` continues to hold development instructions.
 
-The required policy and decision frontmatter becomes `id`, `title`, and `status`. Policy statuses are `draft` and `active`; decision statuses are `proposed` and `accepted`. Proposed records remain on the change branch until approved with the change. The existing `established-by` field becomes optional historical provenance; when present, it still resolves to a proposal. Git and the proposal record the reasons for later revisions. There is no new revision-history field or mandatory in-document change log.
+Use ordinary links to make current requirements discoverable from the relevant guides and developer entry points. Remove the required `describes` field from the guide template and schema, migrate Workbench's guides to links to their actual current sources, and remove that relationship from the record header. Reject legacy guide `describes` metadata with guidance to use ordinary links; optional historical provenance can be written as prose. Guides keep their existing `id` and `title`. No replacement ID graph is introduced.
 
-`supersedes` and the `superseded` status are removed from current policy and decision records and their templates. Validation rejects them with migration guidance. Proposal supersession remains available for relationships between historical change records, with the existing validation rules. Changing an implemented feature does not require changing the old proposal's status or declaring the entire old proposal superseded.
+Retain existing frontmatter, identity, historical-proposal-reference, clarification-marker, and documentation-link checks where applicable. `mise run validate` changes only the affected record contracts; it does not become a multi-format specification scanner. Gherkin and native-contract checks belong to the chosen project tools. When deleting a current record would break a useful historical link, replace that link with an immutable Git revision URL rather than keeping the retired rule in the current record.
 
-The policy template retains the rule or a link to its owner, rationale, applicability and exceptions, and how compliance is checked. The decision template retains the current choice, context, rationale, alternatives, and consequences. Both lose the mandatory append-only revision-history procedure. Moving a rule into `.agents/rules` is appropriate only when its subject is how development work is performed; product guarantees remain product requirements.
+### 5. The change process
 
-### 5. Discovery, references, and checks
+Update the existing skills and contract without adding phases or approval states:
 
-Add `FEATURE.feature` and `DOMAIN.md` to `.agents/templates/`, with instructions for the roles above and their destination paths. Update the template inventory. Native contracts use their native tools and do not receive a generic Workbench wrapper template. No record or domain topic is created simply to populate an empty directory.
+1. During proposal development, identify the current sources affected by the intended change and any missing information. Explain the delta, scope, alternatives, approach, and compatibility work. Link the current owners rather than maintain a second complete contract in Detailed design.
+2. After human approval, revise the affected specifications and agreed records before production code. Reuse their existing representation, or add the smallest adequate source for missing requirements. Resolve new substantive decisions with the human.
+3. Write and observe the relevant failing tests, then write or revise guides from the intended contract and compare them with the tests. Implement against those sources. Preserve applicable native tests and the existing look-and-feel boundary.
+4. Run the shared gate. Self-check the authorized delta, affected requirements, tests, guides, and implementation. Give the independent reviewer the current sources and relevant unchanged constraints alongside the proposal. Verification reports identify actual evidence and remaining limitations.
+5. Provide the preview and readiness report through the existing coupled handoff. After human acceptance, finalize affected records and the vision, record `implemented`, and merge the current sources with their implementation. Release and cleanup keep their existing authorization rules.
 
-`mise run validate` discovers the current feature and domain directories as well as the existing records. It parses Gherkin with a standard parser, validates the feature and scenario identities above, and rejects malformed files, absent or duplicate identities, empty features, and mismatched feature IDs. It validates domain frontmatter and the revised policy and decision schemas. Existing proposal clarification-marker and frontmatter checks remain in force.
+`tools/status.ts` retains its phase derivation and ownership rules. Its implementation and review guidance names current-specification maintenance and verification in appropriate project-native forms. A correction implements the current requirement; an underspecified behavior requiring a decision returns to proposal development. The agent cannot approve a requirement by documenting whatever the implementation happens to do.
 
-Guide `describes` lists current owners: feature, domain, policy, or decision IDs. It is a non-empty list of resolvable current IDs. A native contract is linked directly from the guide and its behavioral owner rather than being assigned a second Workbench identity. Historical proposal IDs cease to be guide `describes` targets. Optional provenance links can remain in prose without determining what the guide currently describes.
+### 6. Workbench adoption and completion
 
-A deleted current target cannot leave a dangling current reference. Validation continues to fail on unresolved metadata references; the documentation build checks local document links. Historical links to a file being deleted are changed to an immutable Git revision URL when they are needed to preserve the old record. This repairs the reference without rewriting historical intent or keeping a retired policy active solely to satisfy a link.
+Update `AGENTS.md`, `PROCESS.md`, `VISION.md`, affected skills, templates, directory READMEs, and guides to agree on the current-record model. Keep the core instructions concise and place optional Gherkin detail in its skill and resources. The adoption guidance covers the ten conditional roles and demonstrates a library contract change, a Gherkin workflow change, and a policy revision or retirement.
 
-The test integration checks executable bindings in the test gate. Every applicable scenario and every expanded examples row must be accounted for on each applicable target. Missing, ambiguous, stale, or silently skipped bindings fail the relevant gate. Renaming or changing steps cannot leave an unrelated test green solely because it still has the old scenario tag. Structural binding checks cannot establish semantic fidelity; the self-check and adversarial review still examine the assertions and the implementation they exercise.
+Reconcile Workbench's current requirements using its existing process documents, tool documentation, tests, guides, and relevant proposals. Establish where current workflow and public-tool contracts are read, repair stale guidance and fill material gaps, and raise disagreements with the human. Preserve adequate sources and tests. Neither converting every suite to Gherkin nor writing a separate domain model for concepts already explained in the process is required.
 
-There is no requirement for a `SPEC` comment on every implementation unit, a lock file for every specification, or a proposal-to-code dependency graph. Stable scenario identities support verification and reporting without restoring SpecKit's reverse-pointer machinery.
+Use the existing documentation site to publish the revised process and guidance and link to current requirement owners. Make proposal history identifiable as history, keep deleted current records out of current navigation, and remove obsolete policy/decision supersession presentation and guide `describes` display. Historical proposal navigation remains. Gherkin examples can use ordinary code blocks or source links; this change requires no custom renderer, format plug-in system, or committed generated specification.
 
-### 6. The change process
+Completion requires the revised process, reusable Gherkin skill and teaching resources, migrated current records and guide references, and the working changes to existing tooling and navigation. Verify the changed record contracts and status behavior with native tests and exercise the documentation preview. A valid policy using the new schema must pass without supersession metadata, obsolete policy/decision metadata must produce migration errors, and removing a still-linked current document must surface the broken reference through the applicable existing check. Preserve test protection; do not substitute tests of prose wording for observable behavior.
 
-The updated skills and contract prescribe this order when the stages apply:
-
-1. During proposal development, identify the existing current owners and any missing specification or record. The proposal describes the problem, authorized delta, alternatives, technical approach, and compatibility or migration work. Detailed design links to current definitions and specifies the change sufficiently for elaboration; it does not become a second permanently current specification. Proposed paths can be named before they exist.
-2. After human approval, update the affected feature files, native contracts, domain references, and agreed policies or decisions before production code. Required behavior absent from the approved intent is raised with the human. Specification diffs remain part of the reviewed change.
-3. Write the failing behavioral bindings and other appropriate tests, and observe the relevant failure before production code. Preserve existing coverage that still applies. Test names and links follow current behavior and scenario identities rather than historical proposal IDs.
-4. Write or revise user-facing guides from the intended specifications, compare them with the tests, and then implement. A guide's control names may still follow the running interface under the existing polish rule.
-5. Run the shared gate. Self-check the proposal's authorized delta against the affected current specifications, tests, guides, implementation, and records. The independent reviewer receives those sources and the relevant unchanged constraints, not only the proposal.
-6. Provide the preview and readiness report. The report identifies the changed current specifications and contract checks, automated verification, any manual verification still requiring the human, and any deliberate divergences. The existing coupled `active-review` transition is preserved.
-7. Resolve human review, finalize current records and the vision where affected, and record `implemented` before merge. Merge the specifications and implementation together. Required release and cleanup retain their existing authorization rules.
-
-A correction implements an already current requirement without inventing a proposal or changing the requirement to fit a bug. An underspecified behavior that requires a decision returns to the proposal path. Look-and-feel polish remains outside behavioral specification churn unless it changes a capability, outcome, or guarantee.
-
-`tools/status.ts` keeps its phase derivation and human ownership rules. Its implementation and review guidance includes current-specification updates and review. `implemented` remains a record of accepted implementation, separate from merge and release. A separate approval state machine for feature files is not introduced.
-
-### 7. Workbench's own adoption and publication
-
-The implementation updates `AGENTS.md`, `PROCESS.md`, `VISION.md`, the relevant skills and rules, all affected templates and directory READMEs, and the guides that describe proposal writing, implementation, record maintenance, and adoption. The inventory in this proposal must be explained as conditional roles, not a ten-document checklist.
-
-Workbench adopts the current specifications itself. Reconcile its exposed behavior across record validation, workflow status, the dynamic-workflow tool, and specification/documentation discovery into capability-scoped Gherkin files. Keep implementation-level tests in their native form where appropriate; bind behavioral scenarios to real tests using the integration selected below. Write the domain reference for record identity, current authority, and proposal lifecycle where those meanings are shared. Existing behavior is evidence during reconciliation; a discrepancy with approved intent is raised rather than automatically copied into the specification.
-
-The current process documents retain their role as developer instructions and user guides. Their human-judgment requirements are classified explicitly as policies, current domain meanings, or procedure; they are not replaced with a claim that all process judgment is executable. Workbench's native contracts and configuration remain in their actual source locations. No speculative API schema or policy is added to fill the inventory.
-
-The documentation site exposes current feature specifications and domain references alongside guides and current policies and decisions. Proposal history is identifiable as change history, and `implemented` is not presented as proof that every historical sentence is current. Current topics are discoverable by subject. Empty optional directories do not fail validation or the site build.
-
-Gherkin pages are rendered from the `.feature` source during the documentation build, including descriptions, rules, scenarios, and examples with usable links. They are generated output, never a committed parallel Markdown specification. Record links and headers resolve current IDs and retain historical proposal navigation. Deleted current records disappear from current navigation. Superseded policy/decision groups and their current-record relationship display are removed; historical proposal relationships remain available.
-
-The work includes behavioral regression coverage for the changed validator and status guidance, Gherkin discovery and reference handling, and documentation generation. The migration must demonstrate that changing a feature scenario affects its actual test execution, a missing binding fails, a policy can be revised without supersession, and deleting a still-referenced current record is rejected. These are consumer-visible behaviors; tests that only pin prose wording or file layout are not substitutes.
-
-### 8. Integration prerequisite and completion boundary
-
-The reusable Vitest and Swift Testing integrations are separate work by the owner's explicit choice. This proposal defines what Workbench needs from an integration, but does not design those libraries' public APIs or introduce a temporary Workbench-only runner as a substitute.
-
-Before this proposal is approved for implementation, select a concrete integration release or reviewed source revision and establish how it runs Workbench's behavioral suites. If adopting it requires migrating the relevant `node:test` suites, that migration is part of Workbench's adoption and must preserve their coverage. Unrelated test suites keep their existing runners. Swift integration delivery is not a prerequisite for Workbench's own TypeScript tools, but an adopting Swift project needs a working integration before it can claim executable Gherkin coverage.
-
-Implementation is complete only when Workbench's own feature specifications are exercised by real bindings through `mise run check` and rendered by its documentation build. Installing a parser, attaching scenario IDs to unrelated tests, or publishing process prose while the required integration is unavailable does not satisfy this proposal. The remaining selection is explicit under Open questions.
+The reusable Vitest and Swift Testing libraries remain separate work. They add no blocking prerequisite, runner migration, or installation dependency to this proposal.
 
 ## Compatibility
 
-This changes the record contract for policies, decisions, and guide references. Adopters migrate those records and the corresponding validator together. Old `supersedes` fields and `superseded` policy/decision statuses receive an actionable validation error instead of silently selecting a current interpretation. Proposal files retain their historical lifecycle and relationship fields.
+This changes policy and decision metadata and removes the required historical `describes` relationship from guides. Adopters migrate those records and their validator together. Obsolete metadata receives an actionable migration error. Proposal files retain their historical lifecycle and relationship fields, and their bodies continue to explain the changes made at the time.
 
 For each retired policy or decision chain, the human and agent determine the complete rule or choice that still applies, incorporate retained clauses into the surviving logical record, remove supersession metadata, and delete retired current files. Keep the surviving ID where possible. Update current references and replace necessary historical links with immutable Git links before deletion. The process does not assume that the newest record already contains every retained clause.
 
-For behavioral specifications, reconcile approved intent with the current implementation, tests, guides, and relevant proposals. Write each current requirement once, bind the applicable scenarios, and identify unresolved disagreements for the human. Guides replace their historical `describes` lists with current owners. The agent may not infer user approval from whichever artifact happens to be easiest to copy.
+For current requirements, reconcile approved intent with existing contract documentation, tests, guides, and relevant proposals. Reuse adequate sources and fill identified gaps rather than restating every historical sentence. A guide links to the actual current owner; it need not acquire a new specification ID or repeat that owner's contract. The agent raises disagreements with the human rather than choosing whichever source is easiest to copy.
 
 Workbench performs its own reconciliation in this change. Its existing proposal bodies remain historical records; only references that must survive a deletion need mechanical repair. `supersedes: []` on this proposal does not claim that the earlier Workbench proposals remain the current specification.
 
-The new parser and integration dependencies are provisioned through the existing project setup and task graph. Projects with other languages retain their native toolchains and select compatible bindings. This proposal introduces no requirement to run TypeScript tests for a Swift product.
+There is no new mandatory Gherkin parser, runner, or general specification registry. Projects retain their native toolchains, test frameworks, and adequate specification formats. A project choosing Gherkin follows the supplied guidance and installs a real integration appropriate to that surface.
 
 ## Implications on adoption
 
-A new project starts with a vision and the process machinery. It creates current specifications, contracts, guides, domain references, policies, and decisions only when their subject exists. The Gherkin integration is configured before the project relies on executable feature specifications.
+A new project starts with its vision and process machinery, then adds current specifications and supporting records as their subjects arise. It receives the reusable Gherkin skill and template with Workbench. Using that guidance is conditional on the surface being specified; ordinary library API contracts require no Gherkin setup.
 
-An existing project first identifies its capability owners and current shared constraints. It then migrates the records and guides, supplies bindings, and runs its gate before switching to the new contract. A staged migration may be organized in work items, but an area still requiring proposal archaeology must be reported as unmigrated. Workbench does not claim complete current specifications while unaccounted areas remain.
+An existing project identifies where its current requirements are owned, repairs gaps and conflicts, migrates policy/decision metadata and guide links, and verifies the changes through its existing gate. It preserves useful native tests and documentation. Work items can track a staged migration, but any area still requiring proposal archaeology is disclosed as unmigrated.
 
-The adoption guide explains the ten roles, supplies one complete worked change, shows a policy revision and retirement, and describes the binding prerequisite and historical-link handling. It contains no mandatory feature-folder taxonomy or registry of duplicated native contracts.
+The adoption guide gives the complete accounting without requiring ten documents per feature. Its worked examples show the same change process applied to Pitlane-like API semantics, a Gherkin workflow, and a mutable policy. Specialized Gherkin authoring and integration instructions are maintained once and linked from that guide.
 
 Previous states remain recoverable from Git. Reverting an adopted process change requires restoring compatible tooling and records together; deleting current records is safe only after the relevant historical state is committed and any required historical links are preserved.
 
 ## Scope
 
-- Define and document the agreed artifact ownership and change process across Workbench's contract, skills, templates, guides, and vision.
-- Add current Gherkin and domain-reference discovery, identities, guide relationships, and validation; support mutable current policies and decisions while retaining proposal history.
-- Publish the current sources in the documentation site without committed generated specification copies.
-- Adopt the model for Workbench's own exposed behavior, consume the separately selected Gherkin integration, and preserve existing test protection.
-- Supply the record migration and adoption guidance, exercise the changed tooling and site, and include the implementation's appropriate changeset.
+- Define current-specification ownership and the conditional ten-role inventory across Workbench's process, skills, templates, guides, and vision.
+- Supply the reusable optional Gherkin skill, feature template, worked examples, and integration-adoption procedure.
+- Support mutable policies and decisions, migrate guide relationships to ordinary links, and update the affected validator, status guidance, and record presentation.
+- Reconcile Workbench's current requirements and document adoption using existing sources and testing tools; verify the changed tooling and documentation.
 
 ### Out of scope
 
-- Designing or implementing the reusable Vitest and Swift Testing libraries. The owner chose separate proposals for them; Workbench's required integration remains a delivery prerequisite.
+- Designing or implementing the reusable Vitest and Swift Testing libraries. They remain separate proposals and are not prerequisites for this change.
 - Automatically migrating other repositories. Their current intent must be reconciled with their owners, and this proposal delivers the procedure rather than asserting knowledge of their intended behavior.
-- Reintroducing SpecKit's full taxonomy, per-implementation reverse pointers, specification lock shards, or a new requirements-delta language.
+- A universal specification schema, cross-artifact ID registry, format plug-in framework, Gherkin renderer, reverse-pointer system, or specification lock files.
 - Replacing Beads, changing release authorization, adding another approval state machine, or changing the existing look-and-feel exception.
 - Requiring a new architecture overview, diagram, domain file, policy, or native-contract wrapper for every feature.
+- Mandatory conversion of existing contracts or tests to Gherkin, or a new project-wide application/library mode.
 
 ## Preview
 
-- Repository shape: documentation and process tooling, with CLI checks and a test-framework integration.
-- Artifact: the existing pull-request documentation deployment plus the checkout's runnable validation and behavioral-test commands.
+- Repository shape: documentation and process tooling with existing CLI checks and native test suites.
+- Artifact: the existing pull-request documentation deployment and runnable record-validation checks.
 - Access: the existing public preview workflow publishes under `https://markmals.github.io/workbench/pr-preview/pr-9/` for this pull request. This repository already deliberately publishes its guides and records. The implementer verifies the actual deployment before handing it off.
-- Exercise: open a current feature, its guide, and its domain reference without following proposal history; open the historical proposal separately; use a disposable fixture to revise a policy in place, reject deletion while a current reference remains, and then retire it with references repaired. Change a scenario and remove a binding in disposable fixtures to observe test-gate failures. Confirm the unchanged fixture passes.
+- Exercise: find the current contract for a Workbench workflow or tool without replaying proposal history. Follow the library, Gherkin, and policy worked changes. Find the reusable Gherkin skill and examples without configuring it for unrelated work. In a disposable fixture, validate an active policy with the new schema, observe migration errors for obsolete metadata, and retire a record with its current links repaired. Check that historical proposal navigation remains available.
 - Cleanup: remove disposable fixtures after verification. The existing workflow manages preview lifetime when the pull request closes; any manual teardown, branch deletion, or release still needs the existing authorization.
 
 The draft proposal can be read before those implementation previews exist. Its publication does not claim the proposed workflow is implemented.
@@ -272,12 +244,12 @@ The draft proposal can be read before those implementation previews exist. Its p
 - [VISION.md](../VISION.md) requires explicit intent, independently checkable representations, preserved rationale, human authority, and ceremony that earns its cost. This proposal preserves those goals while giving current requirements explicit owners. Its artifact inventory must be updated when the implementation is accepted.
 - [Proposal 0001](0001-workbench-2.md) established the proposal-centric record and supersession machinery. This proposal changes the current process and tooling without pretending the historical change never occurred.
 - [Proposal 0003](0003-fit-the-harness-to-current-models.md) established inline implementation, self-check, and one independent review. Those remain.
-- [Proposal 0004](0004-make-room-for-ui-polish.md) leaves look and feel to the running product. Gherkin specifications follow that boundary rather than recreating screen specifications.
-- `.agents/rules/enforcement-hierarchy.md` prefers deterministic checks where possible. Identity, syntax, references, and binding completeness belong in checks; semantic fidelity and meaningful scope remain review judgments. Rationale and applicability remain available even where a check enforces the underlying constraint.
+- [Proposal 0004](0004-make-room-for-ui-polish.md) leaves look and feel to the running product. Current specifications, including optional Gherkin, follow that boundary.
+- `.agents/rules/enforcement-hierarchy.md` prefers deterministic checks where they enforce a concrete requirement. Preserve the applicable record and documentation checks, and use project-native verification for current contracts. Meaning, adequate coverage, and the usefulness of a new artifact remain review judgments.
 
 ## Future directions
 
-Generated contract diagrams or a richer specification browser could improve discovery if real projects need them. They would derive from current sources rather than create a second normative document. Additional language integrations can follow the same behavioral requirements after their own API proposals.
+Reusable Vitest and Swift Testing integrations can supply their own binding APIs and framework-specific documentation. Workbench's Gherkin guidance can link to them when available. Further checks or publishing support should respond to an observed failure or a project's actual documentation needs.
 
 ## Alternatives considered
 
@@ -291,7 +263,7 @@ This retains the existing authoring model, but semantic reconciliation of prose 
 
 ### Put every specification in Gherkin
 
-Gherkin is suitable for behavior and examples. Exact wire shapes, shared identity definitions, architectural rationale, and executable build configuration have other useful representations. Encoding them all as scenarios or feature descriptions would preserve the information only by making those files carry several unrelated responsibilities.
+Gherkin is useful for rules and examples where that is an effective review format. Pitlane's public API semantics are already expressed directly in contract documentation, declarations, and native tests. Requiring another representation for every surface would add maintenance without demonstrated benefit. This proposal retains Gherkin guidance while allowing the project's current sources to carry the contract.
 
 ### Make tests and guides the only current requirements
 
@@ -305,6 +277,14 @@ Separate narratives, use cases, flows, models, errors, and view models provide p
 
 The owner wants to keep both concepts and revise their current files. Product guarantees and architectural reasoning have readers beyond the coding agent and lifetimes beyond one invocation. Development instructions remain in `.agents/`; current product constraints and choices retain their own records.
 
+### Remove Gherkin guidance to simplify the core
+
+Removing reusable guidance would make each adopting project reconstruct its own procedure. A focused skill, template, examples, and adoption notes preserve that knowledge without requiring unrelated work to load it or install an integration.
+
+### Build a general specification framework
+
+A common registry, metadata schema, renderer, and binding-report protocol could coordinate many formats, but the observed problem is finding and maintaining current requirements. Ordinary source ownership, links, native checks, and the existing review process address that problem with fewer conventions. New machinery needs evidence that these mechanisms fail.
+
 ## Open questions
 
-- [NEEDS CLARIFICATION: Which separately reviewed Gherkin integration release or source revision will Workbench consume, and will its record-tool behavioral tests keep node:test or migrate to the chosen framework? Resolve the integration dependency and runner choice before approving implementation; the reusable library APIs remain outside this proposal.]
+None. The owner selected format-neutral current specifications with reusable optional Gherkin guidance. The former integration-selection prerequisite has been removed; the reusable libraries remain separate work. This proposal stays `draft` until the human approves implementation.
