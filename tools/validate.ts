@@ -56,18 +56,18 @@ const SCHEMAS: Record<ArtifactType, Schema> = {
         ],
     },
     policy: {
-        required: ["id", "title", "status", "established-by", "supersedes"],
-        lists: ["supersedes"],
-        statuses: ["draft", "active", "superseded"],
+        required: ["id", "title", "status"],
+        lists: [],
+        statuses: ["draft", "active"],
     },
     decision: {
-        required: ["id", "title", "status", "established-by", "supersedes"],
-        lists: ["supersedes"],
-        statuses: ["proposed", "accepted", "superseded"],
+        required: ["id", "title", "status"],
+        lists: [],
+        statuses: ["proposed", "accepted"],
     },
     guide: {
-        required: ["id", "title", "describes"],
-        lists: ["describes"],
+        required: ["id", "title"],
+        lists: [],
     },
     vision: {
         required: ["title", "updated"],
@@ -108,11 +108,11 @@ function expectedId(file: string, type: RecordType): string | null {
 function referencesFor(artifact: Artifact, type: ArtifactType): { field: string; id: string }[] {
     let { frontmatter } = artifact;
     let fields =
-        type === "guide"
-            ? ["describes"]
-            : type === "vision"
-              ? []
-              : ["supersedes", "established-by"];
+        type === "proposal"
+            ? ["supersedes", "established-by"]
+            : type === "policy" || type === "decision"
+              ? ["established-by"]
+              : [];
 
     return fields.flatMap(field => {
         let value = frontmatter[field];
@@ -205,6 +205,30 @@ export function validateArtifacts(inputArtifacts: readonly Artifact[]): Violatio
 
         let schema = SCHEMAS[type];
         let { frontmatter } = artifact;
+        let isPolicyOrDecision = type === "policy" || type === "decision";
+        if (isPolicyOrDecision && Object.hasOwn(frontmatter, "supersedes")) {
+            violations.push(
+                violation(
+                    artifact.path,
+                    'remove "supersedes"; revise the current record in place or retire it and repair its links',
+                ),
+            );
+        }
+        if (
+            isPolicyOrDecision &&
+            Object.hasOwn(frontmatter, "established-by") &&
+            typeof frontmatter["established-by"] !== "string"
+        ) {
+            violations.push(violation(artifact.path, 'key "established-by" must be a scalar'));
+        }
+        if (type === "guide" && Object.hasOwn(frontmatter, "describes")) {
+            violations.push(
+                violation(
+                    artifact.path,
+                    'remove "describes"; use ordinary links to current requirements instead',
+                ),
+            );
+        }
         for (let key of schema.required) {
             if (!Object.hasOwn(frontmatter, key) || frontmatter[key] === undefined) {
                 violations.push(violation(artifact.path, `missing required key "${key}"`));
@@ -239,7 +263,12 @@ export function validateArtifacts(inputArtifacts: readonly Artifact[]): Violatio
             !(typeof status === "string" && schema.statuses.includes(status))
         ) {
             violations.push(
-                violation(artifact.path, `invalid status "${String(status)}" for ${type}`),
+                violation(
+                    artifact.path,
+                    isPolicyOrDecision && status === "superseded"
+                        ? `status "superseded" is obsolete for ${type}; consolidate still-applicable requirements into the current record, then delete the retired record and repair its links`
+                        : `invalid status "${String(status)}" for ${type}`,
+                ),
             );
         }
         if (
@@ -288,6 +317,13 @@ export function validateArtifacts(inputArtifacts: readonly Artifact[]): Violatio
                 violations.push(
                     violation(artifact.path, `reference "${id}" in ${field} does not resolve`),
                 );
+            } else if (field === "established-by" && artifactType(target.path) !== "proposal") {
+                violations.push(
+                    violation(
+                        artifact.path,
+                        `reference "${id}" in established-by must name a proposal`,
+                    ),
+                );
             } else if (field === "supersedes" && target.frontmatter.status !== "superseded") {
                 violations.push(
                     violation(
@@ -316,6 +352,7 @@ export function validateArtifacts(inputArtifacts: readonly Artifact[]): Violatio
 
     let graph = new Map<string, string[]>();
     for (let [id, artifact] of ids) {
+        if (artifactType(artifact.path) !== "proposal") continue;
         let { supersedes } = artifact.frontmatter;
         graph.set(
             id,

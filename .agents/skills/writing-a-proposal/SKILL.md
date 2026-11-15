@@ -5,13 +5,13 @@ description: Use when a new or substantial change needs definition before tests,
 
 # Writing a Proposal
 
-**Phase 2 — Proposal development.** A proposal is the one durable record of one coherent change. It makes intent concrete enough to derive tests, guides, and code without returning to the original conversation.
+**Phase 2 — Proposal development.** A proposal is the one durable record of one coherent change. It makes the change concrete enough to revise the affected current specifications and then derive tests, guides, and code without returning to the original conversation.
 
 ## First, decide whether this needs a proposal
 
 Proposals are for changes that decide something: new or changed behavior, a real choice between approaches, anything establishing a policy or decision, anything touching the vision.
 
-They are not for changes whose intent already exists. A bug has its correct behavior specified already — by the proposal that promised it, or by a contract too obvious to write down. Correcting an implementation is not defining one. Fixing a typo, a dead link, or a workflow whose behavior was never in question needs no proposal and often no pull request; describing it costs more than doing it.
+Changes whose intent is already established can proceed directly. Use the current specification or the approved change being implemented on this branch to establish a bug's correct behavior. Completed proposals are historical evidence and cannot authorize restoring obsolete behavior. Raise a conflict with current requirements before acting. An unambiguous typo, dead link, or implementation correction needs no new proposal and often no pull request.
 
 They are not for look and feel either. How an interface looks and how it is operated is decided by the human on the running UI, so polish is never a reason to ask the proposal question; use [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md).
 
@@ -30,8 +30,8 @@ Create exactly one `proposals/<NNNN>-<slug>.md`. Copy [`.agents/templates/PROPOS
 - Use the next unused four-digit number and a kebab-case slug.
 - Complete the template frontmatter: `id: proposal.<NNNN>`, Title Case `title`, `status: draft`, the draft PR URL or number, and `supersedes`.
 - Complete every required template section: Summary, Motivation, Domain grounding, Existing baseline, Proposed solution, Detailed design, Compatibility, Implications on adoption, Scope, Out of scope, Preview, Policies and decisions checked, Future directions, Alternatives considered, and Open questions. Acknowledgments is optional.
-- **Detailed design is what tests derive from.** Write it precisely enough that someone who is not the author could implement it without asking questions.
-- Usually delete the template's Acceptance criteria section. Restating Detailed design as a checklist duplicates the specification in a form that drifts from it. Keep it only for a change with discrete outcomes the prose cannot express naturally — a structural change touching many independent things, or a migration with separable steps.
+- **Detailed design is the delta.** Link each current source the change affects (API contract documentation, schemas, feature files, reference prose, policies, decisions) and state what changes in it, precisely enough that someone who is not the author could revise those sources and implement the change without asking questions. Name necessary information that has no current home. Link requirements that stay the same; do not restate a complete contract.
+- Usually delete the template's Acceptance criteria section. Restating Detailed design as a checklist duplicates the change in a form that drifts from it. Keep it only for a change with discrete outcomes the prose cannot express naturally — a structural change touching many independent things, or a migration with separable steps.
 
 ## Describing a user interface
 
@@ -57,9 +57,9 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
 ## Process
 
-1. **Read the record.** Read `VISION.md`, `policies/`, and `decisions/` before proposing. In **Policies and decisions checked**, list each relevant record and its constraint; write `None` when none apply.
+1. **Read the record and the current sources.** Read `VISION.md`, `policies/`, `decisions/`, and the current specifications that own the surface the change touches. Completed proposals explain earlier changes; they do not define what applies now. In **Policies and decisions checked**, list each relevant record and its constraint; write `None` when none apply.
 
-    If the change conflicts with a policy or decision, surface the conflict in that section. The human chooses either to revise the proposal or to supersede the record. Never quietly violate it.
+    If the change conflicts with a policy or decision, surface the conflict in that section. The human chooses either to revise the proposal or to revise or retire the record. Never quietly violate it.
 
 2. **Ground the problem.** When the change depends on domain knowledge that cannot safely be inferred from the request, use `grounding-a-problem` before comparing solutions. Prefer primary or authoritative evidence and separate it from repository observations, inference, and hypotheses. In **Domain grounding**, record the concepts, constraints, quality bar, and remaining uncertainty needed to assess the proposal. If no independent grounding is needed, state why there.
 
@@ -91,13 +91,14 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
     Keep the preview private unless the project deliberately opts into publication. Do not configure unused preview mechanisms.
 
-8. **Author the proposal.** Fill the template from the grounding, baseline, answers, and selected approach. State behavior and boundaries plainly. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
+8. **Author the proposal.** Fill the template from the grounding, baseline, answers, and selected approach. State behavior and boundaries plainly, as changes to the current sources you linked. When the human chooses Gherkin for a surface, use `specifying-behavior-with-gherkin` for its shape. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
 
 9. **File unrelated defects.** If discovery reveals a defect outside this proposal's scope, file it in Beads. Discovering a defect is never a reason to expand the proposal or forget it. Use [`.agents/skills/tracking-work/`](../tracking-work/) for the judgment and filing process.
 
 10. **Self-review.** Before showing the human, check:
     - every template section and frontmatter field is complete;
     - the grounding, baseline, motivation, behavior, criteria, scope, preview, and record check agree;
+    - every current source the change affects is linked, with its delta stated;
     - no unstated assumption remains outside an explicit clarification marker;
     - no rejected approach or out-of-scope item reappears as promised behavior; and
     - the proposal remains one coherent change.
@@ -116,7 +117,7 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
 This gate applies to work you judged proposal-worthy. It does not turn every change into one — that decision was made at the top of this skill, and a correction never reaches here.
 
-Once a proposal exists, never write tests, guides, or code until all of these are true:
+Once a proposal exists, never revise current specifications for it, or write tests, guides, or code, until all of these are true:
 
 1. The proposal file exists.
 2. It contains zero `[NEEDS CLARIFICATION:` markers.
@@ -131,7 +132,8 @@ Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 | No explicit yes to the proposal question for this change | Ask before creating a branch, draft PR, or proposal. |
 | No pushed branch or draft pull request | Return to Phase 1 — Preparation. |
 | Two unrelated motivations or more than roughly six criteria | Split the proposal. |
-| A record conflicts with the change | Surface it; the human chooses revision or supersession. |
+| A record conflicts with the change | Surface it; the human chooses to revise the proposal or to revise or retire the record. |
+| Detailed design restates an existing contract in full | Link the current source and state only what changes. |
 | An unknown detail has no clarification marker | Ask or add the marker. |
 | Detailed design names sizes, colors, controls, or click steps, or quotes words that are not themselves a requirement | Rewrite it as what the user can do, find out, and is told. |
 | Preview names no exercisable artifact for a behavior change | Choose and record one before approval. |

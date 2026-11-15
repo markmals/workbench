@@ -1,6 +1,6 @@
 ---
 title: A Vision for Workbench
-updated: 2026-11-03
+updated: 2026-11-15
 ---
 
 # A Vision for Workbench
@@ -11,7 +11,7 @@ Workbench is the structure that keeps agentic development honest.
 
 An agent that goes straight from a request to an implementation produces code nobody specified, tests that agree with whatever got written, and documentation reverse-engineered from the result. Everything corroborates everything else, and none of it is evidence.
 
-Workbench breaks that loop by insisting the same intent be written down more than once, in forms that can disagree: a proposal that records what was meant, tests that encode it executably, guides that explain it in prose, code that implements it, and a preview that lets a human exercise it. Disagreement between those representations is the signal. The process exists to surface it before release rather than after.
+Workbench breaks that loop by insisting the same intent be written down more than once, in forms that can disagree: a proposal that records what was meant and why, a current specification that states what the project now requires, tests that encode it executably, guides that explain it in prose, code that implements it, and a preview that lets a human exercise it. Disagreement between those representations is the signal. The process exists to surface it before release rather than after.
 
 It is for someone who works with a coding agent daily, on projects they will still be maintaining in a year, and who has noticed that the failure mode is not bad code — it is code nobody decided on. Workbench assumes a single human owner reviewing an agent's work, not a large team with an existing request-for-comments process, and it assumes that human intends to remain the authority over product intent while delegating implementation.
 
@@ -19,11 +19,13 @@ It is for someone who works with a coding agent daily, on projects they will sti
 
 **Make intent explicit before implementation begins.** The proposal exists so that what was meant is recoverable independently of the conversation that produced it. Intent is what a feature does; its look and feel is decided by the human on the running software, where a preview shows it better than prose can.
 
-**Keep several independent representations of that intent.** Proposal, tests, guides, code, and preview each describe the same behavior differently, so that a defect in one is visible against the others.
+**Keep several independent representations of that intent.** Current specifications, tests, guides, code, and preview each describe the same behavior differently, so that a defect in one is visible against the others.
 
 **Make disagreement between them visible before release.** The implementing agent's self-check and an independent adversarial review exist to find contradictions, not to confirm that work looks finished.
 
-**Preserve the reasoning, not just the result.** Proposals, decisions, policies, and review discussion outlive the change. A future reader needs to know why, and the diff will not tell them.
+**Keep current requirements findable.** Each requirement has one current owner, in whatever form suits its surface, and a change edits that owner directly. Nobody should have to replay a chain of proposals to learn what applies now.
+
+**Preserve the reasoning, not just the result.** Proposals, the rationale in decisions and policies, and review discussion outlive the change, and Git keeps every earlier version of the current files. A future reader needs to know why, and the diff will not tell them.
 
 **Keep the human as the final authority.** Agents implement, review, and refute. They do not ratify their own work.
 
@@ -31,10 +33,10 @@ It is for someone who works with a coding agent daily, on projects they will sti
 
 A repository you can clone that gives a project, on day one:
 
-- the artifact structure — vision, policies, decisions, proposals, guides — with templates that make the right shape the easy shape;
+- the artifact structure — vision, current specifications in whatever form suits each surface, policies, decisions, proposals, guides — with templates that make the right shape the easy shape, and optional guidance for specifying behavior in Gherkin;
 - skills covering each phase of the process, written so any competent coding agent can execute them;
 - a validator that mechanically enforces the parts of the process a machine can check, wired into continuous integration and a git hook;
-- a documentation site that publishes the vision, the record, and the guides;
+- a documentation site that publishes the vision, the process, the record, and the guides;
 - a preview mechanism appropriate to what the project is.
 
 It must be adoptable by an agent in a single session, and it must not assume a language, a framework, a platform, or a particular coding harness.
@@ -55,7 +57,7 @@ It must be adoptable by an agent in a single session, and it must not assume a l
 
 Directions worth considering once the core is proven:
 
-- richer mechanical checks — proposals with no corresponding tests, guides describing behavior no test covers, policies no proposal has cited in a long time;
+- richer mechanical checks — current specifications with no corresponding tests, guides describing behavior no test covers, policies nothing has cited in a long time;
 - a dependent-project workflow, where a preview published by one repository is consumed by draft pull requests in others and moved onto the production release automatically;
 - worked examples of the process running end to end on projects of different shapes, since the hardest thing to convey about a process is what good output looks like;
 - repeated measurement of which stages earn their cost as models change; [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) ran the first such experiment, and whether adversarial review catches what the self-check misses remains open.
@@ -66,12 +68,13 @@ Directions worth considering once the core is proven:
 
 **Not tied to one coding harness.** Infrastructure ships harness-neutral in `.agents/` because shipping configuration for harnesses nobody here verifies is worse than a documented adaptation step.
 
-**Not an issue tracker.** The proposal queue is the work queue, and defects that outlive a pull request go to the project's issue tracker. Tools that track work better than a directory of markdown files already exist, and competing with them would cost more than it returns.
+**Not an issue tracker.** Beads holds the work graph, including defects that outlive a pull request. Tools that track work better than a directory of markdown files already exist, and competing with them would cost more than it returns.
 
 **Not a substitute for judgement.** Every gate here can be satisfied superficially by an agent determined to look done. The process makes that harder and more visible; it does not make it impossible, and treating it as though it does would be the most expensive mistake available.
 
 ## Revision history
 
+- **2026-11-15** — Made current specifications the owners of current requirements, kept proposals as the record of each change, and treated policies and decisions as current files revised in place, after human acceptance of [proposal.0005](proposals/0005-current-specifications.md).
 - **2026-11-03** — Limited intent to what a feature does and left look and feel to the human on the running software, after [proposal.0004](proposals/0004-make-room-for-ui-polish.md) gave interface polish a place outside proposals.
 - **2026-10-30** — Replaced the separate cross-artifact review with the implementer's self-check and recorded the first stage-cost measurement, after [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) collapsed the implementation phase's review ceremony.
 - **2026-08-26** — Recorded the guides as part of the minimum viable product, after [proposal.0001](proposals/0001-workbench-2.md) brought them into scope and delivered them.

@@ -2,8 +2,8 @@
 id: policy.<NNNN>
 title: <Title Case>
 status: draft
+# Optional provenance: the proposal that introduced this policy. Delete the line when there is none.
 established-by: proposal.<NNNN>
-supersedes: []
 ---
 
 # <Title Case>
@@ -12,6 +12,11 @@ supersedes: []
 Delete this instruction and replace every <placeholder>. A policy records one durable
 rule for future work. Keep it narrow enough to enforce and clear enough to apply
 without reconstructing the pull-request discussion that created it.
+
+This file always states the rule as it currently applies. When the agreed rule
+changes, revise this file and keep its ID. When it no longer applies, delete the
+file after repairing links to it; never reuse its number. Git and the proposal that
+made each change keep the history, so the file carries no revision log.
 -->
 
 ## Introduction
@@ -28,7 +33,8 @@ rule itself; it is not a history of the proposal that established the policy.
 <!--
 State one imperative sentence. Use “must,” “must not,” or another direct instruction
 that an author can follow. If the rule takes a paragraph to state, it is probably two
-policies and should be split before it becomes hard to enforce.
+policies and should be split before it becomes hard to enforce. When a current
+specification already owns the requirement, link it here instead of restating it.
 -->
 <Imperative rule.>
 
@@ -76,15 +82,3 @@ inventing a local convention or searching through the proposal that created the 
 1. <First action.>
 2. <Required verification or artifact.>
 3. <Escalation or exception procedure, if any.>
-
-## Revision history
-
-<!--
-Record each substantive change after the policy is established, including a link to
-the proposal that changed it. Start with this policy's establishment. Keep the table
-in chronological order so a future reader can reconstruct the rule's evolution.
--->
-
-| Date         | Change                   | Proposal        |
-| ------------ | ------------------------ | --------------- |
-| <YYYY-MM-DD> | Established this policy. | proposal.<NNNN> |

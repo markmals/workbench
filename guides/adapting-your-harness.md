@@ -1,7 +1,6 @@
 ---
 id: guide.adapting-your-harness
 title: Adapting Your Harness
-describes: [proposal.0001]
 ---
 
 # Adapting Your Harness
@@ -11,6 +10,8 @@ describes: [proposal.0001]
 Workbench ships its infrastructure harness-neutral in `.agents/` and comes wired for [Oh My Pi](https://omp.sh). Any other harness needs a deliberate one-time adaptation: point it at the contract, make its skills discoverable, and wire the lifecycle events it supports. Commit that configuration, then leave `.agents/` as the source of truth.
 
 The checks that matter most do not depend on a harness noticing anything. The validator, continuous integration, and the commit hook run independently of the agent's instructions.
+
+The [current process](../PROCESS.md) owns the workflow. Your checkout's `AGENTS.md` owns its agent instructions; [Workbench's default-branch agent contract](https://github.com/markmals/workbench/blob/main/AGENTS.md) is the template source. When reviewing an unmerged change, use the contract from that change's branch.
 
 Ask your agent to make the harness-specific changes below. You should review and commit the result, then run a small feature through the process before relying on it for larger work.
 
@@ -46,7 +47,7 @@ Nothing needs adapting. Oh My Pi loads `AGENTS.md` from the repository root and 
 | --- | --- |
 | `.omp/tools/dynamic-workflows/` | Registers the `workflow` tool. |
 | `.omp/extensions/prime-beads.ts` | Runs `bd prime` before the first turn, injecting the work graph and durable memories into the session. |
-| `.omp/extensions/format-after-edit.ts` | Runs `mise run fmt -- <files>` on each file the `edit` or `write` tool changed, and tells the agent when it reformatted a file or could not parse it. |
+| `.omp/extensions/format-after-edit.ts` | Runs the project's formatter on changed files, skips unsupported extensions such as `.feature`, and reports reformats or parse failures for supported files. |
 | `.omp/extensions/check-before-stop.ts` | Runs `mise run check` before the agent ends its turn. A failure, or a gate that does not finish within 25 seconds, sends the agent back once with the reason. |
 
 Continue at [Configure the readiness-report account](#configure-the-readiness-report-account).
@@ -124,7 +125,7 @@ mise run setup
 mise run check
 ```
 
-Then run one small feature end to end: branch, draft pull request, proposal, tests, guides, code, review, and readiness report. The first pass exposes what your harness does not do well while the change is still cheap to correct.
+Then run one small feature end to end: branch, draft pull request, proposal, current specification, tests, guides, code, review, and readiness report. The first pass exposes what your harness does not do well while the change is still cheap to correct.
 
 ## Add another harness without forking
 

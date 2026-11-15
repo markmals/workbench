@@ -11,7 +11,7 @@
 
 ## What was built
 
-<!-- Summarize the delivered behavior, not the implementation internals. -->
+<!-- Summarize the delivered behavior, not the implementation internals. Link the current specifications and records this change revised. -->
 
 - <Delivered behavior>
 
@@ -50,7 +50,7 @@
 
 ## Remaining limitations
 
-<!-- State known behavior gaps or constraints that remain after this change. -->
+<!-- State known behavior gaps or constraints that remain after this change, including specified behavior no check exercised. -->
 
 - <Known limitation or None.>
 

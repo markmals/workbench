@@ -1,14 +1,13 @@
 ---
 id: guide.choosing-a-preview
 title: Choosing a Preview
-describes: [proposal.0001]
 ---
 
 # Choosing a Preview
 
 ## What do I wire up so I can exercise a change?
 
-Wire the cheapest realistic artifact through which you can exercise the changed behavior. This is the preview stage of [running a feature](./running-a-feature.md).
+Wire the cheapest realistic artifact through which you can exercise the changed behavior. [The process's preview contract](../PROCESS.md#previews) defines that requirement; [Running a Feature](./running-a-feature.md) explains where it fits in review.
 
 Both words carry weight:
 

@@ -1,38 +1,38 @@
 ---
 id: guide.keeping-the-record
 title: Keeping the Record
-describes: [proposal.0001]
 ---
 
 # Keeping the Record
 
 ## When does something become a policy, a decision, or neither?
 
-The record preserves project knowledge that must survive the proposal which revealed it. It is not a place to restate a feature, capture temporary implementation notes, or collect every review comment.
+The record holds project context that must outlive the proposal which revealed it: the vision, the rules future work keeps enforcing, and the choices it must understand. It is not a place to restate a feature, capture temporary implementation notes, or collect every review comment. What the product does belongs in its current specifications, described in [Keeping Current Specifications](./current-specifications.md).
 
 ## The durable artifacts
 
 | Artifact | Purpose | When to update it |
 | --- | --- | --- |
 | [Vision](../VISION.md) | What the project is, its MVP, principles, and direction. | At completion, when accepted work changes the project's capabilities, MVP, or direction. |
-| Policy | A rule that future work must keep enforcing. | When completed work establishes a durable constraint. |
-| Decision | An architectural choice future work must understand. | When completed work establishes a durable choice and its rationale. |
+| Policy | A current rule that future work must keep enforcing. | When agreed work establishes, changes, or retires a durable constraint. |
+| Decision | A current architectural choice future work must understand. | When agreed work establishes, changes, or retires a durable choice and its rationale. |
 
-The vision is living. Policies and decisions preserve a specific rule or choice with the proposal that established it. A proposal is still the specification for its own change; the record does not replace it.
+All three are current documents. Each policy or decision file states the rule or choice that applies now; Git holds its earlier wording, and the proposal that changed it explains why. A proposal explains its own change and is not a current record.
 
 **Most features add nothing here, and that is the point.** Recording nothing is the ordinary outcome, not a step anyone forgot. Both directories being empty means no feature has yet established a rule or a choice worth outliving itself — a healthy state, not a gap to fill.
 
-A policy written speculatively is one nobody follows and everybody has to read. Wait until a feature actually establishes the rule, which is why every entry names the proposal that established it.
+A policy written speculatively is one nobody follows and everybody has to read. Wait until agreed work actually establishes the rule.
 
 ## Apply the test
 
 Ask which sentence describes the knowledge:
 
-| If it says                     | Put it in             |
-| ------------------------------ | --------------------- |
-| “Always do X” or “Never do X.” | A policy.             |
-| “We chose X over Y because Z.” | A decision.           |
-| “This change will do X.”       | The current proposal. |
+| If it says                     | Put it in                                         |
+| ------------------------------ | ------------------------------------------------- |
+| “Always do X” or “Never do X.” | A policy.                                         |
+| “We chose X over Y because Z.” | A decision.                                       |
+| “The product does X.”          | The current specification that owns that surface. |
+| “This change will do X.”       | The current proposal.                             |
 
 **If it does not outlive the current proposal, it belongs in the proposal and nowhere else.** That includes one-off trade-offs, implementation sequencing, review discussion, and notes useful only while this change is in flight. Do not turn the record into a junk drawer.
 
@@ -48,19 +48,30 @@ Use the `.agents/rules/enforcement-hierarchy.md` before adding a rule. Where a c
 
 ## Create a durable entry only after it is earned
 
-`policies/` and `decisions/` start empty on purpose. Do not write speculative policies or decisions because a future change might need them. Record a rule or choice when a feature has established it, and link it to that feature with `established-by`.
+`policies/` and `decisions/` start empty on purpose. Do not write speculative policies or decisions because a future change might need them. Record a rule or choice when agreed work has established it. Optional `established-by: proposal.<NNNN>` names the proposal that introduced it, as provenance; it is not required, and it does not need to change when the record is revised later.
 
-Use the canonical `.agents/templates/POLICY.md` for a narrow rule and its enforcement tier. Use the `.agents/templates/DECISION.md` for the context, choice, alternatives, and consequences. Number either file as `<NNNN>-<slug>.md` and use the matching `policy.<NNNN>` or `decision.<NNNN>` ID.
+Use the canonical `.agents/templates/POLICY.md` for a narrow rule, or a link to the source that owns it, with its scope and enforcement. Use `.agents/templates/DECISION.md` for the current arrangement, context, alternatives, and consequences. Number either file as `<NNNN>-<slug>.md` and use the matching `policy.<NNNN>` or `decision.<NNNN>` ID. Required frontmatter is `id`, `title`, and `status`; [Record Validation and Workflow Status](./record-validation.md) lists the exact checks.
 
-The policy lifecycle is `draft` to `active`; the decision lifecycle is `proposed` to `accepted`. Both can become `superseded`. The human decides whether the feature's outcome merits the record; you can ask the agent to write the entry after that decision.
+The policy lifecycle is `draft` to `active`; the decision lifecycle is `proposed` to `accepted`. A proposed record stays on its change branch until it is agreed. The human decides whether the feature's outcome merits the record; you can ask the agent to write the entry after that decision.
 
-## Supersede; do not rewrite history
+## Revise or retire in place
 
-Never edit a policy or decision into a different meaning. Never delete one. Write a new entry with `supersedes: [<old id>]`, then set the old entry's `status: superseded`.
+When an agreed rule or choice changes, edit its file. Keep the filename and ID, revise the rationale and enforcement in the same change, and update current references to it. When it no longer applies, delete the file. A rule that still binds a supported compatibility promise or an unfinished migration still applies until that obligation ends.
 
-The validator requires both halves of that change and rejects supersession cycles. Superseded entries stay reachable in the documentation site's collapsed group. That history lets future work understand which rule or choice applied at the time and what replaced it.
+The record needs no replacement file, supersession field, or revision-history table. Git keeps every earlier version, and the proposal that made the change explains it. The validator rejects `supersedes` and `status: superseded` on a policy or decision with a message explaining how to revise or retire it instead.
 
-A correction that leaves the meaning intact can be an ordinary revision. When the substantive rule or choice changes, supersede it instead.
+Before deleting a record, find every link to it. Repoint or remove current references. Where a historical link must keep working, such as a completed proposal that cited the record, point it at an immutable Git revision that still contains the file. Never reuse a retired ID for a different record. [Keeping Current Specifications](./current-specifications.md#worked-example-revising-and-retiring-a-policy) works through one revision and one retirement.
+
+## Migrate a supersession chain
+
+A project adopting this model may already have policies or decisions that supersede one another. For each chain:
+
+1. With the human, determine the complete rule or choice that still applies. Do not assume the newest record already contains every clause the older ones kept.
+2. Write the retained clauses into the surviving logical record. Keep the surviving ID where possible.
+3. Remove its `supersedes` field and give it a current status: `active` for a policy, `accepted` for a decision.
+4. Update current references to the retired records, and replace each historical link that must survive with an immutable Git revision link.
+5. Delete the retired files.
+6. Run `mise run check`. The validator reports remaining obsolete metadata, and the documentation build reports broken links.
 
 ## Keep the vision current
 
@@ -73,7 +84,7 @@ Do not use the vision as a release plan or a feature inventory. It guides propos
 1. State the knowledge in one sentence.
 2. Apply the outlives-the-proposal test.
 3. For a rule, try a check, task, or template before prose.
-4. If it is durable, settle it with the agent, then have the entry written and linked to the proposal that established it.
+4. If it is durable, settle it with the agent, then have the entry written, or the existing entry revised or deleted.
 5. At completion, update the vision if accepted work changed it.
 
 For the surrounding feature flow, see [Running a Feature](./running-a-feature.md).

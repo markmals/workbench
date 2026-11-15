@@ -54,7 +54,6 @@ let config = defineConfigWithTheme<WorkbenchThemeConfig>({
         "docs/.vitepress/**",
         "docs/public/**",
         "README.md",
-        "PROCESS.md",
         "AGENTS.md",
     ],
     rewrites: {
@@ -80,6 +79,7 @@ let config = defineConfigWithTheme<WorkbenchThemeConfig>({
         socialLinks: [{ icon: "github", link: "https://github.com/markmals/workbench" }],
         nav: [
             { text: "Vision", link: "/VISION" },
+            { text: "Process", link: "/PROCESS" },
             {
                 text: "Decisions",
                 link: sidebar.firstDecisionLink ?? "/decisions/README",
@@ -91,7 +91,7 @@ let config = defineConfigWithTheme<WorkbenchThemeConfig>({
                 activeMatch: "/policies/",
             },
             {
-                text: "Proposals",
+                text: "Change history",
                 link: sidebar.firstProposalLink ?? "/proposals/README",
                 activeMatch: "/proposals/",
             },

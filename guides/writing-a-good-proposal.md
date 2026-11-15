@@ -1,7 +1,6 @@
 ---
 id: guide.writing-a-good-proposal
 title: Writing a Good Proposal
-describes: [proposal.0001, proposal.0004]
 ---
 
 # Writing a Good Proposal
@@ -12,7 +11,7 @@ The `.agents/templates/PROPOSAL.md` teaches structure: what each section is for.
 
 ## Spend the hour where change is cheap
 
-A proposal is the highest-leverage artifact in a feature. It is the one place where changing your mind is cheap. Tests, guides, and code derive from it; an hour spent making intent clear here can save a day spent reconciling them later.
+A proposal is the highest-leverage artifact in a feature. It is the one place where changing your mind is cheap. The specifications, tests, guides, and code it changes all follow from it; an hour spent making intent clear here can save a day spent reconciling them later.
 
 It also outlives the pull-request conversation. Once the feature ships, the proposal is the explanation of _why_ the project changed. Write for the person who finds it then, not for the agent that heard the original request.
 
@@ -28,7 +27,7 @@ This distinction makes review useful. Readers can agree that a problem matters w
 
 ## Make decisions implementation-ready
 
-Detailed design is the source from which tests derive. It must specify observable behavior, interfaces, failures, boundaries, data, and operational constraints precisely enough that someone who is not the author can implement it without asking questions.
+Detailed design states what changes in each current source the proposal affects. Link the source that owns the behavior today, such as an API's contract documentation, a feature file, or a reference page, and say exactly what the change does to it: new or changed behavior, interfaces, failures, boundaries, data, and operational constraints. It must be precise enough that someone who is not the author can revise those sources and implement the change without asking questions. Requirements that stay the same stay where they are; link them rather than copy them. [Keeping Current Specifications](./current-specifications.md) describes where each kind of requirement lives.
 
 That is the Swift Evolution bar the template borrows. A sentence such as “make validation robust” does not meet it; it leaves a later person to invent what invalid input means, what the user observes, and which behavior wins at a boundary.
 
@@ -59,7 +58,7 @@ Two exceptions keep the line honest. Wording stays out unless the exact words ar
 
 ## Do not create a second specification
 
-Acceptance criteria are usually a mistake. Detailed design is already the specification and the source of the tests. Repeating it as a checklist creates a second version that will drift.
+Acceptance criteria are usually a mistake. Detailed design already describes the change, and the current specifications state the resulting contract. Repeating Detailed design as a checklist creates another version that will drift. So does copying an existing contract into the proposal in full: link its owner and describe the delta.
 
 The current [proposal 0001](../proposals/0001-workbench-2.md) deletes Acceptance criteria: after Detailed design, it continues directly to Compatibility. That is the right default.
 
@@ -108,6 +107,7 @@ For the full path from proposal to release, see [Running a Feature](./running-a-
 | Motivation begins with “Add” or “Build” | The fix is masquerading as the problem. | Restate the harm, affected people, evidence, and workaround without naming an answer. |
 | A design sentence leaves two observable outcomes possible | A later implementer must invent a decision. | Choose the behavior or add a clarification marker. |
 | Acceptance checkboxes repeat Detailed design | There are two specifications that can drift. | Delete Acceptance criteria. |
+| Detailed design copies an existing contract in full | The requirement now has two owners. | Link the current source and describe only what changes. |
 | Detailed design names sizes, colors, or controls, or quotes words that are not themselves a requirement | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI. |
 | “Out of scope” means “not finished” | The proposal hides required work. | Put the work in scope or reduce the change honestly. |
 | Two motivations need separate explanations | The proposal is really two changes. | Split it into coherent proposals. |

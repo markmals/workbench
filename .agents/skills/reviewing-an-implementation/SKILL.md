@@ -5,7 +5,7 @@ description: Use when an implemented proposal has fresh validation evidence and 
 
 # Reviewing an Implementation
 
-**Phase 3 — Implementation.** Check the work against the proposal, have an agent without your context try to break it, then hand it to the human. This procedure does not decide whether the human accepts the work.
+**Phase 3 — Implementation.** Check the work against the approved change and the current specifications it revised, have an agent without your context try to break it, then hand it to the human. This procedure does not decide whether the human accepts the work.
 
 Begin after applicable validation has fresh evidence under `.agents/rules/verification.md`. Proceed in this order:
 
@@ -16,23 +16,23 @@ Begin after applicable validation has fresh evidence under `.agents/rules/verifi
 
 ## 1. Self-check
 
-Read the proposal, the changed tests, the affected guides, and the diff together. For each observable behavior in Detailed design — including boundary cases, errors, defaults, and side effects that could disagree — confirm that it is tested, described where a user would look when it is user-facing, and implemented. Then look the other way: anything implemented that the proposal and guides do not describe is scope creep or a gap in the proposal. Look and feel the proposal leaves open is neither, and neither is a look-and-feel detail the proposal pinned that the human has since changed through polish.
+Read the proposal, the revised current specifications, the changed tests, the affected guides, and the diff together. For each observable behavior the change adds or alters in those specifications — including boundary cases, errors, defaults, and side effects that could disagree — confirm that the specification states it, that it is tested, that it is described where a user would look when it is user-facing, and that it is implemented. Then look the other way: anything implemented that the specifications and guides do not describe is scope creep or a gap, and anything the specifications now state that the proposal did not authorize is scope creep in the specification. Look and feel the proposal leaves open is neither, and neither is a look-and-feel detail the proposal pinned that the human has since changed through polish.
 
-Then ask whether this is the implementation that should remain. Does its structure fit the domain the proposal describes, or does it leak implementation conveniences into public behavior? Is there a simpler realization that expresses the proposal better, or complexity inherited from the baseline that no longer earns its place?
+Then ask whether this is the implementation that should remain. Does its structure fit the domain the specifications describe, or does it leak implementation conveniences into public behavior? Is there a simpler realization that expresses the contract better, or complexity inherited from the baseline that no longer earns its place?
 
 Resolve each disagreement in exactly one way:
 
 | Resolution | Use when | Action |
 | --- | --- | --- |
-| Fix the wrong artifact | Intent has not changed | Correct the tests, guides, or code, and rerun the affected gates. |
-| Revise the proposal | Intent or scope changed | Discuss with the human first, then derive the affected artifacts again. |
+| Fix the wrong artifact | Intent has not changed | Correct the specification, tests, guides, or code within the approved change, and rerun the affected gates. |
+| Revise the proposal | Intent or scope changed | Discuss with the human first, then revise the affected specifications and derive the other artifacts again. |
 | Record the divergence | It remains deliberate for human review | Name the behavior, sources, impact, and reason in the readiness report. |
 
-You may edit tests, guides, and code. You must not revise a proposal without the human.
+You may edit specifications, tests, guides, and code within the approved change. You must not revise a proposal without the human.
 
 ## 2. Independent review
 
-Dispatch one subagent with fresh context for `adversarial-review`, on a different model from yours where the harness allows. Give it the proposal, the commit range, and the commands that verify the work. Tell it to try to show the work is not done — behavior missing or wrong relative to the proposal, edge cases the tests miss, tests that would still pass with a broken implementation, security or data-loss risks — to confirm findings by running code, to ignore style, naming, formatting, and look and feel, and to report without editing.
+Dispatch one subagent with fresh context for `adversarial-review`, on a different model from yours where the harness allows. Give it the proposal, the current specifications the change revised and the relevant unchanged constraints, the commit range, and the commands that verify the work. Tell it to try to show the work is not done — behavior missing or wrong relative to the specifications and the proposal, edge cases the tests miss, tests that would still pass with a broken implementation, security or data-loss risks — to confirm findings by running code, to ignore style, naming, formatting, and look and feel, and to report without editing.
 
 Do not replace this dispatch with your own review. Consume its report:
 
@@ -84,13 +84,13 @@ Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. F
 | Report section | Required content |
 | --- | --- |
 | Proposal | State `FULLY` implemented only when every promised behavior exists. For `PARTIALLY`, name completed and omitted behavior, limitations, and reason. Silent partial implementation is not allowed. |
-| What was built | Delivered behavior, not internals. |
+| What was built | Delivered behavior, not internals, with links to the current specifications and records the change revised. |
 | How to exercise it | Preview link or honest absence, setup, actions, and expected results. |
 | Validation performed | Every command actually run in this session and its observed result, per `.agents/rules/verification.md`. Never report an unrun gate as passing. |
 | Adversarial findings adopted | Each accepted or fixed finding, or `- None.` |
 | Adversarial findings declined, with reasoning | Every declined finding and why it was declined, or `- None.` This section is always present. |
 | Defects discovered and deferred | Each deliberate, out-of-scope defect as a linked Beads item from `tracking-work`, or `- None.` |
-| Remaining limitations | Known behavior gaps or `- None.` |
+| Remaining limitations | Known behavior gaps, including specified behavior no check exercised, or `- None.` |
 | What to look at first | The first behavior, preview action, or diff the human should inspect. |
 
 Declined adversarial findings keep the independent review useful. Do not quietly omit a narrow, uncomfortable, or disputed finding.
@@ -122,7 +122,7 @@ While the proposal is `active-review`, apply feedback that touches only look and
 
 ## Red flags
 
-- Your self-check reviewed style instead of comparing the proposal, tests, guides, and code.
+- Your self-check reviewed style instead of comparing the proposal, specifications, tests, guides, and code.
 - A disagreement between them has no recorded resolution.
 - You widened the change to fix a finding outside the proposal.
 - You changed proposal intent without the human.

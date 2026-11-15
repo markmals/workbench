@@ -3,10 +3,10 @@
         <div class="wb-hero__content">
             <h1 class="wb-hero__title">Workbench</h1>
             <p class="wb-hero__tagline">
-                A platform-agnostic, harness-agnostic agentic development process kit. No single
-                artifact defines a feature: proposals record intent, tests encode behavior, guides
-                explain it, code implements it, previews expose it, and independent review finds
-                where they disagree.
+                A platform-agnostic, harness-agnostic agentic development process kit. Current
+                specifications state the contract; proposals explain changes to it. Tests verify
+                behavior, guides explain its use, code implements it, and previews and independent
+                review expose disagreement.
             </p>
             <div class="wb-hero__actions">
                 <a :href="visionLink" class="wb-hero__button wb-hero__button--primary"> Vision </a>

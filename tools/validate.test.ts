@@ -88,19 +88,16 @@ function validArtifacts(): Artifact[] {
             title: "Record Validation Policy",
             status: "active",
             "established-by": "proposal.0002",
-            supersedes: [],
         }),
         artifact("decisions/0001-records.md", {
             id: "decision.0001",
             title: "Record Validation Decision",
             status: "accepted",
             "established-by": "proposal.0002",
-            supersedes: [],
         }),
         artifact("guides/records.md", {
             id: "guide.records",
             title: "Record Validation Guide",
-            describes: ["proposal.0002"],
         }),
         artifact("VISION.md", {
             title: "Workbench Vision",
@@ -317,14 +314,14 @@ test("rule 2 accepts IDs matching unique filenames", () => {
 
 test("rule 3 rejects unresolved cross-references", () => {
     let records = validArtifacts();
-    records[4].frontmatter.describes = ["proposal.9999"];
+    records[2].frontmatter["established-by"] = "proposal.9999";
 
     assert.deepEqual(
         validateArtifacts(records).filter(({ message }) => message.includes("does not resolve")),
         [
             {
-                path: "guides/records.md",
-                message: 'reference "proposal.9999" in describes does not resolve',
+                path: "policies/0001-records.md",
+                message: 'reference "proposal.9999" in established-by does not resolve',
             },
         ],
     );
@@ -339,54 +336,23 @@ test("rule 3 accepts resolved cross-references", () => {
     );
 });
 
-function policySupersession(status: string): Artifact[] {
-    return [
-        artifact("proposals/0001-records.md", {
-            id: "proposal.0001",
-            title: "Record Validation",
-            authors: ["Ada"],
-            status: "accepted",
-            "pull-request": "42",
-            supersedes: [],
-        }),
-        artifact("policies/0001-old.md", {
-            id: "policy.0001",
-            title: "Old Policy",
-            status,
-            "established-by": "proposal.0001",
-            supersedes: [],
-        }),
-        artifact("policies/0002-new.md", {
-            id: "policy.0002",
-            title: "New Policy",
-            status: "active",
-            "established-by": "proposal.0001",
-            supersedes: ["policy.0001"],
-        }),
-    ];
-}
+test("rule 4 rejects a replaced proposal that remains implemented", () => {
+    let records = validArtifacts();
+    records[0].frontmatter.status = "implemented";
 
-test("rule 4 rejects a superseded record that remains active", () => {
     assert.deepEqual(
-        validateArtifacts(policySupersession("active")).filter(({ message }) =>
-            message.includes("must have status"),
-        ),
+        validateArtifacts(records).filter(({ message }) => message.includes("must have status")),
         [
             {
-                path: "policies/0001-old.md",
-                message: 'record superseded by policy.0002 must have status "superseded"',
+                path: "proposals/0001-records.md",
+                message: 'record superseded by proposal.0002 must have status "superseded"',
             },
         ],
     );
 });
 
-test("rule 4 accepts a record marked superseded", () => {
-    assert.equal(
-        validateArtifacts(policySupersession("superseded")).some(({ message }) =>
-            message.includes("must have status"),
-        ),
-        false,
-    );
+test("rule 4 accepts historical proposal supersession", () => {
+    assert.deepEqual(validateArtifacts(validArtifacts()), []);
 });
 
 for (let status of [
@@ -597,7 +563,6 @@ test("rule 2 rejects guide filenames that are not kebab-case", () => {
     records[4] = artifact("guides/My Guide (DRAFT)!.md", {
         id: "guide.My Guide (DRAFT)!",
         title: "Record Validation Guide",
-        describes: ["proposal.0002"],
     });
 
     assert.deepEqual(
@@ -612,32 +577,32 @@ test("rule 2 rejects guide filenames that are not kebab-case", () => {
 });
 
 test("rule 4 rejects a self-supersession", () => {
-    let records = policySupersession("superseded");
-    records[2].frontmatter.status = "superseded";
-    records[2].frontmatter.supersedes = ["policy.0002"];
+    let records = validArtifacts();
+    records[1].frontmatter.status = "superseded";
+    records[1].frontmatter.supersedes = ["proposal.0002"];
 
     assert.deepEqual(
         validateArtifacts(records).filter(({ message }) => message.includes("supersession cycle")),
         [
             {
-                path: "policies/0002-new.md",
-                message: "supersession cycle: policy.0002 -> policy.0002",
+                path: "proposals/0002-replaces.md",
+                message: "supersession cycle: proposal.0002 -> proposal.0002",
             },
         ],
     );
 });
 
 test("rule 4 rejects a supersession cycle", () => {
-    let records = policySupersession("superseded");
-    records[1].frontmatter.supersedes = ["policy.0002"];
-    records[2].frontmatter.status = "superseded";
+    let records = validArtifacts();
+    records[0].frontmatter.supersedes = ["proposal.0002"];
+    records[1].frontmatter.status = "superseded";
 
     assert.deepEqual(
         validateArtifacts(records).filter(({ message }) => message.includes("supersession cycle")),
         [
             {
-                path: "policies/0001-old.md",
-                message: "supersession cycle: policy.0001 -> policy.0002 -> policy.0001",
+                path: "proposals/0001-records.md",
+                message: "supersession cycle: proposal.0001 -> proposal.0002 -> proposal.0001",
             },
         ],
     );
