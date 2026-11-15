@@ -74,7 +74,7 @@ Directions worth considering once the core is proven:
 
 ## Revision history
 
-- **2026-11-15** — Made current specifications the owners of current requirements, kept proposals as the record of each change, and treated policies and decisions as current files revised in place, for [proposal.0005](proposals/0005-current-specifications.md).
+- **2026-11-15** — Made current specifications the owners of current requirements, kept proposals as the record of each change, and treated policies and decisions as current files revised in place, after human acceptance of [proposal.0005](proposals/0005-current-specifications.md).
 - **2026-11-03** — Limited intent to what a feature does and left look and feel to the human on the running software, after [proposal.0004](proposals/0004-make-room-for-ui-polish.md) gave interface polish a place outside proposals.
 - **2026-10-30** — Replaced the separate cross-artifact review with the implementer's self-check and recorded the first stage-cost measurement, after [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) collapsed the implementation phase's review ceremony.
 - **2026-08-26** — Recorded the guides as part of the minimum viable product, after [proposal.0001](proposals/0001-workbench-2.md) brought them into scope and delivered them.

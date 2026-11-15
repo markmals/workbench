@@ -2,7 +2,7 @@
 id: proposal.0005
 title: Keep Current Specifications Alongside Change Proposals
 authors: [markmals, openai-codex/gpt-6-astra]
-status: active-review
+status: implemented
 pull-request: https://github.com/markmals/workbench/pull/9
 issues: [workbench-1uz, workbench-11q]
 supersedes: []
@@ -287,4 +287,4 @@ A common registry, metadata schema, renderer, and binding-report protocol could 
 
 ## Open questions
 
-None. The owner selected format-neutral current specifications with reusable optional Gherkin guidance and approved implementation before merging on 2026-11-15. The reusable integration libraries remain separate work.
+None. The owner selected format-neutral current specifications with reusable optional Gherkin guidance, approved implementation, and accepted the completed implementation on 2026-11-15. They authorized merging PR #9 and cleaning up its branch, worktree, and preview. Delivery is merge-only; no release is authorized. The reusable integration libraries remain separate work.
