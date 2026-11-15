@@ -1,7 +1,6 @@
 ---
 id: guide.adapting-your-harness
 title: Adapting Your Harness
-describes: [proposal.0001]
 ---
 
 # Adapting Your Harness
@@ -124,7 +123,7 @@ mise run setup
 mise run check
 ```
 
-Then run one small feature end to end: branch, draft pull request, proposal, tests, guides, code, review, and readiness report. The first pass exposes what your harness does not do well while the change is still cheap to correct.
+Then run one small feature end to end: branch, draft pull request, proposal, current specification, tests, guides, code, review, and readiness report. The first pass exposes what your harness does not do well while the change is still cheap to correct.
 
 ## Add another harness without forking
 

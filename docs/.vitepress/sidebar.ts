@@ -87,14 +87,17 @@ function buildRecordSection(directory: "proposals" | "decisions" | "policies"): 
 
         return numberOrder || a.text.localeCompare(b.text, "en", { sensitivity: "base" });
     });
-    let current = entries.filter(entry => entry.status !== "superseded");
-    let superseded = entries
-        .filter(entry => entry.status === "superseded")
-        .map(({ text, link }) => ({ text, link }));
+    let historical = directory === "proposals";
+    let current = historical ? entries.filter(entry => entry.status !== "superseded") : entries;
     let items: DefaultTheme.SidebarItem[] = current.map(({ text, link }) => ({ text, link }));
 
-    if (superseded.length > 0) {
-        items.push({ text: "Superseded", collapsed: true, items: superseded });
+    if (historical) {
+        let superseded = entries
+            .filter(entry => entry.status === "superseded")
+            .map(({ text, link }) => ({ text, link }));
+        if (superseded.length > 0) {
+            items.push({ text: "Superseded", collapsed: true, items: superseded });
+        }
     }
 
     return {

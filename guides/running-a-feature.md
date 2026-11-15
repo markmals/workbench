@@ -1,7 +1,6 @@
 ---
 id: guide.running-a-feature
 title: Running a Feature
-describes: [proposal.0001, proposal.0004]
 ---
 
 # Running a Feature
@@ -31,28 +30,13 @@ The agent owns the work between those decisions. Comment on the pull request or 
 
 What follows describes substantial work — new or changed behavior, anything where a reasonable person could build it differently. Plenty of changes are not that.
 
-A typo, a dead link, or a bug whose correct behavior was never in question does not need a proposal, and often does not need a pull request either. The useful question is whether the change **decides** something. If the intended behavior already exists — because a proposal promised it, or because the contract is too obvious to write down — the agent is correcting an implementation, not defining one, and it should just fix it.
+A typo, a dead link, or a bug whose correct behavior was never in question does not need a proposal, and often does not need a pull request either. The useful question is whether the change **decides** something. If the intended behavior already exists — because a current specification or an approved proposal states it, or because the contract is too obvious to write down — the agent is correcting an implementation, not defining one, and it should just fix it. If the behavior was never specified and fixing it requires a choice, that choice goes back to a proposal.
 
 The agent judges this and tells you which it thinks the change is. You can ask for the full process on anything, at any time, without explaining why. Escalating is always available; the agent quietly deciding your feature is a small fix is the failure mode to watch for.
 
 Polishing an interface does not need a proposal either. A proposal says what a feature does: what a user can do and find out, what happens, and what they are told. Its look and feel — layout, sizes, spacing, type, color, motion, which control presents a choice, how it is operated, and the wording of labels — is yours to decide by looking at the running UI. Ask for changes as you see them. The agent keeps the UI running where you can see it, makes one change at a time, commits what you keep, and lands the work the way the project lands other changes made without a proposal. If a request would change what the feature does, such as keeping a provider's models listed after signing out, it stops and asks whether you want a proposal.
 
-Here is the status command run in this repository while its proposal was ready for implementation:
-
-```text
-$ node tools/status.ts ⊘ cache disabled
-proposal.0001  Workbench 2.0  ·  awaiting-implementation
-PR #1 (draft)  https://github.com/markmals/workbench/pull/1
-branch workbench-2
-
-Phase 3 — Implementation
-  The proposal is approved for implementation.
-
-Next (agent): Write failing tests, then guides, then code, and pass the gates. Self-check against the proposal, get one independent review, then post the readiness report and mark the pull request ready.
-              Skill: .agents/skills/implementing-a-proposal/
-```
-
-The exact branch, proposal, and pull-request details change. The phase and next actor are the parts to use.
+While a proposal is approved for implementation, the command reports **Phase 3 — Implementation**, names the agent as next, and points it at the implementation skill. The branch, proposal, and pull-request details in its output change; the phase and next actor are the parts to use. [Record Validation and Workflow Status](./record-validation.md) is the current contract for what the command reports.
 
 ## Phase 1 — Preparation
 
@@ -88,7 +72,7 @@ When the proposal is settled, you decide that it may become `awaiting-implementa
 
 ### The agent
 
-The agent writes `proposals/<NNNN>-<slug>.md` and pushes it as soon as it is coherent enough to react to — not after it is polished. It incorporates your comments and direct commits, preserving the durable design record.
+The agent writes `proposals/<NNNN>-<slug>.md` and pushes it as soon as it is coherent enough to react to — not after it is polished. The proposal names and links the current specifications the export will change, such as the report workflow's feature file or reference, and explains the change to each. It incorporates your comments and direct commits.
 
 ### What status reports
 
@@ -104,16 +88,17 @@ Do nothing. This phase may take a long time. The agent returns with a reviewable
 
 The order is fixed:
 
-1. Write failing tests for the report export the proposal specifies.
-2. Write guides from the proposal and compare them with the tests.
-3. Implement the code. Where the proposal leaves look and feel open, the agent chooses it to fit the project's existing interface and its platform's conventions, for you to refine in review.
-4. Run the gate with `mise run check`.
+1. Revise the current specification that owns report export, and any policy or decision you agreed to change, so it states the behavior you approved.
+2. Write failing tests for the export that specification now requires.
+3. Write guides from the intended contract and compare them with the tests.
+4. Implement the code. Where the proposal leaves look and feel open, the agent chooses it to fit the project's existing interface and its platform's conventions, for you to refine in review.
+5. Run the gate with `mise run check`.
 
 `mise run check` runs the tests, then `hk check --all` for formatting, lint, and type checks, then `validate` and `docs:build`.
 
-The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the proposal gives each an independent claim before code.
+The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the revised specification gives each an independent claim before code. [Keeping Current Specifications](./current-specifications.md) shows what that first step looks like for an API contract and for a Gherkin workflow.
 
-Passing the gates is not the end. Still in Phase 3, the agent reviews the proposal, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings.
+Passing the gates is not the end. Still in Phase 3, the agent reviews the proposal, current specifications, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings.
 
 It then publishes the preview, posts the readiness report, and marks the pull request ready as one coupled action. That action also changes the proposal to `active-review`.
 
@@ -121,7 +106,7 @@ For the preview, the agent chooses the cheapest realistic artifact through which
 
 ### What status reports
 
-Once you set `awaiting-implementation`, it reports **Phase 3 — Implementation** and names the agent as next. The command output above is a real example of that state. After the coupled final action, it reports **Phase 4 — Human review** and names you as next.
+Once you set `awaiting-implementation`, it reports **Phase 3 — Implementation** and names the agent as next. After the coupled final action, it reports **Phase 4 — Human review** and names you as next.
 
 ## Phase 4 — Human review
 
@@ -153,7 +138,7 @@ After acceptance, explicitly confirm release and branch deletion when the agent 
 
 ### The agent
 
-If the feature changed what the project is, the agent updates `VISION.md`. It records `implemented` in the original feature pull request after acceptance and confirms the record is in the pull request revision before marking a draft pull request ready or merging. Merge and any required release remain separate; a release needs its own authorization. The agent tracks unfinished delivery and performs only authorized cleanup.
+The agent finalizes any policy or decision the change agreed, and updates `VISION.md` if the feature changed what the project is. It records `implemented` in the original feature pull request after acceptance and confirms the record is in the pull request revision before marking a draft pull request ready or merging. The merge lands the revised specifications together with their implementation. Merge and any required release remain separate; a release needs its own authorization. The agent tracks unfinished delivery and performs only authorized cleanup.
 
 ### What status reports
 
@@ -175,4 +160,4 @@ At `accepted`, it reports **Phase 5 — Completion** and names the agent for the
 
 “Who decides” means the judgement, not the keystroke. You can direct the agent to update a status you decided; it cannot make either approval decision alone.
 
-A policy or decision may emerge, but neither replaces the proposal. Use [Keeping the Record](./keeping-the-record.md) to decide what belongs in one.
+After the merge, the proposal is the history of this change, and the revised specifications are where the next change starts. A policy or decision may emerge as well; use [Keeping the Record](./keeping-the-record.md) to decide what belongs in one.

@@ -1,7 +1,6 @@
 ---
 id: guide.getting-started
 title: Getting Started
-describes: [proposal.0001]
 ---
 
 # Getting Started
@@ -12,7 +11,7 @@ Start by making the kit your project, then use it for one small feature. You and
 
 ## What Workbench is
 
-Workbench is a process kit for developing a project with a coding agent. No single artifact defines a feature: intent is written more than once in forms that can disagree. A proposal records intent, tests encode behavior, guides explain it, and code implements it; disagreement between them is the signal to investigate.
+Workbench is a process kit for developing a project with a coding agent. No single artifact defines a feature: intent is written more than once in forms that can disagree. Each requirement has one current owner, such as an API's contract documentation, a schema, or a feature file. Tests encode it, guides explain it, and code implements it; disagreement between them is the signal to investigate. A proposal records each change to those sources and why it was made.
 
 For the argument behind this structure, read the `README.md`. This guide starts with using it.
 
@@ -87,7 +86,7 @@ Workbench comes wired for [Oh My Pi](https://omp.sh): it loads the contract, dis
 
 ## Read the worked example
 
-This clone ships Workbench's own record and guides, which are the clearest available answer to what good output looks like. Read them before you write or delete anything: `VISION.md` for the shape of a vision, `proposals/0001-*.md` for a real proposal, and [Running a Feature](./running-a-feature.md) for the loop you are about to run.
+This clone ships Workbench's own record and guides, which are the clearest available answer to what good output looks like. Read them before you write or delete anything: `VISION.md` for the shape of a vision, `proposals/0001-*.md` for a real proposal, [Running a Feature](./running-a-feature.md) for the loop you are about to run, and [Keeping Current Specifications](./current-specifications.md) for where your project's requirements will live.
 
 ## Write your project's vision
 
@@ -97,7 +96,7 @@ The vision is the standard against which later proposals are evaluated. Without 
 
 ## Clear the rest of the example
 
-Remove `proposals/0001-*.md` and the six guides. **Keep `guides/README.md`** — it documents the frontmatter every future guide needs, and the site's navigation points at it while you have no guides of your own. Keep the `README.md` in each record directory for the same reason.
+Remove Workbench's proposals and its guides. **Keep `guides/README.md`** — it documents the frontmatter every future guide needs, and the site's navigation points at it while you have no guides of your own. Keep the `README.md` in each record directory for the same reason.
 
 Keep `policies/` and `decisions/` empty until a real feature establishes one; speculative policies are the ones nobody follows.
 
@@ -122,10 +121,11 @@ You are not expected to memorise commands, skill names, or process steps. “Kee
 | Path | What it holds | When you use it |
 | --- | --- | --- |
 | `VISION.md` | Your project's purpose, minimum viable product, and direction | Write it before feature work; update it after accepted work changes the project. |
-| `proposals/` | One numbered specification for each change | Write and settle a proposal before implementation. |
-| `guides/` | Reader-facing behavior and usage guides | The agent writes or updates these from the proposal before code. |
-| `policies/` | Rules future work must keep enforcing | Add one only when a feature establishes a durable rule. |
-| `decisions/` | Architectural choices and their context | Add one only when a feature establishes a durable choice. |
+| `proposals/` | One numbered record of each change and its reasons | Write and settle a proposal before implementation. |
+| Contract documentation, schemas, feature files | The current specifications, wherever each surface keeps them | The agent revises the affected ones first, once you approve a proposal. |
+| `guides/` | Reader-facing behavior and usage guides | The agent writes or updates these from the intended contract before code. |
+| `policies/` | Current rules future work must keep enforcing | Add one when agreed work establishes a durable rule; revise or delete it when that rule changes. |
+| `decisions/` | Current architectural choices and their context | Add one when agreed work establishes a durable choice; revise or delete it when that choice changes. |
 | `.agents/` | Harness-neutral process instructions, rules, and templates | Your harness reads the adapted copy; this remains the source of truth. |
 
 ## Continue from here
@@ -134,4 +134,5 @@ You are not expected to memorise commands, skill names, or process steps. “Kee
 - [Write a good proposal](./writing-a-good-proposal.md)
 - [Choose a preview](./choosing-a-preview.md)
 - [Keep the record](./keeping-the-record.md)
+- [Keep current specifications](./current-specifications.md)
 - [Adapt your harness](./adapting-your-harness.md)

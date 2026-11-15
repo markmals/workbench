@@ -1,7 +1,6 @@
 ---
 id: guide.choosing-a-preview
 title: Choosing a Preview
-describes: [proposal.0001]
 ---
 
 # Choosing a Preview

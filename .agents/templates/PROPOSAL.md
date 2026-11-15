@@ -12,8 +12,11 @@ supersedes: []
 # <Title>
 
 <!--
-Delete this instruction and replace every <placeholder>. A proposal is the durable
-specification for one change; write for someone without the pull-request conversation.
+Delete this instruction and replace every <placeholder>. A proposal is the durable record
+of one change: why it is needed, what it changes in the project's current specifications,
+policies, and decisions, and how. Write for someone without the pull-request conversation.
+Link the current sources the change affects rather than restating complete contracts; once
+the change is complete, the proposal is history and those sources hold the requirements.
 
 Lifecycle:
 - `draft` — Phase 2 proposal development with the human; may carry clarification markers.
@@ -109,11 +112,16 @@ they clarify the pitch. This is an overview, not a complete specification.
 ## Detailed design
 
 <!--
-Specify behavior, interfaces, data, failures, boundary cases, and operational constraints.
-Someone who is not the author must be able to implement it without asking questions; tests derive from this section.
+Link each current source this change affects (API contract documentation, declarations or
+schemas, feature files, reference prose, policies, decisions) and specify what changes in it:
+behavior, interfaces, data, failures, boundary cases, and operational constraints. Name any
+necessary information that has no current home. Link requirements that stay the same instead
+of restating them. Someone who is not the author must be able to revise those sources and
+implement the change without asking questions.
 For a user interface, specify what the user can do, find out, and is told; leave its look and feel to the running UI.
 -->
 
+- <Current source, linked>: <what this change does to it>.
 - When <trigger or input>, <actor or system> <required behavior>.
 - If <error or boundary condition>, <observable result>.
 - <Data, configuration, migration, or operational requirement.>
@@ -121,8 +129,8 @@ For a user interface, specify what the user can do, find out, and is told; leave
 ## Acceptance criteria
 
 <!--
-Usually delete this section. Detailed design is what tests derive from, and restating it as a
-checklist duplicates the specification in a form that drifts from it.
+Usually delete this section. Detailed design already describes the change and the current
+specifications state the result; restating either as a checklist creates a copy that drifts.
 
 Keep it only when the change has discrete outcomes that Detailed design cannot express naturally
 — a structural change touching many independent things, or a migration with separable steps.
@@ -181,11 +189,11 @@ realistic one. A human must exercise changed behavior, not merely inspect prose 
 ## Policies and decisions checked
 
 <!--
-Read every relevant entry in policies/ and decisions/, then state how this proposal honors each.
+Read every relevant entry in policies/ and decisions/, then state how this proposal honors each, or which one it revises or retires.
 “None” is permissible only after actually reading both directories; record conflicts rather than silently departing from them.
 -->
 
-- <policy-or-decision-id> — <how this proposal honors it>
+- <policy-or-decision-id> — <how this proposal honors, revises, or retires it>
 
 ## Future directions
 

@@ -44,12 +44,10 @@ let meta = computed(() => {
                       }))
                 : [],
         establishedBy: typeof fm["established-by"] === "string" ? fm["established-by"] : null,
-        supersedes: Array.isArray(fm.supersedes)
-            ? fm.supersedes.filter((value): value is string => typeof value === "string")
-            : [],
-        describes: Array.isArray(fm.describes)
-            ? fm.describes.filter((value): value is string => typeof value === "string")
-            : [],
+        supersedes:
+            isProposal && Array.isArray(fm.supersedes)
+                ? fm.supersedes.filter((value): value is string => typeof value === "string")
+                : [],
         pullRequest:
             typeof fm["pull-request"] === "string" || typeof fm["pull-request"] === "number"
                 ? String(fm["pull-request"])
@@ -98,13 +96,6 @@ let relationships = computed<Relationship[]>(() => {
         });
     }
 
-    if (meta.value.describes.length > 0) {
-        result.push({
-            label: "describes",
-            references: meta.value.describes.map(id => ({ id, link: links[id] ?? null })),
-        });
-    }
-
     return result;
 });
 
@@ -116,6 +107,11 @@ let visible = computed(
 
 <template>
     <aside v-if="visible" class="record-header" aria-label="Document metadata">
+        <p v-if="meta.isProposal">
+            This proposal records a change. Read the
+            <a :href="withBase('/guides/current-specifications')">current specifications</a>
+            for the requirements that apply now.
+        </p>
         <div class="record-header__row">
             <code v-if="meta.id" class="record-header__id">{{ meta.id }}</code>
             <span

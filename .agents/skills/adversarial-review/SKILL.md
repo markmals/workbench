@@ -5,7 +5,7 @@ description: Use when an implementation has passed its self-check and you need a
 
 # Adversarial Review
 
-The implementer's self-check is **confirmatory** — it compares the implementation with the proposal and other artifacts. This review is **refutational**. Its job is not to confirm the code is right; it is to assume the code is wrong and find the input, caller action, or missing test that proves it.
+The implementer's self-check is **confirmatory** — it compares the implementation with the proposal, the current specifications, and the other artifacts. This review is **refutational**. Its job is not to confirm the code is right; it is to assume the code is wrong and find the input, caller action, or missing test that proves it.
 
 **Core principle:** a green suite and a clause-by-clause match prove the code does what someone thought to check. The adversary's whole value is in what nobody thought to check.
 
@@ -40,17 +40,17 @@ Measured baseline (this repo): a confirmatory reviewer handed an otherwise-corre
 
 - **Fresh context window.** The adversary must carry no memory of building the code. No accumulated goodwill, no "I know what I meant here."
 - **Use the strongest available portability rung:** different model family > different model > same model with fresh context and adversarial framing.
-- **Label the rung in the report.** A fresh-context-only run is weaker; never present it as a full adversarial pass. Provide the adversary the proposal, tests, guides, and implementation.
+- **Label the rung in the report.** A fresh-context-only run is weaker; never present it as a full adversarial pass. Provide the adversary the proposal, the current specifications it changed and the relevant unchanged constraints, tests, guides, and implementation.
 
 ## What to attack
 
 Five lenses. Spend the most effort on the first — it is the one confirmatory review cannot cover.
 
-1. **Un-enumerated edges.** The proposal lists what must hold. You hunt what it forgot to forbid. For every input: null, empty, whitespace-only, maximum size, negative, zero, duplicate, unicode, already-sorted, reverse-sorted, concurrent. For every return value: is it an alias of internal state a caller can mutate? For every resource: is it released on every path, including the throwing one? For every `async`: what races?
+1. **Un-enumerated edges.** The specifications list what must hold. You hunt what they forgot to forbid. For every input: null, empty, whitespace-only, maximum size, negative, zero, duplicate, unicode, already-sorted, reverse-sorted, concurrent. For every return value: is it an alias of internal state a caller can mutate? For every resource: is it released on every path, including the throwing one? For every `async`: what races?
 2. **Test quality.** Would this test still pass if the behavior were subtly wrong? Look for tautologies, assertions on implementation detail instead of observed behavior, over-mocking that tests the mock, fixtures that dodge the hard case, and **the missing test** — the scenario the proposal implies but the suite never exercises.
-3. **Proposal fidelity under interpretation.** The code may satisfy the letter of a clause while violating its intent. Name the ambiguity and the interpretation the code chose.
+3. **Contract fidelity under interpretation.** The code may satisfy the letter of a specification or proposal clause while violating its intent. Name the ambiguity and the interpretation the code chose.
 4. **Security surface.** Unvalidated boundary input, injection vectors, authorization assumed rather than checked.
-5. **Proposal gaps the implementation reveals.** Implemented behavior that no proposal clause covers — either scope creep to cut, or a real behavior the proposal should capture. Route the latter back to the proposal, not into silent acceptance. Look and feel the proposal leaves open is not a gap, and neither is a look-and-feel detail the proposal pinned that the human has since changed through polish; a broken accessibility commitment, or a look-and-feel choice that changes what a user can do or find out, is.
+5. **Proposal gaps the implementation reveals.** Implemented behavior that neither the current specifications nor the proposal cover — either scope creep to cut, or a real behavior the proposal should capture. Route the latter back to the proposal, not into silent acceptance. Look and feel the proposal leaves open is not a gap, and neither is a look-and-feel detail the proposal pinned that the human has since changed through polish; a broken accessibility commitment, or a look-and-feel choice that changes what a user can do or find out, is.
 
 ## Verify before you report — no fabricated flaws
 

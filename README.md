@@ -4,7 +4,7 @@
 
 A development process for working with coding agents, packaged as a repository you can clone.
 
-Workbench is built on one idea: **no single artifact defines a feature by itself.** A proposal records intent, tests encode behavior, guides explain behavior, code implements behavior, and a preview lets a human exercise it. Each is written independently, so when they disagree, you find out before release instead of after.
+Workbench is built on one idea: **no single artifact defines a feature by itself.** A proposal records the change and why, a current specification states what the project now requires, tests encode it, guides explain it, code implements it, and a preview lets a human exercise it. Each is written independently, so when they disagree, you find out before release instead of after.
 
 It assumes nothing about your language, framework, platform, or coding harness.
 
@@ -56,22 +56,22 @@ Your agent runs it too, at the start of every session. So "keep going" is a comp
 Per feature:
 
 ```
-branch → draft PR → proposal → tests → guides → code → validation
-       → self-check → adversarial review → preview → readiness report
-       → human review → revision → vision update → merge → release → cleanup
+branch → draft PR → proposal → current specifications → tests → guides → code
+       → validation → self-check → adversarial review → preview → readiness report
+       → human review → revision → records and vision update → merge → release → cleanup
 ```
 
 **Preparation.** The agent branches, pushes, and opens a draft pull request. The pull request is the durable workspace — proposal, implementation, review discussion, and status reports all accumulate in one reviewable place.
 
-**Proposal.** You and the agent write `proposals/<NNNN>-<slug>.md` and iterate until it is right. It has to be concrete enough that tests, guides, and an implementation can be derived from it without rereading your conversation. Unresolved questions are marked and answered, never guessed.
+**Proposal.** You and the agent write `proposals/<NNNN>-<slug>.md` and iterate until it is right. It links the current specifications the change touches and says what changes in each, concretely enough that the agent can revise them and build without rereading your conversation. Unresolved questions are marked and answered, never guessed. Once the change ships, the proposal is its history; the specifications are where the next change starts.
 
-**Implementation.** Failing tests first, then guides written from the proposal, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents.
+**Implementation.** Current specifications first: whichever API contract documentation, schema, reference prose, or Gherkin feature already owns the surface is revised to state the approved change. Then failing tests, then guides written from that intended contract, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents.
 
-**Review.** The agent reads proposal, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
+**Review.** The agent reads proposal, specifications, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
 
-**Human review.** You read the report, the diff, and the preview, and comment. Look-and-feel feedback is applied while the work stays in review. If your feedback changes what the feature does, or a design decision the proposal records, rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: vision update, merge, release, cleanup.
+**Human review.** You read the report, the diff, and the preview, and comment. Look-and-feel feedback is applied while the work stays in review. If your feedback changes what the feature does, or a design decision the proposal records, rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: records and vision update, merge, release, cleanup.
 
-The full description is in [`PROCESS.md`](PROCESS.md). The operative contract your agent reads every session is [`AGENTS.md`](AGENTS.md).
+The full description is in [`PROCESS.md`](PROCESS.md), and [`guides/current-specifications.md`](guides/current-specifications.md) shows where each kind of requirement lives. The operative contract your agent reads every session is [`AGENTS.md`](AGENTS.md).
 
 ## Previews
 
@@ -102,12 +102,12 @@ Defects an agent finds along the way get filed in [Beads](https://github.com/ste
 | `guides/` | User-facing documentation. Start at `getting-started.md`. |
 | `VISION.md` | The project's purpose and direction. Replace ours with yours. |
 | `proposals/` | One document per change, kept as history after it ships. |
-| `policies/` | Rules future work must keep enforcing. |
-| `decisions/` | Architectural choices and the context that produced them. |
+| `policies/` | Current rules future work must keep enforcing, revised in place. |
+| `decisions/` | Current architectural choices and the context that produced them. |
 | `guides/` | User-facing documentation. |
-| `docs/` | The site. Publishes the vision, the record, and the guides. |
+| `docs/` | The site. Publishes the vision, the process, the record, and the guides. |
 | `tools/` | The record validator and the small scripts the tasks run. Dependency-free. |
-| `.agents/skills/` | Seven skills, roughly one per phase. For the agent, not you. |
+| `.agents/skills/` | Skills for each phase and cross-cutting concern, including optional Gherkin guidance. For the agent, not you. |
 | `.agents/rules/` | Code quality, commit discipline, enforcement hierarchy. |
 | `.agents/templates/` | The canonical shape of every artifact. |
 | `.agents/commit-scopes` | The commit scopes the `commit-msg` hook accepts. |
@@ -132,7 +132,7 @@ mise run validate    # record frontmatter, ids, cross-references
 mise run docs:build  # the site builds
 ```
 
-`mise run validate` enforces that identifiers match filenames and are unique, that every `supersedes` / `established-by` / `describes` reference resolves, that superseding an entry marks the superseded one, and that no accepted proposal still carries an unresolved question. [hk](https://hk.jdx.dev) owns the git hooks: `commit-msg` holds every commit to [Scoped Commits](https://scopedcommits.com/) against the scopes in `.agents/commit-scopes`, and `pre-push` runs the gate. Continuous integration runs the same `mise run check`, so no gate depends on the agent remembering.
+`mise run validate` enforces that identifiers match filenames and are unique, that proposal `supersedes` and optional `established-by` references resolve, that superseding a proposal marks the superseded one, and that no proposal approved for implementation still carries an unresolved question. It rejects supersession metadata on policies and decisions, and `describes` on guides, with migration guidance; [`guides/record-validation.md`](guides/record-validation.md) is its full contract. [hk](https://hk.jdx.dev) owns the git hooks: `commit-msg` holds every commit to [Scoped Commits](https://scopedcommits.com/) against the scopes in `.agents/commit-scopes`, and `pre-push` runs the gate. Continuous integration runs the same `mise run check`, so no gate depends on the agent remembering.
 
 ## Harness support
 
@@ -150,4 +150,5 @@ There is no upgrade path. The two versions share almost nothing — 2.0 deletes 
 
 - [`PROCESS.md`](PROCESS.md) — the process in full.
 - [`AGENTS.md`](AGENTS.md) — what your agent is actually bound by.
+- [`guides/current-specifications.md`](guides/current-specifications.md) — where current requirements live, with worked library, Gherkin, and policy changes.
 - [`proposals/0001-workbench-2.md`](proposals/0001-workbench-2.md) — this rewrite, proposed through its own process. The most useful thing to read if you want to know what a good proposal looks like.

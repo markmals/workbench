@@ -4,7 +4,7 @@ This document describes the process I use for agentic development (“vibe codin
 
 The process is intended to be generalizable to any modern agentic coding harness, including [Claude Code](https://claude.com/product/claude-code), [Codex](https://openai.com/codex/), [Copilot](https://github.com/features/copilot), [Pi](https://pi.dev/), and [Oh My Pi](https://omp.sh/). Throughout this document, the harness and the model driving it are collectively referred to as _the agent_.
 
-The process starts with understanding the problem. For substantive changes, the agent grounds the domain, makes intent explicit with the human, then represents it independently in tests, documentation, and code. The resulting behavior is reviewed from multiple perspectives and finally verified by a human before release.
+The process starts with understanding the problem. For substantive changes, the agent grounds the domain, makes intent explicit with the human in a proposal, writes the approved change into the project's current specifications, then represents it independently in tests, documentation, and code. The resulting behavior is reviewed from multiple perspectives and finally verified by a human before release.
 
 ## Goals
 
@@ -12,7 +12,8 @@ The Workbench process has several goals:
 
 - Preserve a coherent long-term vision for the project even as individual features are developed independently.
 - Make the intended behavior and scope of a feature explicit before implementation begins.
-- Maintain multiple independently useful representations of that intent in proposals, tests, guides, and code.
+- Give every current requirement one discoverable owner, so that nobody has to replay past proposals to learn what applies now.
+- Maintain multiple independently useful representations of that intent in current specifications, tests, guides, and code.
 - Make disagreements between those representations visible before a feature is released.
 - Use agents for implementation and review without making the agent the final authority over product intent.
 - Preserve enough design rationale, implementation history, and review discussion for future humans and agents to understand why the project is the way it is.
@@ -20,7 +21,34 @@ The Workbench process has several goals:
 
 ## Artifacts
 
-The process produces and maintains several kinds of artifacts.
+The process produces and maintains ten kinds of artifact, described here as roles. The roles are conditional: one file can fill more than one, and a feature produces an artifact only for the roles it changes. [Keeping Current Specifications](guides/current-specifications.md) gives authoring guidance and worked examples.
+
+| Role | Current authority and usual home | Create or change it when |
+| --- | --- | --- |
+| Behavioral specification | Public API contract documentation, current reference prose, or Gherkin files, organized by capability or interface. It owns observable behavior, defaults, failures, and guarantees. | Required behavior changes. Reuse the source that already owns it. |
+| Native contract | The subsystem's declarations, schema, protocol definition, or persisted-format definition. | Its structural boundary changes. Keep the native source rather than a Markdown copy. |
+| Tests | Native test locations and frameworks, including behavioral, type, property, integration, and other appropriate tests. | They verify the current contract and relevant implementation risks. Use Gherkin bindings when that representation is chosen. |
+| Guides | `guides/` or the project's existing user-documentation home, written for the intended user, including consuming developers. | Users must do or understand something differently. |
+| Implementation | Code and executable configuration, including build definitions, tasks, environment schemas, and design tokens. | It realizes approved behavior or a technical change. |
+| Vision | `VISION.md`: purpose, audience, goals, principles, boundaries, and direction. | These change. It avoids an exhaustive feature catalogue. |
+| Domain references | Short explanations, near the owning specifications, of shared terminology, identity, relationships, and lifecycle meanings. | Existing feature or interface documentation cannot adequately explain a shared meaning. |
+| Policies | `policies/<NNNN>-<slug>.md`: one continuing constraint, its scope, rationale, and enforcement. | Added after human agreement, revised in place, and deleted when retired. |
+| Decisions | `decisions/<NNNN>-<slug>.md`: one current significant choice, its context, alternatives, and consequences. | Added after human agreement, revised in place, and deleted when no longer applicable. |
+| Proposals | `proposals/<NNNN>-<slug>.md`: one change, its scope, approach, and reasons. | Revised while the change is designed and reviewed; preserved as history once complete. |
+
+The first five roles describe and realize the product. The next four provide project context. A proposal records a change to whichever of the others it affects. Work items, changesets and changelogs, review evidence, previews, and process machinery keep their own purposes. None of the roles requires separate narrative, use-case, flow, error-catalogue, view-model, toolchain, or architecture-overview documents.
+
+### Current specifications
+
+_Current specifications_ are the behavioral specifications and native contracts together: what the product must do at a given revision. Each normative fact has one current owner, in the representation that suits its surface. A library states its public surface in declarations and contract documentation covering defaults, errors, side effects, ordering, lifecycle, and compatibility. A protocol uses its native schema with semantic requirements beside it. An application workflow uses Gherkin or a current behavioral reference. One project may use all of these without choosing a project-wide mode, and an adequate existing source is reused rather than duplicated.
+
+Contract text and type expectations are written or revised before implementation. Generated API reference publishes that source; it does not infer intended requirements from the implementation. A guide explains how to accomplish a task, while a reference states the contract on which that task depends.
+
+A feature branch contains the proposed end state of the sources it changes. The main branch contains the integrated contract, and a release tag identifies the contract shipped with that release. The approved proposal bounds the authorized change; the branch's specifications state the resulting contract. Completed proposals never override current definitions. When current sources disagree, or elaborating them reveals a new substantive decision, the agent raises it with me.
+
+Workbench supplies optional guidance for projects that specify a surface in Gherkin, in the `specifying-behavior-with-gherkin` skill and the `.agents/templates/FEATURE.feature` template. Nothing requires a project to use Gherkin, and Workbench adds no specification registry, identifier scheme, or coverage format.
+
+In this repository, this document owns the process semantics. [Record Validation and Workflow Status](guides/record-validation.md) owns the contracts of `mise run validate` and `mise run status`. Source documentation and native tests own the specifics of the other tools.
 
 ### Visions
 
@@ -32,19 +60,19 @@ The vision establishes the long-term direction against which individual proposal
 
 A _policy_ records a rule that should continue to be enforced across future work.
 
-Policies capture constraints or conventions that should not have to be rediscovered from previous implementations or review discussions.
+Policies capture constraints or conventions that should not have to be rediscovered from previous implementations or review discussions. A policy file always states the rule as it currently applies.
 
 ### Decisions
 
 A _decision_ records an architectural or technical choice that should be remembered, including enough context to understand why that choice was made.
 
-Future work may supersede a decision, but should do so explicitly rather than accidentally.
+Future work may change a decision, but does so explicitly with me, by revising the decision's file or deleting it when it no longer applies.
 
 ### Proposals
 
-A _proposal_ describes a specific change to the project in enough detail to serve as the specification for its implementation.
+A _proposal_ describes one change to the project: its motivation, scope, approach, and the delta it makes to the current specifications, policies, and decisions it affects.
 
-Proposals record the motivation, intended behavior, scope, and relevant design decisions of a feature. They describe what a feature does, not its look and feel. They remain part of the project's history after implementation. A future proposal may revise or supersede an earlier proposal.
+Proposals describe what a feature does, not its look and feel. They link the current sources they change rather than maintaining a second complete contract. After implementation they remain part of the project's history, explaining why the project changed; they are not where its current requirements are read. A later proposal may supersede an earlier one that it replaces as a change, and that relationship is historical too.
 
 ### Work items
 
@@ -52,21 +80,11 @@ A _work item_ is a tracked unit of work in Beads: a task, a blocker, a discovere
 
 Work items answer a different question from proposals. The proposal records reviewed intent and is preserved as history; the Beads graph records what is ready, what is blocked, what was deliberately deferred, and what a future session must know. Neither substitutes for the other.
 
-### Tests
+### Tests, guides, and code
 
-_Tests_ are executable specifications of the behavior described by a proposal.
+_Tests_ verify the current specifications, implemented idiomatically for the language and environment: unit, integration, end-to-end, property, type, or other automated checks. _Guides_ are human-consumable Markdown documentation explaining how to use the behavior the specifications define. _Code_ is the implementation, including executable configuration.
 
-They may include unit tests, integration tests, end-to-end tests, or other forms of automated verification implemented idiomatically for the implementation language and environment.
-
-### Guides
-
-_Guides_ are human-consumable Markdown documentation explaining how the proposed or implemented feature behaves and how it is used.
-
-Guides provide a prose representation of the same behavior represented more formally by the proposal and tests.
-
-### Code
-
-_Code_ is the concrete implementation of the behavior described by the proposal, tests, and guides.
+Each is an independent interpretation of the same current requirements. A disagreement among them, or between one of them and the specification, reveals a defect in one of them or in the specification itself.
 
 ### Previews
 
@@ -94,7 +112,7 @@ A new project begins with the creation of its vision document.
 
 The agent and I develop the vision together before normal feature work begins. The document describes both the minimum viable version of the project and the broader direction in which the project may evolve.
 
-The vision is not a collection of committed feature specifications. Individual changes are still designed and implemented through proposals.
+The vision is not a collection of committed feature specifications. Individual changes are designed through proposals, and the project's requirements live in its current specifications.
 
 Unlike proposals, however, the vision is a living document. After accepted features materially alter the project's capabilities or direction, the vision is updated so that it continues to describe the project accurately.
 
@@ -110,7 +128,7 @@ Substantial feature work proceeds through five phases:
 
 The process is iterative. Findings during implementation or review may cause the proposal itself to change, at which point the implementation is reevaluated against the revised proposal.
 
-The full feature loop applies to changes that decide new behavior or resolve a meaningful design choice. A correction whose intent is already established, such as an unambiguous bug fix or dead link, may be handled directly. Polishing an interface's look and feel is handled directly too, as described under [Look and feel](#look-and-feel). If investigation uncovers a design choice, return to proposal development before implementing it.
+The full feature loop applies to changes that decide new behavior or resolve a meaningful design choice. A correction whose intent is already established, such as an unambiguous bug fix or dead link, may be handled directly: it implements the current requirement. Polishing an interface's look and feel is handled directly too, as described under [Look and feel](#look-and-feel). If investigation shows the behavior was never specified and needs a decision, or uncovers another design choice, return to proposal development before implementing it.
 
 The primary agent owns domain understanding, conceptual modeling, and proposal intent, and it usually implements the work itself. It delegates only independent slices that can run in parallel, and it uses a reframer when the problem formulation no longer explains the evidence. An independent adversary tries to falsify the finished work and reports findings without editing it.
 
@@ -118,7 +136,7 @@ Before entering the proposal path for a change, the agent asks the human whether
 
 ### Look and feel
 
-A proposal specifies what a feature does: what a user can do, what they can find out, the states and outcomes they observe, the errors they are told about, and any guarantee the project makes about their data, privacy, accessibility, or platform requirements I have chosen. Its _look and feel_ is how the interface looks and how it is operated: layout, sizes, spacing, typography, color, iconography, motion, grouping and placement, which control presents a choice, what activating an element opens, and the wording of labels and messages. I decide look and feel by looking at the running UI, not by approving prose, so it is never recorded in a proposal and changing it never needs one.
+A proposal, and the current specifications it changes, say what a feature does: what a user can do, what they can find out, the states and outcomes they observe, the errors they are told about, and any guarantee the project makes about their data, privacy, accessibility, or platform requirements I have chosen. Its _look and feel_ is how the interface looks and how it is operated: layout, sizes, spacing, typography, color, iconography, motion, grouping and placement, which control presents a choice, what activating an element opens, and the wording of labels and messages. I decide look and feel by looking at the running UI, not by approving prose, so it is never recorded in a proposal or a current specification, and changing it never needs one.
 
 Two cases sit close to the line. What a message must convey is what the feature does; its words are look and feel unless the exact words are themselves a requirement, such as legal text, text a user must type or match, or a term the project's vocabulary fixes. An accessibility commitment is what the feature does; how a screen meets it is look and feel, and polish never breaks the commitment. The same line holds for a command-line or terminal interface: its colors, alignment, progress display, and help-text wording are look and feel, while its commands, flags, exit codes, and machine-readable output are what it does, as is a library's API.
 
@@ -142,15 +160,13 @@ The pull request remains a draft while the feature is being specified and implem
 
 ## Proposal Development
 
-Before implementation, the agent and I write a proposal describing the feature.
+Before implementation, the agent and I write a proposal describing the change.
 
-The proposal should make the intended change sufficiently concrete that the agent can derive tests, documentation, and an implementation from it without relying primarily on the original conversational request.
+The proposal identifies the current specifications, policies, and decisions the change affects, links them, and explains the delta to each, along with scope, alternatives, approach, and compatibility work. It names any necessary information that has no current home. It should make the change concrete enough that the agent can revise those sources and then derive tests, documentation, and an implementation without relying primarily on the original conversational request. Requirements the change leaves alone are linked, not restated.
 
-We iterate on the proposal until I am satisfied that it represents the feature I intend to build.
+We iterate on the proposal until I am satisfied that it represents the change I intend to make.
 
-The proposal is preserved after the feature ships. It becomes part of the historical explanation of the feature rather than merely temporary planning material.
-
-If future work changes that design, a later proposal may revise or supersede it.
+The proposal is preserved after the feature ships. It becomes part of the historical explanation of the change rather than merely temporary planning material. Later work changes the current sources directly and explains itself in its own proposal.
 
 ### Ground the problem
 
@@ -164,29 +180,33 @@ After grounding, inspect the closest implementation, prototype, workflow, or pri
 
 ### Decide and record intent
 
-Compare viable approaches against the grounded constraints, vision, policies, and decisions. Write the selected behavior in the proposal's **Detailed design**, with scope and unresolved questions explicit. The human decides when the proposal is settled and sets `awaiting-implementation`; an agent must not approve its own proposal.
+Compare viable approaches against the grounded constraints, vision, current specifications, policies, and decisions. Write the selected change in the proposal's **Detailed design** as a delta to the current sources it names, with scope and unresolved questions explicit. The human decides when the proposal is settled and sets `awaiting-implementation`; an agent must not approve its own proposal.
 
 ## Implementation
 
-After the human sets `awaiting-implementation`, the agent implements the proposal itself unless independent slices can run in parallel; a delegated slice gets its detailed design, constraints, scope, and verification commands. Use `reframing-a-problem` when repeated local fixes no longer explain the problem, or when a slice reports that the evidence contradicts the proposal's model; revise intent with the human before continuing.
+After the human sets `awaiting-implementation`, the agent implements the proposal itself unless independent slices can run in parallel; a delegated slice gets the current sources it touches, its detailed design, constraints, scope, and verification commands. Use `reframing-a-problem` when repeated local fixes no longer explain the problem, or when a slice reports that the evidence contradicts the proposal's model; revise intent with the human before continuing.
+
+### Specification Updates
+
+The agent first revises the affected current specifications, and any policy or decision agreed in the proposal, so they state the approved end state. It reuses each source's existing representation, or adds the smallest adequate source for a requirement that has no home. A new substantive decision discovered while elaborating them goes to me. The agent cannot approve a requirement by documenting whatever an implementation happens to do.
 
 ### Behavioral Tests
 
-The agent first writes failing tests for the observable behavior the proposal specifies when such tests add meaningful protection.
+The agent then writes failing tests for the observable behavior the revised specifications require, when such tests add meaningful protection, and watches them fail.
 
-These tests establish an executable interpretation of the proposal before the implementation itself can influence what is considered correct.
+These tests establish an executable interpretation of the specification before the implementation itself can influence what is considered correct. Existing native tests that still apply are kept. A test that only confirms a document exists, or that a test carries an identifier, establishes nothing about behavior.
 
 The goal is not merely to increase test coverage, but to encode the externally meaningful behavior of the feature.
 
 ### Usage Guides
 
-When the change has a user-facing surface, the agent then writes its guide from the proposal before production code exists. This forces the intended interface to be explainable independently from the implementation.
+When the change has a user-facing surface, the agent then writes or revises its guide from the intended contract before production code exists, linking the current sources it explains. This forces the intended interface to be explainable independently from the implementation.
 
 The agent compares the guide with the tests before implementing. A change with no user-facing surface needs no invented guide.
 
 ### Implementation
 
-The agent implements the feature against the proposal, tests, and guides.
+The agent implements the feature against the current specifications, tests, and guides.
 
 Implementation continues until the project's quality gates pass. Depending on the project, these may include:
 
@@ -203,11 +223,11 @@ Passing the quality gates is necessary but not sufficient for the feature to be 
 
 ### Self-Check
 
-Once the implementation passes its automated checks, the agent reads the proposal, tests, guides, and code together to find disagreement between the representations: tests that miss promised behavior, guides that describe something the tests do not exercise, code that implements behavior the proposal does not describe, or details that quietly changed scope or intent. Look and feel the proposal leaves open is not such a disagreement, and neither is a look-and-feel detail the proposal pinned that I have since changed through polish. It also asks whether this is the implementation that should remain — whether its structure expresses the proposal's model or leaks implementation conveniences into public behavior. It fixes what it finds, or records a deliberate divergence for the human.
+Once the implementation passes its automated checks, the agent reads the proposal's authorized change, the affected current specifications, tests, guides, and code together to find disagreement between the representations: tests that miss specified behavior, guides that describe something the tests do not exercise, code that implements behavior the specifications do not describe, specifications that go beyond what the proposal authorized, or details that quietly changed scope or intent. Look and feel the proposal leaves open is not such a disagreement, and neither is a look-and-feel detail the proposal pinned that I have since changed through polish. It also asks whether this is the implementation that should remain — whether its structure expresses the specified model or leaks implementation conveniences into public behavior. It fixes what it finds, or records a deliberate divergence for the human.
 
 ### Adversarial Review
 
-The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and look and feel, and reports without editing.
+The implementation is then reviewed once, independently, by a subagent with fresh context and preferably a different model. It receives the proposal, the current specifications and relevant unchanged constraints, and the work, and tries to falsify the claim that the work is done: missing or wrong behavior, weak or misleading tests, regressions, and security risks. It ignores style and look and feel, and reports without editing.
 
 The primary agent fixes confirmed defects inside the proposal's scope. A finding outside that scope is never a reason to widen the change: it is declined with reasoning or filed in Beads. Declined findings are preserved for human review rather than silently discarded. The adversarial reviewer does not decide whether the feature is acceptable.
 
@@ -217,7 +237,7 @@ Produce the preview selected in the proposal after review findings are resolved.
 
 ### Readiness Report
 
-After the self-check, the adversarial review, and the preview, the agent posts a readiness report describing implemented behavior, verification, any declined findings, and how to exercise the preview. `reviewing-an-implementation` owns this handoff. Moving the proposal to `active-review`, posting the report, and marking the pull request ready form one transition into human review.
+After the self-check, the adversarial review, and the preview, the agent posts a readiness report describing implemented behavior, the evidence its verification produced and that evidence's limits, any declined findings, and how to exercise the preview. `reviewing-an-implementation` owns this handoff. Moving the proposal to `active-review`, posting the report, and marking the pull request ready form one transition into human review.
 
 ## Human Review
 
@@ -227,6 +247,7 @@ I review both the agent's readiness report and the artifacts produced during dev
 
 - the code diff;
 - the proposal;
+- the revised current specifications;
 - tests;
 - rendered preview documentation;
 - a preview application deployment; and
@@ -238,29 +259,29 @@ I leave general or inline pull request comments describing changes I want the ag
 
 I then instruct the agent to process the review feedback. Additional context may be supplied directly to the agent when it does not belong in a pull request comment.
 
-If the feedback changes what the feature does, or a design decision the proposal records, rather than merely correcting its implementation, the agent updates the proposal first.
+If the feedback changes what the feature does, or a design decision the proposal records, rather than merely correcting its implementation, the agent updates the proposal first, then the affected current specifications.
 
 Feedback on look and feel alone is applied while the work stays in review: the agent changes the code, runs the quality gates, pushes, and refreshes the preview, without editing the proposal, changing its status, posting another readiness report, or repeating the adversarial review. Feedback that mixes both is split, and only the part that changes what the feature does or a recorded design decision goes back through the proposal.
 
-The agent then repeats the affected tests, guides, code, validation, self-check, and adversarial review against the revised proposal as necessary.
+The agent then repeats the affected specifications, tests, guides, code, validation, self-check, and adversarial review against the revised proposal as necessary.
 
 Implementation and human review therefore form a loop:
 
-**proposal → tests → guides → code → validation → self-check → adversarial review → preview → human review → revision**
+**proposal → current specifications → tests → guides → code → validation → self-check → adversarial review → preview → human review → revision**
 
 The loop continues until I accept the feature.
 
 ## Policies and Decisions
 
-Feature development may reveal information that should outlive the proposal itself.
+Feature development may reveal knowledge that should outlive the proposal itself.
 
-When a feature establishes a rule that future work should continue to enforce, the agent should record or update that rule as a policy, after discussion with me.
+When agreed work establishes, changes, or retires a rule that future work should continue to enforce, the agent records it as a policy after discussion with me: it adds a policy, revises the existing one, or deletes it when the rule no longer applies. An architectural choice that future work needs to understand is handled the same way as a decision. A proposed policy or decision stays on the change branch until we agree it.
 
-When a feature establishes an architectural choice that future work needs to understand, the agent should record or update that choice as a decision, after discussion with me.
+A revised record keeps its file and identifier, and the same change updates every current reference to it. A retired record's file is deleted and its identifier is not reused. When deleting it would break a historical link that should keep working, that link points to an immutable Git revision instead. Git history and the proposal that made the change preserve the earlier version and its reasons. A constraint that still binds a supported compatibility promise or an unfinished migration remains in force until that obligation ends.
 
-Policies and decisions are therefore not substitutes for proposals. A proposal explains a particular change; policies and decisions extract the durable constraints and architectural knowledge discovered while making that change.
+Policies and decisions are not substitutes for proposals or current specifications. A proposal explains a particular change; a policy or decision holds a continuing constraint or choice; a product guarantee stays with the specification that owns it. Development instructions for agents stay in `.agents/`.
 
-Future proposals should be evaluated against the current vision, policies, and decisions.
+Future proposals should be evaluated against the current vision, specifications, policies, and decisions.
 
 ## Work Tracking
 
@@ -292,6 +313,10 @@ Durable project knowledge — a constraint learned the hard way, a decision too 
 
 Once the feature has passed human review, the agent completes the authorized integration and delivery work.
 
+### Records
+
+The agent finalizes the policies and decisions the change agreed, giving each its current status, and confirms that the current specifications on the branch state what I accepted.
+
 ### Vision Update
 
 The agent reviews the project vision and updates it when the completed feature changes the project's current capabilities, minimum viable product, or broader direction.
@@ -306,13 +331,13 @@ Every pull request carries a changeset. `mise run changeset` writes one into `.c
 
 ### Implementation Record
 
-After acceptance and the vision update, set the proposal to `implemented` in the feature pull request before merging it. This records the approved implementation, not integration or release. Keep acceptance and outstanding delivery visible in the proposal or pull request. Verify the updated integration candidate; do not open a follow-up pull request solely to change the proposal status.
+After acceptance, the records, and the vision update, set the proposal to `implemented` in the feature pull request before merging it. This records the approved implementation, not integration or release. Keep acceptance and outstanding delivery visible in the proposal or pull request. Verify the updated integration candidate; do not open a follow-up pull request solely to change the proposal status.
 
 Confirm the status record is in the pull request revision, not only the local checkout, before marking a draft pull request ready or merging. If an earlier pull request has already merged, inspect its merged revision before concluding a local `accepted` status means the record is missing. Report an absent record to the human for reconciliation rather than treating a merged pull request as editable or opening a status-only pull request.
 
 ### Merge
 
-The agent merges the accepted pull request into the project's main branch after confirming that the implementation record is in its latest revision and its checks are fresh. If the pull request remains draft, mark it ready and verify the updated revision before merging.
+The agent merges the accepted pull request into the project's main branch after confirming that the implementation record is in its latest revision and its checks are fresh. If the pull request remains draft, mark it ready and verify the updated revision before merging. The merge lands the revised current specifications together with the implementation that realizes them.
 
 The merge should preserve enough information for future humans or agents to recover:
 
@@ -347,14 +372,14 @@ Branch deletion and published-artifact teardown require explicit human confirmat
 
 At the project level:
 
-**vision → feature proposals → implemented project → updated vision**
+**vision → feature proposals → current specifications and implemented project → updated vision**
 
 For each feature:
 
-**human opts into proposal → branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → tests → guides → code → validation → self-check → adversarial review → preview → ready pull request → human review → revision or acceptance → vision update → implemented record in the feature pull request → merge → required release → dependent updates → authorized cleanup**
+**human opts into proposal → branch → draft pull request → grounding and ontology review when needed → baseline study → proposal → current specifications → tests → guides → code → validation → self-check → adversarial review → preview → ready pull request → human review → revision or acceptance → records and vision update → implemented record in the feature pull request → merge → required release → dependent updates → authorized cleanup**
 
 The central invariant of the process is that no single artifact defines the feature by itself.
 
-The proposal records intent. Tests encode behavior. Guides explain behavior. Code implements behavior. Previews expose behavior for direct inspection. Independent agent review attempts to find contradictions and defects. Human review determines whether the result is actually the feature that was intended.
+The proposal records the change and its reasons. Current specifications state what is required now. Tests encode that behavior. Guides explain it. Code implements it. Previews expose it for direct inspection. Independent agent review attempts to find contradictions and defects. Human review determines whether the result is actually the feature that was intended.
 
 Each representation acts as a check on the others.

@@ -1,5 +1,5 @@
 # Guides
 
-This directory holds reader-facing explanations of delivered behavior.
+This directory holds reader-facing explanations of how to use the project.
 
-Name each file `<slug>.md`, using a unique kebab-case slug. Required frontmatter is `id: guide.<slug>`, `title`, and one or more `describes` proposal IDs. Guides have no `status` lifecycle; revise them when the behavior they explain changes. History is preserved in the record: superseded proposals, policies, and decisions are never deleted — they are marked and linked.
+Name each file `<slug>.md`, using a unique kebab-case slug. Required frontmatter is `id: guide.<slug>` and `title`. Guides have no `status` lifecycle; revise them when the behavior they explain changes. Link the current sources a guide explains, such as API reference, feature files, or [the process](../PROCESS.md), with ordinary Markdown links. Historical context, when useful, is a sentence of prose. [Keeping Current Specifications](./current-specifications.md) describes where those sources live.

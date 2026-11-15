@@ -1,14 +1,13 @@
 ---
 id: guide.<slug>
 title: <Title Case>
-describes: [proposal.<NNNN>]
 ---
 
 # <Title Case>
 
 ## What it does
 
-<!-- Explain the feature's observable result for a reader who has not read the proposal. -->
+<!-- Explain the feature's observable result for a reader who has not read the proposal. Link the current source that states the precise contract, such as API reference, a feature file, or a process section, with an ordinary Markdown link rather than restating it. -->
 <Plain-language description.>
 
 ## How to use it

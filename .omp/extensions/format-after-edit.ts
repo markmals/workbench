@@ -12,7 +12,13 @@ export default function formatAfterEdit(pi: ExtensionAPI): void {
         if (files.length === 0) return;
 
         let before = files.map(file => readFileSync(file, "utf8"));
-        let result = await pi.exec("mise", ["run", "fmt", "--", ...files], { cwd: ctx.cwd });
+        let result = await pi.exec(
+            "mise",
+            ["run", "fmt", "--", "--no-error-on-unmatched-pattern", ...files],
+            {
+                cwd: ctx.cwd,
+            },
+        );
         let names = files.map(file => relative(ctx.cwd, file));
         if (result.code !== 0) {
             let output = stripVTControlCharacters(`${result.stdout}${result.stderr}`).trim();

@@ -1,6 +1,6 @@
 # Proposals
 
-This directory holds the durable design record for one change per file.
+This directory holds one change record per file: what the change was, why it was made, and how it was reviewed. A completed proposal is history. Current requirements live in the specifications, policies, and decisions it changed; see [Keeping Current Specifications](../guides/current-specifications.md).
 
 Name each file `<NNNN>-<slug>.md`, using the next four-digit number and a kebab-case slug. Required frontmatter is `id: proposal.<NNNN>`, `title`, `authors` as a non-empty list, `status`, `pull-request`, and `supersedes`. Optional `issues` is a list of issue references or URLs. The normal lifecycle is `draft` → `awaiting-implementation` → `active-review` → `accepted` → `implemented`.
 
@@ -22,4 +22,4 @@ After acceptance and the vision update, the agent records `implemented` in the o
 
 A proposal stays `draft` for as long as it takes. It is published to the draft pull request as soon as there is something to react to, and the human edits it there — directly, or by asking for changes — until they are satisfied. Iteration is the normal case, not a sign of a bad first draft.
 
-History is preserved: never delete a superseded entry — mark it `superseded` and link its replacement through `supersedes`.
+Proposals are kept after they close. When a later proposal replaces an earlier one as a change, it names it in `supersedes` and the earlier one becomes `superseded`. That relationship records how the changes were made; it does not say which requirements apply now.

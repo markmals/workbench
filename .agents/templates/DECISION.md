@@ -2,8 +2,8 @@
 id: decision.<NNNN>
 title: <Title Case>
 status: proposed
+# Optional provenance: the proposal that introduced this decision. Delete the line when there is none.
 established-by: proposal.<NNNN>
-supersedes: []
 ---
 
 # <Title Case>
@@ -12,6 +12,11 @@ supersedes: []
 Delete this instruction and replace every <placeholder>. A decision preserves an
 architectural or technical choice and the context that makes it understandable later.
 It records a choice; it does not restate the entire proposal that established it.
+
+This file always describes the current arrangement and choice. When the agreed choice
+changes, revise this file and keep its ID. When it no longer applies, delete the file
+after repairing links to it; never reuse its number. Git and the proposal that made
+each change keep the history, so the file carries no revision log.
 -->
 
 ## Summary
@@ -35,9 +40,9 @@ credible options. A future reader must be able to understand why this choice mat
 ## Decision
 
 <!--
-State the choice affirmatively in the present tense. Say what the project does, not
-what the authors considered doing. Be precise enough that future work can apply the
-decision without guessing which cases the decision covers.
+State the current arrangement and choice affirmatively in the present tense. Say what
+the project does, not what the authors considered doing. Be precise enough that future
+work can apply the decision without guessing which cases the decision covers.
 -->
 
 <The project uses, requires, or preserves this approach.>
@@ -84,20 +89,8 @@ a real consequence rather than repeating the decision in different words.
 
 <!--
 State the costs, limitations, risks, and obligations this decision creates. This list
-is required even when the costs seem minor; it defines what a later decision may need
+is required even when the costs seem minor; it defines what a later revision may need
 to revisit or mitigate.
 -->
 
 - <Cost, limitation, risk, or ongoing obligation.>
-
-## Revision history
-
-<!--
-Record each substantive change after this decision is established, including the
-proposal that changed it. Start with acceptance. Keep entries chronological and
-explain whether a revision clarifies the same decision or changes its substance.
--->
-
-| Date         | Change                  | Proposal        |
-| ------------ | ----------------------- | --------------- |
-| <YYYY-MM-DD> | Accepted this decision. | proposal.<NNNN> |
