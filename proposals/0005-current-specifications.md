@@ -2,7 +2,7 @@
 id: proposal.0005
 title: Keep Current Specifications Alongside Change Proposals
 authors: [markmals, openai-codex/gpt-6-astra]
-status: awaiting-implementation
+status: active-review
 pull-request: https://github.com/markmals/workbench/pull/9
 issues: [workbench-1uz, workbench-11q]
 supersedes: []

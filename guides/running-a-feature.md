@@ -30,7 +30,7 @@ The agent owns the work between those decisions. Comment on the pull request or 
 
 What follows describes substantial work — new or changed behavior, anything where a reasonable person could build it differently. Plenty of changes are not that.
 
-A typo, a dead link, or a bug whose correct behavior was never in question does not need a proposal, and often does not need a pull request either. The useful question is whether the change **decides** something. If the intended behavior already exists — because a current specification or an approved proposal states it, or because the contract is too obvious to write down — the agent is correcting an implementation, not defining one, and it should just fix it. If the behavior was never specified and fixing it requires a choice, that choice goes back to a proposal.
+A typo, a dead link, or a bug with an unambiguous correction does not need a new proposal. The useful question is whether the change **decides** something. A current specification or the approved change being implemented on this branch can establish the intended behavior. A completed proposal is historical evidence and cannot authorize restoring behavior that current specifications replaced. If a claimed correction conflicts with current requirements, or the behavior needs a new choice, raise it with the human before implementation.
 
 The agent judges this and tells you which it thinks the change is. You can ask for the full process on anything, at any time, without explaining why. Escalating is always available; the agent quietly deciding your feature is a small fix is the failure mode to watch for.
 

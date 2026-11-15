@@ -11,7 +11,7 @@ description: Use when a new or substantial change needs definition before tests,
 
 Proposals are for changes that decide something: new or changed behavior, a real choice between approaches, anything establishing a policy or decision, anything touching the vision.
 
-They are not for changes whose intent already exists. A bug has its correct behavior specified already — by the proposal that promised it, or by a contract too obvious to write down. Correcting an implementation is not defining one. Fixing a typo, a dead link, or a workflow whose behavior was never in question needs no proposal and often no pull request; describing it costs more than doing it.
+Changes whose intent is already established can proceed directly. Use the current specification or the approved change being implemented on this branch to establish a bug's correct behavior. Completed proposals are historical evidence and cannot authorize restoring obsolete behavior. Raise a conflict with current requirements before acting. An unambiguous typo, dead link, or implementation correction needs no new proposal and often no pull request.
 
 They are not for look and feel either. How an interface looks and how it is operated is decided by the human on the running UI, so polish is never a reason to ask the proposal question; use [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md).
 
