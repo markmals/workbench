@@ -1,5 +1,6 @@
 {
     "name": "workbench",
+    "description": "The Workbench package a project pins in mise.toml and links at .workbench.",
     "owner": {
         "name": "Mark Malstrom"
     },
