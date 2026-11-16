@@ -2,7 +2,7 @@
 
 This project uses the **Workbench** development process. A human approves a change in a proposal; agents write it into the project's current specifications, then tests, guides, and code; an independent review checks them against each other before the human reviews the result. [`PROCESS.md`](PROCESS.md) describes the whole loop for humans, including the artifact roles and where current requirements live; [`guides/current-specifications.md`](guides/current-specifications.md) shows how to keep them. The skills named below hold the procedures.
 
-Run `mise run status` at the start of every session and whenever you are unsure where the work stands. It reads the branch, the pull request, and the active proposal, and prints the phase and the next step. The human is never expected to remember a command or skill name; "keep going" or a plain description of a problem is enough to orient from it.
+Run `mise run status` at the start of every session and whenever you are unsure where the work stands. It reads the branch, the pull request, and the active proposal, and prints the phase and the next step. It also syncs Beads with the other machines and shows ready work, the items in progress, and the project's memories. The human is never expected to remember a command or skill name; "keep going" or a plain description of a problem is enough to orient from it.
 
 ## Does this change need a proposal?
 
@@ -24,7 +24,7 @@ Use `.agents/skills/implementing-a-proposal/`. In short:
 3. Write failing tests for the behavior those specifications now require, and watch them fail for the right reason.
 4. When the change alters what a user does, sees, or must know, write or extend the guide in `guides/` from the intended contract, not from the code, link the source that owns that contract, and check the guide against the tests.
 5. Write the code.
-6. Verify with `mise run check`. Report the commands you ran and what they printed. Once the complete implementation has passed the applicable checks and is pushed, mark the pull request ready for maintainer review; it stays a draft only while it holds just the proposal. The proposal stays `awaiting-implementation` until the `active-review` handoff.
+6. Verify with `mise run check`. Report the commands you ran and what they printed. Once the complete implementation has passed the applicable checks and is pushed, wait for CI to pass on that revision (`gh pr checks --watch`), then mark the pull request ready for maintainer review; it stays a draft only while it holds just the proposal. When CI fails, fix the failure and push again. The proposal stays `awaiting-implementation` until the `active-review` handoff.
 7. Get one independent review with `.agents/skills/reviewing-an-implementation/` and fix what it confirms. Then post the readiness report and move the proposal to `active-review`; the pull request is already ready.
 
 Which of specifications, tests, guides, and code a change needs is a judgement; the order is not. A change with no user-facing surface needs no guide, and a change with nothing meaningfully testable needs no test, but say so rather than skipping quietly.
@@ -47,37 +47,42 @@ Work inline by default. Use subagents only when they buy something specific: sli
 
 ```sh
 mise run setup       # idempotent first-run bootstrap after a clone
-mise run check       # the single blocking gate; CI and the pre-push hook both call it
+mise run check       # the single blocking gate; CI runs it on every push
 mise run fmt         # format in place; accepts file paths
 mise run lint        # lint, applying the safe fixes
 mise run typecheck   # type-check both TypeScript projects
 mise run test        # the record tools' and the workflow tool's tests
 mise run validate    # record frontmatter, IDs, and cross-references
 mise run docs:build  # the guides site builds
-mise run status      # phase, next action, who acts
+mise run status      # phase, next action, who acts; syncs and reports Beads
+mise run beads:sync  # sync this machine's Beads replica with the remote
 mise run changeset   # add a changeset for this change
 ```
 
-`mise run check` is the gate: formatting, lint, types, tests, the record rules, and the guides site, in one task. Nothing is done until it passes in this turn. `mise tasks` lists everything available.
+`mise run check` is the gate: formatting, lint, types, tests, the record rules, and the guides site, in one task. Nothing is done until it passes in this turn. No git hook runs it; CI does, on every push, and a pull request is marked ready or merged only after CI passes on its latest revision. `mise tasks` lists everything available.
 
 ## Work tracking
 
-Beads (`bd`) is the work tracker, the ready-work queue, and durable agent memory. It replaces GitHub-issue defect tracking, markdown TODO lists, and MEMORY files. Proposals and Beads answer different questions: the proposal is the record of **intent**, reviewed by a human and preserved as history; Beads is the **work graph** — what is ready, what is blocked, what was discovered and deferred, and what a future session needs to remember.
+Beads (`bd`) holds the work agents discover, the ready-work queue, and the project's durable memory. It replaces markdown TODO lists and MEMORY files. GitHub Issues and Projects hold the owner's own planning; leave them to the owner. Proposals and Beads answer different questions: the proposal is the record of **intent**, reviewed by a human and preserved as history; Beads is the **work graph** — what is ready, what is blocked, what was discovered and deferred, and what a future session needs to remember.
 
 ```sh
-bd ready                 # what can be worked on now
-bd show <id>             # read one item before touching it
-bd update <id> --claim   # claim atomically before starting
+mise run status               # syncs Beads, then shows ready work, items in progress, and memories
+bd show <id>                  # read one item before touching it
+mise run beads:claim -- <id>  # claim before starting
 bd create "Title" --description="why this exists" --type=task --priority=2
-bd close <id> --reason="Completed"
-bd remember "<fact>"     # durable project memory
+mise run beads:close -- <id> "Completed"  # close as this machine's claimant, then sync
+bd remember "<fact>"          # durable project memory
+mise run beads:sync           # publish changes other machines should see
 ```
 
 Rules that matter:
 
 - Never run `bd edit`; it opens an interactive editor and will hang a non-interactive agent. Use `bd update` flags.
 - Priorities are `0`–`4`, `0` highest. Default `2`. Do not invent a scale.
-- Claim before starting and close only when the work is actually done.
+- Claim before starting, only with `mise run beads:claim`, and close only when the work is actually done, only with `mise run beads:close`: plain `bd close` runs as the Git user name and is refused for an item claimed as `<user>@<short host>`. Do not start work the claim reports as `held` or `lost`.
+- Each machine has its own Beads replica, and other machines see your changes only after a sync. `mise run status`, `git push`, and `git pull` sync on their own; after creating, closing, or updating an item another machine should see, run `mise run beads:sync`.
+- Every sync runs through mise. Never run `bd dolt push`, `bd dolt pull`, or `bd sync` directly, and never `git push --mirror`, which deletes the remote's Beads data.
+- Resolve a Beads sync conflict yourself, as the skill describes, and report afterwards what you resolved and why.
 - Never run `bd hooks install`; hk owns the git hooks and runs `bd hooks run <hook>` as a step.
 - `.beads/issues.jsonl` is a passive export that is committed; the database is the source of truth.
 
@@ -87,7 +92,7 @@ A defect that stops the current implementation from satisfying its proposal is *
 
 **Mise** owns toolchains, environment, and the task graph. Every command an agent runs routinely is a `mise run <task>`; `mise install` provisions the pinned toolchains from `mise.toml` and `mise.lock`, Bun among them — one test loads the `workflow` tool through Oh My Pi's real loader, which runs on Bun. Add a task rather than documenting a bare command: a task is an enforceable tier, prose is not.
 
-**hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `tools/check-scoped-commit.ts`, whose allowed scopes live in `.agents/commit-scopes`; `pre-push` runs the gate.
+**hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `tools/check-scoped-commit.ts`, whose allowed scopes live in `.agents/commit-scopes`; `pre-commit` formats and lints staged files; `pre-push`, `post-merge`, and `post-rewrite` (after a rebase) sync Beads.
 
 **Fnox** owns secrets. A task that needs a secret declares it with `secrets = [...]` in `mise.toml`, and Fnox resolves it from 1Password or the macOS Keychain at task time. Never put a secret in `[env]`, in a file, or in a commit. Workbench itself needs none.
 
@@ -97,22 +102,19 @@ A defect that stops the current implementation from satisfying its proposal is *
 
 **Worktrunk (`wt`)** owns worktrees. `wt switch --create <name>` creates a parallel worktree that trusts and installs its own toolchain and copies the ignored files listed in `.worktreeinclude`. Run parallel feature work in a worktree rather than stashing.
 
-**GitHub Actions** runs the same `mise run check` the pre-push hook runs. If it passes locally and fails in CI, the difference is environmental — find it, do not special-case the workflow.
+**GitHub Actions** runs `mise run check` on every push; it is the only place the gate runs automatically. If it passes locally and fails in CI, the difference is environmental — find it, do not special-case the workflow.
 
 ## Harness setup
 
-The process lives harness-neutral in `AGENTS.md` and `.agents/`, which stay the source of truth and which no harness forks. Lifecycle wiring is the only harness-specific part, and this repository ships it for [Oh My Pi](https://omp.sh):
+The process lives harness-neutral in `AGENTS.md` and `.agents/`, which stay the source of truth and which no harness forks. A harness needs only the contract and the skills; Workbench wires no harness lifecycle events. This repository ships the [Oh My Pi](https://omp.sh) setup:
 
-| What | How Oh My Pi gets it |
-| --- | --- |
-| This contract | Loads `AGENTS.md` from the repository root |
-| Skills | Discovers `.agents/skills/` |
-| `workflow` tool | `.omp/tools/dynamic-workflows/` |
-| Before the first turn | `.omp/extensions/prime-beads.ts` runs `bd prime` and injects the work graph and durable memories into the session |
-| After every edit | `.omp/extensions/format-after-edit.ts` runs `mise run fmt -- <files>` on each file the `edit` or `write` tool changed and reports a reformat or a parse failure |
-| Before the turn ends | `.omp/extensions/check-before-stop.ts` runs `mise run check`; a failure sends the agent back once with the output |
+| What            | How Oh My Pi gets it                       |
+| --------------- | ------------------------------------------ |
+| This contract   | Loads `AGENTS.md` from the repository root |
+| Skills          | Discovers `.agents/skills/`                |
+| `workflow` tool | `.omp/tools/dynamic-workflows/`            |
 
-A harness without extensions loses only the convenience, not the rule: `bd prime` and `mise run check` are commands the agent runs itself, and hk's `pre-push` hook and CI run the gate regardless. Another harness wires the same three events into its own configuration — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md) — and commits the result rather than forking `.agents/`.
+Orientation, formatting, and the gate are commands, not harness events: run `mise run status` at the start of a session, `mise run fmt -- <files>` when you want formatting before the `pre-commit` hook applies it, and `mise run check` before claiming work is done. Another harness points at the same contract and skills — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md) — and commits the result rather than forking `.agents/`.
 
 Git hooks belong to hk, not to a harness: `mise run setup` installs them, and they run for every commit regardless of who or what made it.
 

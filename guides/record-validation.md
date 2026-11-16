@@ -51,6 +51,20 @@ An approved proposal routes to updating current specifications, then failing tes
 
 Missing or unavailable GitHub state is reported as unknown rather than assumed to mean that no pull request exists. Ambiguous proposal selection, unresolved questions, unpushed commits, and disagreement between PR draft state and proposal review state appear as notices. See [Running a Feature](./running-a-feature.md) for the phase-by-phase process.
 
+### Beads in the status report
+
+Before reporting, `mise run status` runs one Beads sync with the project's remote, the same one `mise run beads:sync` runs, limited to 20 seconds. After the phase report it adds a Beads section: the sync outcome, ready work from `bd ready`, the items in progress and who holds them from `bd list --status in_progress`, and the project's memories from `bd prime --memories-only`. The ready work, items in progress, and memories are this machine's replica after the sync.
+
+| Outcome | Meaning | Reported with |
+| --- | --- | --- |
+| `synced` | This replica pulled every change on the remote and published its own. | One line. |
+| `failed` | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout's `origin`, or the checkout has no `origin` to compare it with. | The reason, and that the rest of the section shows this machine's state. |
+| `conflict` | Beads halted on a conflict it cannot settle; nothing was pushed. | The conflicted tables Beads names, and the items that differ between this replica and the remote. |
+| `blocked` | A dirty working set stops Beads from publishing; nothing was pushed. | Beads' explanation. |
+| `unavailable` | `bd` is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed. | The reason and a pointer to `mise run setup`, in place of the whole section. When a read failed, the reason names it and keeps the sync's outcome. |
+
+Beads outcomes never change the exit status of `mise run status`. With `--json`, the object gains a `beads` key holding either `sync` (`outcome` and `detail`), `ready` (a list of `id`, `title`, and `priority`), `in_progress` (a list of `id`, `title`, and `assignee`), and `memories` (text); or `unavailable` (the reason). The `tracking-work` skill in `.agents/skills/` says how an agent responds to each outcome.
+
 ## What these commands do not establish
 
 The checks cannot decide whether a specification states the right behavior, a test asserts enough, or a policy is still needed. Review those claims against the current requirements and human-approved intent. Gherkin bindings, native schemas, API examples, and platform checks use the project's own tools. Workbench introduces no universal specification registry or mandatory Gherkin runner.

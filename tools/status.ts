@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { collectBeadsReport, formatBeadsReport } from "./beads-report.ts";
 import { parseFrontmatter, withoutCode, type FrontmatterValue } from "./validate.ts";
 
 type Actor = "agent" | "you";
@@ -661,10 +662,15 @@ export function formatStatus(facts: Facts, derived: DerivedStatus = deriveStatus
 }
 
 function main(): void {
-    let facts = gatherFacts();
+    let root = process.cwd();
+    let facts = gatherFacts(root);
     let derived = deriveStatus(facts);
+    // Beads outcomes never change this command's exit status; they are reported, not thrown.
+    let beads = collectBeadsReport(root);
     console.log(
-        process.argv.includes("--json") ? JSON.stringify(derived) : formatStatus(facts, derived),
+        process.argv.includes("--json")
+            ? JSON.stringify({ ...derived, beads })
+            : `${formatStatus(facts, derived)}\n\n${formatBeadsReport(beads)}`,
     );
 }
 

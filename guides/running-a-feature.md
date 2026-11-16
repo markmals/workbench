@@ -98,7 +98,7 @@ The order is fixed:
 
 The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the revised specification gives each an independent claim before code. [Keeping Current Specifications](./current-specifications.md) shows what that first step looks like for an API contract and for a Gherkin workflow.
 
-Passing the gates is not the end. Once the complete implementation is pushed, the agent marks the pull request ready so you can review the code. The proposal remains `awaiting-implementation` until the readiness report is posted.
+Passing the gates is not the end. Once the complete implementation is pushed and continuous integration has passed on it, the agent marks the pull request ready so you can review the code. The proposal remains `awaiting-implementation` until the readiness report is posted.
 
 Still in Phase 3, the agent reviews the proposal, current specifications, tests, guides, and code together; dispatches an adversarial review to a different model; resolves valid findings; and preserves declined findings. It then publishes the preview, posts the readiness report, and moves the proposal to `active-review`. The PR is already ready.
 

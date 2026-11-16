@@ -13,8 +13,9 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    # `mise run check` is the one definition of the blocking gate. The pre-push hook
-    # runs the same task, so the local gate and this one cannot drift apart.
+    # `mise run check` is the one definition of the blocking gate, and this job is the
+    # only place it runs automatically: no git hook runs it. Agents wait for this job
+    # to pass before marking a pull request ready or merging it.
     check:
         name: Check
         runs-on: ubuntu-latest

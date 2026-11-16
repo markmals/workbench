@@ -70,7 +70,7 @@ Write the minimum production code that makes the tests pass and matches the spec
 
 Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
 
-After the complete implementation passes the applicable checks and is pushed, mark the feature pull request ready for maintainer review. Human review can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff. If the push or PR state change cannot be made, report the blocker without claiming the implementation is reviewable in the PR.
+After the complete implementation passes the applicable checks and is pushed, wait for CI to pass on the pushed revision (`gh pr checks <pr-number> --watch`); no git hook runs the gate, so a local run does not cover the pushed revision. When CI fails, fix the failure, push again, and wait again. Then mark the feature pull request ready for maintainer review. Human review can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff. If the push, CI, or PR state change cannot be completed, report the blocker without claiming the implementation is reviewable in the PR.
 
 ## Then
 

@@ -61,6 +61,15 @@ local linters = new Mapping<String, Step> {
     // END PLATFORM STEPS
 }
 
+/// Syncs this machine's Beads replica where work crosses machines: before a push, and after
+/// a pull, merge, or rebase. A sync that does not succeed prints its outcome and never blocks
+/// git.
+local beadsSync: Step = new {
+    check = "mise run beads:sync"
+    allow_failure = true
+    output_summary = "combined"
+}
+
 /// `bd hooks run` exits 3 when the beads database is not initialized. Beads' own
 /// shims treat that as success so a fresh clone can commit before `mise run setup`
 /// has run; these steps do the same.
@@ -102,12 +111,13 @@ hooks {
         }
     }
 
+    // No hook runs `mise run check`: CI runs it on every push, and agents wait for CI before
+    // marking a pull request ready or merging it.
     ["pre-push"] {
         steps {
-            ["check"] {
-                check = "mise run check"
-            }
+            ["beads-sync"] = beadsSync
             ["beads"] {
+                depends = "beads-sync"
                 check = "bd hooks run pre-push {{hook_args}} || [ $? -eq 3 ]"
             }
         }
@@ -125,6 +135,19 @@ hooks {
         steps {
             ["beads"] {
                 check = "bd hooks run post-merge {{hook_args}} || [ $? -eq 3 ]"
+            }
+            ["beads-sync"] = (beadsSync) {
+                depends = "beads"
+            }
+        }
+    }
+
+    // `git pull --rebase` runs `post-rewrite`, not `post-merge`. Git passes `rebase` or `amend`;
+    // an amend rewrites only local work, so it skips the sync.
+    ["post-rewrite"] {
+        steps {
+            ["beads-sync"] = (beadsSync) {
+                check = "[ \"{{hook_args}}\" != rebase ] || mise run beads:sync"
             }
         }
     }

@@ -156,7 +156,7 @@ The agent creates the branch, pushes it to the project's `origin` remote, and cr
 
 The pull request becomes the durable workspace for the feature. It collects the proposal, implementation, review discussion, agent status reports, and other artifacts associated with the change.
 
-The pull request stays draft while it contains only the proposal. Once the complete implementation has passed its applicable checks and reached the pushed feature branch, mark the pull request ready for maintainer review. Keep agent reviews, the preview, and the readiness report on that PR while the maintainer can inspect and comment on the implementation.
+The pull request stays draft while it contains only the proposal. Once the complete implementation has passed its applicable checks and reached the pushed feature branch, and continuous integration has passed on that revision, mark the pull request ready for maintainer review. No git hook runs the full gate; continuous integration runs it on every push, so the agent waits for it rather than assuming a local run covers the pushed revision. Keep agent reviews, the preview, and the readiness report on that PR while the maintainer can inspect and comment on the implementation.
 
 ## Proposal Development
 
@@ -285,7 +285,7 @@ Future proposals should be evaluated against the current vision, specifications,
 
 ## Work Tracking
 
-During proposal development, implementation, automated validation, adversarial review, or human review, the agent discovers work that should be preserved independently of the current pull request. Beads (`bd`) holds it.
+During proposal development, implementation, automated validation, adversarial review, or human review, the agent discovers work that should be preserved independently of the current pull request. Beads (`bd`) holds it, along with the project's durable memory. My own planning lives in GitHub Issues and Projects; Beads does not replace them, and agents leave them to me.
 
 A defect that prevents the current implementation from satisfying its proposal remains part of the current work and should be fixed before the pull request is accepted. The agent does not file a work item merely to defer work the proposal already requires.
 
@@ -308,6 +308,12 @@ When a newly discovered defect is relevant to the current pull request but inten
 If subsequent work fixes the defect incidentally, the agent closes the item with a reference to the pull request or commit that resolved it rather than leaving it stale.
 
 Durable project knowledge — a constraint learned the hard way, a decision too small for a record but too costly to rediscover — goes in `bd remember`, not a memory file.
+
+### Beads across machines
+
+Agents work on the same project from several machines. Each machine keeps its own Beads _replica_ of the project: a full local database, shared by every worktree of that machine's checkout, that works offline. The replicas meet at a _remote_, `refs/dolt/data` on the project's own GitHub repository. It is not a branch, and syncing never creates or updates one.
+
+A replica sees another machine's work only after a _sync_, which pulls from the remote, stops on any conflict Beads cannot settle by itself, and pushes. Syncs happen at points the process already has: when the agent orients itself with `mise run status`, when `git push` and `git pull` run, after the agent changes Beads items another machine should see, and around every claim. A claim is atomic only within one replica, so each machine claims under its own identity and checks after syncing that its claim survived. The agent resolves a sync conflict itself and reports afterwards what it resolved and why. The `tracking-work` skill holds the procedure.
 
 ## Completion
 
@@ -337,7 +343,7 @@ Confirm the status record is in the pull request revision, not only the local ch
 
 ### Merge
 
-The agent merges the accepted pull request into the project's main branch after confirming that the implementation record is in its latest revision and its checks are fresh. If the pull request remains draft, treat that as an anomalous state: verify its pushed implementation, mark it ready, and verify the updated revision before merging. The merge lands the revised current specifications together with the implementation that realizes them.
+The agent merges the accepted pull request into the project's main branch after confirming that the implementation record is in its latest revision and continuous integration has passed on that revision. If the pull request remains draft, treat that as an anomalous state: verify its pushed implementation, mark it ready, and verify the updated revision before merging. The merge lands the revised current specifications together with the implementation that realizes them.
 
 The merge should preserve enough information for future humans or agents to recover:
 

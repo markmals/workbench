@@ -6,8 +6,8 @@ A rule an agent must remember is the weakest kind of rule. Under load, prose get
 
 | Tier | Mechanism | Role |
 | --- | --- | --- |
-| **Tier 0 — Checks** | hk's git hooks (`commit-msg` runs `node tools/check-scoped-commit.ts`, `pre-push` runs `mise run check`), GitHub Actions running that same task, the record validator in `tools/validate.ts`, and the harness lifecycle wiring in `.omp/extensions/` | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
-| **Tier 1 — Tasks** | mise tasks the process invokes by name: `mise run check`, `mise run fmt`, `mise run validate`, `mise run status` | Deterministic once invoked, but something must invoke them. |
+| **Tier 0 — Checks** | hk's git hooks (`commit-msg` runs `node tools/check-scoped-commit.ts`, `pre-commit` formats and lints staged files, and the Beads steps: `pre-push`, `post-merge`, and `post-rewrite` after a rebase sync Beads with `mise run beads:sync`, and every Beads-owned hook runs `bd hooks run <hook>`), GitHub Actions running `mise run check` on every push, and the record validator in `tools/validate.ts` | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
+| **Tier 1 — Tasks** | mise tasks the process invokes by name: `mise run check`, `mise run fmt`, `mise run validate`, `mise run status`, `mise run beads:sync`, `mise run beads:claim`, `mise run beads:close` | Deterministic once invoked, but something must invoke them. |
 | **Tier 2 — Templates** | `.agents/templates/` | Shape the work so the correct thing is the path of least resistance. |
 | **Tier 3 — Prose** | `AGENTS.md`, `SKILL.md` files, and these rules | Necessary for judgment that cannot be mechanized; the tier most likely to be missed. |
 

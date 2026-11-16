@@ -73,9 +73,9 @@ Confirm the implemented record is present in the pull request revision before me
 
 ## 5. Merge
 
-Merge only after human acceptance and fresh checks on the pull request revision that contains the implementation record. The merge lands the revised current specifications together with their implementation. Preserve what was proposed, implemented, and learned in review, including why the final state differs from earlier revisions.
+Merge only after human acceptance, and only after CI has passed on the pull request revision that contains the implementation record: wait for it with `gh pr checks <pr-number> --watch`, and when it fails, fix the failure and push again. The merge lands the revised current specifications together with their implementation. Preserve what was proposed, implemented, and learned in review, including why the final state differs from earlier revisions.
 
-An accepted PR still in draft is an anomalous state. Verify its pushed implementation, mark it ready, and verify the updated revision before merging. Draft status never authorizes skipping readiness or review.
+An accepted PR still in draft is an anomalous state. Verify its pushed implementation, wait for CI on that revision, mark it ready, and verify the updated revision before merging. Draft status never authorizes skipping readiness or review.
 
 Choose a merge strategy that retains the proposal and PR discussion. Do not squash the work into one opaque commit that discards that context.
 

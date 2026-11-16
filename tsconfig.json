@@ -25,5 +25,5 @@
         // Node runs those files by stripping types rather than compiling them.
         "tools"
     ],
-    "include": ["docs/.vitepress/**/*.ts", ".omp/extensions/**/*.ts", ".omp/tools/**/*.ts"]
+    "include": ["docs/.vitepress/**/*.ts", ".omp/tools/**/*.ts"]
 }

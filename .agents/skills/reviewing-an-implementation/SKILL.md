@@ -107,7 +107,7 @@ Confirm the authenticated identity before posting. Without a service account, id
 
 ### Make the Phase 4 proposal transition
 
-The feature pull request should already be ready because the complete, verified implementation was pushed during Phase 3. If it is unexpectedly draft, verify that its pushed revision contains the complete implementation and mark it ready with `gh pr ready <pr-number>` before the handoff.
+The feature pull request should already be ready because the complete, verified implementation was pushed during Phase 3. If it is unexpectedly draft, verify that its pushed revision contains the complete implementation, wait for CI to pass on that revision (`gh pr checks <pr-number> --watch`), and mark it ready with `gh pr ready <pr-number>` before the handoff. When CI fails, fix the failure and push again first.
 
 At the end of Phase 3, move the proposal to `status: active-review` and post the readiness report on that PR. These actions form the handoff to human review; do not claim the report was posted if the bot comment failed. PR readiness and proposal status are separate facts: the PR may be ready while the proposal is still `awaiting-implementation`.
 

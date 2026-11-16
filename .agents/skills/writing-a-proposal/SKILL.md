@@ -137,7 +137,7 @@ Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 | An unknown detail has no clarification marker | Ask or add the marker. |
 | Detailed design names sizes, colors, controls, or click steps, or quotes words that are not themselves a requirement | Rewrite it as what the user can do, find out, and is told. |
 | Preview names no exercisable artifact for a behavior change | Choose and record one before approval. |
-| A newly discovered defect expands scope | File a GitHub issue; keep the proposal bounded. |
+| A newly discovered defect expands scope | File it in Beads with the `tracking-work` skill; keep the proposal bounded. |
 | Existing code suggests the design | Treat it as evidence, not authority; settle intent in the proposal. |
 
 **Do not use the existing implementation to teach yourself the domain when independent domain knowledge is available. Ground yourself first; then inspect the implementation as a specimen.**

@@ -29,7 +29,15 @@ From the repository root, provision the pinned tools. `mise.toml` pins them and 
 mise install
 ```
 
-Then bootstrap the repository. This installs the npm dependencies with the pinned pnpm, initializes the Beads work tracker, and installs every git hook — including the `commit-msg` hook that holds commits to [Scoped Commits](https://scopedcommits.com/). It is idempotent; run it again whenever the tooling changes:
+If you created this repository from the Workbench template, replace Workbench's work tracker before the first setup. `.beads/` holds Workbench's own tracker, pointed at Workbench's repository, and Beads refuses to sync a project whose tracker points at another repository. Delete it, and in the `setup` task in `mise.toml` change `--prefix workbench` to a short name for your project, which Beads puts in every item's ID:
+
+```sh
+git rm -r -q .beads
+```
+
+Setup then creates your project's tracker, pointed at your repository; commit the `.beads/` files it writes.
+
+Then bootstrap the repository. This installs the npm dependencies with the pinned pnpm, restores this machine's copy of the Beads work tracker from the project's repository (or creates the tracker in a project that has none yet), and installs every git hook — including the `commit-msg` hook that holds commits to [Scoped Commits](https://scopedcommits.com/). It is idempotent; run it again whenever the tooling changes, and once on every machine you work from:
 
 ```sh
 mise run setup
@@ -65,8 +73,8 @@ $ node tools/validate.ts
 Validation passed: 0 violations
 
 $ node --test 'tools/**/*.test.ts'
-ℹ tests 120
-ℹ pass 120
+ℹ tests 173
+ℹ pass 173
 ℹ fail 0
 
 $ vitest run --dir .omp/tools
@@ -82,7 +90,7 @@ Do not begin a feature with a failing baseline. Give the output to the agent and
 
 ## Adapt it to your harness
 
-Workbench comes wired for [Oh My Pi](https://omp.sh): it loads the contract, discovers the skills, and runs the lifecycle extensions in `.omp/extensions/` with no further setup. For any other harness, adapt its contract and skill-loading configuration, commit that one-time setup, and then forget about the wiring; the process material in `.agents/` remains the source of truth. Follow [Adapting Your Harness](./adapting-your-harness.md) before starting feature work.
+Workbench comes wired for [Oh My Pi](https://omp.sh): it loads the contract and discovers the skills with no further setup. For any other harness, adapt its contract and skill-loading configuration, commit that one-time setup, and then forget about the wiring; the process material in `.agents/` remains the source of truth. Follow [Adapting Your Harness](./adapting-your-harness.md) before starting feature work.
 
 ## Read the worked example
 
@@ -112,7 +120,7 @@ The [Running a Feature](./running-a-feature.md) guide you just read takes a chan
 mise run status
 ```
 
-Run it with no arguments at the start of a session and whenever you need to orient yourself. It reads the branch, pull request, and proposal record, then reports the current phase, the next action, and who acts.
+Run it with no arguments at the start of a session and whenever you need to orient yourself. It reads the branch, pull request, and proposal record, then reports the current phase, the next action, and who acts. It also syncs the Beads work tracker with your other machines and lists the ready work, the items in progress and who holds them, and the project's memories.
 
 You are not expected to memorise commands, skill names, or process steps. “Keep going” is a complete instruction to the agent because it orients itself with the same command.
 

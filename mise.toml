@@ -34,6 +34,10 @@ bun = "1.3.9"
 # Locally installed CLIs — oxfmt, oxlint, tsrs, vitest, vitepress, changeset —
 # without a `pnpm exec` prefix. They are devDependencies, never global installs.
 _.path = ["{{config_root}}/node_modules/.bin"]
+# Dolt publishes a `__dolt_remote_info__` branch to a Git remote when it pushes, and GitHub
+# then shows its "recently pushed" banner. Set but empty disables it. Every Beads sync runs
+# through a mise task or an hk step that calls one, so every sync sees this.
+DOLT_REMOTE_INFO_BRANCH = ""
 
 # Secrets are resolved by fnox and granted per task with `secrets = [...]`.
 # Never list a secret in `[env]` — that would export it to every process.
@@ -44,16 +48,23 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 # ── The uniform surface ──────────────────────────────────────────────────────
 
 [tasks.setup]
-description = "Idempotent first-run bootstrap: dependencies, work tracker, git hooks"
+description = "Idempotent first-run bootstrap: dependencies, this machine's Beads replica, git hooks"
 depends = ["deps:install"]
 run = [
+    # A project that already has a Beads workspace restores this machine's replica from the
+    # remote's `refs/dolt/data` (`bd bootstrap` never replaces a replica that exists); only a
+    # project without one creates it. `bd init` here would start an unrelated history.
     # `--skip-agents` stops bd from writing its own agent-instruction files; AGENTS.md
     # documents the work tracker itself.
     # `--skip-hooks` is load-bearing: without it `bd init` points core.hooksPath at
     # .beads/hooks, and every hook hk installs is then ignored by git.
-    "bd init --init-if-missing --non-interactive --prefix workbench --skip-agents --skip-hooks",
+    "if [ -f .beads/config.yaml ]; then bd bootstrap --yes; else bd init --non-interactive --prefix workbench --skip-agents --skip-hooks; fi",
     # Commit `.beads/issues.jsonl` so the work graph is reviewable in a diff.
     "bd config set export.auto true",
+    # Syncs happen at the process's sync points (`mise run beads:sync`). Auto-push would push
+    # on every write, race other machines' pushes, and skip the [env] setting above whenever
+    # bd runs outside mise.
+    "bd config set dolt.auto-push false",
     # hk owns every git hook, beads included (see hk.pkl). Never run `bd hooks install`.
     "hk install --mise",
 ]
@@ -77,8 +88,20 @@ description = "Check proposals, policies, decisions and guides against the recor
 run = "node tools/validate.ts"
 
 [tasks.status]
-description = "Where the work stands: current phase, next action, who acts"
+description = "Where the work stands: current phase, next action, who acts, and Beads"
 run = "node tools/status.ts"
+
+[tasks."beads:sync"]
+description = "Sync this machine's Beads replica with the project's remote"
+run = "node tools/beads-cli.ts sync"
+
+[tasks."beads:claim"]
+description = "Claim a Beads item as this machine and confirm the claim survived a sync: `mise run beads:claim -- <id>`"
+run = "node tools/beads-cli.ts claim"
+
+[tasks."beads:close"]
+description = "Close a Beads item as this machine's claimant, then sync: `mise run beads:close -- <id> \"<reason>\"`"
+run = "node tools/beads-cli.ts close"
 
 [tasks.test]
 alias = "t"
