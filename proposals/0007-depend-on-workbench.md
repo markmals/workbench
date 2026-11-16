@@ -82,6 +82,17 @@ Tooling:
     - `knope document-change` prompts interactively.
 - **Single binaries.** [Hugo](https://gohugo.io), [Pagefind](https://pagefind.app), and [dprint](https://dprint.dev) are single binaries with no Node requirement.
 - **Varlock** keeps a project's environment contract in a committed, typed `.env.schema`, with decorators such as `@sensitive` and `@required`. Values come from gitignored `.env` files or from plugins such as 1Password's, and `varlock run -- <command>` resolves and injects them ([Varlock](https://varlock.dev), [1Password plugin](https://varlock.dev/plugins/1password/)). It ships as a standalone binary in its GitHub releases. This machine runs 1.25.0 as `github:dmno-dev/varlock` through mise. Gourmand, Trove, and Vice already use it; Gourmand pins `npm:varlock`, which needs Node.
+- **Agent-first CLIs.** The owner's guide (`~/Documents/Documentation/Programming/agentic-dev/agent-first-clis.md`) draws on Cloudflare's `cf` CLI. Its principle: "Make capabilities discoverable, inputs predictable, outputs structured, and effects verifiable."
+    - One authoritative command registry generates the parser, help, discovery, and documentation.
+    - Discovery and inspection commands (`cli search`, `schema`, `docs search`) never mutate anything.
+    - The grammar is `<resource> <operation>`.
+    - JSON is the default output on stdout, with diagnostics on stderr.
+    - Errors are structured and carry stable codes.
+    - Mutations offer `--dry-run`, and the current context can be inspected.
+    - Commands never prompt.
+    - The CLI is evaluated with agents that start with no knowledge of it.
+
+    Pico's `pico` CLI already follows this shape (`pico schema`, `pico cli search`).
 
 ### Repository observations
 
@@ -119,7 +130,7 @@ The concepts this change introduces or renames:
 | Package pin | The project's `github:markmals/workbench` version in `mise.toml`, with checksums in `mise.lock`. The single place a project names the Workbench version it uses. |
 | Package link | `.workbench`: a gitignored, machine-local symlink from the project root to the installed package for the pinned version. Derived state, recreated by `mise install`. |
 | Harness declaration | Committed `.claude/settings.json` and `.omp/config.yml` entries that point a harness at `.workbench`. |
-| Task interface | The mise task names the process contract and skills invoke: `setup`, `check`, `status`, `validate`, `fmt`. Each project implements them. |
+| Task interface | The project tasks the process contract invokes: `setup`, `check`, and `fmt`, which each project implements. Workbench's own operations are `workbench` commands; the `status`, `validate`, `beads:sync`, and `beads:claim` tasks wrap them for humans and git hooks. |
 | Change file | One Knope change file in `.changeset/`, describing one change for release notes. Knope calls the collection a changeset; Workbench says "change file" for one file. |
 
 The ontology review is REVISE. Today the process and a project's copy of it are the same files. Nothing identifies which version of Workbench a project uses, so "update Workbench" has no referent. The missing concept is the package pin. The package link is derived from it and is never committed.
@@ -127,7 +138,7 @@ The ontology review is REVISE. Today the process and a project's copy of it are 
 Other constraints:
 
 - **Vision.** The [vision](../VISION.md) requires harness neutrality, mechanical enforcement over prose, and ceremony that earns its cost. It keeps the human as the final authority.
-- **Record model.** [Proposal 0005](0005-current-specifications.md) defines the current-record model, and this proposal leaves it unchanged. [Record Validation and Workflow Status](../guides/record-validation.md) is the current contract for `validate` and `status`.
+- **Record model.** [Proposal 0005](0005-current-specifications.md) defines the current-record model, and this proposal leaves it unchanged. [Record Validation and Workflow Status](../guides/record-validation.md) is the current contract for what record validation and workflow status detect.
 - **Error handling.** Failures are surfaced, not hidden behind fallbacks.
 
 ### Quality bar
@@ -181,7 +192,7 @@ Publish Workbench as releases of one package, and make every project a consumer 
 
 ```text
 New project
-mise use github:markmals/workbench@3 && mise install && workbench init
+mise use github:markmals/workbench@3 && mise install && workbench project init
   → pin in mise.toml, harness declarations, Workbench's tasks and checks, empty record
   → `mise run status` and `mise run validate` pass; the holotype template supplies the rest
 
@@ -296,7 +307,7 @@ extensions:
 - The package declares no hooks, tools, commands, MCP servers, or agents for any harness.
 - Pico needs no Pico-specific file. When #61 lands, it reads the same `.claude/settings.json` declaration.
 - Skills and templates name their resources by project-relative path (`.workbench/templates/PROPOSAL.md`, `.workbench/skills/specifying-behavior-with-gherkin/examples.md`). They name other skills by name. A project override `.agents/templates/<name>` takes precedence over `.workbench/templates/<name>`, and the skills say so.
-- **Name collisions.** A project skill or rule must not reuse a Workbench skill or rule name. OMP ranks the package above `.agents/skills`, while Claude Code loads both, so an override would behave differently per harness. `validate` enforces this ([section 5](#5-the-workbench-cli)).
+- **Name collisions.** A project skill or rule must not reuse a Workbench skill or rule name. OMP ranks the package above `.agents/skills`, while Claude Code loads both, so an override would behave differently per harness. `workbench project validate` enforces this ([section 5](#5-the-workbench-cli)).
 
 ### 4. The process contract and the project's AGENTS.md
 
@@ -311,7 +322,7 @@ extensions:
 - delegation guidance;
 - links to the four rules and the reasoning skills.
 
-It names skills by name and package files by `.workbench/...` paths. It contains no harness-specific instruction. Its first instruction stays: run `mise run status` at the start of every session.
+It names skills by name and package files by `.workbench/...` paths. It contains no harness-specific instruction. Its first instruction is to run `workbench workflow status` at the start of every session; humans run `mise run status` for the same report as text. It teaches the CLI's workflow (discover with `workbench cli search` and `workbench schema`, preview with `--dry-run`, execute, then verify from the receipt) and does not reproduce the command reference.
 
 A project's `AGENTS.md` holds only that project:
 
@@ -326,28 +337,164 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 
 ### 5. The `workbench` CLI
 
-`workbench` is a Rust binary, statically linked for each target. Following the owner's Rust CLI stack, it is built with Clap, tested with `cargo test`, formatted with rustfmt, and linted with Clippy. It needs `git` at run time, and `gh` and `bd` only for the commands that use them today. It resolves the project root as the Git top level of the current directory, never from its own location.
+`workbench` is a Rust binary, statically linked for each target. Following the owner's Rust CLI stack, it is built with Clap, tested with `cargo test`, formatted with rustfmt, and linted with Clippy. It needs `git` at run time, plus `gh` or `bd` for the commands that use them. It resolves the project root as the Git top level of the current directory, never from its own location.
 
-| Command | Replaces | Contract |
+Its primary consumer is an agent, so it follows the owner's agent-first CLI guide: capabilities are discoverable, inputs predictable, outputs structured, and effects verifiable. Humans get text output on request, and through the mise tasks.
+
+#### One command registry
+
+Every operation is declared once, in a registry inside the crate. Each entry gives:
+
+- the operation's stable identifier and command path;
+- a one-line summary and a description;
+- each argument and option, with its type, whether it is required, its default, and its accepted values;
+- a JSON Schema for its output;
+- whether it reads or modifies state, and what;
+- what it requires (`git`, `gh` authentication, `bd`, the network);
+- whether it supports `--dry-run` and whether it is idempotent;
+- the error codes it can return;
+- at least one example.
+
+The registry generates the Clap parser, `--help`, shell completions, `workbench schema`, the `workbench cli search` index, and the CLI reference page in Workbench's guides. Tests fail when these drift apart:
+
+- every Clap argument appears in the registry, and every registry entry parses;
+- every registered example runs against a fixture project, and its output validates against the declared output schema;
+- every declared default is the runtime default.
+
+#### Command tree
+
+The grammar is `workbench <resource> <operation> [arguments] [options]`, in kebab-case. Collections are plural (`records`, `commits`, `change-files`). Singletons are singular (`project`, `workflow`, `context`). `beads` names the Beads database.
+
+| Command | Effect | Replaces |
 | --- | --- | --- |
-| `workbench status [--json]` | `tools/status.ts` | [Record Validation and Workflow Status](../guides/record-validation.md), plus Beads below |
-| `workbench validate [--json]` | `tools/validate.ts` | Same guide, plus the collision rule below |
-| `workbench check-commit <message-file>` | `tools/check-scoped-commit.ts` | Scopes below |
-| `workbench check-commits <base> <head>` | `tools/check-pr-commits.ts` | Every subject in the range |
-| `workbench check-change-files <base> <head>` | `tools/require-changeset.ts` | [Section 8](#8-change-files-and-releases) |
-| `workbench beads sync` and `workbench beads claim <id>` | Proposal 0006's `tools/beads.ts` | [Proposal 0006](https://github.com/markmals/workbench/pull/11), sections 3 and 4 |
-| `workbench init` | The GitHub template and Adapting Your Harness | [Section 11](#11-adopting-workbench) |
+| `workbench cli search <query>` | Reads | — |
+| `workbench cli completions <shell>` | Reads | — |
+| `workbench schema [<command>]` | Reads | — |
+| `workbench docs search <query>` | Reads | — |
+| `workbench context show` | Reads | — |
+| `workbench workflow status [--no-sync]` | Reads; syncs Beads unless `--no-sync` | `tools/status.ts` and proposal 0006's Beads section |
+| `workbench records validate` | Reads | `tools/validate.ts` |
+| `workbench project validate` | Reads | — |
+| `workbench project init [--site github-pages\|cloudflare] [--dry-run]` | Creates files ([section 11](#11-adopting-workbench)) | The GitHub template and Adapting Your Harness |
+| `workbench commits check --message-file <path>` and `workbench commits check <base> <head>` | Reads | `tools/check-scoped-commit.ts` and `tools/check-pr-commits.ts` |
+| `workbench change-files create --type <type> --summary <text> [--package <name>] [--body <text\|@file\|->] [--dry-run]` | Creates one file ([section 8](#8-change-files-and-releases)) | Hand-written change files |
+| `workbench change-files check <base> <head>` | Reads | `tools/require-changeset.ts` |
+| `workbench beads sync [--dry-run]` | Syncs the Beads replica | Proposal 0006's `beads:sync` |
+| `workbench beads claim <id> [--dry-run]` | Claims an item and syncs | Proposal 0006's `beads:claim` |
 
-- **Parity.** Each ported command keeps today's output, exit statuses, and JSON fields. Every case in today's `tools/*.test.ts` for a retained behavior becomes a Rust test. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
-- **Beads.** `workbench status` ports, unchanged, the Beads section that [proposal 0006](https://github.com/markmals/workbench/pull/11) adds to `mise run status`. `workbench beads sync` and `workbench beads claim` port 0006's sync and claim behavior, outcomes, and exit statuses. The `beads:sync` and `beads:claim` tasks call them.
-- **Commit scopes.** `check-commit` and `check-commits` accept three kinds of scope:
+The mise tasks wrap these commands for humans and hooks:
+
+- `status` runs `workbench workflow status --output text`.
+- `validate` runs `workbench records validate --output text` and `workbench project validate --output text`.
+- `beads:sync` and `beads:claim` call their commands.
+
+hk's `commit-msg` hook runs `workbench commits check --message-file {{commit_msg_file}}`.
+
+#### Discovery and progressive disclosure
+
+- **`workbench --help`** orients: what Workbench is, the discovery commands, and the resource groups. It is not the full option reference.
+- **`workbench cli search "<task>"`** runs locally without credentials. It ranks commands by name, summary, description, option metadata, and synonyms the registry declares. It returns at most five matches by default (`--limit` changes that), as JSON `items` with the exact `command`, its `summary`, its `effect`, and a `score`.
+- **`workbench schema`** with no argument lists every command path with its summary. `workbench schema <command>` returns that command's full registry entry.
+- **`workbench docs search "<query>"`** searches the package's Markdown: the contract, rules, skills, templates, and the CLI reference. It returns `items` with a `path` under `.workbench/`, a `title`, and a `snippet`; the agent reads the file for detail.
+- **`workbench --version`** prints the version.
+
+None of these mutates anything.
+
+#### Output
+
+- **JSON by default.** Results are JSON on stdout: compact when stdout is not a terminal, indented when it is. `--output text` gives a human-formatted rendering of the same result. The JSON contract does not depend on color or terminal width.
+- **Standard streams.** stdout carries only the result. Progress, warnings, and diagnostics go to stderr.
+- **Collections** return `items`, plus `hasMore` and `nextCursor` whenever the command bounds the result. No command truncates a collection silently.
+- **Receipts.** A modifying command returns a receipt with:
+    - its `status`;
+    - its target: the project root, plus the Beads remote for Beads commands;
+    - the identifiers it produced (file paths, item IDs);
+    - the fields that matter for the operation, such as a claim's `claimant` and `published`.
+
+#### Errors and exit statuses
+
+A failure writes `{"error": {"code", "message", "retryable", "details", "suggestions"}}` to stderr. A check that ran and found violations is a failure too, but its result, listing the violations, still goes to stdout.
+
+| Code | Exit | Retryable | Meaning |
+| --- | --- | --- | --- |
+| `CHECK_FAILED` | 1 | No | A check ran and found violations. |
+| `INVALID_ARGUMENT` | 2 | No | Input is missing or malformed. `details` lists the missing fields and accepted values. |
+| `NOT_FOUND` | 3 | No | A named record, item, commit, or file does not exist. |
+| `PRECONDITION_FAILED` | 3 | No | The project is not ready: not a Git repository, no pin, no `.workbench` link, or Beads not initialized. `suggestions` names the fix. |
+| `DEPENDENCY_MISSING` | 3 | No | A required program (`git`, `gh`, `bd`) is absent. |
+| `UNAUTHENTICATED` | 3 | No | `gh` or Git credentials are missing or rejected. |
+| `CONFLICT` | 4 | No | Another claimant holds the item, a claim was lost, or a Beads sync stopped on a conflict for the agent to resolve. |
+| `TIMEOUT` | 5 | Yes | An operation exceeded its time limit. |
+| `UNAVAILABLE` | 5 | Yes | The remote or the network was unreachable. |
+| `INTERNAL` | 70 | No | A defect in `workbench` itself. |
+
+- **Exit status 0** means the operation completed.
+- **Partial completion is reported, not hidden.** A claim made locally whose sync failed exits 0, but its receipt says `published: false`, and stderr says why.
+- **`workflow status`** reports a Beads sync failure inside its result and still exits 0, as in proposal 0006.
+
+#### Preview, safety, and verification
+
+- **`--dry-run`** is available on every modifying command. A dry run validates input, resolves the target, and describes the changes without making them:
+    - for `project init`, the files it would create or add to;
+    - for `change-files create`, the file it would write;
+    - for `beads claim`, the item, its current claimant, and the claimant it would claim as;
+    - for `beads sync`, the remote and any unpublished local commits.
+
+    A dry run states what it cannot predict; a sync, for example, cannot predict merge conflicts.
+
+- **No destructive operations.** `project init` never overwrites or deletes, so no command needs a confirmation flag.
+- **Verification.** Receipts return stable identifiers. `beads claim` reads the claimant back after syncing. After `project init`, `context show` and `project validate` read back the resulting setup.
+
+#### Context
+
+`workbench context show` returns:
+
+- the project root, Git branch, and `origin`;
+- the pull request, or `unknown` with the reason;
+- the pinned Workbench version, the running binary's version, and where `.workbench` points;
+- which harness declarations exist;
+- the Beads workspace, its remote, and the claimant identity;
+- the site host configuration.
+
+`workbench project validate` reports problems in that setup as `CHECK_FAILED` violations:
+
+- a `.workbench` link pointing at a different version than the pin;
+- missing harness declarations;
+- name collisions;
+- vendored Workbench files.
+
+#### Input and unattended use
+
+- **Input.** Scalar inputs are named flags. `--body` accepts text, `@file`, or `-` for stdin.
+- **No prompts.** No command prompts or waits for input. Missing required input fails at once with `INVALID_ARGUMENT`, listing the missing fields and the values each accepts.
+- **Time limits.** Every network operation has one (20 seconds for a Beads sync, as in proposal 0006), and `--timeout` overrides it.
+- **Credentials.** `workbench` takes no credentials as arguments. It relies on `gh`'s and Git's own credential stores, and never prints credentials in results, errors, or dry runs.
+- **The Dolt info branch.** The CLI sets `DOLT_REMOTE_INFO_BRANCH` to empty for every `bd` and `dolt` process it starts. No Workbench sync publishes the info branch, whatever the caller's environment, so a project on the package needs no `[env]` entry for it.
+
+#### Behavior carried over
+
+`records validate`, `commits check`, `change-files check`, `workflow status`, and the `beads` commands detect the same conditions as today's tools and proposal 0006. Every case in `tools/*.test.ts` and 0006's tests for a retained behavior becomes a Rust test. Their output follows this section instead of today's formats. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
+
+- **Commit scopes.** `commits check` accepts three kinds of scope:
     - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
     - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
     - the `<NNNN>-<slug>` scope of any existing proposal file.
 
     A rejection lists every accepted scope.
 
-- **Collision rule in `validate`.** A project skill directory `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release's skills and rules, so the check does not depend on `.workbench`.
+- **The collision rule in `project validate`.** A project skill directory `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release's skills and rules, so the check does not depend on `.workbench`.
+
+#### Evaluating the CLI with agents
+
+Before `3.0.0` is released, fresh agent sessions attempt five tasks in a fixture project. Each session starts with no Workbench context beyond the output of `workbench --help`:
+
+1. find and claim the next ready item;
+2. add a change file for a fix;
+3. find out why `records validate` fails, and repair the record;
+4. set up Workbench in an empty repository and verify the setup;
+5. recover from a Beads sync attempted without network access.
+
+Each run records task completion, invalid commands, the number of commands, and whether the agent verified its result. Failures caused by the CLI's interface are fixed before release.
 
 ### 6. No harness hooks
 
@@ -370,9 +517,9 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 - **Every pull request adds at least one change file** in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer of the diff.
     - A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses `default: <major|minor|patch>`; a project's `knope.toml` may add types.
     - The first heading is the summary. Text below it is the detail.
-    - Agents write change files directly. They never run `knope document-change`, which prompts interactively.
+    - Agents create change files with `workbench change-files create`, which validates the type and package against `knope.toml` and writes the file. They never run `knope document-change`, which prompts interactively.
 - **`.changeset/` holds only change files**, because Knope fails on any other Markdown file there. Guidance that lives in `.changeset/README.md` today moves to `PROCESS.md` and the guides.
-- **`workbench check-change-files <base> <head>`** passes when the range adds a file under `.changeset/` that has valid change-file frontmatter. It fails otherwise, naming what is missing. How a pull request with no user-visible change satisfies it is an [open question](#open-questions). CI runs it on every pull request except Knope's release pull request.
+- **`workbench change-files check <base> <head>`** passes when the range adds a file under `.changeset/` that has valid change-file frontmatter. It fails with `CHECK_FAILED` otherwise, naming what is missing. How a pull request with no user-visible change satisfies it is an [open question](#open-questions). CI runs it on every pull request except Knope's release pull request.
 - **A project's `knope.toml` is project-owned.** It sets `[changes] ignore_conventional_commits = true`. Scoped Commits subjects are not Conventional Commits, and versions come from change files only.
 - **Releases follow Knope's release pull request recipe:**
     - A workflow on every push to `main` runs Knope's prepare-release workflow. It keeps one release pull request open showing the next version, the changelog entry, and the version-file changes.
@@ -414,7 +561,7 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
     - `docs:build` runs Hugo, then Pagefind. `docs:dev` serves the site with reload; search needs a build.
 - **Hosting.** A project publishes its site to GitHub Pages or to Cloudflare; each suits different projects, so Workbench supports both.
     - On either host, `main` publishes the site. Each pull request gets a preview at its own URL, linked from the pull request and removed when the pull request closes.
-    - `workbench init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows ([section 11](#11-adopting-workbench)).
+    - `workbench project init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows ([section 11](#11-adopting-workbench)).
     - Cloudflare publishing uses Cloudflare's GitHub Action, which runs Wrangler on the CI runner only; the project still needs no Node. It needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets.
     - Workbench's own site stays on GitHub Pages.
 - **Look and feel** are left to the owner on the preview, per [proposal 0004](0004-make-room-for-ui-polish.md). Matching the VitePress theme is not a requirement.
@@ -422,25 +569,24 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 ### 10. Formatting
 
 - **In Workbench.** dprint formats Markdown with `textWrap: "never"`, plus JSON, YAML (including frontmatter), and TOML. hk's `dprint`, `cargo_fmt`, and `cargo_clippy` builtins replace the Oxfmt, Oxlint, and `tsrs` steps. The whitespace, newline, merge-conflict, and `actionlint` steps remain. No formatter checks Hugo templates or CSS.
-- **In projects.** Formatting is project-owned. Each holotype template chooses its formatters, for example Oxfmt in TypeScript projects. `workbench init` writes no formatter configuration.
+- **In projects.** Formatting is project-owned. Each holotype template chooses its formatters, for example Oxfmt in TypeScript projects. `workbench project init` writes no formatter configuration.
 
 ### 11. Adopting Workbench
 
-`workbench init` adds Workbench to a Git repository: a new project, a holotype template, or an existing project. It writes only what Workbench owns. Formatters, tests, builds, releases, and environment schemas belong to the project or its holotype template. `init` runs where `mise.toml` already pins `github:markmals/workbench` (`mise use github:markmals/workbench@<version>` writes that pin). It creates each missing item and never overwrites an existing file. For structured files it adds only missing keys or entries:
+`workbench project init` adds Workbench to a Git repository: a new project, a holotype template, or an existing project. It writes only what Workbench owns. Formatters, tests, builds, releases, and environment schemas belong to the project or its holotype template. It runs where `mise.toml` already pins `github:markmals/workbench` (`mise use github:markmals/workbench@<version>` writes that pin). It creates each missing item and never overwrites an existing file. For structured files it adds only missing keys or entries:
 
 - **`mise.toml`:**
     - the `postinstall` link hook;
     - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
-    - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0006;
     - the tasks `status`, `validate`, `beads:sync`, and `beads:claim` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
     - the `.omp/config.yml` extension entry, appended to an existing list;
     - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
-- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, and Beads gets its steps, including proposal 0006's sync steps. It runs no check before a push.
-- **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `check-commits` and `check-change-files` on every pull request except Knope's release pull request.
-- **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, `init` reports it.
+- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench commits check --message-file`, and Beads gets proposal 0006's sync steps, which call `workbench beads sync`. It runs no check before a push.
+- **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `workbench commits check` and `workbench change-files check` on every pull request except Knope's release pull request.
+- **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, the receipt says so.
 - **Records:**
     - `VISION.md` from the template when absent;
     - `proposals/`, `policies/`, `decisions/`, and `guides/` with their READMEs when absent;
@@ -448,9 +594,9 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
     - `docs/hugo.toml` when absent.
 - **With `--site github-pages` or `--site cloudflare`:** pins for `hugo` and `github:CloudCannon/pagefind`, the `docs:build` and `docs:dev` tasks, and that host's publishing and preview workflows, each when absent.
 
-`init` then prints:
+Its receipt lists:
 
-- what it created;
+- what it created or added to;
 - what it left unchanged;
 - every Workbench file the project still vendors;
 - the project-owned pieces Workbench relies on but does not create: the `setup`, `check`, and `fmt` tasks, and a release flow that consumes change files with Knope.
@@ -460,16 +606,16 @@ The vendored files it lists cover:
 - Workbench-named skills and rules under `.agents/`;
 - templates under `.agents/templates/`, marked identical (removable) or different (an override);
 - the three OMP extensions and `.omp/tools/dynamic-workflows/`;
-- the TypeScript tools `init` replaces;
+- the TypeScript tools the CLI replaces;
 - `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`.
 
-`init` deletes nothing. It exits zero unless it could not write a file.
+`project init --dry-run` returns the same receipt without writing anything. `project init` deletes nothing. It exits 0 unless it could not write a file.
 
 `guides/adopting-workbench.md` replaces `guides/adapting-your-harness.md`. It covers starting a project and migrating an existing one:
 
-1. Pin and run `init`.
+1. Pin Workbench, run `workbench project init --dry-run` to see what it will do, then run it.
 2. Move project additions out of shared files into project rules, project skills, or template overrides.
-3. Delete the vendored copies `init` lists.
+3. Delete the vendored copies the receipt lists.
 4. Convert pending Changesets entries to change files, and move the release flow to Knope.
 5. Move a published site to Hugo on GitHub Pages or Cloudflare.
 6. Replace Fnox with Varlock: declare variables in `.env.schema`, and run tasks that need secrets under `varlock run --`.
@@ -478,7 +624,7 @@ The vendored files it lists cover:
 
 It also covers the harness caveats: Claude Code's workspace trust, `CLAUDE.md` imports, and worktrees resolving to the main checkout; OMP's project `extensions:` replacing the user-level list; and Pico's dependence on #61.
 
-The Workbench repository stops being a GitHub template repository; the owner changes that setting. `README.md` and the getting-started guide describe `mise use` and `workbench init` in its place.
+The Workbench repository stops being a GitHub template repository; the owner changes that setting. `README.md` and the getting-started guide describe `mise use` and `workbench project init` in its place.
 
 ### 12. The Workbench repository
 
@@ -515,22 +661,25 @@ This change touches many independent surfaces, so its outcomes are listed for re
 
 - [ ] In a fixture repository with no Node on PATH, pinning a published release and running `mise install` creates `.workbench`. A new OMP session and a new Claude Code session each receive the process contract and list Workbench's skills, and OMP lists the four rules.
 - [ ] Changing the pin and running `mise install` re-points `.workbench`, and the next session in each harness loads the new release.
-- [ ] `workbench status`, `validate`, `check-commit`, and `check-commits` pass the cases ported from `tools/*.test.ts`, and `status` reproduces proposal 0006's Beads section.
-- [ ] `workbench validate` reports a project skill or rule that reuses a Workbench name.
-- [ ] `workbench check-change-files` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
+- [ ] `workbench records validate`, `commits check`, `change-files check`, `workflow status`, and the `beads` commands pass the cases ported from `tools/*.test.ts` and proposal 0006's tests.
+- [ ] Every registered command example runs and its output validates against its declared schema. Every Clap argument is in the registry. `cli search`, `schema`, and `docs search` work offline, without credentials. Every failure writes the structured error with its documented code and exit status.
+- [ ] `workbench project validate` reports a project skill or rule that reuses a Workbench name, and a `.workbench` link that disagrees with the pin.
+- [ ] `workbench change-files check` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
+- [ ] In the agent evaluation, fresh sessions complete all five tasks using only discovery, without guessing at command syntax.
 - [ ] Merging Knope's release pull request publishes a GitHub release with Knope-written notes, four attested archives, and the tag. Installing that version through mise on macOS arm64 and on CI's Linux x64 yields a complete package root.
 - [ ] Workbench contains no `package.json`, npm lockfile, TypeScript source, or OMP package, pins no Node, pnpm, or Bun, and `mise run check` passes.
-- [ ] The Hugo site publishes today's pages, fails on a dead relative link, serves under a PR-preview path, and searches. `init --site github-pages` and `--site cloudflare` each produce working publishing and preview workflows.
-- [ ] In an empty repository, `workbench init` followed by `mise install` makes `mise run status` and `mise run validate` succeed and lets both harnesses load the package. In a copy of an existing consumer, it changes no existing file and lists that consumer's vendored Workbench files and the missing project-owned tasks.
+- [ ] The Hugo site publishes today's pages, fails on a dead relative link, serves under a PR-preview path, and searches. `project init --site github-pages` and `--site cloudflare` each produce working publishing and preview workflows.
+- [ ] In an empty repository, `workbench project init` followed by `mise install` makes `mise run status` and `mise run validate` succeed and lets both harnesses load the package. In a copy of an existing consumer, it changes no existing file, and its receipt lists that consumer's vendored Workbench files and the missing project-owned tasks.
 
 ## Compatibility
 
 This breaks every existing Workbench project. Nothing changes in a project until that project adopts the package. Each adoption is its own change, made by following the adoption guide.
 
 - **Records** keep the format of [proposal 0005](0005-current-specifications.md).
-    - `validate`'s contract is unchanged apart from the collision rule.
-    - `check-change-files` replaces the changeset check.
-    - Task names are unchanged.
+    - Record validation detects what it detects today. Project validation, with the collision rule, is new.
+    - `change-files check` replaces the changeset check.
+    - The `status` and `validate` task names are unchanged.
+- **CLI output.** The `workbench` commands output JSON by default, with new result shapes and structured errors. Anything that parsed the old tools' text output or `--json` shape must change.
 - **Changesets to Knope.**
     - Pending Changesets entries become change files.
     - Existing `CHANGELOG.md` history stays as written, and new entries use Knope's format.
@@ -539,7 +688,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **Pico.** Until #61 supports declared plugins and their rules, Pico sessions in an adopted project load its `AGENTS.md` and `.agents/` content but not the package. Today's vendored copies do reach Pico. Pico is not the owner's daily harness yet.
 - **OMP users with user-level `extensions:`** must repeat those entries in the project list, because a project list replaces the user list.
 - **Fnox to Varlock.** Projects that grant secrets through Fnox move them to `.env.schema` and run the affected tasks under `varlock run --`. Their holotype templates own that change.
-- **Starting a project.** "Use this template" ends; `workbench init` replaces it.
+- **Starting a project.** "Use this template" ends; `workbench project init` replaces it.
 - **Platforms.** Windows is not a supported target.
 
 ## Implications on adoption
@@ -548,13 +697,13 @@ This breaks every existing Workbench project. Nothing changes in a project until
     - mise 2026.11.8, `git`, and `gh`;
     - Claude Code 2.1.325 or OMP 18.20.2;
     - for the site, Hugo 0.170.0 and Pagefind 1.6.0.
-- **Adoption follows the guide in [section 11](#11-adopting-workbench).** A new project is one `mise use`, one `mise install`, and `workbench init`. An existing project also moves its additions out of shared files and deletes its vendored copies.
+- **Adoption follows the guide in [section 11](#11-adopting-workbench).** A new project is one `mise use`, one `mise install`, and `workbench project init`. An existing project also moves its additions out of shared files and deletes its vendored copies.
 - **Updates** arrive through the pin, from Renovate's mise manager or by hand. Regenerate `mise.lock` where Renovate's lock update fails.
 - **Reversal.** Revert the adoption commits; the vendored files return from history. Pinning an older release reverts only package changes.
 
 ## Scope
 
-- The Rust `workbench` CLI with the commands in [section 5](#5-the-workbench-cli), and Rust tests ported from `tools/*.test.ts`.
+- The Rust `workbench` CLI described in [section 5](#5-the-workbench-cli): its command registry, discovery and documentation commands, output and error contract, Rust tests ported from `tools/*.test.ts` and proposal 0006, and the agent evaluation.
 - The package layout under `plugin/`:
     - the process contract extracted from `AGENTS.md`, plus its output-style copy and their equality test;
     - rule frontmatter, which resolves workbench-0ky;
@@ -563,13 +712,13 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - The Hugo theme, Workbench's site on it, and PR previews.
 - dprint and the revised `hk.pkl`.
 - Removing the workflow tool and every Node, TypeScript, and OMP dependency from Workbench.
-- `workbench init` and `guides/adopting-workbench.md`, with updates to `AGENTS.md`, `PROCESS.md`, `README.md`, the guides, the templates, and the pull request template.
+- `workbench project init` and `guides/adopting-workbench.md`, with updates to `AGENTS.md`, `PROCESS.md`, `README.md`, the guides, the templates, and the pull request template.
 - A comment on pico#62 recording the workflow tool's last revision.
 
 ### Out of scope
 
 - **Migrating the nine consumer repositories.** Each migration is a change in that repository, using the adoption guide.
-- **Upstreaming the validator improvements found in Pico, Recon, and Trove.** Each changes `validate`'s contract and needs its own specification.
+- **Upstreaming the validator improvements found in Pico, Recon, and Trove.** Each changes what record validation detects and needs its own specification.
 - **Pico's plugin support** ([pico#61](https://github.com/markmals/pico/issues/61)).
 - **Renovate configuration in consumer repositories.**
 - **Windows targets, and distribution through Homebrew or crates.io.** Nothing asks for them yet.
@@ -590,15 +739,16 @@ This breaks every existing Workbench project. Nothing changes in a project until
     2. Open an OMP session and a Claude Code session and find the contract and the skills.
     3. Run `mise run status` and `mise run validate`.
     4. Bump the pin to the next release candidate and see the next session load it.
-    5. Run `workbench init` in an empty repository, then `mise run check`.
-    6. Browse the site preview: record headers, proposal history, and search. A deliberately dead link fails CI.
+    5. Run `workbench project init --dry-run`, then `workbench project init`, in an empty repository, then `mise run check`.
+    6. Starting from `workbench --help`, find and run `beads claim` and `change-files create` using only `cli search` and `schema`.
+    7. Browse the site preview: record headers, proposal history, and search. A deliberately dead link fails CI.
 - **Cleanup:** delete the fixtures. After acceptance, delete the prerelease and its tag, with the owner's confirmation.
 
 ## Policies and decisions checked
 
 - **Policies and decisions.** None: `policies/` and `decisions/` hold only their READMEs.
 - **[VISION.md](../VISION.md):**
-    - Its minimum viable product is "a repository you can clone". This proposal makes it a versioned package plus `workbench init`.
+    - Its minimum viable product is "a repository you can clone". This proposal makes it a versioned package plus `workbench project init`.
     - Its non-goal says infrastructure "ships harness-neutral in `.agents/`". The infrastructure becomes harness-neutral content in the package, with small committed harness declarations.
     - Both statements are revised at completion.
     - The vision's principles hold:
@@ -607,8 +757,8 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **[Proposal 0001](0001-workbench-2.md)** established the template-repository distribution and the Workbench 2 tooling. This proposal replaces both and leaves that record as history.
 - **[Proposal 0004](0004-make-room-for-ui-polish.md)** leaves look and feel to the running product. The site's appearance follows that.
 - **[Proposal 0005](0005-current-specifications.md)** defined the current-record model and the record and status contract in `guides/record-validation.md`, both preserved. Its "changesets and changelogs" role passes to change files and Knope's changelog.
-- **[Proposal 0006](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and the pre-push check, and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench status` ports 0006's Beads section.
-- **`.agents/rules/enforcement-hierarchy.md`.** Moving the checks into the package keeps them deterministic: `commit-msg`, `pre-commit`, CI, and `validate`. It adds the collision check.
+- **[Proposal 0006](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and the pre-push check, and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench workflow status` and the `beads` commands carry over 0006's behavior.
+- **`.agents/rules/enforcement-hierarchy.md`.** Moving the checks into the package keeps them deterministic: `commit-msg`, `pre-commit`, CI, `records validate`, and `project validate`. It adds the collision check.
 
 ## Future directions
 
@@ -617,6 +767,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - The validator improvements in Pico, Recon, and Trove are candidates for upstreaming as separate changes.
 - The general reasoning skills (grounding, ontology review, reframing, systematic debugging, adversarial review) appear standalone in about fourteen non-Workbench repositories. They could become a package of their own.
 - Shared tool pins through mise `include` fragments could follow if pin drift across projects becomes a problem.
+- The command registry could generate an MCP server exposing the same operations, if a harness ever needs tools rather than a CLI.
 
 ## Alternatives considered
 
@@ -634,7 +785,8 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **Zola** dropped custom frontmatter in testing and requires a `content/` directory. **mdBook** needs a generated `SUMMARY.md` and a preprocessor for frontmatter. **Keeping VitePress** keeps Node.
 - **Knope reading Changesets-format files unchanged.** The owner chose Knope-native change files and release notes.
 - **Keeping the template repository alongside the package.** Two distribution paths would drift apart the way the copies have.
+- **Keeping today's tool interfaces:** text by default, `--json` on request, and a flat list of commands with free-text errors. Agents then guess at command names, parse prose, and cannot tell a retryable failure from a permanent one. The owner's agent-first CLI guide sets the contract instead.
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: How does a pull request with no user-visible change satisfy the change-file requirement? Options: a commit trailer such as `Release-Note: none` that `workbench check-change-files` accepts (recommended: checkable offline and kept in history), or a pull-request label that CI checks.]
+- [NEEDS CLARIFICATION: How does a pull request with no user-visible change satisfy the change-file requirement? Options: a commit trailer such as `Release-Note: none` that `workbench change-files check` accepts (recommended: checkable offline and kept in history), a `--none` form of `workbench change-files create` that writes an explicit no-release marker, or a pull-request label that CI checks.]
