@@ -234,7 +234,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **Sync points:**
     1. `mise run status` ([section 2](#2-beads-in-mise-run-status)).
     2. hk's `pre-push` hook runs `mise run beads:sync` before its other steps.
-    3. hk's `post-merge` hook runs `mise run beads:sync` after a pull or merge.
+    3. hk's `post-merge` hook runs `mise run beads:sync` after a pull or merge, and its `post-rewrite` hook runs it after a rebase, which is what `git pull --rebase` runs instead of `post-merge`. The owner added the rebase step on 2026-11-15 after review found the gap; an amend does not sync.
     4. After creating, closing, or updating a Beads item another machine should see, the agent runs `mise run beads:sync`. Claims sync themselves ([section 4](#4-claiming-work-across-machines)). The contract states this rule.
 - **Failures in hooks.** A Beads sync failure in a git hook prints its outcome and never blocks the git operation.
 - **Never:**
@@ -271,7 +271,7 @@ The `tracking-work` skill gains a section on Beads across machines. The owner re
     - Each machine has one replica per project, shared by all of that checkout's worktrees.
     - `bd` commands read and write only that replica, and other machines' changes arrive only through a sync.
     - The meeting point is `refs/dolt/data` on the project's `origin`. It is not a branch, does not appear in branch lists, and `git clone` does not fetch it.
-    - `git pull` brings Beads changes only because hk's `post-merge` hook syncs; `git fetch` brings none.
+    - `git pull` brings Beads changes only because hk's `post-merge` or `post-rewrite` hook syncs; `git fetch` brings none.
     - `.beads/issues.jsonl` is an export for diffs and viewers, never a sync channel.
 - **When syncs happen.** `mise run status`, `git push`, and `git pull` sync on their own. The agent runs `mise run beads:sync` after creating, closing, or updating items another machine should see, and before ending a session that changed Beads.
 - **Claiming.** Claim only through `mise run beads:claim`. The skill explains what each outcome in section 4 means, and that an item held by another claimant is not available.
@@ -317,7 +317,7 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 - **[Record Validation and Workflow Status](../guides/record-validation.md)** changes as described in [section 2](#2-beads-in-mise-run-status), and the **`tracking-work` skill** as described in sections 2 and 5.
 - **Configuration:**
     - `mise.toml` gains the `[env]` entry, the `beads:sync` and `beads:claim` tasks, and the setup changes.
-    - `hk.pkl` gains the `pre-push` and `post-merge` steps.
+    - `hk.pkl` gains the `pre-push`, `post-merge`, and `post-rewrite` steps.
     - `tools/status.ts` gains the Beads section. The new `tools/beads.ts` implements sync and claim. Both get tests.
 
 ## Compatibility
