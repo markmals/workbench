@@ -42,15 +42,15 @@ A policy constrains future work. State it as an imperative rule that an author c
 
 Before writing a policy, try to make the rule a validator rule, CI step, git hook, task, or template section. A policy that can be a check **must** be a check. Prose is the enforcement tier most likely to be missed and the prose policies are the ones that rot.
 
-This repository supplies a concrete example. The `.agents/templates/PROPOSAL.md` has a “Policies and decisions checked” section. That makes reviewing the current record part of the proposal's shape, rather than creating a policy that says “remember to check policies.” The template is stronger than a reminder.
+Workbench supplies a concrete example. Its proposal template, `.workbench/templates/PROPOSAL.md`, has a “Policies and decisions checked” section. That makes reviewing the current record part of the proposal's shape, rather than creating a policy that says “remember to check policies.” The template is stronger than a reminder.
 
-Use the `.agents/rules/enforcement-hierarchy.md` before adding a rule. Where a check already enforces one, do not duplicate it in prose.
+Read `.workbench/rules/enforcement-hierarchy.md` before adding a rule. Where a check already enforces one, do not duplicate it in prose.
 
 ## Create a durable entry only after it is earned
 
 `policies/` and `decisions/` start empty on purpose. Do not write speculative policies or decisions because a future change might need them. Record a rule or choice when agreed work has established it. Optional `established-by: proposal.<NNNN>` names the proposal that introduced it, as provenance; it is not required, and it does not need to change when the record is revised later.
 
-Use the canonical `.agents/templates/POLICY.md` for a narrow rule, or a link to the source that owns it, with its scope and enforcement. Use `.agents/templates/DECISION.md` for the current arrangement, context, alternatives, and consequences. Number either file as `<NNNN>-<slug>.md` and use the matching `policy.<NNNN>` or `decision.<NNNN>` ID. Required frontmatter is `id`, `title`, and `status`; [Record Validation and Workflow Status](./record-validation.md) lists the exact checks.
+Use the canonical policy template, `.workbench/templates/POLICY.md`, for a narrow rule, or a link to the source that owns it, with its scope and enforcement. Use `.workbench/templates/DECISION.md` for the current arrangement, context, alternatives, and consequences. A project that overrides either in `.agents/templates/` uses its override. Number either file as `<NNNN>-<slug>.md` and use the matching `policy.<NNNN>` or `decision.<NNNN>` ID. Required frontmatter is `id`, `title`, and `status`; [Record Validation and Workflow Status](./record-validation.md) lists the exact checks.
 
 The policy lifecycle is `draft` to `active`; the decision lifecycle is `proposed` to `accepted`. A proposed record stays on its change branch until it is agreed. The human decides whether the feature's outcome merits the record; you can ask the agent to write the entry after that decision.
 

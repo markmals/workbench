@@ -15,7 +15,7 @@ Use one command whenever you want to orient yourself:
 mise run status
 ```
 
-It takes no arguments. It derives the current phase from the branch, pull request, and active proposal, then names the next actor.
+It takes no arguments. It derives the current phase from the branch, pull request, and active proposal, then names the next actor. The agent gets the same report as JSON from `workbench workflow status`.
 
 ## What you actually do
 
@@ -94,7 +94,7 @@ The order is fixed:
 4. Implement the code. Where the proposal leaves look and feel open, the agent chooses it to fit the project's existing interface and its platform's conventions, for you to refine in review.
 5. Run the gate with `mise run check`.
 
-`mise run check` runs the tests, then `hk check --all` for formatting, lint, and type checks, then `validate` and `docs:build`.
+`mise run check` is the project's single gate, and each project defines what it runs: typically its tests, `hk check --all` for formatting and lint, `validate`, and the site build.
 
 The order protects the design. Tests written after code agree with code that already exists; guides written after implementation document its accidents. Writing both from the revised specification gives each an independent claim before code. [Keeping Current Specifications](./current-specifications.md) shows what that first step looks like for an API contract and for a Gherkin workflow.
 

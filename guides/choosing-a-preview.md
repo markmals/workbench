@@ -43,14 +43,14 @@ A CLI is the exception. Installing its binary is the real act of exercising the 
 
 ## Wire one recipe
 
-`.github/workflows/preview.yml` ships a working documentation deployment because Workbench is documentation and process. It also contains commented recipes for the other repository shapes.
+For a documentation site, `workbench project init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows. For any other surface, the project wires its own preview; Workbench's `.github/workflows/preview.yml` keeps commented recipes for the other repository shapes to start from.
 
 1. Choose the row that matches your project and the changed surface.
-2. Wire that recipe in the workflow.
+2. Wire that recipe in the project's preview workflow.
 3. Delete the recipes that do not apply.
 4. Open the preview URL from the pull request and exercise the change.
 
-For the shipped documentation recipe, enable GitHub Pages with `gh-pages` as its source. The workflow builds every open pull request, deploys beneath `pr-preview/pr-<number>/`, comments the preview URL on the pull request, and removes the deployment and comment when the pull request closes.
+For a site on GitHub Pages, enable Pages with `gh-pages` as its source. The preview workflow builds every open pull request, deploys beneath `pr-preview/pr-<number>/`, comments the preview URL on the pull request, and removes the deployment and comment when the pull request closes. On Cloudflare, each pull request deploys to its own Pages branch, `pr-<number>`, whose URL is commented on the pull request and which is deleted when the pull request closes.
 
 Do not keep a menu of inactive preview mechanisms as configuration. The comments are examples for adoption; your workflow should express one maintained choice.
 
@@ -58,15 +58,15 @@ Do not keep a menu of inactive preview mechanisms as configuration. The comments
 
 Previews answer "does this change work." A published documentation site answers "where do I read the guides." They are different jobs, and Workbench wires them in different workflows — `preview.yml` on pull requests, `docs.yml` on the default branch.
 
-Both write to `gh-pages`: the published site at the root, previews beneath `pr-preview/`. The production deploy excludes that directory when it cleans, so publishing does not delete the previews of open pull requests.
+On GitHub Pages, both write to `gh-pages`: the published site at the root, previews beneath `pr-preview/`. The production deploy excludes that directory when it cleans, so publishing does not delete the previews of open pull requests.
 
-**`docs.yml` skips itself on a private repository.** Publishing guides is the one place the private-by-default rule can be broken by accident, so the job is gated rather than trusting whoever adopts the kit to remember. If your repository is public and your guides should not be, delete that workflow.
+**The GitHub Pages `docs.yml` skips itself on a private repository.** Publishing guides is the one place the private-by-default rule can be broken by accident, so the job is gated rather than trusting whoever adopts Workbench to remember. If your repository is public and your guides should not be, delete that workflow.
 
 ## Keep previews private by default
 
 A preview is private unless you deliberately decide otherwise. A public preview can expose unfinished behavior, test data, or guides that the repository does not expose.
 
-GitHub Pages cannot serve privately outside GitHub Enterprise. If your guides must stay private, do not use this repository's GitHub Pages default. Use the Cloudflare Pages recipe in the workflow instead and gate it behind Cloudflare Access. It requires these repository secrets:
+GitHub Pages cannot serve privately outside GitHub Enterprise. If your guides must stay private, publish to Cloudflare instead, with `workbench project init --site cloudflare`, and gate the site behind Cloudflare Access. It requires these repository secrets:
 
 | Secret                  | Used for                                             |
 | ----------------------- | ---------------------------------------------------- |
@@ -79,7 +79,7 @@ A prerelease published to a public package registry is public forever. Treat tha
 
 A site served beneath a subpath must receive that base path at build time. Otherwise its assets resolve against the domain root and the page loads blank.
 
-The shipped workflow sets `DOCS_BASE` to the preview path, and `docs/.vitepress/config.ts` reads it at build time. Workbench encountered this bug twice: once for assets and once for homepage links.
+The site workflows set `HUGO_BASEURL` to the preview's URL on the `mise run docs:build` step, and Hugo reads it at build time. Workbench encountered this bug twice: once for assets and once for homepage links.
 
 Open the deployed preview. Confirm that the page renders and that the homepage links work. A green workflow is not evidence that a subpath deployment is usable.
 

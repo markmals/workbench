@@ -49,10 +49,10 @@ Contract text and type expectations are written or revised before implementation
 | Subject | Current owner |
 | --- | --- |
 | The workflow, its phases, roles, and approval points | [The process](../PROCESS.md) |
-| `mise run validate` and `mise run status` | [Record Validation and Workflow Status](./record-validation.md) |
-| What an agent must do in a session | `AGENTS.md` and the skills under `.agents/skills/` |
-| The shape of each record | `.agents/templates/` |
-| Tool and hook specifics | Source documentation and native tests in `tools/` and `.omp/tools/dynamic-workflows/` |
+| What `workbench records validate` and `workbench workflow status` detect and report | [Record Validation and Workflow Status](./record-validation.md) |
+| What an agent must do in a session | The process contract, [`plugin/rules/workbench.md`](../plugin/rules/workbench.md), and the rules and skills beside it in `plugin/` |
+| The shape of each record | The templates in [`plugin/templates/`](../plugin/templates/README.md) |
+| The `workbench` CLI's commands, arguments, results, and errors | The command registry in `src/`, published as the [CLI reference](../plugin/reference/cli.md), and the Rust tests in `tests/` |
 | Purpose and direction | [The vision](../VISION.md) |
 | Why any of these changed | The proposals and their pull requests |
 
@@ -122,7 +122,7 @@ Feature: Export a report
 
 The scenarios describe what Dana can do and is told, not which button she presses. The project's existing Gherkin integration runs the new XLSX example through its bindings, and it fails until the implementation exists. The guide gains the new format, and the code follows.
 
-A project uses Gherkin only where rules and examples communicate a requirement well, and only with a real integration wired into its test task before it claims executable coverage. For syntax, file layout, bindings, and adopting an integration, use the skill in `.agents/skills/specifying-behavior-with-gherkin/`. Workbench itself specifies its process in prose and its tools in source documentation and native tests.
+A project uses Gherkin only where rules and examples communicate a requirement well, and only with a real integration wired into its test task before it claims executable coverage. For syntax, file layout, bindings, and adopting an integration, use the `specifying-behavior-with-gherkin` skill. Workbench itself specifies its process in prose and its CLI in its command registry and Rust tests.
 
 ## Worked example: revising and retiring a policy
 

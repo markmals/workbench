@@ -7,7 +7,7 @@ title: Writing a Good Proposal
 
 **The template gives me sections. What makes the content worth the effort?**
 
-The `.agents/templates/PROPOSAL.md` teaches structure: what each section is for. This guide is about judgement: what makes a proposal make the next three days obvious instead of adding ceremony.
+Workbench's proposal template, `.workbench/templates/PROPOSAL.md`, teaches structure: what each section is for. This guide is about judgement: what makes a proposal make the next three days obvious instead of adding ceremony.
 
 ## Spend the hour where change is cheap
 
