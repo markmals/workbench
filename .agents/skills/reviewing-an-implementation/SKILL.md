@@ -12,7 +12,7 @@ Begin after applicable validation has fresh evidence under `.agents/rules/verifi
 1. Self-check.
 2. Dispatch `adversarial-review`; consume its report.
 3. Produce the preview.
-4. Post the readiness report and make the pull request ready together.
+4. Post the readiness report and move the proposal to `active-review`; the implementation PR should already be ready.
 
 ## 1. Self-check
 
@@ -77,7 +77,7 @@ Build from the pull-request revision. Give repository-accessible humans a stable
 
 Previews are private by default. Do not publish one publicly unless the project deliberately opts in. A prerelease package published to a public registry is public forever; use a prerelease tag and state that public status in the readiness report. Teardown belongs to Phase 5 cleanup through `completing-a-feature`.
 
-## 4. Report readiness and mark ready
+## 4. Report readiness
 
 Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. Fill every template section and add the self-check's recorded divergences and their resolutions.
 
@@ -97,24 +97,19 @@ Declined adversarial findings keep the independent review useful. Do not quietly
 
 ### Post as a service account
 
-Configure a bot token or GitHub App installation token in the environment. Confirm the authenticated identity before posting.
+Prefer the repository's agent identity for the readiness comment, rather than the human's PR identity. Where a service-account token is configured:
 
 ```sh
 GH_TOKEN="$SERVICE_ACCOUNT_TOKEN" gh pr comment <pr-number> --body-file readiness-report.md
-GH_TOKEN="$SERVICE_ACCOUNT_TOKEN" gh pr ready <pr-number>
 ```
 
-Without a service account, post from the available authenticated identity and say in the report: `Posted from <identity>; no service account is configured.` Do not imply bot authorship.
+Confirm the authenticated identity before posting. Without a service account, identify the available account in the report unless repository identity rules forbid that fallback. PR readiness uses the ordinary `gh pr ready` under the human's identity during implementation; the service-account token is only for the agent-authored report.
 
-### Make the coupled transition into Phase 4
+### Make the Phase 4 proposal transition
 
-At the end of Phase 3, these three actions form one transition and MUST NOT be separated:
+The feature pull request should already be ready because the complete, verified implementation was pushed during Phase 3. If it is unexpectedly draft, verify that its pushed revision contains the complete implementation and mark it ready with `gh pr ready <pr-number>` before the handoff.
 
-1. Move the proposal to `status: active-review`.
-2. Post the readiness report.
-3. Flip the pull request from draft to ready with `gh pr ready <pr-number>`.
-
-Do not leave the proposal, report, and pull-request state disagreeing. Ready means the work is human-reviewable, not correct or accepted. Never set `accepted`; only the human may do so in Phase 4, which starts Phase 5 completion.
+At the end of Phase 3, move the proposal to `status: active-review` and post the readiness report on that PR. These actions form the handoff to human review; do not claim the report was posted if the bot comment failed. PR readiness and proposal status are separate facts: the PR may be ready while the proposal is still `awaiting-implementation`.
 
 ### Look-and-feel feedback in review
 
@@ -129,6 +124,6 @@ While the proposal is `active-review`, apply feedback that touches only look and
 - You skipped independent adversarial review or dropped a declined finding.
 - The preview is fabricated, public by accident, detached from the pull request, or a bare URL.
 - The report claims a validation gate was not run.
-- You marked the pull request ready without the proposal status and report.
+- You left a verified, pushed implementation in a draft PR merely because its readiness report is pending.
 
 Correct the record before handoff.

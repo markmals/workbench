@@ -75,7 +75,7 @@ Every pull request carries a changeset. Run `mise run changeset`, choose the bum
 
 ## Push policy
 
-Pushing the feature branch to `origin` is expected and routine: it creates and updates the draft pull request that serves as the durable workspace. Push early and push often.
+Pushing the feature branch to `origin` is expected and routine: it creates and updates the pull request that serves as the durable workspace. It starts draft for proposal development and becomes ready after the complete implementation is verified and pushed. Push early and push often.
 
 Pushing directly to the default branch is prohibited. Work reaches the default branch only by merging its pull request.
 

@@ -24,8 +24,8 @@ Use `.agents/skills/implementing-a-proposal/`. In short:
 3. Write failing tests for the behavior those specifications now require, and watch them fail for the right reason.
 4. When the change alters what a user does, sees, or must know, write or extend the guide in `guides/` from the intended contract, not from the code, link the source that owns that contract, and check the guide against the tests.
 5. Write the code.
-6. Verify with `mise run check`. Report the commands you ran and what they printed.
-7. Get one independent review with `.agents/skills/reviewing-an-implementation/` and fix what it confirms. Then post the readiness report, move the proposal to `active-review`, and mark the pull request ready, together.
+6. Verify with `mise run check`. Report the commands you ran and what they printed. Once the complete implementation has passed the applicable checks and is pushed, mark the pull request ready for maintainer review; it stays a draft only while it holds just the proposal. The proposal stays `awaiting-implementation` until the `active-review` handoff.
+7. Get one independent review with `.agents/skills/reviewing-an-implementation/` and fix what it confirms. Then post the readiness report and move the proposal to `active-review`; the pull request is already ready.
 
 Which of specifications, tests, guides, and code a change needs is a judgement; the order is not. A change with no user-facing surface needs no guide, and a change with nothing meaningfully testable needs no test, but say so rather than skipping quietly.
 

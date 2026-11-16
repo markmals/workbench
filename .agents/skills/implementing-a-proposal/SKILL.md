@@ -12,7 +12,7 @@ Phase 3 writes an approved change into the project's current specifications, the
 ## Preconditions
 
 - The proposal has `status: awaiting-implementation`, or the human returned it with `status: returned-for-revisions`; neither has an unresolved clarification marker.
-- Phase 1 — preparation — created the branch, pushed it to `origin`, and opened a draft pull request.
+- Phase 1 — preparation — created the branch, pushed it to `origin`, and opened a draft pull request for the proposal. It stays draft until the complete implementation has passed applicable checks and reached the pushed branch.
 - Read the proposal's **Detailed design**, the current sources it links, the code it touches, and the vision, policies, and decisions it names. Completed proposals are history; read current requirements from the sources that own them.
 - When the design is ambiguous, or current sources disagree with each other or with the proposal in a way that changes behavior, raise it. Do not choose silently or expand scope.
 
@@ -70,6 +70,8 @@ Write the minimum production code that makes the tests pass and matches the spec
 
 Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
 
+After the complete implementation passes the applicable checks and is pushed, mark the feature pull request ready for maintainer review. Human review can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff. If the push or PR state change cannot be made, report the blocker without claiming the implementation is reviewable in the PR.
+
 ## Then
 
-Continue with [`.agents/skills/reviewing-an-implementation/`](../reviewing-an-implementation/SKILL.md). It owns the self-check, the independent review, the preview, and the handoff to the human. Set no proposal status before then.
+Continue with [`.agents/skills/reviewing-an-implementation/`](../reviewing-an-implementation/SKILL.md). It owns the self-check, the independent review, the preview, and the handoff to the human. Set no proposal status before then. The pull request should already be ready.

@@ -57,17 +57,18 @@ Per feature:
 
 ```
 branch → draft PR → proposal → current specifications → tests → guides → code
-       → validation → self-check → adversarial review → preview → readiness report
-       → human review → revision → records and vision update → merge → release → cleanup
+       → validation → ready PR → self-check → adversarial review → preview
+       → readiness report → human review → revision → records and vision update
+       → merge → release → cleanup
 ```
 
 **Preparation.** The agent branches, pushes, and opens a draft pull request. The pull request is the durable workspace — proposal, implementation, review discussion, and status reports all accumulate in one reviewable place.
 
 **Proposal.** You and the agent write `proposals/<NNNN>-<slug>.md` and iterate until it is right. It links the current specifications the change touches and says what changes in each, concretely enough that the agent can revise them and build without rereading your conversation. Unresolved questions are marked and answered, never guessed. Once the change ships, the proposal is its history; the specifications are where the next change starts.
 
-**Implementation.** Current specifications first: whichever API contract documentation, schema, reference prose, or Gherkin feature already owns the surface is revised to state the approved change. Then failing tests, then guides written from that intended contract, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents.
+**Implementation.** Current specifications first: whichever API contract documentation, schema, reference prose, or Gherkin feature already owns the surface is revised to state the approved change. Then failing tests, then guides written from that intended contract, then code. The order matters: tests written after the code agree with the code, and guides written after the implementation document its accidents. Once the complete implementation is verified and pushed, the agent marks the pull request ready for you to review. The proposal remains `awaiting-implementation` while agent review continues.
 
-**Review.** The agent reads proposal, specifications, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and marks the pull request ready.
+**Review.** The agent reads proposal, specifications, tests, guides, and code together and fixes where they disagree. Then one adversarial reviewer — fresh context, different model, style ignored — tries to prove the work is broken. It reports; it does not fix. Findings the primary agent declines are surfaced in the readiness report rather than quietly dropped. Then the preview goes up, and the agent posts a readiness report and moves the proposal to `active-review`; the PR was already ready.
 
 **Human review.** You read the report, the diff, and the preview, and comment. Look-and-feel feedback is applied while the work stays in review. If your feedback changes what the feature does, or a design decision the proposal records, rather than correcting the implementation, the proposal is updated first and the loop runs again. When you accept it: records and vision update, merge, release, cleanup.
 
