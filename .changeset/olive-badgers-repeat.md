@@ -1,6 +1,8 @@
 ---
-"workbench": minor
+default: minor
 ---
+
+# Replace the Vite+ toolchain with mise, hk, and Beads
 
 Replace the Vite+ toolchain with the platform-neutral tooling layer the project templates share: mise owns every pinned tool and every task, hk owns every git hook, Fnox owns secrets, Beads owns the work graph, Changesets owns the changelog, and Worktrunk owns worktrees.
 

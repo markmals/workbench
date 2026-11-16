@@ -1,6 +1,8 @@
 ---
-"workbench": minor
+default: minor
 ---
+
+# Drop harness hooks and sync Beads across machines
 
 Agent sessions no longer pay for work they did not ask for. The three Oh My Pi extensions are gone: nothing formats after every edit, runs `mise run check` before every stop, or injects `bd prime` into the first turn. The `pre-commit` hook still formats staged files, the agent still runs `mise run check` before claiming work is done, and the `pre-push` hook no longer runs the gate. CI runs it on every push, and agents wait for CI to pass before marking a pull request ready or merging it.
 

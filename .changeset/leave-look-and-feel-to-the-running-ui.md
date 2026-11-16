@@ -1,6 +1,8 @@
 ---
-"workbench": minor
+default: minor
 ---
+
+# Leave look and feel to the running UI
 
 Proposals now say what a feature does and leave its look and feel — layout, sizes, spacing, type, color, motion, which control presents a choice, how it is operated, and wording — to the human on the running UI. Look-and-feel feedback during human review is applied while the proposal stays `active-review`, with no proposal edit, status change, readiness report, or second adversarial review. Polishing an interface between proposals needs no proposal question; the new `polishing-a-ui` skill describes the loop and stops when a request would change what the feature does.
 
