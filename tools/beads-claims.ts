@@ -110,13 +110,15 @@ export function claimBeadsItem(
 export function closeBeadsItem(
     root: string,
     id: string,
-    reason: string | undefined,
+    reason: string,
     timeoutMs = SYNC_TIME_LIMIT_MS,
 ): CloseResult {
     refuseForeignRemote(root, timeoutMs);
     let actor = claimant();
-    let arguments_ = ["close", id, ...(reason ? [`--reason=${reason}`] : []), "--json"];
-    let close = bd(arguments_, root, undefined, { ...process.env, BEADS_ACTOR: actor });
+    let close = bd(["close", id, `--reason=${reason}`, "--json"], root, undefined, {
+        ...process.env,
+        BEADS_ACTOR: actor,
+    });
     if (close.status !== 0) throw new Error(bdError(close, "close"));
     let sync = syncBeads(root, timeoutMs);
     if (sync.outcome !== "synced")

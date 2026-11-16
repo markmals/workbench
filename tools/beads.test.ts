@@ -656,3 +656,16 @@ test("beads:close exits zero when closed and nonzero when Beads refuses, printin
     assert.match(refused.stdout, /close failed/);
     assert.match(refused.stdout, /cannot close wb-1: held/);
 });
+
+test("beads:close without a reason is a usage error that closes nothing", t => {
+    let result = runTask(
+        t,
+        { where: AVAILABLE, close: { json: [{ id: "wb-1" }] }, sync: SYNCED },
+        "close",
+        "wb-1",
+    );
+
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /close <id> "<reason>"/);
+    assert.doesNotMatch(result.stdout, /closed/);
+});

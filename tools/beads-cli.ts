@@ -8,7 +8,7 @@ import { beadsUnavailable, formatOutcome, formatUnavailable, syncBeads } from ".
 const USAGE = [
     "Usage: node tools/beads-cli.ts sync",
     "       node tools/beads-cli.ts claim <id>",
-    '       node tools/beads-cli.ts close <id> ["<reason>"]',
+    '       node tools/beads-cli.ts close <id> "<reason>"',
 ].join("\n");
 
 function run(command: string, id: string | undefined, reason: string | undefined): number {
@@ -25,7 +25,7 @@ function run(command: string, id: string | undefined, reason: string | undefined
     }
     try {
         let result =
-            command === "claim" ? claimBeadsItem(root, id!) : closeBeadsItem(root, id!, reason);
+            command === "claim" ? claimBeadsItem(root, id!) : closeBeadsItem(root, id!, reason!);
         console.log(formatOutcome(result.outcome, result.detail));
         return result.outcome === "held" || result.outcome === "lost" ? 1 : 0;
     } catch (error) {
@@ -36,7 +36,8 @@ function run(command: string, id: string | undefined, reason: string | undefined
 
 function main(): number {
     let [command, id, reason] = process.argv.slice(2);
-    let valid = command === "sync" || ((command === "claim" || command === "close") && id);
+    let valid =
+        command === "sync" || (command === "claim" && id) || (command === "close" && id && reason);
     if (!valid) {
         console.error(USAGE);
         return 2;

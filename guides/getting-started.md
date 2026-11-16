@@ -73,8 +73,8 @@ $ node tools/validate.ts
 Validation passed: 0 violations
 
 $ node --test 'tools/**/*.test.ts'
-ℹ tests 172
-ℹ pass 172
+ℹ tests 173
+ℹ pass 173
 ℹ fail 0
 
 $ vitest run --dir .omp/tools
