@@ -4,7 +4,7 @@ title: Drop Harness Hooks and Sync Beads Across Machines
 authors: [markmals, anthropic/claude-opus-5-5]
 status: draft
 pull-request: https://github.com/markmals/workbench/pull/11
-issues: []
+issues: [workbench-lx8]
 supersedes: []
 ---
 
@@ -33,6 +33,8 @@ Every Workbench project in `~/Developer` already points `sync.remote` at its own
 Recon took a different route and turned on `dolt.auto-push`. Beads documents that setting as safe only for a single writer. Recon's repository also now carries a `__dolt_remote_info__` branch. Dolt publishes that branch so the remote appears in GitHub's interface, and GitHub then shows its banner announcing a recently pushed branch.
 
 The owner wants every machine to have current Beads, including what other agents have claimed, without that noise.
+
+**The contract misstates what Beads is for.** The owner's stack (`~/Developer/Notes/sprinkles-stack.md`) divides tracking: GitHub Issues and Projects hold the owner's planning, and Beads holds agents' work and the project's memory. `AGENTS.md` instead says Beads "replaces GitHub-issue defect tracking". The `writing-a-proposal` skill contradicts both: its red-flag table says to file a newly discovered defect as a GitHub issue (Beads `workbench-lx8`).
 
 ## Domain grounding
 
@@ -224,8 +226,10 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **`AGENTS.md`:**
     - The harness setup table drops the lifecycle rows.
     - Work tracking states the sync rules from [section 3](#3-syncing-beads-across-machines).
+    - Work tracking states what each tracker holds. Beads holds the work agents discover and the project's memory. GitHub Issues and Projects hold the owner's planning. The sentence calling Beads a replacement for GitHub-issue defect tracking goes.
     - The quality-gates list adds `mise run beads:sync`.
-- **`PROCESS.md`'s Work Tracking section** describes replicas, the remote, and the sync points.
+- **`PROCESS.md`'s Work Tracking section** describes replicas, the remote, and the sync points, and states the same division between Beads and GitHub Issues and Projects.
+- **The `writing-a-proposal` skill's red-flag table** files a newly discovered out-of-scope defect in Beads, not as a GitHub issue.
 - **`guides/adapting-your-harness.md`** drops "Wire lifecycle events" and the extension rows. A harness needs only the contract and the skills.
 - **`guides/getting-started.md` and `README.md`** stop describing lifecycle extensions.
 - **`.agents/rules/enforcement-hierarchy.md`'s Tier 0** drops `.omp/extensions/` and names the hk steps.
