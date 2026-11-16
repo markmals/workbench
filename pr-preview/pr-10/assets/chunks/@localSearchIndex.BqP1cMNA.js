@@ -1,0 +1,1 @@
+import{t as e}from"./framework.Bj5pAnfO.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.sbHnf6GA.js`),[])};export{t as default};
