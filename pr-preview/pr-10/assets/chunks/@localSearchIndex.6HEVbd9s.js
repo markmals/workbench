@@ -1,1 +1,0 @@
-import{t as e}from"./framework.Bj5pAnfO.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.CcalDEY9.js`),[])};export{t as default};
