@@ -38,7 +38,7 @@ Do not write Conventional Commits `type(scope):` subjects. Scoped Commits lead w
 - the project's product scopes, one per line in `.agents/commit-scopes`, which is optional and grows with the project;
 - `<NNNN>-<slug>` for work implementing that real proposal, such as `0007-export-queue`.
 
-A rejected subject lists every accepted scope. Prefer the narrowest scope that accurately describes the change; use `treewide` only for a true sweep. A change that needs a product scope no list has adds it to `.agents/commit-scopes` in the same commit.
+`workbench commits scopes` lists every accepted scope and where it comes from, and a rejected subject lists them too. Prefer the narrowest scope that accurately describes the change; use `treewide` only for a true sweep. A change that needs a product scope no list has adds it to `.agents/commit-scopes` in the same commit.
 
 Examples:
 

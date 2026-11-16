@@ -3,6 +3,7 @@
 pub mod range;
 mod report;
 mod scopes;
+mod scopes_command;
 mod subject;
 
 use std::io::ErrorKind;
@@ -19,11 +20,12 @@ use crate::response::Response;
 use range::Range;
 use report::{CommitsCheck, RangeArguments};
 
-pub static COMMANDS: &[CommandSpec] = &[CommandSpec {
-    id: "commits.check",
-    path: &["commits", "check"],
-    summary: "Check commit subjects against Scoped Commits: one message file, or every commit in a range",
-    description: "Checks that each commit subject is a Scoped Commit, `<scope>: <imperative \
+pub static COMMANDS: &[CommandSpec] = &[
+    CommandSpec {
+        id: "commits.check",
+        path: &["commits", "check"],
+        summary: "Check commit subjects against Scoped Commits: one message file, or every commit in a range",
+        description: "Checks that each commit subject is a Scoped Commit, `<scope>: <imperative \
         description>`, naming an accepted scope. Give exactly one form. `--message-file <path>` \
         checks the message a commit-msg hook is about to commit: its subject is the first line \
         that is neither blank nor a `#` comment, and a message with no such line passes. \
@@ -38,72 +40,74 @@ pub static COMMANDS: &[CommandSpec] = &[CommandSpec {
         every accepted scope. Any violation fails with CHECK_FAILED after the result is \
         written. A missing message file or an unknown revision is NOT_FOUND; both forms, \
         neither, or a base without a head is INVALID_ARGUMENT.",
-    arguments: &[
-        ArgumentSpec {
-            name: "base",
-            kind: ArgumentKind::Positional,
-            value: ValueKind::String,
-            required: false,
-            default: None,
-            multiple: false,
-            summary: "The range's base: a commit, branch, or tag the checked commits are not reachable from",
-        },
-        ArgumentSpec {
-            name: "head",
-            kind: ArgumentKind::Positional,
-            value: ValueKind::String,
-            required: false,
-            default: None,
-            multiple: false,
-            summary: "The range's head: the last commit to check",
-        },
-        ArgumentSpec {
-            name: "message-file",
-            kind: ArgumentKind::Option,
-            value: ValueKind::Path,
-            required: false,
-            default: None,
-            multiple: false,
-            summary: "A commit message to check instead of a range, such as the commit-msg hook's file",
-        },
-    ],
-    effect: Effect::Reads,
-    requires: &[Requirement::Git],
-    dry_run: false,
-    idempotent: true,
-    errors: &[
-        ErrorCode::CheckFailed,
-        ErrorCode::InvalidArgument,
-        ErrorCode::NotFound,
-        ErrorCode::PreconditionFailed,
-        ErrorCode::DependencyMissing,
-    ],
-    examples: &[
-        Example {
-            summary: "Check the message a commit-msg hook is about to commit",
-            args: &["commits", "check", "--message-file", ".git/COMMIT_EDITMSG"],
-        },
-        Example {
-            summary: "Check every commit a branch adds to main",
-            args: &["commits", "check", "main", "feature"],
-        },
-    ],
-    synonyms: &[
-        "commit",
-        "message",
-        "subject",
-        "scope",
-        "lint",
-        "validate",
-        "verify",
-        "hook",
-        "conventional",
-        "pull request",
-        "branch",
-    ],
-    output_schema: || schema_for!(CommitsCheck),
-    run: check,
-}];
+        arguments: &[
+            ArgumentSpec {
+                name: "base",
+                kind: ArgumentKind::Positional,
+                value: ValueKind::String,
+                required: false,
+                default: None,
+                multiple: false,
+                summary: "The range's base: a commit, branch, or tag the checked commits are not reachable from",
+            },
+            ArgumentSpec {
+                name: "head",
+                kind: ArgumentKind::Positional,
+                value: ValueKind::String,
+                required: false,
+                default: None,
+                multiple: false,
+                summary: "The range's head: the last commit to check",
+            },
+            ArgumentSpec {
+                name: "message-file",
+                kind: ArgumentKind::Option,
+                value: ValueKind::Path,
+                required: false,
+                default: None,
+                multiple: false,
+                summary: "A commit message to check instead of a range, such as the commit-msg hook's file",
+            },
+        ],
+        effect: Effect::Reads,
+        requires: &[Requirement::Git],
+        dry_run: false,
+        idempotent: true,
+        errors: &[
+            ErrorCode::CheckFailed,
+            ErrorCode::InvalidArgument,
+            ErrorCode::NotFound,
+            ErrorCode::PreconditionFailed,
+            ErrorCode::DependencyMissing,
+        ],
+        examples: &[
+            Example {
+                summary: "Check the message a commit-msg hook is about to commit",
+                args: &["commits", "check", "--message-file", ".git/COMMIT_EDITMSG"],
+            },
+            Example {
+                summary: "Check every commit a branch adds to main",
+                args: &["commits", "check", "main", "feature"],
+            },
+        ],
+        synonyms: &[
+            "commit",
+            "message",
+            "subject",
+            "scope",
+            "lint",
+            "validate",
+            "verify",
+            "hook",
+            "conventional",
+            "pull request",
+            "branch",
+        ],
+        output_schema: || schema_for!(CommitsCheck),
+        run: check,
+    },
+    scopes_command::COMMAND,
+];
 
 /// What `commits check` was asked to check.
 enum Form {

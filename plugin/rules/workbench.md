@@ -104,7 +104,7 @@ Every pull request adds at least one Knope change file in `.changeset/`, written
 ## Tooling
 
 - **mise** owns toolchains, environment, and the task graph, including the Workbench pin. `mise install` provisions the pinned tools and re-links `.workbench/`. Every command an agent runs routinely is a `mise run <task>` or a `workbench` command; add a task rather than documenting a bare command.
-- **hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `workbench commits check`. It accepts Workbench's process scopes, the scopes in `.agents/commit-scopes`, and the `<NNNN>-<slug>` of any proposal.
+- **hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `workbench commits check`. It accepts Workbench's process scopes, the scopes in `.agents/commit-scopes`, and the `<NNNN>-<slug>` of any proposal; `workbench commits scopes` lists them.
 - **Varlock** owns environment variables and secrets. A project declares them in a committed `.env.schema`, and a task that needs a secret runs under `varlock run --`. Never put a secret in mise `[env]`, in a file, or in a commit.
 - **Beads (`bd`)** owns the work graph and agent memory.
 - **Knope** owns versions, the changelog, and releases. Merging Knope's release pull request is the explicit release authorization the process requires.

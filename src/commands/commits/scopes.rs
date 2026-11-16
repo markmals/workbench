@@ -6,6 +6,8 @@ use std::path::Path;
 use std::sync::LazyLock;
 
 use regex::Regex;
+use schemars::JsonSchema;
+use serde::Serialize;
 use serde_json::json;
 
 use crate::failure::Failure;
@@ -35,16 +37,66 @@ pub const SCOPES_FILE: &str = ".agents/commit-scopes";
 static PROPOSAL_FILE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^([0-9]{4}-[a-z0-9-]+)\.md$").expect("a valid pattern"));
 
+/// Where an accepted scope comes from.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum Source {
+    /// One of Workbench's process scopes, accepted in every project.
+    BuiltIn,
+    /// Listed in the project's `.agents/commit-scopes`.
+    ScopesFile,
+    /// The `<NNNN>-<slug>` of a proposal in `proposals/`.
+    Proposal,
+}
+
+/// One accepted scope.
+#[derive(Clone, Debug, Serialize, JsonSchema)]
+pub struct Scope {
+    /// The scope, as written before the colon in a subject.
+    pub scope: String,
+    pub source: Source,
+    /// For a proposal scope, the proposal file it names.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+}
+
 /// Every accepted scope: the built-in ones, then the scopes file's, then one per proposal.
 pub fn accepted(root: &Path) -> Result<Vec<String>, Failure> {
-    let mut scopes: Vec<String> = BUILT_IN.iter().map(ToString::to_string).collect();
+    Ok(accepted_with_sources(root)?
+        .into_iter()
+        .map(|scope| scope.scope)
+        .collect())
+}
+
+/// Every accepted scope with where it comes from, in the order `accepted` gives. A scope the
+/// scopes file repeats keeps its first source.
+pub fn accepted_with_sources(root: &Path) -> Result<Vec<Scope>, Failure> {
+    let built_in = BUILT_IN
+        .iter()
+        .map(|scope| (scope.to_string(), Source::BuiltIn, None));
     let listed = match read_optional(&root.join(SCOPES_FILE))? {
         Some(source) => parse(&source),
         None => Vec::new(),
     };
-    for scope in listed.into_iter().chain(proposal_scopes(root)?) {
-        if !scopes.contains(&scope) {
-            scopes.push(scope);
+    let listed = listed
+        .into_iter()
+        .map(|scope| (scope, Source::ScopesFile, None));
+    let proposals = proposal_scopes(root)?.into_iter().map(|scope| {
+        (
+            scope.clone(),
+            Source::Proposal,
+            Some(format!("proposals/{scope}.md")),
+        )
+    });
+
+    let mut scopes: Vec<Scope> = Vec::new();
+    for (scope, source, path) in built_in.chain(listed).chain(proposals) {
+        if !scopes.iter().any(|known| known.scope == scope) {
+            scopes.push(Scope {
+                scope,
+                source,
+                path,
+            });
         }
     }
     Ok(scopes)

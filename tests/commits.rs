@@ -71,3 +71,5 @@ fn assert_rejected(fixture: &Fixture, message: &str, rule: &str) -> Value {
 mod message_file;
 #[path = "commits/range.rs"]
 mod range;
+#[path = "commits/scopes.rs"]
+mod scopes;
