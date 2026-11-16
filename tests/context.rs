@@ -146,6 +146,32 @@ fn context_show_reports_the_project_setup() {
 }
 
 #[test]
+fn context_show_never_prints_credentials_from_origin_or_the_beads_remote() {
+    let fixture = adopted_project();
+    fixture.git_command(&[
+        "remote",
+        "set-url",
+        "origin",
+        "https://agent:s3cret-token@github.com/example/project.git",
+    ]);
+    fake_bd(
+        &fixture,
+        r#"[{"name":"origin","url":"git+https://x-access-token:s3cret-token@github.com/example/project.git"}]"#,
+    );
+
+    for args in [&[][..], &["--output", "text"][..]] {
+        let mut command = vec!["context", "show"];
+        command.extend_from_slice(args);
+        let outcome = fixture.run(&command);
+        assert_eq!(outcome.status, 0, "{}", outcome.stderr);
+        assert!(!outcome.stdout.contains("s3cret"), "{}", outcome.stdout);
+        assert!(!outcome.stderr.contains("s3cret"), "{}", outcome.stderr);
+    }
+    let context = show(&fixture, &[]);
+    assert_eq!(context["origin"], "https://github.com/example/project.git");
+}
+
+#[test]
 fn context_show_reports_no_pull_request_when_github_has_none() {
     let fixture = adopted_project();
     fake_gh(&fixture, "[]");

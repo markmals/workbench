@@ -9,7 +9,7 @@ mod items;
 mod receipts;
 mod remote;
 pub mod report;
-mod repository;
+pub mod repository;
 pub mod sync;
 mod sync_command;
 mod workspace;

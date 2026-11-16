@@ -6,6 +6,7 @@ use std::time::Instant;
 use serde::Deserialize;
 
 use super::report::{Beads, BeadsRemote};
+use crate::commands::beads::repository::without_credentials;
 use crate::failure::Failure;
 use crate::process::{Program, RunError};
 
@@ -58,7 +59,7 @@ fn dolt_remote(root: &Path, deadline: Instant, timeout: u64) -> BeadsRemote {
             .into_iter()
             .find(|remote| remote.name == "origin")
             .map_or(BeadsRemote::None, |remote| BeadsRemote::Configured {
-                url: remote.url,
+                url: without_credentials(&remote.url),
             }),
         Err(_) => unknown("`bd` listed Dolt remotes in a form workbench cannot read".into()),
     }

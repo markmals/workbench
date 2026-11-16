@@ -11,6 +11,7 @@ use std::time::{Duration, Instant};
 
 use schemars::schema_for;
 
+use crate::commands::beads::repository::without_credentials;
 use crate::commands::project::setup;
 use crate::failure::{ErrorCode, Failure};
 use crate::invocation::Invocation;
@@ -90,7 +91,7 @@ fn show(invocation: &Invocation) -> Result<Response, Failure> {
     let deadline = Instant::now() + Duration::from_secs(timeout);
 
     let branch = github::branch(root);
-    let origin = setup::origin(root);
+    let origin = setup::origin(root).map(|url| without_credentials(&url));
     let pull_request =
         github::pull_request(root, branch.as_deref(), origin.is_some(), deadline, timeout);
     let context = Context {
