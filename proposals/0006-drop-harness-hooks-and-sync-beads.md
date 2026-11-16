@@ -2,7 +2,7 @@
 id: proposal.0006
 title: Drop Harness Hooks and Sync Beads Across Machines
 authors: [markmals, anthropic/claude-opus-5-5]
-status: draft
+status: awaiting-implementation
 pull-request: https://github.com/markmals/workbench/pull/11
 issues: [workbench-lx8]
 supersedes: []
