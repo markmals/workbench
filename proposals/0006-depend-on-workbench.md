@@ -39,9 +39,9 @@ The copy carries three further costs:
 
 - **Node everywhere.** Workbench's own tooling requires Node, pnpm, and Bun in every project, including Swift and Rust projects that need none of them otherwise. That tooling is TypeScript scripts in `tools/`, a VitePress site, Oxfmt, Changesets, and an OMP tool whose test runs OMP's loader on Bun.
 - **OMP packages everywhere.** The harness wiring is OMP extension code in TypeScript, so every project inherits OMP-specific packages.
-- **A slower agent loop.** That wiring runs `check-before-stop`, which executes the full gate at the end of every turn, including turns that changed nothing.
+- **A slower agent loop.** That wiring runs the full gate at the end of every turn. [Proposal 0007](https://github.com/markmals/workbench/pull/11) removes it, and this proposal builds on that.
 
-The owner wants skills, rules, templates, the agent contract, and tools to update the way a dependency does, including in repositories that are not cloned locally. Changes to the record format should remain explicit migrations. The owner's top performance priority is the speed of the agentic loop. They want Workbench's tooling in Rust, like their other CLIs, and want Workbench to require no TypeScript and no OMP-specific packages.
+The owner wants skills, rules, templates, the agent contract, and tools to update the way a dependency does, including in repositories that are not cloned locally. Changes to the record format should remain explicit migrations. They want Workbench's tooling in Rust, like their other CLIs, and want Workbench to require no TypeScript and no OMP-specific packages.
 
 ## Domain grounding
 
@@ -102,10 +102,6 @@ Throwaway fixtures exercised the load-bearing claims on 2026-11-15 and were then
 - **Pagefind 1.6.0.** Installed as `github:CloudCannon/pagefind`, it indexed the output.
 - **Zola 0.23.6** silently dropped custom top-level frontmatter.
 - **dprint 0.64.3.** With Markdown `textWrap: "never"`, it unwrapped hand-wrapped prose and normalized frontmatter. hk 2.8.1 has builtins for `dprint`, `cargo_fmt`, `cargo_clippy`, and `taplo`.
-- **Hook costs.**
-    - `mise run check` takes 4.7 s in Workbench. [Proposal 0003](0003-fit-the-harness-to-current-models.md) records 4–8 minutes in Trove, where `check-before-stop` therefore always times out and sends the agent back once.
-    - `bd prime` took 0.7 s and injected 8,444 characters into every request. Before that day Workbench had no Beads memories, so all of it was generic Beads guidance, including `git add . && git commit`, which contradicts the commit rules.
-    - `format-after-edit` costs 0.26 s per edit. When it reformats a file, it also costs a round trip for the agent to re-read it.
 
 ### Relevant constraints and principles
 
@@ -169,7 +165,7 @@ Incidental, and replaced here:
 - TypeScript tools and their Vitest suites, including the workflow tool's.
 - The VitePress and VoidZero theme, and Oxfmt and Oxlint.
 - Changesets with `@changesets/changelog-github`, and `tag-release.ts` and `project-version.ts`, which exist only to serve Changesets.
-- The three OMP extensions and the OMP `workflow` tool.
+- The OMP `workflow` tool. [Proposal 0007](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions.
 - The vendored `.agents/` copies.
 - `guides/adapting-your-harness.md`, which asks each project to hand-wire its harness.
 
@@ -338,9 +334,7 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 | `workbench init` | The GitHub template and Adapting Your Harness | [Section 11](#11-adopting-workbench) |
 
 - **Parity.** Each ported command keeps today's output, exit statuses, and JSON fields. Every case in today's `tools/*.test.ts` for a retained behavior becomes a Rust test. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
-- **Beads in `status`.** After the phase report, `workbench status` reports the ready work from `bd ready` and the project's memories from `bd prime --memories-only`.
-    - When `bd` is not installed or the workspace is not initialized, it says so in one line and names `mise run setup`. It exits as it would without Beads.
-    - `--json` adds a `beads` object holding either `ready` (a list of `id`, `title`, `priority`) and `memories` (text), or `unavailable` (the reason).
+- **Beads in `status`.** `workbench status` ports, unchanged, the Beads section and sync behavior that [proposal 0007](https://github.com/markmals/workbench/pull/11) adds to `mise run status`.
 - **Commit scopes.** `check-commit` and `check-commits` accept three kinds of scope:
     - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
     - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
@@ -352,13 +346,7 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 
 ### 6. No harness hooks
 
-Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-before-stop.ts`, and `tools/format-after-edit.test.ts`. The package declares hooks for no harness. What each removed hook did is covered elsewhere:
-
-| Removed hook | Covered by |
-| --- | --- |
-| `bd prime` before the first turn | `mise run status`, already the contract's first instruction, now carries ready work and memories (owner approved 2026-11-15). |
-| Format after every edit | hk's `pre-commit` hook, which already formats staged files and stages the result. The agent may also run `mise run fmt -- <files>`. |
-| Full gate before every stop | The contract's verification rule (run `mise run check` this turn before claiming work is done), hk's `pre-push` hook (see [Open questions](#open-questions)), and CI. |
+[Proposal 0007](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions, moves Beads orientation into `mise run status`, and defines the Beads sync points. This proposal assumes 0007 has landed. The package declares hooks for no harness.
 
 ### 7. No workflow tool
 
@@ -433,13 +421,14 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 - **`mise.toml`:**
     - the `postinstall` link hook;
     - pins for `hk`, `gh`, Beads, `knope`, and `dprint` when absent, at the versions the release was tested with;
-    - the tasks `setup`, `check`, `status`, `validate`, and `fmt` when absent.
+    - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0007;
+    - the tasks `setup`, `check`, `status`, `validate`, `fmt`, and `beads:sync` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
     - the `.omp/config.yml` extension entry, appended to an existing list;
     - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
-- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, its `pre-commit` hook formats, and Beads gets its steps.
+- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, its `pre-commit` hook formats, and Beads gets its steps, including proposal 0007's sync steps.
 - **`knope.toml`** when absent, for one package with the settings in [section 8](#8-change-files-and-releases).
 - **CI and release workflows** when absent: CI running `mise run check`, `check-commits`, and `check-change-files`, plus Knope's prepare-release and release workflows.
 - **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, `init` reports it.
@@ -509,7 +498,7 @@ This change touches many independent surfaces, so its outcomes are listed for re
 
 - [ ] In a fixture repository with no Node on PATH, pinning a published release and running `mise install` creates `.workbench`. A new OMP session and a new Claude Code session each receive the process contract and list Workbench's skills, and OMP lists the four rules.
 - [ ] Changing the pin and running `mise install` re-points `.workbench`, and the next session in each harness loads the new release.
-- [ ] `workbench status`, `validate`, `check-commit`, and `check-commits` pass the cases ported from `tools/*.test.ts`. `status` reports ready work and memories, and says when Beads is unavailable.
+- [ ] `workbench status`, `validate`, `check-commit`, and `check-commits` pass the cases ported from `tools/*.test.ts`, and `status` reproduces proposal 0007's Beads section.
 - [ ] `workbench validate` reports a project skill or rule that reuses a Workbench name.
 - [ ] `workbench check-change-files` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
 - [ ] Merging Knope's release pull request publishes a GitHub release with Knope-written notes, four attested archives, and the tag. Installing that version through mise on macOS arm64 and on CI's Linux x64 yields a complete package root.
@@ -529,7 +518,6 @@ This breaks every existing Workbench project. Nothing changes in a project until
     - Pending Changesets entries become change files.
     - Existing `CHANGELOG.md` history stays as written, and new entries use Knope's format.
     - Release workflows are replaced. Projects that publish through another pipeline rewire it by hand, such as the cli starter's cargo-dist release and Pitlane's packages.
-- **No more automatic session work.** Sessions no longer format after each edit, run the gate before stopping, or inject `bd prime`.
 - **The workflow tool.** Projects that still carry a copy (Trove, Pitlane, Hive, and Bento) lose it on migration. OMP's native helpers replace it there.
 - **Pico.** Until #61 supports declared plugins and their rules, Pico sessions in an adopted project load its `AGENTS.md` and `.agents/` content but not the package. Today's vendored copies do reach Pico. Pico is not the owner's daily harness yet.
 - **OMP users with user-level `extensions:`** must repeat those entries in the project list, because a project list replaces the user list.
@@ -556,7 +544,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - The release pipeline: Knope configuration, the per-target builds, attestations, and the prepare-release and release workflows. Publishing `3.0.0` requires the owner's explicit authorization.
 - The Hugo theme, Workbench's site on it, and PR previews.
 - dprint and the revised `hk.pkl`.
-- Removing the harness hooks, the workflow tool, and every Node, TypeScript, and OMP dependency from Workbench.
+- Removing the workflow tool and every Node, TypeScript, and OMP dependency from Workbench.
 - `workbench init` and `guides/adopting-workbench.md`, with updates to `AGENTS.md`, `PROCESS.md`, `README.md`, the guides, the templates, and the pull request template.
 - A comment on pico#62 recording the workflow tool's last revision.
 
@@ -597,13 +585,12 @@ This breaks every existing Workbench project. Nothing changes in a project until
     - Both statements are revised at completion.
     - The vision's principles hold:
         - Enforcement stays mechanical at commit, push, and CI.
-        - The removed hooks fail "ceremony must earn its cost" on measured cost.
         - The package content assumes no language, framework, or platform.
 - **[Proposal 0001](0001-workbench-2.md)** established the template-repository distribution and the Workbench 2 tooling. This proposal replaces both and leaves that record as history.
-- **[Proposal 0003](0003-fit-the-harness-to-current-models.md)** recorded `check-before-stop`'s timeout in Trove and suggested a fast-subset stop hook as a future direction. This proposal removes the hook instead; see Alternatives.
 - **[Proposal 0004](0004-make-room-for-ui-polish.md)** leaves look and feel to the running product. The site's appearance follows that.
 - **[Proposal 0005](0005-current-specifications.md)** defined the current-record model and the record and status contract in `guides/record-validation.md`, both preserved. Its "changesets and changelogs" role passes to change files and Knope's changelog.
-- **`.agents/rules/enforcement-hierarchy.md`.** Removing the hook tier leaves the deterministic checks in place: `commit-msg`, `pre-commit`, CI, and `validate`. It adds the collision check.
+- **[Proposal 0007](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench status` ports 0007's Beads section.
+- **`.agents/rules/enforcement-hierarchy.md`.** Moving the checks into the package keeps them deterministic: `commit-msg`, `pre-commit`, CI, and `validate`. It adds the collision check.
 
 ## Future directions
 
@@ -626,12 +613,10 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **cargo-dist for builds and releases.** It and Knope both create the GitHub release, and Knope owns the notes the owner asked for. A plain build per target with attestations is simpler.
 - **The contract through a Claude SessionStart hook.** It reintroduces a hook. Claude Code moves context over 10,000 characters to a file, and its docs warn that imperative hook text can trip prompt-injection defenses. An output style is sent with every request and survives compaction. Its cost: it overrides a user's own output style in Workbench projects.
 - **Converting the rules into skills.** Skills load in every harness. Rules keep on-demand loading in OMP and Pico, and Claude reaches them through the contract's links, so the conversion would add churn without improving any harness.
-- **Keeping a cheaper stop hook**, either a fast subset of the gate or a check that the gate passed since the last edit. Either one still forces work before any pause that follows an edit, including mid-work questions. The loop speed the owner prioritizes is the cost.
 - **Zola** dropped custom frontmatter in testing and requires a `content/` directory. **mdBook** needs a generated `SUMMARY.md` and a preprocessor for frontmatter. **Keeping VitePress** keeps Node.
 - **Knope reading Changesets-format files unchanged.** The owner chose Knope-native change files and release notes.
 - **Keeping the template repository alongside the package.** Two distribution paths would drift apart the way the copies have.
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: Should hk's `pre-push` hook keep running the full `mise run check`, or should the gate run only in CI, with the agent waiting for CI (`gh pr checks --watch`) before marking a pull request ready? Dropping it removes a 4–8 minute wait from every push in Trove-sized projects, at the cost of failing commits reaching a draft pull request before CI flags them.]
 - [NEEDS CLARIFICATION: How does a pull request with no user-visible change satisfy the change-file requirement? Options: a commit trailer such as `Release-Note: none` that `workbench check-change-files` accepts (recommended: checkable offline and kept in history), or a pull-request label that CI checks.]
