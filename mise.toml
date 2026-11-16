@@ -106,6 +106,17 @@ alias = "t"
 description = "Run the CLI's tests"
 run = "cargo test"
 
+[tasks."docs:build"]
+description = "Build the site into docs/public with Hugo, then index it for search with Pagefind"
+# A deployed build sets its base URL through HUGO_BASEURL, which Hugo reads in place of
+# docs/hugo.toml's `baseURL`; a local build needs nothing set. The build also fails on a dead
+# relative link, which makes it the dead-link check inside `mise run check`.
+run = ["hugo build --source docs --cleanDestinationDir", "pagefind --site docs/public"]
+
+[tasks."docs:dev"]
+description = "Serve the site with live reload; search needs `mise run docs:build`"
+run = "hugo server --source docs"
+
 [tasks."cli:reference"]
 description = "Regenerate plugin/reference/cli.md from the command registry"
 run = "WORKBENCH_UPDATE_REFERENCE=1 cargo test --test reference"
