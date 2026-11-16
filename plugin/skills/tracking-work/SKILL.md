@@ -114,7 +114,7 @@ Close only with `workbench beads close <id> --reason "<reason>"`. `bd close` ref
 
 ### Sync outcomes
 
-`workbench workflow status` reports the outcome of its sync in `beads.sync` (`outcome` and `detail`) and exits 0 whatever it is; `--no-sync` skips the sync and reports `skipped`. `workbench beads sync` exits 0 only for `synced`. Otherwise it writes an error to stderr whose code says what happened, and whose `details.outcome` is the outcome below:
+`workbench workflow status` reports the outcome of its sync in `beads.sync` and exits 0 whatever it is; `--no-sync` skips the sync and reports `skipped`. `workbench beads sync` exits 0 only for `synced`. Otherwise it writes an error to stderr whose code says what happened, and whose `details.outcome` is the outcome below. The `sync` object in `workflow status` and in the receipts of `beads claim` and `beads close` carries the same `code`, and `retryable`, whenever it did not sync, so read the cause from the code rather than from Beads' wording: Dolt adds hints about credentials to every failed fetch.
 
 | Outcome       | Error code                | Exit | Cause                                                                                                                                    |
 | ------------- | ------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,7 +131,7 @@ What each outcome asks of you:
 
 - **`synced`**: nothing to do.
 - **`skipped`**: nothing was pulled or pushed; run `workbench workflow status` without `--no-sync`, or `workbench beads sync`, before relying on what another machine changed.
-- **`failed`**: continue, and say that Beads may be stale. The reason says why; a later sync point retries. When the reason says the Beads remote is not this project's `origin`, nothing was pulled or pushed and no later sync will be: stop and tell the human, as [Recovering a Beads sync](recovering-a-sync.md#failed) describes.
+- **`failed`**: continue, and say that Beads may be stale. An unreachable remote never stops work: claims and closes still happen on this machine as `claimed-unpublished` or `closed-unpublished`. `code` says why; for `UNAVAILABLE` or `TIMEOUT` a later sync point retries, and `UNAUTHENTICATED` needs Git's credentials fixed. When the Beads remote is not this project's `origin` (`PRECONDITION_FAILED`), nothing was pulled or pushed and no later sync will be: stop and tell the human, as [Recovering a Beads sync](recovering-a-sync.md#failed) describes.
 - **`conflict`**: Beads halted on a conflict it cannot settle, and nothing was pushed. Resolve it with your best judgement:
   1. Export a backup outside the repository: `bd export --all -o <path>`.
   2. Find the items. With embedded storage, which Workbench uses, the halted merge is aborted, so `bd conflicts list` shows nothing: compare `bd diff main origin/main` with `bd show <id>`. When `bd conflicts list` does show live conflicts, `bd conflicts show` presents them field by field.

@@ -285,6 +285,8 @@ fn a_failed_sync_still_reports_this_machines_replica() {
     let status = status_json(&fixture, &[]);
 
     assert_eq!(status["beads"]["sync"]["outcome"], "failed");
+    assert_eq!(status["beads"]["sync"]["code"], "UNAVAILABLE");
+    assert_eq!(status["beads"]["sync"]["retryable"], true);
     assert_eq!(
         status["beads"]["ready"],
         json!([{ "id": "wb-1", "title": "Fix the parser", "priority": 2 }])

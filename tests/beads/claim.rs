@@ -86,9 +86,41 @@ fn a_claim_whose_second_sync_fails_is_claimed_on_this_machine_only() {
     let receipt = outcome.json();
     assert_eq!(receipt["status"], "claimed-unpublished");
     assert_eq!(receipt["published"], false);
+    assert_eq!(receipt["sync"]["code"], "UNAVAILABLE", "{receipt}");
+    assert_eq!(receipt["sync"]["retryable"], true, "{receipt}");
     assert!(outcome.stderr.contains("warning:"), "{}", outcome.stderr);
     assert!(
         outcome.stderr.contains("remote unreachable"),
+        "{}",
+        outcome.stderr
+    );
+}
+
+#[test]
+fn a_claim_whose_sync_is_refused_credentials_names_that_cause() {
+    let fixture = project_with_remote(
+        true,
+        replica()
+            .on_each(
+                "sync",
+                vec![
+                    synced(),
+                    Reply::json(json!({ "error": "sync failed: push: authentication required" }))
+                        .exit(1),
+                ],
+            )
+            .on("update", Reply::json(json!([{ "id": "wb-1" }])))
+            .on("show", item("wb-1", "in_progress", CLAIMANT)),
+    );
+
+    let outcome = fixture.run(&["beads", "claim", "wb-1"]);
+
+    assert_eq!(outcome.status, 0, "{}", outcome.stderr);
+    let receipt = outcome.json();
+    assert_eq!(receipt["sync"]["code"], "UNAUTHENTICATED", "{receipt}");
+    assert_eq!(receipt["sync"]["retryable"], false, "{receipt}");
+    assert!(
+        outcome.stderr.contains("UNAUTHENTICATED"),
         "{}",
         outcome.stderr
     );

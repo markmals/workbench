@@ -170,39 +170,32 @@ fn as_failed_sync(mut failure: Failure) -> Failure {
     failure
 }
 
-/// The error for a sync that did not end `synced`, with the code its cause calls for.
+/// The error for a sync that did not end `synced`, with the code its cause calls for: the same
+/// code its `sync` object carries in status reports and receipts.
 fn sync_failure(result: SyncResult, remote: Option<String>) -> Failure {
     let message = outcome_text(result.outcome.as_str(), &result.detail).replace("\n  ", "\n");
     let mut details = json!({ "outcome": result.outcome, "remote": remote });
-    let (code, suggestion) = match result.problem {
+    let code = result.code.unwrap_or(ErrorCode::Unavailable);
+    let suggestion = match result.problem {
         Some(SyncProblem::Refused(refusal)) => return as_failed_sync(refusal.to_failure()),
         Some(SyncProblem::BdMissing) => return as_failed_sync(Failure::dependency_missing("bd")),
-        Some(SyncProblem::TimedOut) => (
-            ErrorCode::Timeout,
-            "Retry, or allow more time with --timeout",
-        ),
-        Some(SyncProblem::CredentialsRejected) => (
-            ErrorCode::Unauthenticated,
-            "Beads uses Git's credentials for origin; check that `git fetch origin` works",
-        ),
+        Some(SyncProblem::TimedOut) => "Retry, or allow more time with --timeout",
+        Some(SyncProblem::CredentialsRejected) => {
+            "Beads uses Git's credentials for origin; check that `git fetch origin` works"
+        }
         Some(SyncProblem::Conflict(report)) => {
             details["tables"] = json!(report.tables);
             details["differing"] = json!(report.differing);
-            (
-                ErrorCode::Conflict,
-                "Back up with `bd export --all -o <path>`, settle the conflict as the tracking-work \
-                 skill describes, then run `workbench beads sync`",
-            )
+            "Back up with `bd export --all -o <path>`, settle the conflict as the tracking-work \
+             skill describes, then run `workbench beads sync`"
         }
-        Some(SyncProblem::Blocked) => (
-            ErrorCode::PreconditionFailed,
+        Some(SyncProblem::Blocked) => {
             "Back up, clear the dirty working set as the tracking-work skill describes, then run \
-             `workbench beads sync`",
-        ),
-        Some(SyncProblem::Unreachable) | None => (
-            ErrorCode::Unavailable,
-            "Continue, and say that Beads may be stale; run `workbench beads sync` again later",
-        ),
+             `workbench beads sync`"
+        }
+        Some(SyncProblem::Unreachable) | None => {
+            "Continue, and say that Beads may be stale; run `workbench beads sync` again later"
+        }
     };
     Failure::new(code, message)
         .with_details(details)

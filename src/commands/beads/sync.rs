@@ -13,6 +13,7 @@ use serde::Serialize;
 use super::bd::{bd, bd_error, interruption, parse_json, sentence};
 use super::items::{DifferingItem, differing_items};
 use super::remote::{Refusal, read_remotes, remote_lacks_beads_history};
+use crate::failure::ErrorCode;
 use crate::process::{Run, RunError};
 
 static REJECTED_CREDENTIALS: LazyLock<Regex> = LazyLock::new(|| {
@@ -55,7 +56,14 @@ pub struct SyncResult {
     pub outcome: SyncOutcome,
     /// What happened, in words; for anything but `synced`, why.
     pub detail: String,
-    /// Why a sync that did not complete did not, for choosing an error code.
+    /// For a sync that did not end `synced` or `skipped`: the error code `workbench beads sync`
+    /// fails with for this cause, such as `UNAVAILABLE` for an unreachable remote.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<ErrorCode>,
+    /// Whether running the sync again can succeed without anyone changing anything.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retryable: Option<bool>,
+    /// Why a sync that did not complete did not, for describing it as an error.
     #[serde(skip)]
     pub problem: Option<SyncProblem>,
 }
@@ -73,6 +81,20 @@ pub enum SyncProblem {
     Blocked,
 }
 
+impl SyncProblem {
+    /// The error code this cause is reported with, wherever the sync ran.
+    pub fn code(&self) -> ErrorCode {
+        match self {
+            SyncProblem::Refused(_) | SyncProblem::Blocked => ErrorCode::PreconditionFailed,
+            SyncProblem::TimedOut => ErrorCode::Timeout,
+            SyncProblem::CredentialsRejected => ErrorCode::Unauthenticated,
+            SyncProblem::Unreachable => ErrorCode::Unavailable,
+            SyncProblem::BdMissing => ErrorCode::DependencyMissing,
+            SyncProblem::Conflict(_) => ErrorCode::Conflict,
+        }
+    }
+}
+
 /// What Beads says about a conflict it halted on.
 #[derive(Debug)]
 pub struct ConflictReport {
@@ -83,26 +105,39 @@ pub struct ConflictReport {
 
 impl SyncResult {
     pub fn skipped() -> SyncResult {
-        SyncResult {
-            outcome: SyncOutcome::Skipped,
-            detail: "--no-sync was passed; nothing was pulled or pushed.".into(),
-            problem: None,
-        }
+        let detail = "--no-sync was passed; nothing was pulled or pushed.".to_string();
+        SyncResult::ended(SyncOutcome::Skipped, detail, None)
     }
 
     fn synced(detail: &str) -> SyncResult {
-        SyncResult {
-            outcome: SyncOutcome::Synced,
-            detail: detail.into(),
-            problem: None,
-        }
+        SyncResult::ended(SyncOutcome::Synced, detail.into(), None)
     }
 
     fn failed(problem: SyncProblem, detail: String) -> SyncResult {
+        SyncResult::ended(SyncOutcome::Failed, detail, Some(problem))
+    }
+
+    /// The outcome, with the cause's code and retryability when it did not sync: `failed
+    /// (UNAVAILABLE, retryable)`.
+    pub fn label(&self) -> String {
+        match (self.code, self.retryable) {
+            (Some(code), Some(true)) => {
+                format!("{} ({}, retryable)", self.outcome.as_str(), code.as_str())
+            }
+            (Some(code), _) => format!("{} ({})", self.outcome.as_str(), code.as_str()),
+            (None, _) => self.outcome.as_str().to_string(),
+        }
+    }
+
+    /// The one place a result is made, so its `code` and `retryable` always match its cause.
+    fn ended(outcome: SyncOutcome, detail: String, problem: Option<SyncProblem>) -> SyncResult {
+        let code = problem.as_ref().map(SyncProblem::code);
         SyncResult {
-            outcome: SyncOutcome::Failed,
+            outcome,
             detail,
-            problem: Some(problem),
+            code,
+            retryable: code.map(ErrorCode::retryable),
+            problem,
         }
     }
 
@@ -140,11 +175,11 @@ pub fn sync_replica(root: &Path, limit: Duration) -> SyncResult {
     match sync.status {
         Some(0) => SyncResult::synced(synced_detail(&sync)),
         Some(2) => halted(root, &sync, deadline),
-        Some(4) => SyncResult {
-            outcome: SyncOutcome::Blocked,
-            detail: format!("{} Nothing was pushed.", sentence(&bd_error(&sync, "sync"))),
-            problem: Some(SyncProblem::Blocked),
-        },
+        Some(4) => SyncResult::ended(
+            SyncOutcome::Blocked,
+            format!("{} Nothing was pushed.", sentence(&bd_error(&sync, "sync"))),
+            Some(SyncProblem::Blocked),
+        ),
         Some(1) if remote_lacks_beads_history(root, deadline) => {
             first_publish(root, deadline, limit)
         }
@@ -227,9 +262,9 @@ fn halted(root: &Path, sync: &Run, deadline: Instant) -> SyncResult {
             lines.push("Run `bd diff main origin/main` to see what differs from the remote.".into())
         }
     }
-    SyncResult {
-        outcome: SyncOutcome::Conflict,
-        detail: lines.join("\n"),
-        problem: Some(SyncProblem::Conflict(ConflictReport { tables, differing })),
-    }
+    SyncResult::ended(
+        SyncOutcome::Conflict,
+        lines.join("\n"),
+        Some(SyncProblem::Conflict(ConflictReport { tables, differing })),
+    )
 }

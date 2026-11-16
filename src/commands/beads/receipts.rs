@@ -89,9 +89,9 @@ impl ItemChange {
             (
                 format!("{verb}-unpublished"),
                 format!(
-                    "{id} is {verb} as {claimant} on this machine only; the sync ended {}: {} Run \
-                     `workbench beads sync` until it succeeds.",
-                    sync.outcome.as_str(),
+                    "{id} is {verb} as {claimant} on this machine only; the sync ended {}: {} \
+                     Run `workbench beads sync` until it succeeds.",
+                    sync.label(),
                     sync.detail
                 ),
             )

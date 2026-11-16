@@ -190,10 +190,7 @@ impl RenderText for BeadsState {
                 self.sync.detail
             ),
         };
-        let mut lines = vec![
-            outcome_text(self.sync.outcome.as_str(), &detail),
-            String::new(),
-        ];
+        let mut lines = vec![outcome_text(&self.sync.label(), &detail), String::new()];
         lines.push(heading("Ready", self.ready.is_empty()));
         for item in &self.ready {
             lines.push(format!("  {}  P{}  {}", item.id, item.priority, item.title));

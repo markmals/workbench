@@ -1154,6 +1154,61 @@ Result schema:
       ],
       "type": "object"
     },
+    "ErrorCode": {
+      "description": "A stable error code. Codes, exit statuses, and retryability are part of the CLI contract.",
+      "oneOf": [
+        {
+          "const": "CHECK_FAILED",
+          "description": "A check ran and found violations.",
+          "type": "string"
+        },
+        {
+          "const": "INVALID_ARGUMENT",
+          "description": "Input is missing or malformed.",
+          "type": "string"
+        },
+        {
+          "const": "NOT_FOUND",
+          "description": "A named record, item, commit, or file does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "PRECONDITION_FAILED",
+          "description": "The project is not ready for the operation.",
+          "type": "string"
+        },
+        {
+          "const": "DEPENDENCY_MISSING",
+          "description": "A required program is absent.",
+          "type": "string"
+        },
+        {
+          "const": "UNAUTHENTICATED",
+          "description": "`gh` or Git credentials are missing or rejected.",
+          "type": "string"
+        },
+        {
+          "const": "CONFLICT",
+          "description": "Another claimant holds the item, a claim was lost, or a sync stopped on a conflict.",
+          "type": "string"
+        },
+        {
+          "const": "TIMEOUT",
+          "description": "An operation exceeded its time limit.",
+          "type": "string"
+        },
+        {
+          "const": "UNAVAILABLE",
+          "description": "The remote or the network was unreachable.",
+          "type": "string"
+        },
+        {
+          "const": "INTERNAL",
+          "description": "A defect in `workbench` itself.",
+          "type": "string"
+        }
+      ]
+    },
     "Facts": {
       "properties": {
         "branch": {
@@ -1573,12 +1628,30 @@ Result schema:
     "SyncResult": {
       "description": "How one sync ended.",
       "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For a sync that did not end `synced` or `skipped`: the error code `workbench beads sync`\nfails with for this cause, such as `UNAVAILABLE` for an unreachable remote."
+        },
         "detail": {
           "description": "What happened, in words; for anything but `synced`, why.",
           "type": "string"
         },
         "outcome": {
           "$ref": "#/$defs/SyncOutcome"
+        },
+        "retryable": {
+          "description": "Whether running the sync again can succeed without anyone changing anything.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "required": [
@@ -2776,6 +2849,61 @@ Result schema:
 ```json
 {
   "$defs": {
+    "ErrorCode": {
+      "description": "A stable error code. Codes, exit statuses, and retryability are part of the CLI contract.",
+      "oneOf": [
+        {
+          "const": "CHECK_FAILED",
+          "description": "A check ran and found violations.",
+          "type": "string"
+        },
+        {
+          "const": "INVALID_ARGUMENT",
+          "description": "Input is missing or malformed.",
+          "type": "string"
+        },
+        {
+          "const": "NOT_FOUND",
+          "description": "A named record, item, commit, or file does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "PRECONDITION_FAILED",
+          "description": "The project is not ready for the operation.",
+          "type": "string"
+        },
+        {
+          "const": "DEPENDENCY_MISSING",
+          "description": "A required program is absent.",
+          "type": "string"
+        },
+        {
+          "const": "UNAUTHENTICATED",
+          "description": "`gh` or Git credentials are missing or rejected.",
+          "type": "string"
+        },
+        {
+          "const": "CONFLICT",
+          "description": "Another claimant holds the item, a claim was lost, or a sync stopped on a conflict.",
+          "type": "string"
+        },
+        {
+          "const": "TIMEOUT",
+          "description": "An operation exceeded its time limit.",
+          "type": "string"
+        },
+        {
+          "const": "UNAVAILABLE",
+          "description": "The remote or the network was unreachable.",
+          "type": "string"
+        },
+        {
+          "const": "INTERNAL",
+          "description": "A defect in `workbench` itself.",
+          "type": "string"
+        }
+      ]
+    },
     "ItemChange": {
       "description": "A change Beads accepted.",
       "properties": {
@@ -2917,12 +3045,30 @@ Result schema:
     "SyncResult": {
       "description": "How one sync ended.",
       "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For a sync that did not end `synced` or `skipped`: the error code `workbench beads sync`\nfails with for this cause, such as `UNAVAILABLE` for an unreachable remote."
+        },
         "detail": {
           "description": "What happened, in words; for anything but `synced`, why.",
           "type": "string"
         },
         "outcome": {
           "$ref": "#/$defs/SyncOutcome"
+        },
+        "retryable": {
+          "description": "Whether running the sync again can succeed without anyone changing anything.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "required": [
@@ -2979,6 +3125,61 @@ Result schema:
 ```json
 {
   "$defs": {
+    "ErrorCode": {
+      "description": "A stable error code. Codes, exit statuses, and retryability are part of the CLI contract.",
+      "oneOf": [
+        {
+          "const": "CHECK_FAILED",
+          "description": "A check ran and found violations.",
+          "type": "string"
+        },
+        {
+          "const": "INVALID_ARGUMENT",
+          "description": "Input is missing or malformed.",
+          "type": "string"
+        },
+        {
+          "const": "NOT_FOUND",
+          "description": "A named record, item, commit, or file does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "PRECONDITION_FAILED",
+          "description": "The project is not ready for the operation.",
+          "type": "string"
+        },
+        {
+          "const": "DEPENDENCY_MISSING",
+          "description": "A required program is absent.",
+          "type": "string"
+        },
+        {
+          "const": "UNAUTHENTICATED",
+          "description": "`gh` or Git credentials are missing or rejected.",
+          "type": "string"
+        },
+        {
+          "const": "CONFLICT",
+          "description": "Another claimant holds the item, a claim was lost, or a sync stopped on a conflict.",
+          "type": "string"
+        },
+        {
+          "const": "TIMEOUT",
+          "description": "An operation exceeded its time limit.",
+          "type": "string"
+        },
+        {
+          "const": "UNAVAILABLE",
+          "description": "The remote or the network was unreachable.",
+          "type": "string"
+        },
+        {
+          "const": "INTERNAL",
+          "description": "A defect in `workbench` itself.",
+          "type": "string"
+        }
+      ]
+    },
     "ItemChange": {
       "description": "A change Beads accepted.",
       "properties": {
@@ -3120,12 +3321,30 @@ Result schema:
     "SyncResult": {
       "description": "How one sync ended.",
       "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For a sync that did not end `synced` or `skipped`: the error code `workbench beads sync`\nfails with for this cause, such as `UNAVAILABLE` for an unreachable remote."
+        },
         "detail": {
           "description": "What happened, in words; for anything but `synced`, why.",
           "type": "string"
         },
         "outcome": {
           "$ref": "#/$defs/SyncOutcome"
+        },
+        "retryable": {
+          "description": "Whether running the sync again can succeed without anyone changing anything.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "required": [
