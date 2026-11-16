@@ -73,7 +73,7 @@ The same project is worked on from several machines. Read this section before yo
 - Each machine has one Beads **replica** per project: a full local Dolt database in the main checkout's `.beads/`. Every worktree of that checkout shares it.
 - `bd` commands read and write only this replica. Another machine's changes arrive only through a sync, and yours reach it only through one.
 - The replicas meet at `refs/dolt/data` on the project's `origin` repository. It is not a branch: it does not appear in branch lists, and `git clone` and `git fetch` do not bring it.
-- `git pull` brings Beads changes only because hk's `post-merge` hook syncs. `git fetch` brings none.
+- `git pull` brings Beads changes only because hk syncs after it: `post-merge` after a merging pull, `post-rewrite` after `git pull --rebase` or any other rebase. `git fetch` brings none.
 - `.beads/issues.jsonl` is an export for diffs and viewers. It is never a sync channel.
 - A **claimant** is `BEADS_ACTOR`, which `mise run beads:claim` sets to `<user>@<short host name>`, one identity per machine. A claim is atomic only within one replica.
 
@@ -109,7 +109,7 @@ A claim made before claimants named machines holds a Git user name, such as `Mar
     4. Finish with `mise run beads:sync`.
     5. Tell the human what you resolved and why, as a report rather than a request for approval.
 - **`blocked`**: a dirty working set stops publishing. Back up first, find what left it dirty and clear it, finish with `mise run beads:sync`, and report afterwards the same way.
-- **`unavailable`**: run `mise run setup`.
+- **`unavailable`**: run `mise run setup`. When a read of the replica failed after the sync, the reason names the read and the sync's outcome; a locked or damaged database needs [Recovering a Beads sync](recovering-a-sync.md) rather than setup.
 
 Whatever the resolution, never force a push, and never delete or re-bootstrap the replica to make a conflict go away. Either one discards another machine's work. [Recovering a Beads sync](recovering-a-sync.md) has worked resolutions and what to do when these steps are not enough.
 

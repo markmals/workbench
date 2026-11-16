@@ -101,7 +101,7 @@ export function syncBeads(root: string, timeoutMs = SYNC_TIME_LIMIT_MS): SyncRes
     if (sync.timedOut) return timedOut(timeoutMs);
     if (sync.status === 0)
         return { outcome: "synced", detail: "Pulled from and pushed to the remote." };
-    if (sync.status === 2) return conflict(root, sync);
+    if (sync.status === 2) return conflict(root, sync, deadline);
     if (sync.status === 4)
         return { outcome: "blocked", detail: `${bdError(sync, "sync")} Nothing was pushed.` };
     if (sync.status === 1 && remoteLacksBeadsHistory(root, deadline)) {
@@ -117,14 +117,14 @@ export function syncBeads(root: string, timeoutMs = SYNC_TIME_LIMIT_MS): SyncRes
     return { outcome: "failed", detail: bdError(sync, "sync") };
 }
 
-function conflict(root: string, sync: CommandRun): SyncResult {
+function conflict(root: string, sync: CommandRun, deadline: number): SyncResult {
     let tables = (parseJson(sync.stdout) as { conflicts?: string[] } | undefined)?.conflicts;
     let lines = [
         `Beads halted on a conflict in ${tables?.length ? tables.join(", ") : "the database"}; nothing was pushed.`,
     ];
     // Embedded storage aborts the halted merge, so the conflicted rows are gone; what differs
     // from the remote's last fetched state is the closest Beads can show.
-    let diff = bd(["diff", "main", "origin/main", "--json"], root);
+    let diff = bd(["diff", "main", "origin/main", "--json"], root, deadline);
     let items = parseJson(diff.stdout) as DiffEntry[] | undefined;
     if (diff.status === 0 && Array.isArray(items) && items.length > 0)
         lines.push(`Differs from the remote: ${items.map(describeDiffEntry).join(", ")}`);

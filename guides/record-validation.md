@@ -61,7 +61,7 @@ Before reporting, `mise run status` runs one Beads sync with the project's remot
 | `failed` | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. | The reason, and that the rest of the section shows this machine's state. |
 | `conflict` | Beads halted on a conflict it cannot settle; nothing was pushed. | The conflicted tables Beads names, and the items that differ between this replica and the remote. |
 | `blocked` | A dirty working set stops Beads from publishing; nothing was pushed. | Beads' explanation. |
-| `unavailable` | `bd` is not installed, there is no Beads workspace, or its database is not initialized. | The reason and a pointer to `mise run setup`, in place of the whole section. |
+| `unavailable` | `bd` is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed. | The reason and a pointer to `mise run setup`, in place of the whole section. When a read failed, the reason names it and keeps the sync's outcome. |
 
 Beads outcomes never change the exit status of `mise run status`. With `--json`, the object gains a `beads` key holding either `sync` (`outcome` and `detail`), `ready` (a list of `id`, `title`, and `priority`), `in_progress` (a list of `id`, `title`, and `assignee`), and `memories` (text); or `unavailable` (the reason). The `tracking-work` skill in `.agents/skills/` says how an agent responds to each outcome.
 

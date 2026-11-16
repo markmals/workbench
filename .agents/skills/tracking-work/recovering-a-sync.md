@@ -65,6 +65,13 @@ The rest of the report is this machine's state. Continue, say that Beads may be 
 - **Authentication**: Beads uses Git's credentials for `origin`. If `git fetch origin` also fails, fix the credentials; that is the human's machine setup.
 - **Push retries exhausted**: another machine kept winning the push race. Run `mise run beads:sync` again.
 
+## `unavailable` after a sync: a replica that cannot be read
+
+`mise run status` reports `unavailable` when `bd ready`, `bd list`, or `bd prime` fails after the sync, and names the read that failed and how the sync ended.
+
+- **A lock**: another `bd` process is using this replica, often another agent's session in a worktree of the same checkout. Wait for it and run `mise run status` again.
+- **Anything else**: run `bd doctor` and read what it reports. A damaged database is covered by Beads' [database-corruption guide](https://github.com/gastownhall/beads/blob/main/docs/recovery/database-corruption.md); back up first, and ask the human before any step that deletes or rebuilds `.beads/`.
+
 ## When these steps are not enough
 
 Beads' [recovery guide](https://github.com/gastownhall/beads/tree/main/docs/recovery) covers sync failures, merge conflicts, and database corruption. Its steps run `bd dolt push` and `bd dolt pull` directly; here they run as `mise run beads:sync`. Stop and ask the human before any step that reseeds or rewrites the remote, deletes `.beads/`, or re-runs `bd init`.

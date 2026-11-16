@@ -92,7 +92,7 @@ A defect that stops the current implementation from satisfying its proposal is *
 
 **Mise** owns toolchains, environment, and the task graph. Every command an agent runs routinely is a `mise run <task>`; `mise install` provisions the pinned toolchains from `mise.toml` and `mise.lock`, Bun among them — one test loads the `workflow` tool through Oh My Pi's real loader, which runs on Bun. Add a task rather than documenting a bare command: a task is an enforceable tier, prose is not.
 
-**hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `tools/check-scoped-commit.ts`, whose allowed scopes live in `.agents/commit-scopes`; `pre-commit` formats and lints staged files; `pre-push` and `post-merge` sync Beads.
+**hk** owns every git hook. `mise run setup` installs them with `hk install --mise`. Never install hooks any other way, and never bypass them with `--no-verify`. The `commit-msg` hook holds every commit to [Scoped Commits](https://scopedcommits.com/) with `tools/check-scoped-commit.ts`, whose allowed scopes live in `.agents/commit-scopes`; `pre-commit` formats and lints staged files; `pre-push`, `post-merge`, and `post-rewrite` (after a rebase) sync Beads.
 
 **Fnox** owns secrets. A task that needs a secret declares it with `secrets = [...]` in `mise.toml`, and Fnox resolves it from 1Password or the macOS Keychain at task time. Never put a secret in `[env]`, in a file, or in a commit. Workbench itself needs none.
 

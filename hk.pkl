@@ -62,7 +62,8 @@ local linters = new Mapping<String, Step> {
 }
 
 /// Syncs this machine's Beads replica where work crosses machines: before a push, and after
-/// a pull or merge. A sync that does not succeed prints its outcome and never blocks git.
+/// a pull, merge, or rebase. A sync that does not succeed prints its outcome and never blocks
+/// git.
 local beadsSync: Step = new {
     check = "mise run beads:sync"
     allow_failure = true
@@ -137,6 +138,16 @@ hooks {
             }
             ["beads-sync"] = (beadsSync) {
                 depends = "beads"
+            }
+        }
+    }
+
+    // `git pull --rebase` runs `post-rewrite`, not `post-merge`. Git passes `rebase` or `amend`;
+    // an amend rewrites only local work, so it skips the sync.
+    ["post-rewrite"] {
+        steps {
+            ["beads-sync"] = (beadsSync) {
+                check = "[ \"{{hook_args}}\" != rebase ] || mise run beads:sync"
             }
         }
     }

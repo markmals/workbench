@@ -383,6 +383,36 @@ test("a workspace whose database is not initialized is unavailable", t => {
     assert.match(report.unavailable, /not initialized/);
 });
 
+test("a replica that cannot be read is unavailable, and the report keeps the sync's outcome", t => {
+    let { root } = project(t, {
+        where: AVAILABLE,
+        sync: { exit: 1, json: { error: "sync failed: remote unreachable" } },
+        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
+        ready: { exit: 1, json: { error: "database is locked" } },
+    });
+
+    let report = collectBeadsReport(root);
+
+    assert.ok("unavailable" in report, JSON.stringify(report));
+    assert.match(report.unavailable, /database is locked/);
+    assert.match(report.unavailable, /failed/);
+    assert.match(report.unavailable, /remote unreachable/);
+});
+
+test("describing a conflict stays within the sync's time limit", t => {
+    let { root } = project(t, {
+        sync: { exit: 2, json: { status: "conflict", conflicts: ["issues"], pushed: false } },
+        diff: { json: [], sleepMs: 5_000 },
+    });
+
+    let started = Date.now();
+    let result = syncBeads(root, 500);
+
+    assert.ok(Date.now() - started < 2_000, `took ${Date.now() - started} ms`);
+    assert.equal(result.outcome, "conflict");
+    assert.match(result.detail, /bd diff main origin\/main/);
+});
+
 function runTask(t: TestContext, script: FakeScript, ...arguments_: string[]) {
     let root = mkdtempSync(path.join(tmpdir(), "workbench-beads-task-"));
     t.after(() => rmSync(root, { force: true, recursive: true }));

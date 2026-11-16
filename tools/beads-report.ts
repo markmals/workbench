@@ -33,18 +33,24 @@ const PRIME_HOST_NOTICE = /^\[bd prime\][^\n]*\n+/;
 
 /**
  * Syncs, then reads this machine's replica: ready work, items in progress, and memories. A
- * failed read makes the whole report unavailable, with bd's reason, rather than partial.
+ * failed read makes the whole report unavailable rather than partial; its reason names the
+ * failed read and keeps the sync's outcome, which happened before it.
  */
 export function collectBeadsReport(root: string): BeadsReport {
     let unavailable = beadsUnavailable(root);
     if (unavailable) return { unavailable };
     let sync = syncBeads(root);
-    let ready = runCommand("bd", ["ready", "--json"], root);
-    if (ready.status !== 0) return { unavailable: bdError(ready, "ready") };
-    let inProgress = runCommand("bd", ["list", "--status", "in_progress", "--json"], root);
-    if (inProgress.status !== 0) return { unavailable: bdError(inProgress, "list") };
-    let prime = runCommand("bd", ["prime", "--memories-only"], root);
-    if (prime.status !== 0) return { unavailable: bdError(prime, "prime") };
+    let reads = [
+        ["ready", "--json"],
+        ["list", "--status", "in_progress", "--json"],
+        ["prime", "--memories-only"],
+    ].map(arguments_ => ({ command: arguments_[0]!, run: runCommand("bd", arguments_, root) }));
+    let failed = reads.find(({ run }) => run.status !== 0);
+    if (failed)
+        return {
+            unavailable: `reading this replica failed (bd ${failed.command}: ${bdError(failed.run, failed.command)}); the sync before it ended ${sync.outcome}: ${sync.detail}`,
+        };
+    let [ready, inProgress, prime] = reads.map(({ run }) => run);
     let readyItems = (parseJson(ready.stdout) as ReadyItem[] | undefined) ?? [];
     let inProgressItems = (parseJson(inProgress.stdout) as InProgressItem[] | undefined) ?? [];
     return {
