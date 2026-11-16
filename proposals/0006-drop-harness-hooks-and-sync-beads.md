@@ -1,5 +1,5 @@
 ---
-id: proposal.0007
+id: proposal.0006
 title: Drop Harness Hooks and Sync Beads Across Machines
 authors: [markmals, anthropic/claude-opus-5-5]
 status: draft
@@ -175,13 +175,20 @@ GitHub:    refs/dolt/data advances; no branch is created or updated; no banner
 
 ### 1. Remove the harness hooks
 
-Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-before-stop.ts`, and `tools/format-after-edit.test.ts`. Workbench then wires no harness lifecycle event. `.omp/` keeps only the `workflow` tool, which [proposal 0006](https://github.com/markmals/workbench/pull/10) removes separately.
+Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-before-stop.ts`, and `tools/format-after-edit.test.ts`. Workbench then wires no harness lifecycle event. `.omp/` keeps only the `workflow` tool, which [proposal 0007](https://github.com/markmals/workbench/pull/10) removes separately.
 
 | Removed hook | Covered by |
 | --- | --- |
 | `bd prime` before the first turn | `mise run status`, already the contract's first instruction, now reports Beads ([section 2](#2-beads-in-mise-run-status)). |
 | Format after every edit | hk's `pre-commit` hook, which already formats staged files and stages the result. Agents may run `mise run fmt -- <files>`. |
-| Full check before every stop | The verification rule (run `mise run check` this turn before claiming work is done), hk's `pre-push` hook (see [Open questions](#open-questions)), and CI. |
+| Full check before every stop | The verification rule (run `mise run check` this turn before claiming work is done), and CI. |
+
+**The pre-push hook stops running the check.**
+
+- `mise run check` runs in CI only. hk's `pre-push` hook keeps only its Beads steps.
+- Before marking a pull request ready or merging it, the agent waits for CI to pass on the pushed revision (`gh pr checks --watch`). When CI fails, the agent fixes the failure and pushes again.
+- The verification rule is unchanged: the agent still runs `mise run check` itself before claiming work is done.
+- The owner chose this on 2026-11-15. Every push no longer waits for the full check, which takes 4.7 s in Workbench and 4–8 minutes in Trove.
 
 ### 2. Beads in `mise run status`
 
@@ -300,7 +307,9 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 - **The `writing-a-proposal` skill's red-flag table** files a newly discovered out-of-scope defect in Beads, not as a GitHub issue.
 - **`guides/adapting-your-harness.md`** drops "Wire lifecycle events" and the extension rows. A harness needs only the contract and the skills.
 - **`guides/getting-started.md` and `README.md`** stop describing lifecycle extensions.
-- **`.agents/rules/enforcement-hierarchy.md`'s Tier 0** drops `.omp/extensions/` and names the hk steps.
+- **`.agents/rules/enforcement-hierarchy.md`'s Tier 0** drops `.omp/extensions/` and the `pre-push` check, and names the hk Beads steps.
+- **Every mention of the pre-push check** says CI alone runs `mise run check`: `AGENTS.md`'s quality-gates list and its GitHub Actions paragraph, `README.md`'s `hk.pkl` row, and the comment in `.github/workflows/ci.yml`.
+- **The skills that mark a pull request ready or merge it** (`implementing-a-proposal`, `reviewing-an-implementation`, `completing-a-feature`) wait for CI on that revision first.
 - **[Record Validation and Workflow Status](../guides/record-validation.md)** changes as described in [section 2](#2-beads-in-mise-run-status), and the **`tracking-work` skill** as described in sections 2 and 5.
 - **Configuration:**
     - `mise.toml` gains the `[env]` entry, the `beads:sync` and `beads:claim` tasks, and the setup changes.
@@ -314,7 +323,8 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
     - Workbench's own setup changes from `bd init --init-if-missing` to `bd bootstrap` for an existing workspace. A machine whose replica already exists keeps it.
     - A project that sets `dolt.auto-push: true`, such as Recon, switches to the sync points.
     - A project whose repository lacks `refs/dolt/data`, such as Bento, publishes it at its first sync.
-- **Consumer projects.** Until [proposal 0006](https://github.com/markmals/workbench/pull/10) delivers Workbench as a package, each consumer takes this change by copying it, like any other Workbench change today.
+- **Consumer projects.** Until [proposal 0007](https://github.com/markmals/workbench/pull/10) delivers Workbench as a package, each consumer takes this change by copying it, like any other Workbench change today.
+- **Pushes no longer run the check.** A commit that fails it can reach a pull request's branch. CI flags it before the pull request can be marked ready or merged.
 
 ## Implications on adoption
 
@@ -340,7 +350,7 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 
 ### Out of scope
 
-- **Packaging Workbench and porting `status` to Rust.** That is [proposal 0006](https://github.com/markmals/workbench/pull/10), which ports this behavior unchanged.
+- **Packaging Workbench and porting `status` to Rust.** That is [proposal 0007](https://github.com/markmals/workbench/pull/10), which ports this behavior unchanged.
 - **Migrating consumer projects,** including deleting Recon's info branch. Each is a change in that repository.
 - **Changing Beads itself**, such as beads#7945.
 - **A shared Dolt server, or a DoltHub or bucket remote.** See Alternatives and Future directions.
@@ -362,10 +372,10 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 ## Policies and decisions checked
 
 - **Policies and decisions.** None: `policies/` and `decisions/` hold only their READMEs.
-- **[VISION.md](../VISION.md).** "Ceremony must earn its cost": the hooks are removed on measured cost. "Enforce mechanically": checks remain at commit, push, and CI. "Not an issue tracker": Beads keeps the work graph.
+- **[VISION.md](../VISION.md).** "Ceremony must earn its cost": the hooks and the pre-push check are removed on measured cost. "Enforce mechanically": checks remain at commit time and in CI. "Not an issue tracker": Beads keeps the work graph.
 - **[Proposal 0003](0003-fit-the-harness-to-current-models.md)** recorded `check-before-stop`'s timeout in Trove and suggested a fast-subset stop hook. This proposal removes the hook instead; see Alternatives.
 - **[Proposal 0005](0005-current-specifications.md)** put `status`'s contract in `guides/record-validation.md`, which this proposal extends.
-- **[Proposal 0006](https://github.com/markmals/workbench/pull/10)** depends on this one: its package declares no harness hooks, and its Rust `status` ports this Beads section.
+- **[Proposal 0007](https://github.com/markmals/workbench/pull/10)** depends on this one: its package declares no harness hooks, and its Rust `status` ports this Beads section.
 - **`.agents/rules/enforcement-hierarchy.md`.** Tier 0 loses the harness wiring and gains the hk Beads steps. Every remaining check runs whether or not the agent remembers.
 
 ## Future directions
@@ -377,6 +387,7 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 ## Alternatives considered
 
 - **Cheaper hooks.** A fast subset of the check before stopping, or a check that the gate passed since the last edit, still forces work before any pause that follows an edit, including mid-work questions. Formatting at commit time already exists.
+- **Keeping the pre-push check.** Nothing that fails the check ever reaches GitHub, but every push waits for the full check, and CI already blocks merging.
 - **A DoltHub remote.** Hosted Dolt remotes are built for many writers and offer a web view of the database. They add an account, credentials on every machine, and a service outside GitHub. Suppressing the info branch removes the banner without them.
 - **An S3 or GCS bucket.** No server to run, but it needs a cloud account and credentials on every machine.
 - **A shared Dolt server** (Beads server mode, reached over Tailscale). One database means atomic claims and no merges. But every machine must reach the server to use Beads at all, and it adds a service to run and back up.
@@ -386,4 +397,4 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: Should hk's `pre-push` hook keep running the full `mise run check`, or should the gate run only in CI, with the agent waiting for CI (`gh pr checks --watch`) before marking a pull request ready? Dropping it removes a 4–8 minute wait from every push in Trove-sized projects, at the cost of failing commits reaching a draft pull request before CI flags them.]
+None. On 2026-11-15 the owner chose to run `mise run check` in CI only.
