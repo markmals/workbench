@@ -61,7 +61,7 @@ extending a policy beyond the failure it was created to prevent.
 ## Enforcement
 
 <!--
-Name the enforcement tier from .agents/rules/enforcement-hierarchy.md: check, task,
+Name the enforcement tier from .workbench/rules/enforcement-hierarchy.md: check, task,
 template, or prose. Describe the mechanism that enforces this rule and who runs or
 uses it. If the tier is prose, justify why the rule could not be enforced as a check.
 Choose the strongest practical tier rather than documenting an unenforced preference.

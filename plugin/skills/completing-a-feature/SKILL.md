@@ -36,12 +36,12 @@ If it does not outlive this proposal, it belongs in the proposal and nowhere els
 Before adding, revising, or deleting either:
 
 1. Agree it with the human. Neither is an agent-only conclusion.
-2. For a new record, copy the canonical template. Required frontmatter is `id`, `title`, and `status`; `established-by: proposal.<NNNN>` is optional provenance.
+2. For a new record, copy the canonical template: `.agents/templates/POLICY.md` or `.agents/templates/DECISION.md` when the project overrides it, otherwise `.workbench/templates/POLICY.md` or `.workbench/templates/DECISION.md`. Required frontmatter is `id`, `title`, and `status`; `established-by: proposal.<NNNN>` is optional provenance.
 3. Give each agreed record its current status: `active` for a policy, `accepted` for a decision. A proposed record does not leave the change branch until it is agreed.
 
 ### Enforce policies first
 
-A policy that can be enforced by a check **must** be. Before writing prose, try to express it as a validator rule, continuous-integration step, or template section, per `.agents/rules/enforcement-hierarchy.md`.
+A policy that can be enforced by a check **must** be. Before writing prose, try to express it as a check, continuous-integration step, or template section, per `.workbench/rules/enforcement-hierarchy.md`.
 
 Keep prose for judgment a deterministic check cannot decide. Prose policies are the ones that rot.
 
@@ -55,7 +55,7 @@ A policy or decision file states what applies now, and Git with the proposal kee
 | No longer applies | Delete the file. First repoint or remove current links to it. Replace each historical link that must keep working, such as one in a completed proposal, with an immutable Git revision URL; `git log -1 --format=%H -- <file>` gives a commit that contains it. Never reuse its ID. |
 | Still binds a supported compatibility promise or an unfinished migration | It still applies. Keep it until that obligation ends. |
 
-Write no replacement record and no `supersedes` or `superseded` metadata on a policy or decision; the validator rejects both. [Keeping Current Specifications](../../../guides/current-specifications.md#worked-example-revising-and-retiring-a-policy) works through one revision and one retirement.
+Write no replacement record and no `supersedes` or `superseded` metadata on a policy or decision; the validator rejects both. Workbench's guide [Keeping Current Specifications](https://github.com/markmals/workbench/blob/main/guides/current-specifications.md#worked-example-revising-and-retiring-a-policy) works through one revision and one retirement.
 
 ## 3. Update the vision
 
@@ -65,7 +65,7 @@ Consult the human before a substantial rewrite. Do not turn a narrow completion 
 
 ## 4. Record the accepted implementation
 
-Add the changeset if the work does not already carry one: `mise run changeset`, bump chosen deliberately, entry written for the person reading the changelog. A change with no user-visible effect still carries one, created with `--empty`. CI rejects a pull request without a changeset, so this is a gate, not a courtesy.
+Add a change file if the work does not already carry one: `workbench change-files create`, change type chosen deliberately, summary written for the person reading the release notes. A change with no user-visible effect carries a `Release-Note: none` trailer on one of its commits instead (`git commit --trailer "Release-Note: none"`). CI runs `workbench change-files check` and rejects a pull request with neither, so this is a gate, not a courtesy.
 
 After human acceptance and the vision update, set the proposal to `implemented` in the same feature pull request that contains the implementation. This status records accepted implementation, not a merged pull request or completed release. Record acceptance and any outstanding delivery in the proposal or PR, then commit and verify the updated integration candidate before merging. Never open a follow-up PR solely to move this status.
 
@@ -81,7 +81,7 @@ Choose a merge strategy that retains the proposal and PR discussion. Do not squa
 
 ## 6. Release
 
-When release is required and separately authorized, use the project's existing CI/CD process. Merging accumulates changesets on the default branch, and the release workflow opens a release pull request that runs `mise run version`: `changeset version` applies the pending changesets, bumping the version in the root `package.json` and writing `CHANGELOG.md`. Merging that release pull request is what publishes. Run `mise tasks` when the setup is unknown. Skip publication for approved merge-only delivery.
+When release is required and separately authorized, use the project's existing CI/CD process. Merging accumulates change files on the default branch, and on every push to it Knope's prepare-release workflow keeps one release pull request open with the next version, its changelog entry, and the version-file changes. Merging that release pull request is what publishes: the release workflow builds the artifacts, tags `v<version>`, and creates the GitHub release. Run `mise tasks` and read `.github/workflows/` when the setup is unknown. Skip publication for approved merge-only delivery.
 
 **Never publish without explicit human confirmation.** Approval to merge is not approval to release.
 
@@ -109,7 +109,7 @@ Cleanup runs when confidence is highest. Treat it as a separate destructive oper
 - You deleted a record while a current link, or a historical link that must keep working, still pointed at it.
 - You merged without preserving why the final state differs.
 - You released because the PR merged.
-- You merged a pull request that carries no changeset.
+- You merged a pull request that carries neither a change file nor a `Release-Note: none` trailer.
 - A dependent PR still uses a preview version after release.
 - A preview or prerelease artifact outlives its PR without a tracked, authorized teardown plan.
 - You deleted a branch, force-pushed, or tore down a published prerelease artifact without explicit human confirmation.

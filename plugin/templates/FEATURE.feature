@@ -1,7 +1,7 @@
 # Copy to specs/features/<capability>.feature, or to the project's existing
 # feature location. Describe one capability per file. Replace each <...>
 # placeholder, and delete the comments and any section this capability does
-# not need. Guidance: .agents/skills/specifying-behavior-with-gherkin/SKILL.md
+# not need. Guidance: the specifying-behavior-with-gherkin skill.
 Feature: <Capability, named in its users' words>
   <Who uses this capability and what it lets them do.>
 

@@ -44,7 +44,7 @@ Outside an approved proposal, suggest look-and-feel changes but make only the on
 | Where | What happens |
 | --- | --- |
 | A proposal being implemented or in `active-review` | Commits on its branch, then a refreshed preview. No proposal edit, no status change, no readiness report, no adversarial review. |
-| Between proposals | No proposal question. Land it the way the project lands other changes made without a proposal: a branch and pull request with a changeset where the project works through pull requests, otherwise commits. Say which in one line. |
+| Between proposals | No proposal question. Land it the way the project lands other changes made without a proposal: a branch and pull request with a change file where the project works through pull requests, otherwise commits. Say which in one line. |
 
 ## When a request changes what the feature does
 

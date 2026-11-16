@@ -15,11 +15,11 @@ Gherkin is one optional representation for a behavioral specification. A feature
 | Workflow across actors, steps, or state | Gherkin, when the human chooses it or rules and examples help reviewers; otherwise current reference prose. |
 | Protocol or persisted format | The native schema plus its semantic requirements. |
 
-Revise whichever source already owns a requirement rather than copying it into a `.feature` file. [examples.md](examples.md) contrasts Pitlane's `getStylesheets()` contract with two workflows where Gherkin helps.
+Revise whichever source already owns a requirement rather than copying it into a `.feature` file. `.workbench/skills/specifying-behavior-with-gherkin/examples.md` contrasts Pitlane's `getStylesheets()` contract with two workflows where Gherkin helps.
 
 ## Write the feature
 
-Start from [`.agents/templates/FEATURE.feature`](../../templates/FEATURE.feature). A new project puts features at `specs/features/<capability>.feature`; an existing coherent location takes precedence.
+Start from the feature template: `.agents/templates/FEATURE.feature` when the project overrides it, otherwise `.workbench/templates/FEATURE.feature`. A new project puts features at `specs/features/<capability>.feature`; an existing coherent location takes precedence.
 
 - One capability per file, named for that capability.
 - The description holds purpose, vocabulary, and scope. Nothing executes it.
@@ -50,4 +50,4 @@ Examples illustrate a rule at chosen points. They do not prove it for every inpu
 
 A scenario is automated evidence only when a real integration ran it in the project's test task and its `Then` bindings assert the stated outcome. Matching every step establishes binding completeness. After a step changes, a tag or test name that still matches proves nothing about the new requirement. Unknown step text must fail; recognized parameter changes must reach the test inputs and assertions. List excluded and manually checked scenarios as such in the review evidence.
 
-Before claiming executable coverage in a project, follow [integration-adoption.md](integration-adoption.md).
+Before claiming executable coverage in a project, follow `.workbench/skills/specifying-behavior-with-gherkin/integration-adoption.md`.

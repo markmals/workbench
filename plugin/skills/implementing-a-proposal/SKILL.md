@@ -30,9 +30,9 @@ Before any test or production code, revise each current source the proposal chan
 | --- | --- |
 | Library API | The declaration and its contract documentation (doc comment, or the reference the package publishes): defaults, errors, side effects, ordering, lifecycle, compatibility. Edit the doc comment now, before the function body. |
 | Protocol or stored data | The native schema and the semantic requirements beside it. |
-| Application workflow | Its feature file or behavioral reference. For `.feature` files, use [`.agents/skills/specifying-behavior-with-gherkin/`](../specifying-behavior-with-gherkin/SKILL.md). |
+| Application workflow | Its feature file or behavioral reference. For `.feature` files, use the `specifying-behavior-with-gherkin` skill. |
 | Process or tooling | The reference prose that owns it. |
-| Agreed policy or decision | The same file, keeping its ID, or its deletion when the change retires it ([`completing-a-feature`](../completing-a-feature/SKILL.md) §2). |
+| Agreed policy or decision | The same file, keeping its ID, or its deletion when the change retires it (`completing-a-feature` skill, §2). |
 
 Reuse each source's representation. Add a source only for a requirement with no adequate home, and keep it as small as the requirement allows. When another document restates the contract, such as a README repeating the API reference, revise it in the same edit or replace the restatement with a link, so each fact keeps one owner. Write only what the proposal authorizes; a new substantive decision goes to the human. Never write a specification from what the code happens to do.
 
@@ -56,7 +56,7 @@ NO TEST-WORTHY PRODUCTION BEHAVIOR WITHOUT A FAILING TEST FIRST
 
 Write a guide only when the change alters what a user does, sees, or must know. Write it from the intended contract before production code exists, for a reader who will never read the proposal: inputs, prerequisites, actions, outcomes, errors, defaults, and durable effects, not internals.
 
-Extend the guide in `guides/` that already owns the workflow; add one from [`.agents/templates/GUIDE.md`](../../templates/GUIDE.md) only when none does. Its frontmatter is `id`, matching the path, and an accurate `title`. Link the current source that states the precise contract with an ordinary Markdown link rather than restating it. Every example must run as printed.
+Extend the guide in `guides/` that already owns the workflow; add one from the guide template only when none does: `.agents/templates/GUIDE.md` when the project overrides it, otherwise `.workbench/templates/GUIDE.md`. Its frontmatter is `id`, matching the path, and an accurate `title`. Link the current source that states the precise contract with an ordinary Markdown link rather than restating it. Every example must run as printed.
 
 What the user does comes from the specification. The names and placement of on-screen elements a guide mentions follow the running UI, and you update them when polish changes them; that is not writing a guide from finished code.
 
@@ -64,14 +64,14 @@ Then compare the guide with the failing tests and the specification. Anything on
 
 ## 4. Code
 
-Write the minimum production code that makes the tests pass and matches the specification and guide. Add no behavior the specification does not state. Look and feel the proposal leaves open is yours to choose, fitting the project's existing interface and its platform's conventions, and the human's to refine with [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md). When an unexplained failure appears, find its cause with [`.agents/skills/systematic-debugging/`](../systematic-debugging/SKILL.md) before changing code.
+Write the minimum production code that makes the tests pass and matches the specification and guide. Add no behavior the specification does not state. Look and feel the proposal leaves open is yours to choose, fitting the project's existing interface and its platform's conventions, and the human's to refine with the `polishing-a-ui` skill. When an unexplained failure appears, find its cause with the `systematic-debugging` skill before changing code.
 
 ## 5. Gates and commits
 
-Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; [`.agents/rules/verification.md`](../../rules/verification.md) says what counts as evidence. Never commit while red. Commit at green boundaries following [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md), and push.
+Run `mise run check`, then any project-specific gate `mise tasks` lists that it does not already cover, and read the output; `.workbench/rules/verification.md` says what counts as evidence. Never commit while red. Commit at green boundaries following `.workbench/rules/commit-discipline.md`, and push.
 
 After the complete implementation passes the applicable checks and is pushed, wait for CI to pass on the pushed revision (`gh pr checks <pr-number> --watch`); no git hook runs the gate, so a local run does not cover the pushed revision. When CI fails, fix the failure, push again, and wait again. Then mark the feature pull request ready for maintainer review. Human review can begin while the self-check, independent review, and readiness report remain in progress. Keep the proposal at `awaiting-implementation` until the handoff. If the push, CI, or PR state change cannot be completed, report the blocker without claiming the implementation is reviewable in the PR.
 
 ## Then
 
-Continue with [`.agents/skills/reviewing-an-implementation/`](../reviewing-an-implementation/SKILL.md). It owns the self-check, the independent review, the preview, and the handoff to the human. Set no proposal status before then. The pull request should already be ready.
+Continue with the `reviewing-an-implementation` skill. It owns the self-check, the independent review, the preview, and the handoff to the human. Set no proposal status before then. The pull request should already be ready.

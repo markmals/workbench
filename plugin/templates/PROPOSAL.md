@@ -171,7 +171,7 @@ belongs elsewhere unless this change requires it.
 
 <!--
 Name deliberate exclusions and why. Defects discovered while writing this proposal that fall outside
-scope are filed in Beads, not folded in; use .agents/skills/tracking-work/.
+scope are filed in Beads, not folded in; use the tracking-work skill.
 -->
 
 - <Excluded work and reason it is excluded.>
@@ -180,7 +180,7 @@ scope are filed in Beads, not folded in; use .agents/skills/tracking-work/.
 
 <!--
 Choose the artifact from the preview table that exercises this change and explain why it is the cheapest
-realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use .agents/skills/reviewing-an-implementation/. For a pure refactor with no exercisable surface, state why no preview applies.
+realistic one. A human must exercise changed behavior, not merely inspect prose or a screenshot; use the reviewing-an-implementation skill. For a pure refactor with no exercisable surface, state why no preview applies.
 -->
 
 - Artifact: <preview artifact>

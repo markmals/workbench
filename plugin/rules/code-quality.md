@@ -4,7 +4,7 @@ description: What good code looks like in a Workbench project — small focused 
 
 # Code Quality
 
-> **This file is part of the agent contract.** Keep it tight — every line costs context.
+> **This file is part of the process contract.** Keep it tight — every line costs context.
 
 The code an agent writes in this repo should feel like code a careful human wrote. Not a clever human, not a fast human — a careful one. The goal is readability for the next person (which is usually a future agent reading cold).
 

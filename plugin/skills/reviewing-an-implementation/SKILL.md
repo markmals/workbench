@@ -7,7 +7,7 @@ description: Use when an implemented proposal has fresh validation evidence and 
 
 **Phase 3 — Implementation.** Check the work against the approved change and the current specifications it revised, have an agent without your context try to break it, then hand it to the human. This procedure does not decide whether the human accepts the work.
 
-Begin after applicable validation has fresh evidence under `.agents/rules/verification.md`. Proceed in this order:
+Begin after applicable validation has fresh evidence under `.workbench/rules/verification.md`. Proceed in this order:
 
 1. Self-check.
 2. Dispatch `adversarial-review`; consume its report.
@@ -71,7 +71,7 @@ For a mixed repository, preview the surface the proposal changed; do not produce
 
 **The human must be able to open or install it directly.** A downloadable build artifact is not a preview — reviewing it would mean unzipping a file and starting a local server, which is enough friction that the change gets reviewed as prose instead. The one exception is a command-line tool, where installing the binary is the real act. If your preview step ends in "upload artifact" for anything else, it is not finished.
 
-A site deployed to a subpath needs its base path set to that subpath at build time, or every asset resolves against the domain root and the preview loads blank. Verify the deployed preview actually renders before linking it; a green workflow is not evidence, per `.agents/rules/verification.md`.
+A site deployed to a subpath needs its base path set to that subpath at build time, or every asset resolves against the domain root and the preview loads blank. Verify the deployed preview actually renders before linking it; a green workflow is not evidence, per `.workbench/rules/verification.md`.
 
 Build from the pull-request revision. Give repository-accessible humans a stable link or installation location; they must not build the artifact themselves. The readiness report links it and states required setup, what to try, and the expected result. A bare URL is insufficient. Keep the preview's lifetime tied to the pull request.
 
@@ -79,14 +79,14 @@ Previews are private by default. Do not publish one publicly unless the project 
 
 ## 4. Report readiness
 
-Compose the pull-request comment from `.agents/templates/READINESS_REPORT.md`. Fill every template section and add the self-check's recorded divergences and their resolutions.
+Compose the pull-request comment from the readiness report template: `.agents/templates/READINESS_REPORT.md` when the project overrides it, otherwise `.workbench/templates/READINESS_REPORT.md`. Fill every template section and add the self-check's recorded divergences and their resolutions.
 
 | Report section | Required content |
 | --- | --- |
 | Proposal | State `FULLY` implemented only when every promised behavior exists. For `PARTIALLY`, name completed and omitted behavior, limitations, and reason. Silent partial implementation is not allowed. |
 | What was built | Delivered behavior, not internals, with links to the current specifications and records the change revised. |
 | How to exercise it | Preview link or honest absence, setup, actions, and expected results. |
-| Validation performed | Every command actually run in this session and its observed result, per `.agents/rules/verification.md`. Never report an unrun gate as passing. |
+| Validation performed | Every command actually run in this session and its observed result, per `.workbench/rules/verification.md`. Never report an unrun gate as passing. |
 | Adversarial findings adopted | Each accepted or fixed finding, or `- None.` |
 | Adversarial findings declined, with reasoning | Every declined finding and why it was declined, or `- None.` This section is always present. |
 | Defects discovered and deferred | Each deliberate, out-of-scope defect as a linked Beads item from `tracking-work`, or `- None.` |
@@ -113,7 +113,7 @@ At the end of Phase 3, move the proposal to `status: active-review` and post the
 
 ### Look-and-feel feedback in review
 
-While the proposal is `active-review`, apply feedback that touches only look and feel with [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md): change the code, run the gates, push, refresh the preview, and say what changed. Do not edit the proposal, change its status, post another readiness report, or rerun the adversarial review. Feedback that changes what the feature does, or a design decision the proposal records, goes through the proposal first, after the human returns the work with `returned-for-revisions`. Split feedback that mixes both.
+While the proposal is `active-review`, apply feedback that touches only look and feel with the `polishing-a-ui` skill: change the code, run the gates, push, refresh the preview, and say what changed. Do not edit the proposal, change its status, post another readiness report, or rerun the adversarial review. Feedback that changes what the feature does, or a design decision the proposal records, goes through the proposal first, after the human returns the work with `returned-for-revisions`. Split feedback that mixes both.
 
 ## Red flags
 

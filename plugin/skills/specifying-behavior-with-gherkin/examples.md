@@ -4,7 +4,7 @@ These files teach the skill. They are not Workbench requirements.
 
 ## End-user workflow: placing holds
 
-[examples/placing-holds.feature](examples/placing-holds.feature) specifies how library members reserve titles.
+`.workbench/skills/specifying-behavior-with-gherkin/examples/placing-holds.feature` specifies how library members reserve titles.
 
 - The description defines _active hold_, _queue_, and the pickup period, and names what another owner specifies. Scenarios do not execute it.
 - The first rule uses a scenario outline for the two accepted counts at the edge of the limit, 0 and 4. The refusal at 5 is a separate scenario because its outcome differs in kind: it states the reason and what stays unchanged.
@@ -15,7 +15,7 @@ The first rule's scenarios illustrate the limit at three counts. They say nothin
 
 ## Developer workflow: applying migrations
 
-[examples/applying-migrations.feature](examples/applying-migrations.feature) specifies a `migrate up` command. Developers are its users.
+`.workbench/skills/specifying-behavior-with-gherkin/examples/applying-migrations.feature` specifies a `migrate up` command. Developers are its users.
 
 Gherkin fits because the contract is a sequence over stored state: which files exist, what the history records, what the command reports, and what the schema looks like after a failure. Before-and-after tables show that directly. A function signature would not. Maintainers of each database adapter review the same rules and bind the same feature.
 

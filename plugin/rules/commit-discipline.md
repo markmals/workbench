@@ -32,18 +32,22 @@ Write an imperative, present-tense description: `add`, `fix`, `remove` — not `
 
 Do not write Conventional Commits `type(scope):` subjects. Scoped Commits lead with the area being changed.
 
-The allowed scopes are the entries in [`.agents/commit-scopes`](../commit-scopes) — one per line, process scopes first, product scopes added as the project grows — plus `<NNNN>-<slug>` for work implementing that real proposal, such as `0007-export-queue`. That file is the only list; do not memorize a second one.
+`workbench commits check` accepts three kinds of scope:
 
-Prefer the narrowest scope that accurately describes the change; use `treewide` only for a true sweep. A change that needs a scope the file does not have adds the scope to the file in the same commit.
+- Workbench's process scopes: `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
+- the project's product scopes, one per line in `.agents/commit-scopes`, which is optional and grows with the project;
+- `<NNNN>-<slug>` for work implementing that real proposal, such as `0007-export-queue`.
+
+A rejected subject lists every accepted scope. Prefer the narrowest scope that accurately describes the change; use `treewide` only for a true sweep. A change that needs a product scope no list has adds it to `.agents/commit-scopes` in the same commit.
 
 Examples:
 
 - `proposal: clarify release preview ownership`
 - `guides: explain the readiness report`
-- `hooks: enforce scoped commit subjects`
+- `ci: check change files on every pull request`
 - `0007-export-queue: reject duplicate export jobs`
 
-Mechanical merge, revert, fixup, and squash commits are exempt. hk runs `node tools/check-scoped-commit.ts` as its `commit-msg` step, so every commit is checked regardless of which harness, editor, or human made it, and CI checks every commit in a pull request.
+Mechanical merge, revert, fixup, and squash commits are exempt. hk's `commit-msg` hook runs `workbench commits check`, so every commit is checked regardless of which harness, editor, or human made it, and CI checks every commit in a pull request.
 
 ## Staging
 
@@ -62,20 +66,20 @@ Mechanical merge, revert, fixup, and squash commits are exempt. hk runs `node to
 
 ## Never commit
 
-- Secrets: environment files, credentials, tokens, and keys.
+- Secrets: credentials, tokens, keys, and the `.env` files that hold their values. The committed `.env.schema` declares variables and holds no secret values.
 - Build output and generated artifacts the project does not track.
 - Personal editor configuration unless the human explicitly asks.
 - Large binaries unless the project explicitly tracks them.
 
-If an unexpected secret appears in `git status`, stop and warn the human. Secrets reach tasks through Fnox grants in `mise.toml`, never through a tracked file.
+If an unexpected secret appears in `git status`, stop and warn the human. Secrets reach tasks through Varlock, never through a tracked file: the project declares them in `.env.schema`, and a task that needs one runs under `varlock run --`.
 
 ## Frequency
 
 Prefer many small, focused commits to one large commit. Commit at each natural green boundary before beginning the next independent change.
 
-## Changesets
+## Change files
 
-Every pull request carries a changeset. Run `mise run changeset`, choose the bump, and write the entry for the person reading the changelog — not for the reviewer who already saw the diff. A change with no user-visible effect still carries one, created with `--empty`. The `.changeset/` file is committed with the work it describes; CI rejects a pull request without one, and the release pull request is exempt.
+Every pull request adds at least one change file in `.changeset/`, written for the person reading the release notes — not for the reviewer who already saw the diff. Create it with `workbench change-files create`, choosing the change type deliberately; never run `knope document-change`, which prompts. Commit the change file with the work it describes. A pull request with no user-visible change carries a `Release-Note: none` trailer on one of its commits instead (`git commit --trailer "Release-Note: none"`). CI runs `workbench change-files check` and rejects a pull request with neither; Knope's release pull request is exempt.
 
 ## Push policy
 

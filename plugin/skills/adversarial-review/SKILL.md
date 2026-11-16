@@ -108,4 +108,4 @@ Any of these → you reverted to confirmation. Restart from the refute-by-defaul
 - `reviewing-an-implementation` — the self-check that precedes this stage and the readiness report that records declined findings.
 - `implementing-a-proposal` — the discipline whose tests this stage tries to defeat.
 - `systematic-debugging` — once a defect is confirmed, used to find its root cause before the fix.
-- `.agents/rules/verification.md` — the gate this stage feeds.
+- `.workbench/rules/verification.md` — the gate this stage feeds.

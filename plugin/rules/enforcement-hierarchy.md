@@ -10,14 +10,14 @@ A rule an agent must remember is the weakest kind of rule. Under load, prose get
 
 | Tier | Mechanism | Role |
 | --- | --- | --- |
-| **Tier 0 — Checks** | hk's git hooks (`commit-msg` runs `node tools/check-scoped-commit.ts`, `pre-commit` formats and lints staged files, and the Beads steps: `pre-push`, `post-merge`, and `post-rewrite` after a rebase sync Beads with `mise run beads:sync`, and every Beads-owned hook runs `bd hooks run <hook>`), GitHub Actions running `mise run check` on every push, and the record validator in `tools/validate.ts` | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
-| **Tier 1 — Tasks** | mise tasks the process invokes by name: `mise run check`, `mise run fmt`, `mise run validate`, `mise run status`, `mise run beads:sync`, `mise run beads:claim`, `mise run beads:close` | Deterministic once invoked, but something must invoke them. |
-| **Tier 2 — Templates** | `.agents/templates/` | Shape the work so the correct thing is the path of least resistance. |
-| **Tier 3 — Prose** | `AGENTS.md`, `SKILL.md` files, and these rules | Necessary for judgment that cannot be mechanized; the tier most likely to be missed. |
+| **Tier 0 — Checks** | hk's git hooks (`commit-msg` runs `workbench commits check`, `pre-commit` runs the project's formatters and linters on staged files, and the Beads steps: `pre-push`, `post-merge`, and `post-rewrite` after a rebase sync Beads with `workbench beads sync`, and every Beads-owned hook runs `bd hooks run <hook>`), GitHub Actions running `mise run check` on every push and `workbench commits check` and `workbench change-files check` on every pull request, and the record and project checks `workbench records validate` and `workbench project validate` | Deterministic; runs whether or not the agent remembers. A rule that can live here must. |
+| **Tier 1 — Tasks and commands** | What the process invokes by name: the mise tasks `mise run check` and `mise run fmt`; the `workbench` commands `workflow status`, `beads claim`, `beads close`, `beads sync`, and `change-files create`; and the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks that wrap them for humans | Deterministic once invoked, but something must invoke them. |
+| **Tier 2 — Templates** | `.workbench/templates/`, and a project's overrides in `.agents/templates/` | Shape the work so the correct thing is the path of least resistance. |
+| **Tier 3 — Prose** | The process contract, the project's `AGENTS.md`, `SKILL.md` files, and these rules | Necessary for judgment that cannot be mechanized; the tier most likely to be missed. |
 
 ## The rule
 
-- Before writing a prose rule, ask whether a check or template could enforce it deterministically. If it can, build that instead — usually a new hk step or a new assertion in the validator, reached through a `mise` task so humans and CI run the same thing.
+- Before writing a prose rule, ask whether a check or template could enforce it deterministically. If it can, build that instead — usually a new hk step or a new check inside `mise run check`, so humans and CI run the same thing.
 - Where a check already enforces a rule, do not also state it in prose — delete the prose.
 - Keep judgment in prose. Good naming, the right abstraction, and a justified deviation are not cheap deterministic checks.
 

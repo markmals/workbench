@@ -87,7 +87,7 @@ You leave debugging stage 2 knowing what differs between working and broken.
 1. **Write a failing test.** The simplest possible reproduction of the bug. Use the `implementing-a-proposal` skill.
 2. **Verify the test fails for the right reason.** Same red-green discipline as TDD.
 3. **Implement a single fix.** One change. No "while I'm here" improvements. No bundled refactors.
-4. **Verify the fix.** Test passes? Other tests still pass? Issue actually resolved? Use `.agents/rules/verification.md`.
+4. **Verify the fix.** Test passes? Other tests still pass? Issue actually resolved? Use `.workbench/rules/verification.md`.
 
 ### When 3+ fixes have failed: question the architecture
 
@@ -158,17 +158,17 @@ When you see these: **return to debugging stage 1**.
 
 ## Commit
 
-Once the failing test passes, the fix is verified, and the broader suite is green, commit. See [`.agents/rules/commit-discipline.md`](../../rules/commit-discipline.md) for message style.
+Once the failing test passes, the fix is verified, and the broader suite is green, commit. See `.workbench/rules/commit-discipline.md` for message style.
 
 Natural boundaries for a debugging session:
 
-- **Regression test + fix:** one commit. For a tooling bug, subject: `tools: fix <user-observable bug description>`. The body explains the root cause uncovered in debugging stage 1, not the symptom.
-- **Split into two commits** when the failing test is independently valuable, such as pinning previously untested behavior: `tools: add regression test for <bug>` then `tools: fix <bug>`.
+- **Regression test + fix:** one commit. Subject: `<scope>: fix <user-observable bug description>`, with the narrowest scope that covers the fix. The body explains the root cause uncovered in debugging stage 1, not the symptom.
+- **Split into two commits** when the failing test is independently valuable, such as pinning previously untested behavior: `<scope>: add regression test for <bug>` then `<scope>: fix <bug>`.
 
 Do **not** bundle a "while I'm here" cleanup, an unrelated refactor, or a fix for a second bug into the same commit. One root cause, one commit. Other findings get their own commits or their own debugging sessions.
 
 ## Related skills
 
 - `implementing-a-proposal` — for the failing-test step in debugging stage 4
-- `.agents/rules/verification.md` — the gate before claiming the bug is fixed
+- `.workbench/rules/verification.md` — the gate before claiming the bug is fixed
 - `writing-a-proposal` — when a fix changes intended behavior, revise the proposal before implementation.

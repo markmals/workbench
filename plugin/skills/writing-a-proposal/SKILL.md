@@ -13,7 +13,7 @@ Proposals are for changes that decide something: new or changed behavior, a real
 
 Changes whose intent is already established can proceed directly. Use the current specification or the approved change being implemented on this branch to establish a bug's correct behavior. Completed proposals are historical evidence and cannot authorize restoring obsolete behavior. Raise a conflict with current requirements before acting. An unambiguous typo, dead link, or implementation correction needs no new proposal and often no pull request.
 
-They are not for look and feel either. How an interface looks and how it is operated is decided by the human on the running UI, so polish is never a reason to ask the proposal question; use [`.agents/skills/polishing-a-ui/`](../polishing-a-ui/SKILL.md).
+They are not for look and feel either. How an interface looks and how it is operated is decided by the human on the running UI, so polish is never a reason to ask the proposal question; use the `polishing-a-ui` skill.
 
 Say whether you think the change warrants a proposal and why. Before creating a proposal workspace, ask the human directly: "Do you want a proposal for this change?" Ask even if they said "start a feature" or "write a proposal"; only their answer to this question for this change counts as consent. Do not infer yes from scope, status output, or silence.
 
@@ -25,7 +25,7 @@ Only after an explicit yes for this change, confirm the change has a branch push
 
 ## Output
 
-Create exactly one `proposals/<NNNN>-<slug>.md`. Copy [`.agents/templates/PROPOSAL.md`](../../templates/PROPOSAL.md); do not replace it with a folder or auxiliary planning files.
+Create exactly one `proposals/<NNNN>-<slug>.md`. Copy the proposal template: `.agents/templates/PROPOSAL.md` when the project overrides it, otherwise `.workbench/templates/PROPOSAL.md`. Do not replace it with a folder or auxiliary planning files.
 
 - Use the next unused four-digit number and a kebab-case slug.
 - Complete the template frontmatter: `id: proposal.<NNNN>`, Title Case `title`, `status: draft`, the draft PR URL or number, and `supersedes`.
@@ -93,7 +93,7 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
 8. **Author the proposal.** Fill the template from the grounding, baseline, answers, and selected approach. State behavior and boundaries plainly, as changes to the current sources you linked. When the human chooses Gherkin for a surface, use `specifying-behavior-with-gherkin` for its shape. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
 
-9. **File unrelated defects.** If discovery reveals a defect outside this proposal's scope, file it in Beads. Discovering a defect is never a reason to expand the proposal or forget it. Use [`.agents/skills/tracking-work/`](../tracking-work/) for the judgment and filing process.
+9. **File unrelated defects.** If discovery reveals a defect outside this proposal's scope, file it in Beads. Discovering a defect is never a reason to expand the proposal or forget it. Use the `tracking-work` skill for the judgment and filing process.
 
 10. **Self-review.** Before showing the human, check:
     - every template section and frontmatter field is complete;
