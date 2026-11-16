@@ -1,5 +1,5 @@
 ---
-id: proposal.0006
+id: proposal.0007
 title: Depend on Workbench Instead of Copying It
 authors: [markmals, anthropic/claude-opus-5-5]
 status: draft
@@ -39,7 +39,7 @@ The copy carries three further costs:
 
 - **Node everywhere.** Workbench's own tooling requires Node, pnpm, and Bun in every project, including Swift and Rust projects that need none of them otherwise. That tooling is TypeScript scripts in `tools/`, a VitePress site, Oxfmt, Changesets, and an OMP tool whose test runs OMP's loader on Bun.
 - **OMP packages everywhere.** The harness wiring is OMP extension code in TypeScript, so every project inherits OMP-specific packages.
-- **A slower agent loop.** That wiring runs the full gate at the end of every turn. [Proposal 0007](https://github.com/markmals/workbench/pull/11) removes it, and this proposal builds on that.
+- **A slower agent loop.** That wiring runs the full gate at the end of every turn. [Proposal 0006](https://github.com/markmals/workbench/pull/11) removes it, and this proposal builds on that.
 
 The owner wants skills, rules, templates, the agent contract, and tools to update the way a dependency does, including in repositories that are not cloned locally. Changes to the record format should remain explicit migrations. They want Workbench's tooling in Rust, like their other CLIs, and want Workbench to require no TypeScript and no OMP-specific packages.
 
@@ -169,7 +169,7 @@ Incidental, and replaced here:
 - The VitePress and VoidZero theme, and Oxfmt and Oxlint.
 - Changesets with `@changesets/changelog-github`, and `tag-release.ts` and `project-version.ts`, which exist only to serve Changesets.
 - Fnox, with `fnox.toml`, the `[secrets.fnox]` task grants, and the 1Password CLI pin it shells out to.
-- The OMP `workflow` tool. [Proposal 0007](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions.
+- The OMP `workflow` tool. [Proposal 0006](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions.
 - The vendored `.agents/` copies.
 - `guides/adapting-your-harness.md`, which asks each project to hand-wire its harness.
 
@@ -335,11 +335,11 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 | `workbench check-commit <message-file>` | `tools/check-scoped-commit.ts` | Scopes below |
 | `workbench check-commits <base> <head>` | `tools/check-pr-commits.ts` | Every subject in the range |
 | `workbench check-change-files <base> <head>` | `tools/require-changeset.ts` | [Section 8](#8-change-files-and-releases) |
-| `workbench beads sync` and `workbench beads claim <id>` | Proposal 0007's `tools/beads.ts` | [Proposal 0007](https://github.com/markmals/workbench/pull/11), sections 3 and 4 |
+| `workbench beads sync` and `workbench beads claim <id>` | Proposal 0006's `tools/beads.ts` | [Proposal 0006](https://github.com/markmals/workbench/pull/11), sections 3 and 4 |
 | `workbench init` | The GitHub template and Adapting Your Harness | [Section 11](#11-adopting-workbench) |
 
 - **Parity.** Each ported command keeps today's output, exit statuses, and JSON fields. Every case in today's `tools/*.test.ts` for a retained behavior becomes a Rust test. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
-- **Beads.** `workbench status` ports, unchanged, the Beads section that [proposal 0007](https://github.com/markmals/workbench/pull/11) adds to `mise run status`. `workbench beads sync` and `workbench beads claim` port 0007's sync and claim behavior, outcomes, and exit statuses. The `beads:sync` and `beads:claim` tasks call them.
+- **Beads.** `workbench status` ports, unchanged, the Beads section that [proposal 0006](https://github.com/markmals/workbench/pull/11) adds to `mise run status`. `workbench beads sync` and `workbench beads claim` port 0006's sync and claim behavior, outcomes, and exit statuses. The `beads:sync` and `beads:claim` tasks call them.
 - **Commit scopes.** `check-commit` and `check-commits` accept three kinds of scope:
     - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
     - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
@@ -351,7 +351,7 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 
 ### 6. No harness hooks
 
-[Proposal 0007](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions, moves Beads orientation into `mise run status`, and defines the Beads sync points. This proposal assumes 0007 has landed. The package declares hooks for no harness.
+[Proposal 0006](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions and the pre-push check, moves Beads orientation into `mise run status`, and defines the Beads sync points. This proposal assumes 0006 has landed. The package declares hooks for no harness.
 
 ### 7. No workflow tool
 
@@ -431,14 +431,14 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 - **`mise.toml`:**
     - the `postinstall` link hook;
     - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
-    - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0007;
+    - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0006;
     - the tasks `status`, `validate`, `beads:sync`, and `beads:claim` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
     - the `.omp/config.yml` extension entry, appended to an existing list;
     - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
-- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, and Beads gets its steps, including proposal 0007's sync steps.
+- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, and Beads gets its steps, including proposal 0006's sync steps. It runs no check before a push.
 - **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `check-commits` and `check-change-files` on every pull request except Knope's release pull request.
 - **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, `init` reports it.
 - **Records:**
@@ -515,7 +515,7 @@ This change touches many independent surfaces, so its outcomes are listed for re
 
 - [ ] In a fixture repository with no Node on PATH, pinning a published release and running `mise install` creates `.workbench`. A new OMP session and a new Claude Code session each receive the process contract and list Workbench's skills, and OMP lists the four rules.
 - [ ] Changing the pin and running `mise install` re-points `.workbench`, and the next session in each harness loads the new release.
-- [ ] `workbench status`, `validate`, `check-commit`, and `check-commits` pass the cases ported from `tools/*.test.ts`, and `status` reproduces proposal 0007's Beads section.
+- [ ] `workbench status`, `validate`, `check-commit`, and `check-commits` pass the cases ported from `tools/*.test.ts`, and `status` reproduces proposal 0006's Beads section.
 - [ ] `workbench validate` reports a project skill or rule that reuses a Workbench name.
 - [ ] `workbench check-change-files` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
 - [ ] Merging Knope's release pull request publishes a GitHub release with Knope-written notes, four attested archives, and the tag. Installing that version through mise on macOS arm64 and on CI's Linux x64 yields a complete package root.
@@ -602,12 +602,12 @@ This breaks every existing Workbench project. Nothing changes in a project until
     - Its non-goal says infrastructure "ships harness-neutral in `.agents/`". The infrastructure becomes harness-neutral content in the package, with small committed harness declarations.
     - Both statements are revised at completion.
     - The vision's principles hold:
-        - Enforcement stays mechanical at commit, push, and CI.
+        - Enforcement stays mechanical at commit time and in CI.
         - The package content assumes no language, framework, or platform.
 - **[Proposal 0001](0001-workbench-2.md)** established the template-repository distribution and the Workbench 2 tooling. This proposal replaces both and leaves that record as history.
 - **[Proposal 0004](0004-make-room-for-ui-polish.md)** leaves look and feel to the running product. The site's appearance follows that.
 - **[Proposal 0005](0005-current-specifications.md)** defined the current-record model and the record and status contract in `guides/record-validation.md`, both preserved. Its "changesets and changelogs" role passes to change files and Knope's changelog.
-- **[Proposal 0007](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench status` ports 0007's Beads section.
+- **[Proposal 0006](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and the pre-push check, and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench status` ports 0006's Beads section.
 - **`.agents/rules/enforcement-hierarchy.md`.** Moving the checks into the package keeps them deterministic: `commit-msg`, `pre-commit`, CI, and `validate`. It adds the collision check.
 
 ## Future directions
