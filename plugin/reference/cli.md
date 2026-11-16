@@ -2264,6 +2264,93 @@ Result schema:
 }
 ```
 
+#### `workbench commits scopes`
+
+List the scopes a commit subject may use, and where each comes from.
+
+Lists every scope `workbench commits check` accepts, in the order it reads them: the built-in process scopes (`source: built-in`); the scopes listed one per line in the optional `.agents/commit-scopes` (`source: scopes-file`); and `<NNNN>-<slug>` for every `proposals/<NNNN>-<slug>.md` (`source: proposal`, with the proposal's `path`). A scope the scopes file repeats is listed once, with its first source. Run it before writing a commit subject; a scope a project needs that no list has goes into `.agents/commit-scopes` in the same commit. Reads only. An unreadable `.agents/commit-scopes` or `proposals/` is PRECONDITION_FAILED.
+
+- **Effect:** reads only
+- **Requires:** `git`
+- **Dry run:** no
+- **Idempotent:** yes
+- **Errors:** `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `INTERNAL`
+
+Examples:
+
+```sh
+# List the scopes this project's commit subjects may use
+workbench commits scopes
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "Scope": {
+      "description": "One accepted scope.",
+      "properties": {
+        "path": {
+          "description": "For a proposal scope, the proposal file it names.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scope": {
+          "description": "The scope, as written before the colon in a subject.",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        }
+      },
+      "required": [
+        "scope",
+        "source"
+      ],
+      "type": "object"
+    },
+    "Source": {
+      "description": "Where an accepted scope comes from.",
+      "oneOf": [
+        {
+          "const": "built-in",
+          "description": "One of Workbench's process scopes, accepted in every project.",
+          "type": "string"
+        },
+        {
+          "const": "scopes-file",
+          "description": "Listed in the project's `.agents/commit-scopes`.",
+          "type": "string"
+        },
+        {
+          "const": "proposal",
+          "description": "The `<NNNN>-<slug>` of a proposal in `proposals/`.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "items": {
+      "description": "Every accepted scope, built-in first, then the scopes file's, then the proposals'.",
+      "items": {
+        "$ref": "#/$defs/Scope"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "title": "CommitScopes",
+  "type": "object"
+}
+```
+
 ### `change-files`
 
 Knope change files for release notes.
@@ -2367,7 +2454,7 @@ Result schema:
 
 Check that a commit range adds a valid change file or carries Release-Note: none.
 
-Passes when the range, the commits reachable from head and not from base, either adds a Markdown file directly under `.changeset/` with valid change-file frontmatter, or has a commit carrying the Git trailer `Release-Note: none` (the key in any case, the value exactly `none`, parsed by Git the way `git interpret-trailers --parse` parses it). Added files are the ones head adds since its merge base with base, read as committed at head. Valid frontmatter is a `---` line, one `<package>: <type>` line per affected package, and a closing `---` line; when the project has a knope.toml, every package must be one it declares (`default` for a single `[package]`) and every type `major`, `minor`, `patch`, or one that package's `extra_changelog_sections` add. The result lists each added change file with its problems and the commits carrying the trailer. Otherwise it fails with CHECK_FAILED naming both ways to satisfy it. When the check passes but another added file is invalid, stderr warns about it, because Knope fails on it. An unknown revision is NOT_FOUND; base and head without shared history is INVALID_ARGUMENT; an unusable knope.toml is PRECONDITION_FAILED. CI runs it on every pull request except Knope's release pull request.
+Passes when the range, the commits reachable from head and not from base, either adds a valid change file, a Markdown file directly under `.changeset/`, or has a commit carrying the Git trailer `Release-Note: none` (the key in any case, the value exactly `none`, parsed by Git the way `git interpret-trailers --parse` parses it). Added files are the ones head adds since its merge base with base, read as committed at head. A valid change file has valid frontmatter, then a summary: the first non-blank line after the frontmatter is a heading with text, such as `# Add the export queue`, which Knope writes into the changelog. Valid frontmatter is a `---` line, one `<package>: <type>` line per affected package, and a closing `---` line; when the project has a knope.toml, every package must be one it declares (`default` for a single `[package]`) and every type `major`, `minor`, `patch`, or one that package's `extra_changelog_sections` add. The result lists each added change file with its problems and the commits carrying the trailer. Otherwise it fails with CHECK_FAILED naming both ways to satisfy it. When the check passes but another added file is invalid, stderr warns about it, because Knope fails on it. An unknown revision is NOT_FOUND; base and head without shared history is INVALID_ARGUMENT; an unusable knope.toml is PRECONDITION_FAILED. CI runs it on every pull request except Knope's release pull request.
 
 - **Effect:** reads only
 - **Requires:** `git`
