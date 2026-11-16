@@ -350,7 +350,7 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 
 ### Out of scope
 
-- **Packaging Workbench and porting `status` to Rust.** That is [proposal 0007](https://github.com/markmals/workbench/pull/10), which ports this behavior unchanged.
+- **Packaging Workbench and porting `status` to Rust.** That is [proposal 0007](https://github.com/markmals/workbench/pull/10). It carries this behavior over under its agent-first CLI contract, which changes the output format and the error codes, not what is detected.
 - **Migrating consumer projects,** including deleting Recon's info branch. Each is a change in that repository.
 - **Changing Beads itself**, such as beads#7945.
 - **A shared Dolt server, or a DoltHub or bucket remote.** See Alternatives and Future directions.
@@ -375,7 +375,7 @@ The skill's claim example and the word "atomic" are replaced. Detail that only m
 - **[VISION.md](../VISION.md).** "Ceremony must earn its cost": the hooks and the pre-push check are removed on measured cost. "Enforce mechanically": checks remain at commit time and in CI. "Not an issue tracker": Beads keeps the work graph.
 - **[Proposal 0003](0003-fit-the-harness-to-current-models.md)** recorded `check-before-stop`'s timeout in Trove and suggested a fast-subset stop hook. This proposal removes the hook instead; see Alternatives.
 - **[Proposal 0005](0005-current-specifications.md)** put `status`'s contract in `guides/record-validation.md`, which this proposal extends.
-- **[Proposal 0007](https://github.com/markmals/workbench/pull/10)** depends on this one: its package declares no harness hooks, and its Rust `status` ports this Beads section.
+- **[Proposal 0007](https://github.com/markmals/workbench/pull/10)** depends on this one: its package declares no harness hooks, and its `workbench workflow status` and `beads` commands carry this behavior over.
 - **`.agents/rules/enforcement-hierarchy.md`.** Tier 0 loses the harness wiring and gains the hk Beads steps. Every remaining check runs whether or not the agent remembers.
 
 ## Future directions
