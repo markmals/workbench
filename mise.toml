@@ -135,5 +135,6 @@ root="dist/workbench-$target"
 rm -rf "$root" && mkdir -p "$root" artifacts
 cp -R plugin/. "$root/"
 cp "target/$target/release/workbench" "$root/workbench"
-tar -C dist -czf "artifacts/workbench-$target.tar.gz" "workbench-$target"
+# macOS tar otherwise adds `._*` AppleDouble files for extended attributes.
+COPYFILE_DISABLE=1 tar -C dist -czf "artifacts/workbench-$target.tar.gz" "workbench-$target"
 """

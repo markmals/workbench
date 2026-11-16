@@ -2,10 +2,17 @@
 # projects: `3.0.0-rc.1` is installed with `mise use github:markmals/workbench@3.0.0-rc.1`.
 # The repository is public, so a prerelease is public too; publishing one needs the owner's
 # explicit confirmation. Delete the prerelease and its tag once the preview is done.
+#
+# Two ways to start it. Pushing a prerelease tag such as `v3.0.0-rc.1` runs this workflow as it
+# stands at the tagged commit, so it works from a branch before this file reaches `main`.
+# Dispatching it by hand (`gh workflow run prerelease.yml --ref <branch> -f version=3.0.0-rc.1`)
+# needs the file on `main`, and creates the tag itself.
 
 name: Prerelease
 
 on:
+    push:
+        tags: ["v[0-9]+.[0-9]+.[0-9]+-*"]
     workflow_dispatch:
         inputs:
             version:
@@ -17,28 +24,34 @@ permissions:
     contents: read
 
 concurrency:
-    group: prerelease-${{ inputs.version }}
+    group: prerelease-${{ inputs.version || github.ref_name }}
     cancel-in-progress: false
 
 jobs:
     validate:
         name: Validate the version
         runs-on: ubuntu-latest
+        outputs:
+            version: ${{ steps.version.outputs.version }}
         steps:
             - name: Require a prerelease version
+              id: version
               env:
-                  VERSION: ${{ inputs.version }}
+                  INPUT: ${{ inputs.version }}
+                  TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
               run: |
-                  if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-[0-9A-Za-z.]+$'; then
-                      echo "::error::$VERSION is not a prerelease version such as 3.0.0-rc.1"
+                  version="${INPUT:-${TAG#v}}"
+                  if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-[0-9A-Za-z.]+$'; then
+                      echo "::error::'$version' is not a prerelease version such as 3.0.0-rc.1"
                       exit 1
                   fi
+                  echo "version=$version" >>"$GITHUB_OUTPUT"
 
     build:
         needs: validate
         uses: ./.github/workflows/build-archives.yml
         with:
-            version: ${{ inputs.version }}
+            version: ${{ needs.validate.outputs.version }}
         permissions:
             contents: read
             id-token: write
@@ -46,7 +59,7 @@ jobs:
 
     publish:
         name: Publish the prerelease
-        needs: build
+        needs: [validate, build]
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -59,12 +72,13 @@ jobs:
             - name: Create the prerelease
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  VERSION: ${{ inputs.version }}
+                  VERSION: ${{ needs.validate.outputs.version }}
                   TARGET: ${{ github.sha }}
+                  REPOSITORY: ${{ github.repository }}
               run: |
                   gh release create "v$VERSION" artifacts/*.tar.gz \
-                      --repo "${{ github.repository }}" \
+                      --repo "$REPOSITORY" \
                       --target "$TARGET" \
                       --prerelease \
                       --title "v$VERSION" \
-                      --notes "Prerelease of Workbench $VERSION from ${{ github.ref_name }} at $TARGET, for preview only."
+                      --notes "Prerelease of Workbench $VERSION at $TARGET, for preview only."

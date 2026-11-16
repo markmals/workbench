@@ -52,11 +52,12 @@ jobs:
               if: inputs.version != ''
               env:
                   VERSION: ${{ inputs.version }}
+              # Perl rather than sed: the macOS and Linux runners' seds disagree on in-place
+              # flags and first-match addressing. Only the first `version =` is the package's.
               run: |
-                  sed -i.bak -E "0,/^version = \".*\"/s//version = \"$VERSION\"/" Cargo.toml
-                  sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" plugin/.claude-plugin/plugin.json
-                  rm Cargo.toml.bak plugin/.claude-plugin/plugin.json.bak
-                  mise exec -- cargo update --workspace --offline || mise exec -- cargo update --workspace
+                  perl -0pi -e 's/^version = "[^"]*"/version = "$ENV{VERSION}"/m' Cargo.toml
+                  perl -pi -e 's/"version": "[^"]+"/"version": "$ENV{VERSION}"/' plugin/.claude-plugin/plugin.json
+                  mise exec -- cargo update --workspace
             - run: mise run package -- "${{ matrix.target }}"
             - uses: actions/attest-build-provenance@v4.2.2
               with:
