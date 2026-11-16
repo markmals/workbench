@@ -58,6 +58,8 @@ Beads (bd 1.3.2, documentation in `gastownhall/beads`):
 
     The pull settles some conflicts on its own, including last-write-wins on individual issue fields. A conflict it cannot resolve safely halts the cycle with exit status 2. A working set left dirty by another writer exits 4.
 
+- **Resolving conflicts.** `bd conflicts list` and `bd conflicts show` present the conflicts left in the working set issue by issue and field by field (base, ours, theirs). `bd conflicts resolve <id> --ours|--theirs` settles one issue, and `--all` settles all of them (`bd conflicts --help`). Beads' recovery guide warns never to force past a conflict and never to delete another machine's work (`docs/recovery/sync-failures.md`).
+
 - **`dolt.auto-push` is opt-in.** It pushes after writes, debounced to one push per interval. Beads warns that "concurrent pushes to git-protocol Dolt remotes can corrupt or strand remote history when multiple writers race" (`docs/reference/configuration.md`).
 - **Other remote types exist.** Beads supports DoltHub, S3, GCS, Git, and file remotes. It names DoltHub the zero-configuration default for syncing across machines and documents bucket-based syncing as an alternative (`docs/architecture/dolt.md`, `docs/multi-agent/bucket-federation.md`).
 
@@ -120,7 +122,7 @@ Other constraints:
 - After a session's `mise run status`, the agent sees every Beads change any machine had pushed at its own latest sync point.
 - No turn pays for a check, a formatter run, or a prime injection it did not ask for.
 - No sync creates or updates anything under `refs/heads/`.
-- Concurrent syncs from two machines never silently lose a write that Beads does not settle by design. Push races retry, and unsafe conflicts halt and are reported.
+- Concurrent syncs from two machines never silently lose a write that Beads does not settle by design. Push races retry. A conflict Beads cannot settle halts the sync until the agent resolves it, and the agent reports how it did so.
 
 ### Remaining uncertainty
 
@@ -194,8 +196,8 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
     | --- | --- |
     | `synced` | One line. |
     | `failed` | The reason (unreachable remote, timeout, authentication), and that the rest shows this machine's state. |
-    | `conflict` | `bd sync` exit 2: the conflict needs a person to resolve it, with a link to the adoption guidance. |
-    | `blocked` | `bd sync` exit 4: a dirty working set blocks publishing. |
+    | `conflict` | `bd sync` exit 2: names the conflicted items. The agent resolves them ([section 5](#5-agent-documentation)). |
+    | `blocked` | `bd sync` exit 4: a dirty working set blocks publishing. The agent investigates and clears it ([section 5](#5-agent-documentation)). |
     | `unavailable` | `bd` is missing or the workspace is not initialized, with a pointer to `mise run setup`. Shown instead of the whole section. |
 
     The sync is limited to 20 seconds; past that its outcome is `failed`.
@@ -264,8 +266,14 @@ The `tracking-work` skill gains a section on Beads across machines. The owner re
 - **Claiming.** Claim only through `mise run beads:claim`. The skill explains what each outcome in section 4 means, and that an item held by another claimant is not available.
 - **Sync outcomes**, from `mise run status` and the tasks:
     - `failed`: continue, and say that Beads may be stale.
-    - `conflict`: stop writing to Beads, give the human the `bd sync` output, and never force.
-    - `blocked`: report it to the human.
+    - `conflict`: resolve it, using best judgement.
+        1. Export a backup first (`bd export --all`).
+        2. Read each conflicted item with `bd conflicts show`.
+        3. Settle each with `bd conflicts resolve <id> --ours` or `--theirs`. When the right answer combines both sides, follow up with `bd update`.
+        4. Finish with `mise run beads:sync`.
+        5. Afterwards, tell the human what was resolved and why, as a report rather than a request for approval.
+    - `blocked`: find what left the working set dirty and clear it, with the same backup first and the same report afterwards.
+    - Whatever the resolution, never force a push, and never delete or re-bootstrap the replica to make a conflict go away. Either one discards another machine's work.
     - `unavailable`: run `mise run setup`.
 - **Never:**
     - run `bd dolt push`, `bd dolt pull`, or `bd sync` directly;
@@ -279,7 +287,7 @@ The `tracking-work` skill gains a section on Beads across machines. The owner re
     - run `bd prime`, whose generic guidance contradicts these rules.
 - **A new machine.** `mise run setup` restores the replica.
 
-The skill's claim example and the word "atomic" are replaced. Conflict and recovery detail that only matters when something goes wrong lives in a supporting file in the skill's directory, linked from the section. The contract carries the short rules and points to the skill.
+The skill's claim example and the word "atomic" are replaced. Detail that only matters when something goes wrong lives in a supporting file in the skill's directory, linked from the section. That includes worked conflict resolutions, aborting an open merge, and pointers into Beads' recovery guide. The contract carries the short rules and points to the skill.
 
 ### 6. Documents and configuration that change
 
