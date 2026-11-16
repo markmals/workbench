@@ -93,6 +93,10 @@ Checked on 2026-11-15:
     - Sequential: A claimed an item and synced; B synced and tried to claim it. Beads refused: "issue already claimed by mark@alpha".
     - Concurrent: both claimed another item before syncing, and both claims succeeded locally. After both synced, both replicas showed `mark@beta`. A's claim was gone, with no error.
 - **First publish.** `bd sync` fails while the remote has no `refs/dolt/data` yet ("no branches found in remote"). The first publish needs `bd dolt push`.
+- **Conflicts in embedded storage**, which Workbench uses. One replica deleted an item and the other renamed it.
+    - `bd sync` exited 2 and named only the table (`"conflicts": ["issues"]`). It aborted the merge and restored the working set, so `bd conflicts list` and `bd conflicts show` reported nothing. `bd sql` is unsupported in embedded mode.
+    - `bd diff main origin/main` listed the item. `bd vc merge origin/main --strategy theirs`, then `bd sync`, settled the conflict and published the result.
+    - On 2026-11-15 the owner chose the conflict report and resolution procedure in sections 2 and 5 from these results.
 - **Worktrees.** All worktrees of a checkout share one database: `bd where` in a Worktrunk worktree resolves to the main checkout's `.beads/embeddeddolt`.
 - **Measured hook costs.**
     - `mise run check` takes 4.7 s in Workbench, and the 4–8 minutes in Trove come from [proposal 0003](0003-fit-the-harness-to-current-models.md).
@@ -203,7 +207,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
     | --- | --- |
     | `synced` | One line. |
     | `failed` | The reason (unreachable remote, timeout, authentication), and that the rest shows this machine's state. |
-    | `conflict` | `bd sync` exit 2: names the conflicted items. The agent resolves them ([section 5](#5-agent-documentation)). |
+    | `conflict` | `bd sync` exit 2: names the conflicted tables Beads reports, and the items that differ between this replica and the remote (`bd diff main origin/main`). The agent resolves them ([section 5](#5-agent-documentation)). |
     | `blocked` | `bd sync` exit 4: a dirty working set blocks publishing. The agent investigates and clears it ([section 5](#5-agent-documentation)). |
     | `unavailable` | `bd` is missing or the workspace is not initialized, with a pointer to `mise run setup`. Shown instead of the whole section. |
 
@@ -275,8 +279,8 @@ The `tracking-work` skill gains a section on Beads across machines. The owner re
     - `failed`: continue, and say that Beads may be stale.
     - `conflict`: resolve it, using best judgement.
         1. Export a backup first (`bd export --all`).
-        2. Read each conflicted item with `bd conflicts show`.
-        3. Settle each with `bd conflicts resolve <id> --ours` or `--theirs`. When the right answer combines both sides, follow up with `bd update`.
+        2. Find the items. When the merge was left live, `bd conflicts list` and `bd conflicts show` present them. When it was aborted, as embedded storage always does, `bd diff main origin/main` and `bd show` do.
+        3. Settle live conflicts with `bd conflicts resolve <id> --ours` or `--theirs`, and an aborted merge with `bd vc merge origin/main --strategy ours` or `theirs`. When the right answer combines both sides, follow up with `bd update`.
         4. Finish with `mise run beads:sync`.
         5. Afterwards, tell the human what was resolved and why, as a report rather than a request for approval.
     - `blocked`: find what left the working set dirty and clear it, with the same backup first and the same report afterwards.
