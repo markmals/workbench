@@ -222,6 +222,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 ### 3. Syncing Beads across machines
 
 - **The remote** is the project's own GitHub repository, through `sync.remote`, with Beads history in `refs/dolt/data`. That is unchanged from today.
+- **Only the project's own remote.** A sync whose Dolt remote is not the same repository as the checkout's `origin` is `failed`, without pulling or pushing. Workbench commits `.beads/config.yaml`, so a project created from the Workbench template would otherwise sync with Workbench's own Beads. Its getting-started steps replace Workbench's `.beads/` before the first setup. The owner added this on 2026-11-15 after review found the hazard; proposal 0007's `workbench init` is its long-term home.
 - **Every sync runs through mise.** A project's `mise.toml` sets:
 
     ```toml
