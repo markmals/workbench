@@ -43,6 +43,8 @@ The copy carries three further costs:
 
 The owner wants skills, rules, templates, the agent contract, and tools to update the way a dependency does, including in repositories that are not cloned locally. Changes to the record format should remain explicit migrations. They want Workbench's tooling in Rust, like their other CLIs, and want Workbench to require no TypeScript and no OMP-specific packages.
 
+Workbench is also the process shared by the owner's holotype templates in `~/Developer/Templates/agentic-projects`: one template per kind of project the owner builds, with more planned. Each template owns its project's tooling, and Workbench supplies the process. Whatever tools Workbench does name must match the owner's stack (`~/Developer/Notes/sprinkles-stack.md`). In particular, Varlock replaces Fnox for environment variables and secrets.
+
 ## Domain grounding
 
 ### Established context
@@ -79,6 +81,7 @@ Tooling:
     - The release-PR recipe keeps one release pull request open from `main`. Merging it runs `Release`, which creates the GitHub release and uploads assets before publishing ([recipe](https://knope.tech/recipes/1-preview-releases-with-pull-requests/), [Release](https://knope.tech/reference/config-file/steps/release/)).
     - `knope document-change` prompts interactively.
 - **Single binaries.** [Hugo](https://gohugo.io), [Pagefind](https://pagefind.app), and [dprint](https://dprint.dev) are single binaries with no Node requirement.
+- **Varlock** keeps a project's environment contract in a committed, typed `.env.schema`, with decorators such as `@sensitive` and `@required`. Values come from gitignored `.env` files or from plugins such as 1Password's, and `varlock run -- <command>` resolves and injects them ([Varlock](https://varlock.dev), [1Password plugin](https://varlock.dev/plugins/1password/)). It ships as a standalone binary in its GitHub releases. This machine runs 1.25.0 as `github:dmno-dev/varlock` through mise. Gourmand, Trove, and Vice already use it; Gourmand pins `npm:varlock`, which needs Node.
 
 ### Repository observations
 
@@ -155,7 +158,7 @@ Preserve:
 - **The record model and lifecycle** from proposals 0001, 0003, 0004, and 0005.
 - **The task names** every consumer already shares (`setup`, `check`, `status`, `validate`, `fmt`) and the single gate `mise run check`.
 - **The record and status contract** in `guides/record-validation.md`, and the behavior covered by `tools/*.test.ts`.
-- **The tool owners:** hk owns git hooks, including the Scoped Commits check against `.agents/commit-scopes`. Beads owns the work graph. Fnox owns secrets. Worktrunk owns worktrees.
+- **The tool owners:** hk owns git hooks, including the Scoped Commits check against `.agents/commit-scopes`. Beads owns the work graph. Worktrunk owns worktrees.
 - **CI** running the same gate.
 - **The published site:** home, vision, process, guides, and the proposal, policy, and decision records with their metadata headers, historical proposal navigation, search, and PR previews under `/pr-preview/pr-<N>/`. The site build is the dead-link check.
 
@@ -165,6 +168,7 @@ Incidental, and replaced here:
 - TypeScript tools and their Vitest suites, including the workflow tool's.
 - The VitePress and VoidZero theme, and Oxfmt and Oxlint.
 - Changesets with `@changesets/changelog-github`, and `tag-release.ts` and `project-version.ts`, which exist only to serve Changesets.
+- Fnox, with `fnox.toml`, the `[secrets.fnox]` task grants, and the 1Password CLI pin it shells out to.
 - The OMP `workflow` tool. [Proposal 0007](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions.
 - The vendored `.agents/` copies.
 - `guides/adapting-your-harness.md`, which asks each project to hand-wire its harness.
@@ -178,8 +182,8 @@ Publish Workbench as releases of one package, and make every project a consumer 
 ```text
 New project
 mise use github:markmals/workbench@3 && mise install && workbench init
-  → pin in mise.toml, harness declarations, task interface, empty record
-  → `mise run check` passes
+  → pin in mise.toml, harness declarations, Workbench's tasks and checks, empty record
+  → `mise run status` and `mise run validate` pass; the holotype template supplies the rest
 
 Fresh clone of any Workbench project
 mise install
@@ -303,7 +307,7 @@ extensions:
 - the implementation steps and the rules;
 - Beads usage;
 - the task interface;
-- the roles of mise, hk, Fnox, Beads, Knope, and Worktrunk;
+- the roles of mise, hk, Varlock, Beads, Knope, and Worktrunk;
 - delegation guidance;
 - links to the four rules and the reasoning skills.
 
@@ -322,7 +326,7 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 
 ### 5. The `workbench` CLI
 
-`workbench` is a Rust binary, statically linked for each target. It needs `git` at run time. It needs `gh` and `bd` only for the commands that use them today. It resolves the project root as the Git top level of the current directory, never from its own location.
+`workbench` is a Rust binary, statically linked for each target. Following the owner's Rust CLI stack, it is built with Clap, tested with `cargo test`, formatted with rustfmt, and linted with Clippy. It needs `git` at run time, and `gh` and `bd` only for the commands that use them today. It resolves the project root as the Git top level of the current directory, never from its own location.
 
 | Command | Replaces | Contract |
 | --- | --- | --- |
@@ -403,48 +407,60 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
     - A relative link to an unpublished repository file resolves to that file on the repository named by `params.repository`.
     - A relative link to a file that does not exist fails the build, naming the file that contains it. This keeps the site build as the dead-link check inside `mise run check`.
 - **Builds and tools.**
-    - Each build takes its base URL from the build command, so PR previews keep `/pr-preview/pr-<N>/`.
+    - Each build takes its base URL from the build command, so a preview can be served under any path, including GitHub Pages' `/pr-preview/pr-<N>/`.
     - Pagefind indexes the built site, and the theme offers search over that index.
     - A project pins `hugo` and `github:CloudCannon/pagefind`. The theme declares its minimum Hugo version and fails with that requirement when built with an older one.
     - `docs:build` runs Hugo, then Pagefind. `docs:dev` serves the site with reload; search needs a build.
+- **Hosting.** A project publishes its site to GitHub Pages or to Cloudflare; each suits different projects, so Workbench supports both.
+    - On either host, `main` publishes the site. Each pull request gets a preview at its own URL, linked from the pull request and removed when the pull request closes.
+    - `workbench init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows ([section 11](#11-adopting-workbench)).
+    - Cloudflare publishing uses Cloudflare's GitHub Action, which runs Wrangler on the CI runner only; the project still needs no Node. It needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets.
+    - Workbench's own site stays on GitHub Pages.
 - **Look and feel** are left to the owner on the preview, per [proposal 0004](0004-make-room-for-ui-polish.md). Matching the VitePress theme is not a requirement.
 
 ### 10. Formatting
 
 - **In Workbench.** dprint formats Markdown with `textWrap: "never"`, plus JSON, YAML (including frontmatter), and TOML. hk's `dprint`, `cargo_fmt`, and `cargo_clippy` builtins replace the Oxfmt, Oxlint, and `tsrs` steps. The whitespace, newline, merge-conflict, and `actionlint` steps remain. No formatter checks Hugo templates or CSS.
-- **In projects.** `workbench init` writes a `dprint.json` covering Markdown, JSON, YAML, and TOML when the project has none. A project's language formatters stay its own.
+- **In projects.** Formatting is project-owned. Each holotype template chooses its formatters, for example Oxfmt in TypeScript projects. `workbench init` writes no formatter configuration.
 
 ### 11. Adopting Workbench
 
-`workbench init` runs in a Git repository whose `mise.toml` already pins `github:markmals/workbench` (`mise use github:markmals/workbench@<version>` writes that pin). It creates each missing item and never overwrites an existing file. For structured files it adds only missing keys or entries:
+`workbench init` adds Workbench to a Git repository: a new project, a holotype template, or an existing project. It writes only what Workbench owns. Formatters, tests, builds, releases, and environment schemas belong to the project or its holotype template. `init` runs where `mise.toml` already pins `github:markmals/workbench` (`mise use github:markmals/workbench@<version>` writes that pin). It creates each missing item and never overwrites an existing file. For structured files it adds only missing keys or entries:
 
 - **`mise.toml`:**
     - the `postinstall` link hook;
-    - pins for `hk`, `gh`, Beads, `knope`, and `dprint` when absent, at the versions the release was tested with;
+    - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
     - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0007;
-    - the tasks `setup`, `check`, `status`, `validate`, `fmt`, and `beads:sync` when absent.
+    - the tasks `status`, `validate`, and `beads:sync` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
     - the `.omp/config.yml` extension entry, appended to an existing list;
     - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
-- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, its `pre-commit` hook formats, and Beads gets its steps, including proposal 0007's sync steps.
-- **`knope.toml`** when absent, for one package with the settings in [section 8](#8-change-files-and-releases).
-- **CI and release workflows** when absent: CI running `mise run check`, `check-commits`, and `check-change-files`, plus Knope's prepare-release and release workflows.
+- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench check-commit`, and Beads gets its steps, including proposal 0007's sync steps.
+- **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `check-commits` and `check-change-files` on every pull request except Knope's release pull request.
 - **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, `init` reports it.
 - **Records:**
     - `VISION.md` from the template when absent;
     - `proposals/`, `policies/`, `decisions/`, and `guides/` with their READMEs when absent;
     - `.agents/commit-scopes` when absent;
-    - `docs/hugo.toml` and `dprint.json` when absent.
+    - `docs/hugo.toml` when absent.
+- **With `--site github-pages` or `--site cloudflare`:** pins for `hugo` and `github:CloudCannon/pagefind`, the `docs:build` and `docs:dev` tasks, and that host's publishing and preview workflows, each when absent.
 
-`init` then prints what it created, what it left unchanged, and every Workbench file the project still vendors. That last list covers:
+`init` then prints:
+
+- what it created;
+- what it left unchanged;
+- every Workbench file the project still vendors;
+- the project-owned pieces Workbench relies on but does not create: the `setup`, `check`, and `fmt` tasks, and a release flow that consumes change files with Knope.
+
+The vendored files it lists cover:
 
 - Workbench-named skills and rules under `.agents/`;
 - templates under `.agents/templates/`, marked identical (removable) or different (an override);
 - the three OMP extensions and `.omp/tools/dynamic-workflows/`;
 - the TypeScript tools `init` replaces;
-- `.changeset/config.json` and `docs/.vitepress/`.
+- `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`.
 
 `init` deletes nothing. It exits zero unless it could not write a file.
 
@@ -453,9 +469,9 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 1. Pin and run `init`.
 2. Move project additions out of shared files into project rules, project skills, or template overrides.
 3. Delete the vendored copies `init` lists.
-4. Convert pending Changesets entries to change files and swap the release workflow.
-5. Move a published site to Hugo.
-6. Format records with dprint.
+4. Convert pending Changesets entries to change files, and move the release flow to Knope.
+5. Move a published site to Hugo on GitHub Pages or Cloudflare.
+6. Replace Fnox with Varlock: declare variables in `.env.schema`, and run tasks that need secrets under `varlock run --`.
 7. Run `mise run check`.
 8. Optionally enable Renovate for the pin, with lock regeneration.
 
@@ -481,7 +497,7 @@ The Workbench repository stops being a GitHub template repository; the owner cha
     - Changesets: `.changeset/config.json` and `.changeset/README.md`;
     - the process files under `.agents/`, which move to `plugin/`.
 - **Kept.** `.agents/commit-scopes` keeps Workbench's repository-only scopes.
-- **`mise.toml`** drops `node`, `pnpm`, and `bun`. It adds Rust, `hugo`, `github:CloudCannon/pagefind`, `knope`, and `dprint`. It keeps `hk`, `fnox`, `1password`, `gh`, `actionlint`, `worktrunk`, and Beads.
+- **`mise.toml`** drops `node`, `pnpm`, `bun`, `fnox`, and `1password`, and its `[secrets.fnox]` block; `fnox.toml` is deleted. It adds Rust, `hugo`, `github:CloudCannon/pagefind`, `knope`, and `dprint`. It keeps `hk`, `gh`, `actionlint`, `worktrunk`, and Beads. Workbench needs no environment variables or secrets, so it has no `.env.schema`.
 - **`mise run check`** runs the Rust tests, `hk check --all`, `validate`, and `docs:build`.
 - **Workflows:** CI (check, commit subjects, change files), docs publishing, PR previews, prepare-release, and release.
 - **Documents updated with the change:**
@@ -503,8 +519,8 @@ This change touches many independent surfaces, so its outcomes are listed for re
 - [ ] `workbench check-change-files` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
 - [ ] Merging Knope's release pull request publishes a GitHub release with Knope-written notes, four attested archives, and the tag. Installing that version through mise on macOS arm64 and on CI's Linux x64 yields a complete package root.
 - [ ] Workbench contains no `package.json`, npm lockfile, TypeScript source, or OMP package, pins no Node, pnpm, or Bun, and `mise run check` passes.
-- [ ] The Hugo site publishes today's pages, fails on a dead relative link, serves under the PR-preview base path, and searches.
-- [ ] In an empty repository, `workbench init` produces a project whose `mise run check` passes. In a copy of an existing consumer, it changes no existing file and lists that consumer's vendored Workbench files.
+- [ ] The Hugo site publishes today's pages, fails on a dead relative link, serves under a PR-preview path, and searches. `init --site github-pages` and `--site cloudflare` each produce working publishing and preview workflows.
+- [ ] In an empty repository, `workbench init` followed by `mise install` makes `mise run status` and `mise run validate` succeed and lets both harnesses load the package. In a copy of an existing consumer, it changes no existing file and lists that consumer's vendored Workbench files and the missing project-owned tasks.
 
 ## Compatibility
 
@@ -521,6 +537,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **The workflow tool.** Projects that still carry a copy (Trove, Pitlane, Hive, and Bento) lose it on migration. OMP's native helpers replace it there.
 - **Pico.** Until #61 supports declared plugins and their rules, Pico sessions in an adopted project load its `AGENTS.md` and `.agents/` content but not the package. Today's vendored copies do reach Pico. Pico is not the owner's daily harness yet.
 - **OMP users with user-level `extensions:`** must repeat those entries in the project list, because a project list replaces the user list.
+- **Fnox to Varlock.** Projects that grant secrets through Fnox move them to `.env.schema` and run the affected tasks under `varlock run --`. Their holotype templates own that change.
 - **Starting a project.** "Use this template" ends; `workbench init` replaces it.
 - **Platforms.** Windows is not a supported target.
 
