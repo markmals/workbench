@@ -36,7 +36,7 @@ The process produces and maintains ten kinds of artifact, described here as role
 | Decisions | `decisions/<NNNN>-<slug>.md`: one current significant choice, its context, alternatives, and consequences. | Added after human agreement, revised in place, and deleted when no longer applicable. |
 | Proposals | `proposals/<NNNN>-<slug>.md`: one change, its scope, approach, and reasons. | Revised while the change is designed and reviewed; preserved as history once complete. |
 
-The first five roles describe and realize the product. The next four provide project context. A proposal records a change to whichever of the others it affects. Work items, changesets and changelogs, review evidence, previews, and process machinery keep their own purposes. None of the roles requires separate narrative, use-case, flow, error-catalogue, view-model, toolchain, or architecture-overview documents.
+The first five roles describe and realize the product. The next four provide project context. A proposal records a change to whichever of the others it affects. Work items, change files and changelogs, review evidence, previews, and process machinery keep their own purposes. None of the roles requires separate narrative, use-case, flow, error-catalogue, view-model, toolchain, or architecture-overview documents.
 
 ### Current specifications
 
@@ -46,9 +46,9 @@ Contract text and type expectations are written or revised before implementation
 
 A feature branch contains the proposed end state of the sources it changes. The main branch contains the integrated contract, and a release tag identifies the contract shipped with that release. The approved proposal bounds the authorized change; the branch's specifications state the resulting contract. Completed proposals never override current definitions. When current sources disagree, or elaborating them reveals a new substantive decision, the agent raises it with me.
 
-Workbench supplies optional guidance for projects that specify a surface in Gherkin, in the `specifying-behavior-with-gherkin` skill and the `.agents/templates/FEATURE.feature` template. Nothing requires a project to use Gherkin, and Workbench adds no specification registry, identifier scheme, or coverage format.
+Workbench supplies optional guidance for projects that specify a surface in Gherkin, in the `specifying-behavior-with-gherkin` skill and the `FEATURE.feature` template, both in the Workbench package. Nothing requires a project to use Gherkin, and Workbench adds no specification registry, identifier scheme, or coverage format.
 
-In this repository, this document owns the process semantics. [Record Validation and Workflow Status](guides/record-validation.md) owns the contracts of `mise run validate` and `mise run status`. Source documentation and native tests own the specifics of the other tools.
+In this repository, this document owns the process semantics. [Record Validation and Workflow Status](guides/record-validation.md) owns what `workbench records validate`, `workbench project validate`, and `workbench workflow status` detect and report. The [CLI reference](plugin/reference/cli.md), generated from the command registry, owns every `workbench` command's arguments, results, and errors. Source documentation and native tests own the specifics of the other tools.
 
 ### Visions
 
@@ -146,7 +146,7 @@ _Polish_ is the work of refining look and feel with me on the running UI, and th
 
 ### Agent orchestration
 
-The project's Oh My Pi `workflow` tool under `.omp/tools/dynamic-workflows/` is for a dependency graph of agent work: independent branches that feed a later synthesis, or result-driven branches and pipelines. A single small task stays inline; a fixed batch of independent slices uses ordinary task delegation. Workflow scripts orchestrate subagents deterministically and expose phases, but the agents still need bounded ownership and the strategist still owns intent and review. A failed branch yields `null`; treat it as a missing result, not evidence of success.
+The agent works inline by default. It delegates, with the harness's own delegation, only slices that are independent and touch separate files, or a review that needs fresh context. Each delegate gets bounded ownership: the files it owns, the current sources it touches, its constraints, and how to verify its work. The primary agent still owns intent and review. A delegate that fails returns no result, and the agent treats that missing result as missing, never as evidence of success.
 
 ## Preparation
 
@@ -279,7 +279,7 @@ When agreed work establishes, changes, or retires a rule that future work should
 
 A revised record keeps its file and identifier, and the same change updates every current reference to it. A retired record's file is deleted and its identifier is not reused. When deleting it would break a historical link that should keep working, that link points to an immutable Git revision instead. Git history and the proposal that made the change preserve the earlier version and its reasons. A constraint that still binds a supported compatibility promise or an unfinished migration remains in force until that obligation ends.
 
-Policies and decisions are not substitutes for proposals or current specifications. A proposal explains a particular change; a policy or decision holds a continuing constraint or choice; a product guarantee stays with the specification that owns it. Development instructions for agents stay in `.agents/`.
+Policies and decisions are not substitutes for proposals or current specifications. A proposal explains a particular change; a policy or decision holds a continuing constraint or choice; a product guarantee stays with the specification that owns it. Development instructions for agents live in the Workbench package's contract, rules, and skills, and in the project's own `AGENTS.md` and `.agents/`.
 
 Future proposals should be evaluated against the current vision, specifications, policies, and decisions.
 
@@ -331,9 +331,13 @@ Because the vision is intended to describe the project as it currently exists an
 
 The agent may consult me before making substantial changes to the vision.
 
-### Changeset
+### Change files
 
-Every pull request carries a changeset. `mise run changeset` writes one into `.changeset/`, naming the bump and describing the change for the changelog a user will read — not for the reviewer who already saw the diff. A change with no user-visible effect still carries a changeset, created with `--empty`. CI rejects a pull request without one; the release pull request is exempt.
+Every pull request adds at least one change file in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer who already saw the diff: what they can now do, what no longer works, and what they must change. A change file is Markdown whose frontmatter maps each affected package to a change type; a single-package project writes `default: major`, `minor`, or `patch`, and its `knope.toml` may add types. The first heading is the summary, and any text below it is the detail. `workbench change-files create` validates the type and package against `knope.toml` and writes the file; `knope document-change` prompts interactively, so agents never run it. `.changeset/` holds only change files, because Knope fails on any other Markdown file there.
+
+A pull request with no user-visible change carries the Git trailer `Release-Note: none` on one of its commits instead (`git commit --trailer "Release-Note: none"`). The trailer can be checked offline and stays in history next to the change it describes. `workbench change-files check` fails a pull request that has neither; CI runs it on every pull request except the release pull request.
+
+Knope turns change files into versions, the changelog, and releases. A project's `knope.toml` is its own, and sets `[changes] ignore_conventional_commits = true`, because Scoped Commits subjects are not Conventional Commits and versions come from change files only. On every push to `main`, a workflow keeps one release pull request open showing the next version, its changelog entry, and the version-file changes. Merging that pull request builds the project's artifacts, tags `v<version>`, and publishes the GitHub release with the changelog entry as its notes; that merge is the explicit release authorization the process requires.
 
 ### Implementation Record
 
