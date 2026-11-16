@@ -556,6 +556,506 @@ Result schema:
 }
 ```
 
+### `context`
+
+Inspect the project, pin, link, harness, and Beads setup.
+
+#### `workbench context show`
+
+Show the project, branch, pull request, Workbench pin and link, harnesses, Beads, and site.
+
+Reports the project's Workbench context without judging or changing it: the project root (the Git top level of the current directory), the branch (null when HEAD is detached), and the `origin` URL; the branch's pull request from `gh`, or `unknown` with the reason (no branch, no `origin`, `gh` missing or unauthenticated, no answer within the time limit, or several pull requests for the branch); the `github:markmals/workbench` version `mise.toml` pins, this binary's version, and where `.workbench` points with the package version there (in Workbench's own repository it links to the working tree's `plugin/` and nothing is pinned); whether `.claude/settings.json` and `.omp/config.yml` declare the package, and the `.claude/skills` and `.claude/rules` links to the project's own skills and rules; the Beads workspace, its Dolt remote as `bd` reports it, and the claimant claims and closes act as (`BEADS_ACTOR`, or `<login user>@<short host name>`); and the documentation site: `docs/hugo.toml` and the workflows that build it, with their host. A missing `gh` or `bd` makes the affected field `unknown` rather than failing. `gh` and `bd` together get `--timeout` seconds. Use `workbench project validate` to check the setup.
+
+- **Effect:** reads only
+- **Requires:** `git`
+- **Dry run:** no
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--timeout <integer>` | integer | no | `10` | Seconds to wait for `gh` and `bd`; past it, what they would report is unknown |
+
+Examples:
+
+```sh
+# Show the project's Workbench context
+workbench context show
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "Beads": {
+      "properties": {
+        "claimant": {
+          "description": "Who `workbench beads claim` and `close` act as on this machine.",
+          "type": "string"
+        },
+        "remote": {
+          "$ref": "#/$defs/BeadsRemote",
+          "description": "The workspace's Dolt remote, which Beads syncs with."
+        },
+        "workspace": {
+          "description": "`.beads` when the project has a Beads workspace, otherwise null.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "remote",
+        "claimant"
+      ],
+      "type": "object"
+    },
+    "BeadsRemote": {
+      "oneOf": [
+        {
+          "description": "The URL of the workspace's `origin` Dolt remote.",
+          "properties": {
+            "status": {
+              "const": "configured",
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "url"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The workspace has no `origin` Dolt remote yet.",
+          "properties": {
+            "status": {
+              "const": "none",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "status": {
+              "const": "unknown",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "reason"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Declaration": {
+      "description": "Whether one harness's project configuration loads the package.",
+      "properties": {
+        "detail": {
+          "description": "What the file lacks, or why it cannot be read; null when declared.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "description": "The harness's project configuration file.",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/DeclarationState"
+        }
+      },
+      "required": [
+        "path",
+        "state"
+      ],
+      "type": "object"
+    },
+    "DeclarationState": {
+      "oneOf": [
+        {
+          "enum": [
+            "declared"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "missing",
+          "description": "The file does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "incomplete",
+          "description": "The file exists without the declaration.",
+          "type": "string"
+        },
+        {
+          "const": "unreadable",
+          "description": "The file cannot be read or parsed.",
+          "type": "string"
+        }
+      ]
+    },
+    "Harnesses": {
+      "properties": {
+        "claudeCode": {
+          "$ref": "#/$defs/Declaration",
+          "description": "Claude Code's declaration of the package in `.claude/settings.json`."
+        },
+        "ohMyPi": {
+          "$ref": "#/$defs/Declaration",
+          "description": "Oh My Pi's declaration of the package in `.omp/config.yml`."
+        },
+        "projectLinks": {
+          "description": "`.claude/skills` and `.claude/rules`, through which Claude Code loads the project's own\nskills and rules from `.agents/`.",
+          "items": {
+            "$ref": "#/$defs/ProjectLink"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "claudeCode",
+        "ohMyPi",
+        "projectLinks"
+      ],
+      "type": "object"
+    },
+    "Link": {
+      "description": "The `.workbench` link to the installed package.",
+      "properties": {
+        "path": {
+          "description": "Always `.workbench`.",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/LinkState"
+        },
+        "target": {
+          "description": "The directory the link resolves to; for a dangling link, its target as written.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "description": "The package version at the target: `version` in its `.claude-plugin/plugin.json`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workingTree": {
+          "description": "True in Workbench's own repository, where `.workbench` links to the working tree's\n`plugin/` and `mise.toml` pins no release.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "state",
+        "workingTree"
+      ],
+      "type": "object"
+    },
+    "LinkState": {
+      "oneOf": [
+        {
+          "const": "linked",
+          "description": "It resolves to a directory.",
+          "type": "string"
+        },
+        {
+          "const": "missing",
+          "description": "There is no `.workbench`.",
+          "type": "string"
+        },
+        {
+          "const": "dangling",
+          "description": "It points at nothing.",
+          "type": "string"
+        }
+      ]
+    },
+    "Pin": {
+      "description": "What `mise.toml` pins for Workbench.",
+      "oneOf": [
+        {
+          "description": "`mise.toml` pins this version of `github:markmals/workbench`.",
+          "properties": {
+            "status": {
+              "const": "pinned",
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "version"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`mise.toml` is absent or pins no Workbench version.",
+          "properties": {
+            "status": {
+              "const": "unpinned",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`mise.toml` exists but is not valid TOML.",
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "status": {
+              "const": "unreadable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "reason"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ProjectLink": {
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "target": {
+          "description": "Where the link points, as written; null when there is no link at the path.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object"
+    },
+    "PullRequest": {
+      "description": "The branch's pull request.",
+      "oneOf": [
+        {
+          "properties": {
+            "draft": {
+              "type": "boolean"
+            },
+            "number": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "state": {
+              "description": "`OPEN`, `CLOSED`, or `MERGED`.",
+              "type": "string"
+            },
+            "status": {
+              "const": "found",
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "number",
+            "url",
+            "title",
+            "state",
+            "draft"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "GitHub has no pull request for the branch.",
+          "properties": {
+            "status": {
+              "const": "none",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The pull request could not be determined.",
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "status": {
+              "const": "unknown",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "reason"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Site": {
+      "properties": {
+        "config": {
+          "description": "`docs/hugo.toml` when present, otherwise null.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workflows": {
+          "description": "The GitHub workflows that build the site (they run `docs:build`).",
+          "items": {
+            "$ref": "#/$defs/SiteWorkflow"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "workflows"
+      ],
+      "type": "object"
+    },
+    "SiteHost": {
+      "oneOf": [
+        {
+          "enum": [
+            "github-pages",
+            "cloudflare"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "description": "The workflow builds the site but publishes it nowhere Workbench recognizes.",
+          "type": "string"
+        }
+      ]
+    },
+    "SiteWorkflow": {
+      "properties": {
+        "host": {
+          "$ref": "#/$defs/SiteHost"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "host"
+      ],
+      "type": "object"
+    },
+    "Workbench": {
+      "properties": {
+        "binary": {
+          "description": "The version of the `workbench` binary that ran this command.",
+          "type": "string"
+        },
+        "link": {
+          "$ref": "#/$defs/Link"
+        },
+        "pin": {
+          "$ref": "#/$defs/Pin",
+          "description": "The `github:markmals/workbench` version `mise.toml` pins."
+        }
+      },
+      "required": [
+        "pin",
+        "binary",
+        "link"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The project's Workbench context.",
+  "properties": {
+    "beads": {
+      "$ref": "#/$defs/Beads"
+    },
+    "branch": {
+      "description": "The checked-out branch, or null when HEAD is detached.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "harnesses": {
+      "$ref": "#/$defs/Harnesses"
+    },
+    "origin": {
+      "description": "The URL of the `origin` remote, or null when there is none.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project": {
+      "description": "The project root: the Git top level of the current directory.",
+      "type": "string"
+    },
+    "pullRequest": {
+      "$ref": "#/$defs/PullRequest"
+    },
+    "site": {
+      "$ref": "#/$defs/Site"
+    },
+    "workbench": {
+      "$ref": "#/$defs/Workbench"
+    }
+  },
+  "required": [
+    "project",
+    "pullRequest",
+    "workbench",
+    "harnesses",
+    "beads",
+    "site"
+  ],
+  "title": "Context",
+  "type": "object"
+}
+```
+
 ### `workflow`
 
 Where the work stands and what happens next.
@@ -1216,6 +1716,351 @@ Result schema:
     "count"
   ],
   "title": "ValidationReport",
+  "type": "object"
+}
+```
+
+### `project`
+
+Set up and check a project's use of Workbench.
+
+#### `workbench project validate`
+
+Check the project's Workbench setup: pin, link, harness declarations, names, vendored files.
+
+Checks how the project uses Workbench and reports each problem as a violation with a `path` relative to the project root and a `message`: `mise.toml` pinning no `github:markmals/workbench` version (fix: `mise use github:markmals/workbench@<version>`); a `.workbench` link that is missing, dangling, or holds a different version than the pin (the link's version is the `version` in its `.claude-plugin/plugin.json`; fix: `mise install`); a missing or unreadable harness declaration (the `workbench` marketplace and the `workbench@workbench` plugin in `.claude/settings.json`, the `./.workbench` extension in `.omp/config.yml`); a project skill `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` that reuses the name of a skill or rule this release ships; and vendored Workbench files the package now supplies: templates in `.agents/templates/` identical to the package's (a different one is an override and passes), the Oh My Pi extensions `check-before-stop`, `format-after-edit`, and `prime-beads`, `.omp/tools/dynamic-workflows/`, the TypeScript tools this CLI replaces and their tests, `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`. Templates are compared with `.workbench/templates/`, or with the copies built into workbench from the same release when the link is missing. Workbench's own repository, whose `.workbench` links to its working tree's `plugin/`, has no pin and skips the pin and link check. Any violation fails with CHECK_FAILED, and the result still goes to stdout. Never changes anything.
+
+- **Effect:** reads only
+- **Requires:** `git`
+- **Dry run:** no
+- **Idempotent:** yes
+- **Errors:** `CHECK_FAILED`, `INVALID_ARGUMENT`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `INTERNAL`
+
+Examples:
+
+```sh
+# Check the project's Workbench setup
+workbench project validate
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "Violation": {
+      "description": "One problem in one file.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "path": {
+          "description": "The file or directory, relative to the project root.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The project's Workbench setup problems.",
+  "properties": {
+    "count": {
+      "description": "How many violations there are; zero means the setup is valid.",
+      "format": "uint",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "violations": {
+      "description": "Every violation, in the order the checks found them.",
+      "items": {
+        "$ref": "#/$defs/Violation"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "violations",
+    "count"
+  ],
+  "title": "Validation",
+  "type": "object"
+}
+```
+
+#### `workbench project init`
+
+Add Workbench to this Git repository without overwriting anything.
+
+Adds what Workbench owns to the Git repository, creating each missing item and never overwriting or deleting a file. Runs only where `mise.toml` pins `github:markmals/workbench` (otherwise PRECONDITION_FAILED; `mise use github:markmals/workbench@<version>` writes the pin). To existing structured files it adds only missing keys and entries: `mise.toml` gets the `postinstall` hook that links `.workbench`, pins for hk, gh, and Beads, and the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks; `.gitignore` gets `.workbench`; `.claude/settings.json` gets the `workbench` marketplace and the `workbench@workbench` plugin; `.omp/config.yml` gets the `./.workbench` extension. It links `.claude/skills` and `.claude/rules` to `../.agents/skills` and `../.agents/rules` when those directories exist. It creates, when absent: `hk.pkl` (the Scoped Commits check on `commit-msg` and the Beads hook steps and syncs), `.github/workflows/workbench.yml` (commit and change-file checks on every pull request but Knope's release pull request), an `AGENTS.md` stub with the `.workbench` line, `VISION.md` from the template (`.agents/templates/VISION.md` when the project overrides it) with today's date in place of `<YYYY-MM-DD>`, so record validation accepts it, the `proposals/`, `policies/`, `decisions/`, and `guides/` READMEs, `.agents/commit-scopes`, and `docs/hugo.toml`. `--site github-pages` or `--site cloudflare` also adds the `hugo` and `github:CloudCannon/pagefind` pins, the `docs:build` and `docs:dev` tasks, `docs/.gitignore` for the build output in `docs/public`, and that host's publishing and preview workflows, `.github/workflows/docs.yml` and `preview.yml`, which pass the base URL through `HUGO_BASEURL`; Cloudflare also gets `docs/wrangler.jsonc`, the Worker that serves the site. The receipt lists what it created, what it added to with the entries added, what it left unchanged, what needs a person's attention (such as an `AGENTS.md` without the `.workbench` line), every Workbench file the project still vendors (templates marked `identical`, removable, or `different`, an override), and the project-owned pieces Workbench relies on but does not create: the `setup`, `check`, and `fmt` tasks and a release flow that consumes change files with Knope. `--dry-run` returns the same receipt with status `dry-run` and writes nothing. Exits 0 unless a file could not be written, which fails with PRECONDITION_FAILED while the receipt still reports what was written. Afterwards, `mise install` links `.workbench`, and `workbench project validate` and `workbench context show` read the setup back.
+
+- **Effect:** modifies project files: Workbench's mise, Git, and harness declarations, hooks, CI workflow, and record scaffolding
+- **Requires:** `git`
+- **Dry run:** yes
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--site <choice>` | `github-pages`, `cloudflare` | no | — | Also set up the documentation site and its publishing and preview workflows on this host |
+| `--dry-run` | boolean | no | — | Validate input, resolve the target, and describe the changes without making them |
+
+Examples:
+
+```sh
+# Preview what adopting Workbench would create and add
+workbench project init --dry-run
+# Preview adoption with a documentation site on GitHub Pages
+workbench project init --site github-pages --dry-run
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "Addition": {
+      "description": "An existing file and the entries added to it.",
+      "properties": {
+        "entries": {
+          "description": "The keys or lines added, such as `tools.hk`, `tasks.\"beads:sync\"`, or `.workbench`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "entries"
+      ],
+      "type": "object"
+    },
+    "MissingPiece": {
+      "description": "A project-owned piece Workbench relies on but does not create.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "piece": {
+          "description": "`setup`, `check`, or `fmt` for a mise task; `release` for the Knope release flow.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "piece",
+        "message"
+      ],
+      "type": "object"
+    },
+    "Notice": {
+      "description": "Something about one file a person needs to know or do.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "message"
+      ],
+      "type": "object"
+    },
+    "Status": {
+      "oneOf": [
+        {
+          "const": "initialized",
+          "description": "It created or added to files.",
+          "type": "string"
+        },
+        {
+          "const": "unchanged",
+          "description": "Everything was already in place; nothing was written.",
+          "type": "string"
+        },
+        {
+          "const": "dry-run",
+          "description": "`--dry-run`: nothing was written.",
+          "type": "string"
+        }
+      ]
+    },
+    "TemplateMatch": {
+      "enum": [
+        "identical",
+        "different"
+      ],
+      "type": "string"
+    },
+    "VendoredFile": {
+      "description": "One vendored file or directory.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/VendoredKind"
+        },
+        "message": {
+          "description": "What the file is and what to do with it.",
+          "type": "string"
+        },
+        "path": {
+          "description": "Relative to the project root; a directory has no trailing slash.",
+          "type": "string"
+        },
+        "template": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TemplateMatch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For a template: `identical` to the package's, so removable, or `different`, an override\nthe project keeps. Null for every other kind."
+        }
+      },
+      "required": [
+        "path",
+        "kind",
+        "message"
+      ],
+      "type": "object"
+    },
+    "VendoredKind": {
+      "oneOf": [
+        {
+          "enum": [
+            "template",
+            "changesets-config",
+            "vitepress",
+            "fnox"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "skill",
+          "description": "A project skill named like a Workbench skill.",
+          "type": "string"
+        },
+        {
+          "const": "rule",
+          "description": "A project rule named like a Workbench rule.",
+          "type": "string"
+        },
+        {
+          "const": "omp-extension",
+          "description": "One of the Oh My Pi extensions Workbench no longer uses.",
+          "type": "string"
+        },
+        {
+          "const": "workflow-tool",
+          "description": "The Oh My Pi workflow tool.",
+          "type": "string"
+        },
+        {
+          "const": "tool",
+          "description": "A TypeScript tool the `workbench` CLI replaces, or its test.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "What `project init` did, or for a dry run, what it would do.",
+  "properties": {
+    "addedTo": {
+      "description": "Existing files given missing entries.",
+      "items": {
+        "$ref": "#/$defs/Addition"
+      },
+      "type": "array"
+    },
+    "attention": {
+      "description": "Existing content left as it was that a person needs to complete by hand.",
+      "items": {
+        "$ref": "#/$defs/Notice"
+      },
+      "type": "array"
+    },
+    "cannotPredict": {
+      "description": "What a dry run cannot predict; empty for a real run.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "created": {
+      "description": "Files and links created, relative to the project root.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "failed": {
+      "description": "Files that could not be written, with the reason. Empty unless the command failed.",
+      "items": {
+        "$ref": "#/$defs/Notice"
+      },
+      "type": "array"
+    },
+    "missing": {
+      "description": "Project-owned pieces Workbench relies on but does not create.",
+      "items": {
+        "$ref": "#/$defs/MissingPiece"
+      },
+      "type": "array"
+    },
+    "project": {
+      "description": "The project root the paths are relative to.",
+      "type": "string"
+    },
+    "site": {
+      "description": "The documentation site host requested with `--site`, or null.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "$ref": "#/$defs/Status"
+    },
+    "unchanged": {
+      "description": "Items already in place, left as they were.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "vendored": {
+      "description": "Workbench files the project still vendors.",
+      "items": {
+        "$ref": "#/$defs/VendoredFile"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "project",
+    "created",
+    "addedTo",
+    "unchanged",
+    "attention",
+    "failed",
+    "vendored",
+    "missing",
+    "cannotPredict"
+  ],
+  "title": "Receipt",
   "type": "object"
 }
 ```
