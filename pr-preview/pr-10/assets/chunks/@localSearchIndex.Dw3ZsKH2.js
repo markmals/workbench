@@ -1,1 +1,0 @@
-import{t as e}from"./framework.Bj5pAnfO.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.B7gbP-Z9.js`),[])};export{t as default};
