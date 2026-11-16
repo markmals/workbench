@@ -1,0 +1,11 @@
+{{- /*
+  A page's title: its front matter title, else its first level-one heading (a README or
+  PROCESS.md has no front matter), else Hugo's own title for the page.
+*/ -}}
+{{- $title := .Params.title -}}
+{{- with and (not $title) .Fragments -}}
+  {{- range first 1 (where .Headings "Level" 1) -}}
+    {{- $title = .Title | plainify | htmlUnescape -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($title | default .Title) -}}

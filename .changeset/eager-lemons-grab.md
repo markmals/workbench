@@ -1,6 +1,8 @@
 ---
-"workbench": minor
+default: minor
 ---
+
+# Keep current requirements in the sources that own them
 
 Maintain current requirements in API contracts, reference documentation, or Gherkin as appropriate to each surface. Proposals now explain changes to those sources. Workbench includes reusable optional Gherkin authoring guidance, examples, and a feature template without requiring a new runner or specification registry.
 

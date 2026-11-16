@@ -1,0 +1,9 @@
+{{- /* A page's rendered Markdown, with its record header under the title. */ -}}
+{{- $content := string .Content -}}
+{{- $header := partial "record-header.html" . -}}
+{{- if strings.HasPrefix $content "<h1" -}}
+  {{- $content = replace $content "</h1>" (printf "</h1>%s" $header) 1 -}}
+{{- else -}}
+  {{- $content = printf "%s%s" $header $content -}}
+{{- end -}}
+{{- partial "clarification-markers.html" $content | safeHTML -}}

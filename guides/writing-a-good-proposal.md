@@ -7,7 +7,7 @@ title: Writing a Good Proposal
 
 **The template gives me sections. What makes the content worth the effort?**
 
-The `.agents/templates/PROPOSAL.md` teaches structure: what each section is for. This guide is about judgement: what makes a proposal make the next three days obvious instead of adding ceremony.
+Workbench's proposal template, `.workbench/templates/PROPOSAL.md`, teaches structure: what each section is for. This guide is about judgement: what makes a proposal make the next three days obvious instead of adding ceremony.
 
 ## Spend the hour where change is cheap
 
@@ -102,14 +102,14 @@ For the full path from proposal to release, see [Running a Feature](./running-a-
 
 ## Red flags
 
-| Symptom | What it means | What to do |
-| --- | --- | --- |
-| Motivation begins with “Add” or “Build” | The fix is masquerading as the problem. | Restate the harm, affected people, evidence, and workaround without naming an answer. |
-| A design sentence leaves two observable outcomes possible | A later implementer must invent a decision. | Choose the behavior or add a clarification marker. |
-| Acceptance checkboxes repeat Detailed design | There are two specifications that can drift. | Delete Acceptance criteria. |
-| Detailed design copies an existing contract in full | The requirement now has two owners. | Link the current source and describe only what changes. |
-| Detailed design names sizes, colors, or controls, or quotes words that are not themselves a requirement | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI. |
-| “Out of scope” means “not finished” | The proposal hides required work. | Put the work in scope or reduce the change honestly. |
-| Two motivations need separate explanations | The proposal is really two changes. | Split it into coherent proposals. |
-| An alternative is a weak caricature | The reader's real objection is unaddressed. | State the strongest version and explain the trade-off. |
-| The draft is being polished in private | The agent is deciding intent alone. | Publish it for review now. |
+| Symptom                                                                                                 | What it means                                          | What to do                                                                            |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Motivation begins with “Add” or “Build”                                                                 | The fix is masquerading as the problem.                | Restate the harm, affected people, evidence, and workaround without naming an answer. |
+| A design sentence leaves two observable outcomes possible                                               | A later implementer must invent a decision.            | Choose the behavior or add a clarification marker.                                    |
+| Acceptance checkboxes repeat Detailed design                                                            | There are two specifications that can drift.           | Delete Acceptance criteria.                                                           |
+| Detailed design copies an existing contract in full                                                     | The requirement now has two owners.                    | Link the current source and describe only what changes.                               |
+| Detailed design names sizes, colors, or controls, or quotes words that are not themselves a requirement | Look and feel has been written into the specification. | State what the user can do and find out; decide the rest on the running UI.           |
+| “Out of scope” means “not finished”                                                                     | The proposal hides required work.                      | Put the work in scope or reduce the change honestly.                                  |
+| Two motivations need separate explanations                                                              | The proposal is really two changes.                    | Split it into coherent proposals.                                                     |
+| An alternative is a weak caricature                                                                     | The reader's real objection is unaddressed.            | State the strongest version and explain the trade-off.                                |
+| The draft is being polished in private                                                                  | The agent is deciding intent alone.                    | Publish it for review now.                                                            |

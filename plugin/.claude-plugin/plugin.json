@@ -1,0 +1,9 @@
+{
+    "name": "workbench",
+    "version": "2.0.0",
+    "description": "The Workbench development process: its contract, skills, rules, and templates.",
+    "author": {
+        "name": "Mark Malstrom"
+    },
+    "repository": "https://github.com/markmals/workbench"
+}

@@ -1,0 +1,15 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+{{- $title := partial "title.html" . }}
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $title }} · {{ site.Title }}{{ end }}</title>
+{{- with .Description | default site.Params.description }}
+<meta name="description" content="{{ . }}">
+{{- end }}
+{{- with site.Params.favicon }}
+<link rel="icon" href="{{ relURL . }}"{{ if strings.HasSuffix . ".svg" }} type="image/svg+xml"{{ end }}>
+{{- end }}
+{{- $styles := slice (resources.Get "css/site.css") (resources.Get "css/syntax.css") | resources.Concat "css/site.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}">
+{{- $search := resources.Get "js/search.js" | minify | fingerprint }}
+<script src="{{ $search.RelPermalink }}" integrity="{{ $search.Data.Integrity }}" defer></script>

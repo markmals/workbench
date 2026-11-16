@@ -1,0 +1,9 @@
+<ul class="page-list">
+  {{- range . }}
+  <li>
+    <a href="{{ .RelPermalink }}">{{ partial "title.html" . }}</a>
+    {{- with .Params.id }} <code>{{ . }}</code>{{ end }}
+    {{- with .Params.status }} <span class="status status--{{ . | urlize }}">{{ . | humanize }}</span>{{ end }}
+  </li>
+  {{- end }}
+</ul>

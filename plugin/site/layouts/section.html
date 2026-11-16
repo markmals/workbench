@@ -1,0 +1,21 @@
+{{ define "main" }}
+<div class="layout">
+  {{- partial "sidebar.html" . }}
+  <article class="content" data-pagefind-body>
+    {{- partial "content.html" . }}
+    {{- $groups := partial "section-pages.html" . }}
+    <div class="section-pages" data-pagefind-ignore>
+      {{- with $groups.current }}
+      <h2 id="in-this-section">In this section</h2>
+      {{- partial "page-list.html" . }}
+      {{- end }}
+      {{- with $groups.superseded }}
+      <h2 id="superseded">Superseded</h2>
+      <p>Later proposals replaced these. They remain as history.</p>
+      {{- partial "page-list.html" . }}
+      {{- end }}
+    </div>
+    {{- partial "source-link.html" . }}
+  </article>
+</div>
+{{ end }}

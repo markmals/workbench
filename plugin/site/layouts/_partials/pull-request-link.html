@@ -1,0 +1,11 @@
+{{- /* A record's `pull-request`: a URL, or a number on `params.repository`. */ -}}
+{{- $value := string . -}}
+{{- $number := replaceRE `^.*/pull/(\d+)/?$` "$1" $value -}}
+{{- $href := "" -}}
+{{- if strings.HasPrefix $value "https://" -}}
+  {{- $href = $value -}}
+{{- else if site.Params.repository -}}
+  {{- $href = printf "%s/pull/%s" (strings.TrimSuffix "/" site.Params.repository) $value -}}
+{{- end -}}
+{{- $label := cond (findRE `^\d+$` $number) (printf "#%s" $number) $value -}}
+{{- with $href }}<a href="{{ . }}">{{ $label }}</a>{{ else }}<code>{{ $label }}</code>{{ end -}}

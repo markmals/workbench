@@ -16,6 +16,6 @@ trim_trailing_whitespace = false
 indent_size = 4
 
 # Generated or externally formatted files that are not ours to restyle.
-[{pnpm-lock.yaml,*.lock}]
+[*.lock]
 indent_size = unset
 insert_final_newline = unset

@@ -1,0 +1,14 @@
+{
+    "name": "workbench",
+    "description": "The Workbench package a project pins in mise.toml and links at .workbench.",
+    "owner": {
+        "name": "Mark Malstrom"
+    },
+    "plugins": [
+        {
+            "name": "workbench",
+            "source": "./",
+            "description": "The Workbench development process: its contract, skills, rules, and templates."
+        }
+    ]
+}

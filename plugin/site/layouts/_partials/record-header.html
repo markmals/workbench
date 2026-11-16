@@ -1,0 +1,38 @@
+{{- /* The metadata block under a record's title: the front matter fields the record format defines. */ -}}
+{{- $kind := "" -}}
+{{- with .Params.id }}{{ $kind = index (split . ".") 0 }}{{ end -}}
+{{- $isRecord := in (slice "proposal" "policy" "decision") $kind -}}
+{{- $pullRequest := index .Params "pull-request" -}}
+{{- $establishedBy := index .Params "established-by" -}}
+{{- with .Params }}
+{{- if or $isRecord .authors .issues .supersedes $establishedBy $pullRequest }}
+<aside class="record-header" aria-label="Record metadata" data-pagefind-ignore>
+  {{- if eq $kind "proposal" }}
+  {{- with index (partialCached "record-pages.html" site) "guide.current-specifications" }}
+  <p class="record-header__note">This proposal records a change. The <a href="{{ .RelPermalink }}">current specifications</a> state what applies now.</p>
+  {{- end }}
+  {{- end }}
+  <div class="record-header__summary">
+    {{- with .id }}<code class="record-header__id">{{ . }}</code>{{ end }}
+    {{- with .status }}<span class="status status--{{ . | urlize }}">{{ . | humanize }}</span>{{ end }}
+  </div>
+  <dl class="record-header__details">
+    {{- with .authors }}
+    <div><dt>Authors</dt><dd>{{ range . }}<span>{{ . }}</span>{{ end }}</dd></div>
+    {{- end }}
+    {{- with $pullRequest }}
+    <div><dt>Pull request</dt><dd>{{ partial "pull-request-link.html" . }}</dd></div>
+    {{- end }}
+    {{- with .issues }}
+    <div><dt>Issues</dt><dd>{{ range . }}{{ if strings.HasPrefix . "https://" }}<a href="{{ . }}">{{ . }}</a>{{ else }}<code>{{ . }}</code>{{ end }}{{ end }}</dd></div>
+    {{- end }}
+    {{- with .supersedes }}
+    <div><dt>Supersedes</dt><dd>{{ range . }}{{ partial "record-reference.html" . }}{{ end }}</dd></div>
+    {{- end }}
+    {{- with $establishedBy }}
+    <div><dt>Established by</dt><dd>{{ partial "record-reference.html" . }}</dd></div>
+    {{- end }}
+  </dl>
+</aside>
+{{- end }}
+{{- end }}

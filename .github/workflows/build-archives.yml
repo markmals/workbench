@@ -1,0 +1,69 @@
+# Builds and attests one release archive per supported target: the `workbench` binary plus the
+# contents of `plugin/`, under a top-level `workbench-<target>/` directory. release.yml and
+# prerelease.yml call it; `version`, when given, is stamped into Cargo.toml and the plugin
+# manifest of a prerelease build without committing it.
+
+name: Build archives
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: The version to stamp into the build, for a prerelease
+                type: string
+                required: false
+                default: ""
+
+permissions:
+    contents: read
+
+jobs:
+    build:
+        name: ${{ matrix.target }}
+        strategy:
+            fail-fast: true
+            matrix:
+                include:
+                    - target: aarch64-apple-darwin
+                      os: macos-latest
+                    - target: x86_64-apple-darwin
+                      os: macos-latest
+                    - target: aarch64-unknown-linux-musl
+                      os: ubuntu-24.04-arm
+                    - target: x86_64-unknown-linux-musl
+                      os: ubuntu-latest
+        runs-on: ${{ matrix.os }}
+        permissions:
+            contents: read
+            id-token: write
+            attestations: write
+        steps:
+            - uses: actions/checkout@v7
+            - uses: jdx/mise-action@v5
+              with:
+                  cache: false
+                  install_args: rust
+            - name: Install the target
+              run: mise exec -- rustup target add "${{ matrix.target }}"
+            - name: Install musl-tools
+              if: endsWith(matrix.target, '-linux-musl')
+              run: sudo apt-get update && sudo apt-get install -y musl-tools
+            - name: Stamp the prerelease version
+              if: inputs.version != ''
+              env:
+                  VERSION: ${{ inputs.version }}
+              # Perl rather than sed: the macOS and Linux runners' seds disagree on in-place
+              # flags and first-match addressing. Only the first `version =` is the package's.
+              run: |
+                  perl -0pi -e 's/^version = "[^"]*"/version = "$ENV{VERSION}"/m' Cargo.toml
+                  perl -pi -e 's/"version": "[^"]+"/"version": "$ENV{VERSION}"/' plugin/.claude-plugin/plugin.json
+                  mise exec -- cargo update --workspace
+            - run: mise run package -- "${{ matrix.target }}"
+            - uses: actions/attest-build-provenance@v4.2.2
+              with:
+                  subject-path: artifacts/workbench-${{ matrix.target }}.tar.gz
+            - uses: actions/upload-artifact@v7.0.2
+              with:
+                  name: workbench-${{ matrix.target }}
+                  path: artifacts/workbench-${{ matrix.target }}.tar.gz
+                  if-no-files-found: error

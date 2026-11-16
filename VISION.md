@@ -1,6 +1,6 @@
 ---
 title: A Vision for Workbench
-updated: 2026-11-15
+updated: 2026-11-16
 ---
 
 # A Vision for Workbench
@@ -31,15 +31,15 @@ It is for someone who works with a coding agent daily, on projects they will sti
 
 ## Minimum viable product
 
-A repository you can clone that gives a project, on day one:
+A versioned package a project pins and sets up with one command, which gives it, on day one:
 
 - the artifact structure — vision, current specifications in whatever form suits each surface, policies, decisions, proposals, guides — with templates that make the right shape the easy shape, and optional guidance for specifying behavior in Gherkin;
 - skills covering each phase of the process, written so any competent coding agent can execute them;
-- a validator that mechanically enforces the parts of the process a machine can check, wired into continuous integration;
+- a command-line tool that mechanically enforces the parts of the process a machine can check, wired into continuous integration;
 - a documentation site that publishes the vision, the process, the record, and the guides;
 - a preview mechanism appropriate to what the project is.
 
-It must be adoptable by an agent in a single session, and it must not assume a language, a framework, a platform, or a particular coding harness.
+It must be adoptable by an agent in a single session, it must reach every project as an update to that pin rather than as a copy to merge by hand, and it must not assume a language, a framework, a platform, or a particular coding harness.
 
 ## Design principles
 
@@ -66,7 +66,7 @@ Directions worth considering once the core is proven:
 
 **Not a project scaffold.** Workbench does not choose your language, framework, or architecture. Version 1 did, and the process became the small part of a large repository about stacks.
 
-**Not tied to one coding harness.** Infrastructure ships harness-neutral in `.agents/` because shipping configuration for harnesses nobody here verifies is worse than a documented adaptation step.
+**Not tied to one coding harness.** The process ships as harness-neutral Markdown in the package, and each harness loads it through a small committed declaration, because shipping configuration for harnesses nobody here verifies is worse than one shared format.
 
 **Not an issue tracker.** Beads holds the work graph, including defects that outlive a pull request. Tools that track work better than a directory of markdown files already exist, and competing with them would cost more than it returns.
 
@@ -74,6 +74,7 @@ Directions worth considering once the core is proven:
 
 ## Revision history
 
+- **2026-11-16** — Made Workbench a versioned package that projects pin and update, with a command-line tool and plugin content in place of copied files, after human acceptance of [proposal.0007](proposals/0007-depend-on-workbench.md).
 - **2026-11-15** — Took every check out of the agent's loop and its git hooks, leaving the gate to continuous integration, and synced the Beads work graph across machines through each project's own repository, after human acceptance of [proposal.0006](proposals/0006-drop-harness-hooks-and-sync-beads.md).
 - **2026-11-15** — Made current specifications the owners of current requirements, kept proposals as the record of each change, and treated policies and decisions as current files revised in place, after human acceptance of [proposal.0005](proposals/0005-current-specifications.md).
 - **2026-11-03** — Limited intent to what a feature does and left look and feel to the human on the running software, after [proposal.0004](proposals/0004-make-room-for-ui-polish.md) gave interface polish a place outside proposals.

@@ -1,0 +1,23 @@
+{{- /*
+  Resolves a relative link written in a Markdown source file, as GitHub would, against the
+  repository: a published file links to its page, any other repository file to its copy on
+  `params.repository`, and a missing file fails the build. Both keep the link's fragment.
+*/ -}}
+{{- $source := partial "repository-path.html" .page.File.Filename -}}
+{{- $target := path.Join (path.Dir .page.File.Filename) .url.Path -}}
+{{- $path := partial "repository-path.html" $target -}}
+{{- $fragment := "" -}}
+{{- with .url.Fragment }}{{ $fragment = printf "#%s" . }}{{ end -}}
+
+{{- $href := index (partialCached "source-pages.html" site) $target -}}
+{{- if not $href -}}
+  {{- if not (and $path (resources.Get (printf "repository/%s" $path))) -}}
+    {{- errorf "%s links to %q, which does not exist" $source .destination -}}
+  {{- else -}}
+    {{- $href = partial "repository-url.html" $path -}}
+    {{- if not $href -}}
+      {{- errorf "%s links to %q, which the site does not publish; set params.repository to link it on the repository" $source .destination -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return (printf "%s%s" $href $fragment) -}}

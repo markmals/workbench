@@ -1,0 +1,8 @@
+{{- $url := urls.Parse .Destination -}}
+{{- $href := .Destination -}}
+{{- $external := or $url.Scheme $url.Host (strings.HasPrefix .Destination "/") -}}
+{{- if and (not $external) $url.Path -}}
+  {{- $href = partial "resolve-link.html" (dict "page" .Page "url" $url "destination" .Destination) -}}
+{{- end -}}
+<a href="{{ $href }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- /* Trim the newline Hugo would otherwise render after the link. */ -}}

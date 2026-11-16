@@ -33,6 +33,6 @@
 - [ ] Adversarial review complete
 - [ ] Preview published
 - [ ] Readiness report posted
-- [ ] Changeset added (`mise run changeset`, `--empty` when there is no user-visible effect)
+- [ ] Change file added (`workbench change-files create`), or a `Release-Note: none` commit trailer when there is no user-visible change
 
 The agent posts the readiness report as a pull-request comment; do not write it here.

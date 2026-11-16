@@ -1,0 +1,5 @@
+{{- /* Pagefind writes its index and UI into the built site's pagefind/ directory. */ -}}
+<dialog class="search" aria-label="Search" data-search-base="{{ site.Home.RelPermalink }}" data-search-bundle="{{ relURL "pagefind/" }}">
+  <div class="search__ui" id="search-ui"></div>
+  <p class="search__unavailable" hidden>Search runs over a built site. Build it with <code>mise run docs:build</code> and serve <code>docs/public</code>.</p>
+</dialog>

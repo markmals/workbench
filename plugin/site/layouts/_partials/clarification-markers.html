@@ -1,0 +1,18 @@
+{{- /*
+  Highlights `[NEEDS CLARIFICATION: <question>]` markers in rendered HTML, leaving code alone:
+  each code element is swapped for a placeholder, the markers are wrapped, and the code is
+  restored. Returns the HTML as a string.
+*/ -}}
+{{- $html := . -}}
+{{- if strings.Contains $html "[NEEDS CLARIFICATION:" -}}
+  {{- $code := findRE `(?s)<code[^>]*>.*?</code>` $html -}}
+  {{- range $index, $element := $code -}}
+    {{- $html = replace $html $element (printf "\x00code-%d\x00" $index) 1 -}}
+  {{- end -}}
+  {{- $marker := `<mark class="needs-clarification" title="Resolve with the human before acceptance"><span class="needs-clarification__label">Needs clarification</span> $1</mark>` -}}
+  {{- $html = replaceRE `\[NEEDS CLARIFICATION:\s*([^\]]+)\]` $marker $html -}}
+  {{- range $index, $element := $code -}}
+    {{- $html = replace $html (printf "\x00code-%d\x00" $index) $element 1 -}}
+  {{- end -}}
+{{- end -}}
+{{- return $html -}}

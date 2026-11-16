@@ -1,0 +1,16 @@
+{{- $current := . }}
+<header class="site-header">
+  <a class="site-header__brand" href="{{ site.Home.RelPermalink }}">
+    {{- with site.Params.logo }}<img src="{{ relURL . }}" alt="" width="32" height="32">{{ end -}}
+    <span>{{ site.Title }}</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Main">
+    {{- range site.Menus.main }}
+    {{- $within := and (ne .URL site.Home.RelPermalink) (strings.HasPrefix $current.RelPermalink .URL) }}
+    <a href="{{ .URL }}"{{ if $within }} class="is-active"{{ end }}{{ if eq $current.RelPermalink .URL }} aria-current="page"{{ end }}>{{ .Name }}</a>
+    {{- end }}
+  </nav>
+  <button class="site-header__search" type="button" data-search-open aria-haspopup="dialog">
+    <span>Search</span><kbd>/</kbd>
+  </button>
+</header>

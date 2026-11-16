@@ -1,0 +1,16 @@
+# The Workbench site theme. A project selects it from docs/hugo.toml with
+# `themesDir = "../.workbench"` and `theme = "site"`, and mounts its records as content.
+#
+# The theme reads these site parameters, each optional:
+#   description   the meta description, and the home tagline when `tagline` is unset
+#   tagline       the home page's introduction
+#   repository    the repository URL; links to files the site does not publish go to
+#                 `<repository>/blob/main/<path>`, and each page links to its source
+#   logo, favicon, heroImage
+#                 paths under the project's docs/static/
+#
+# Relative links are checked against the repository mounted at `assets/repository`; a link
+# to a file that does not exist fails the build.
+
+[module.hugoVersion]
+min = "0.170.0"

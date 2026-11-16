@@ -1,0 +1,19 @@
+{{- /* The module's hugoVersion only warns; an older Hugo must stop here instead. */ -}}
+{{- if lt hugo.Version "0.170.0" -}}
+  {{- errorf "The Workbench site theme requires Hugo 0.170.0 or later; this is Hugo %s." hugo.Version -}}
+{{- end -}}
+<!doctype html>
+<html lang="{{ site.Language.Locale | default "en" }}">
+  <head>
+    {{- partial "head.html" . }}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {{- partial "header.html" . }}
+    <main id="main">
+      {{- block "main" . }}{{ end }}
+    </main>
+    {{- partial "footer.html" . }}
+    {{- partial "search.html" . }}
+  </body>
+</html>
