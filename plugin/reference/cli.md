@@ -2285,7 +2285,7 @@ Writes `.changeset/<name>.md`, the change file Knope turns into a version bump a
 | `--type <string>` | string | yes | — | The change type: major, minor, patch, or one the package's knope.toml sections add |
 | `--summary <string>` | string | yes | — | One line for the changelog; it becomes the heading and names the file |
 | `--package <string>` | string | no | — | The package the change affects; required when knope.toml declares several |
-| `--body <text>` | text | no | — | Detail below the heading: text, @<file>, or - for stdin |
+| `--body <text>` | text | no | — | Detail below the heading: the text, `@<file>` to read a file, or `-` to read stdin |
 | `--dry-run` | boolean | no | — | Validate input, resolve the target, and describe the changes without making them |
 
 Examples:

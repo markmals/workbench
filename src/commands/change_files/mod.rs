@@ -68,7 +68,7 @@ pub static COMMANDS: &[CommandSpec] = &[
                 required: false,
                 default: None,
                 multiple: false,
-                summary: "Detail below the heading: text, @<file>, or - for stdin",
+                summary: "Detail below the heading: the text, `@<file>` to read a file, or `-` to read stdin",
             },
             DRY_RUN,
         ],
