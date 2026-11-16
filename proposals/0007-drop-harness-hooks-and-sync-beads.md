@@ -34,6 +34,12 @@ Recon took a different route and turned on `dolt.auto-push`. Beads documents tha
 
 The owner wants every machine to have current Beads, including what other agents have claimed, without that noise.
 
+The owner also reports that their agents did not understand how Beads works across machines. Workbench gives them little to go on, and some of what it does say is wrong:
+
+- The `tracking-work` skill calls `bd update <id> --claim` atomic. It is atomic only within one machine's database.
+- Every machine claims as the same Git user. Beads treats a claim "already claimed by you" as a no-op success, so a second machine can take an item the first is working on without any error.
+- The generic `bd prime` guidance that the current hook injects tells agents to run `bd dolt push` directly.
+
 **The contract misstates what Beads is for.** The owner's stack (`~/Developer/Notes/sprinkles-stack.md`) divides tracking: GitHub Issues and Projects hold the owner's planning, and Beads holds agents' work and the project's memory. `AGENTS.md` instead says Beads "replaces GitHub-issue defect tracking". The `writing-a-proposal` skill contradicts both: its red-flag table says to file a newly discovered defect as a GitHub issue (Beads `workbench-lx8`).
 
 ## Domain grounding
@@ -81,6 +87,11 @@ Checked on 2026-11-15:
     - The remote held only `main` and `refs/dolt/data`.
 - **Latency.** `bd dolt pull` against Workbench's real GitHub remote took 1.28 s.
 - **mise environment.** mise exports an `[env]` value of `""` as a set, empty variable, both to `mise exec` and to tasks.
+- **Claims across two clones, with distinct `BEADS_ACTOR` values** (`mark@alpha` and `mark@beta`):
+    - Sequential: A claimed an item and synced; B synced and tried to claim it. Beads refused: "issue already claimed by mark@alpha".
+    - Concurrent: both claimed another item before syncing, and both claims succeeded locally. After both synced, both replicas showed `mark@beta`. A's claim was gone, with no error.
+- **First publish.** `bd sync` fails while the remote has no `refs/dolt/data` yet ("no branches found in remote"). The first publish needs `bd dolt push`.
+- **Worktrees.** All worktrees of a checkout share one database: `bd where` in a Worktrunk worktree resolves to the main checkout's `.beads/embeddeddolt`.
 - **Measured hook costs.**
     - `mise run check` takes 4.7 s in Workbench, and the 4–8 minutes in Trove come from [proposal 0003](0003-fit-the-harness-to-current-models.md).
     - `bd prime` took 0.7 s and printed 8,444 characters. With `--memories-only` it printed 2,831, all of them memories recorded that day.
@@ -90,12 +101,13 @@ Checked on 2026-11-15:
 
 | Concept | Identity and lifetime |
 | --- | --- |
-| Beads replica | One machine's local Dolt database for a project: a full copy that works offline. Lives in that checkout's `.beads/`. |
+| Beads replica | One machine's local Dolt database for a project: a full copy that works offline. Lives in the main checkout's `.beads/`, and every worktree of that checkout shares it. |
 | Beads remote | `refs/dolt/data` on the project's own GitHub repository. The meeting point of the replicas; never a branch. |
 | Sync | One `bd sync` cycle: pull, conflict check, push with retries. |
 | Sync point | A moment in the Workbench process at which a sync runs. Defined by this proposal. |
+| Claimant | Who holds a claim: `BEADS_ACTOR`, which Workbench sets to `<user>@<host>`. Identifies the machine holding an item. |
 
-The ontology review is COHERENT. Beads already defines replicas, remotes, and sync. This proposal adds only the process concept of a sync point. A claim is atomic within one replica. Across replicas, how soon others see a claim is bounded by the sync points.
+The ontology review is COHERENT. Beads already defines replicas, remotes, sync, and actors. This proposal adds the process concept of a sync point, and fixes the claimant as one identity per machine. A claim is atomic within one replica. Across replicas, how soon others see a claim is bounded by the sync points.
 
 Other constraints:
 
@@ -112,7 +124,7 @@ Other constraints:
 
 ### Remaining uncertainty
 
-- **Claims are not atomic across machines.** Two machines can claim the same item between syncs. The pull settles issue fields last-write-wins, so one claim replaces the other; the losing machine learns at its next sync. Syncing immediately after claiming narrows that window but does not close it.
+- **Claims are not atomic across machines.** Two machines that claim the same item before syncing both succeed locally. After syncing, the later sync's claim stands and the other disappears without an error. `beads:claim` detects a lost claim by re-reading the item after its sync ([section 4](#4-claiming-work-across-machines)), but it cannot prevent one.
 - **Network speed.** Sync latency on slower networks or larger databases is unmeasured. The only measurement is a 1.28 s pull from this machine.
 - **New machines.** A machine without a Dolt commit identity may fail its first merge. Beads documents this as a known failure when setting up a new machine.
 
@@ -151,8 +163,8 @@ Remove the hooks. Orientation and syncing then happen at points the process alre
 - after Beads writes that another machine should see, through one explicit task.
 
 ```text
-Machine B: mise run status → sync → sees A's claims and new items → claims t-42
-           mise run beads:sync → the claim is published
+Machine B: mise run status → sync → sees A's claims and new items
+           mise run beads:claim -- t-42 → sync, claim as mark@beta, sync, confirm
 Machine A: next mise run status, git push, or git pull → sync → sees t-42 claimed
 GitHub:    refs/dolt/data advances; no branch is created or updated; no banner
 ```
@@ -174,6 +186,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **Order.** `mise run status` runs one sync ([section 3](#3-syncing-beads-across-machines)) before reporting. After the phase report, it adds a Beads section:
     - the sync outcome;
     - ready work, from `bd ready`;
+    - items in progress and who holds them, from `bd list --status in_progress`;
     - the project's memories, from `bd prime --memories-only`.
 - **Sync outcomes:**
 
@@ -189,7 +202,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 
 - **Exit status.** Beads outcomes never change the exit status of `mise run status`.
 - **JSON.** `mise run status -- --json` adds a `beads` object that holds either:
-    - `sync` (`outcome` and `detail`), `ready` (a list of `id`, `title`, `priority`), and `memories` (text); or
+    - `sync` (`outcome` and `detail`), `ready` (a list of `id`, `title`, `priority`), `in_progress` (a list of `id`, `title`, `assignee`), and `memories` (text); or
     - `unavailable` (the reason).
 - **Contract and skill updates.** [Record Validation and Workflow Status](../guides/record-validation.md) gains this section as part of `status`'s contract. The `tracking-work` skill's start sequence becomes `mise run status`, then `bd show <id>`.
 
@@ -203,13 +216,13 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
     DOLT_REMOTE_INFO_BRANCH = ""
     ```
 
-    It defines a `beads:sync` task that runs `bd sync`. `mise run status`, the `beads:sync` task, and hk's mise-run steps all see that variable, so no sync publishes `__dolt_remote_info__`.
+    It defines a `beads:sync` task. That task runs `bd sync`, or `bd dolt push` when the remote has no `refs/dolt/data` yet, so the project's first sync publishes its history. `mise run status`, `beads:sync`, `beads:claim`, and hk's mise-run steps all see the variable, so no sync publishes `__dolt_remote_info__`. Both tasks and `mise run status` share one implementation, `tools/beads.ts`.
 
 - **Sync points:**
     1. `mise run status` ([section 2](#2-beads-in-mise-run-status)).
     2. hk's `pre-push` hook runs `mise run beads:sync` before its other steps.
     3. hk's `post-merge` hook runs `mise run beads:sync` after a pull or merge.
-    4. After claiming, closing, or creating a Beads item another machine should see, the agent runs `mise run beads:sync`. The contract states this rule.
+    4. After creating, closing, or updating a Beads item another machine should see, the agent runs `mise run beads:sync`. Claims sync themselves ([section 4](#4-claiming-work-across-machines)). The contract states this rule.
 - **Failures in hooks.** A Beads sync failure in a git hook prints its outcome and never blocks the git operation.
 - **Never:**
     - `dolt.auto-push`, which `mise run setup` sets to `false`;
@@ -221,7 +234,54 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **Setting up a machine.** `mise run setup` runs `bd bootstrap --yes` in a project that already has `.beads/config.yaml`. That restores the replica from `refs/dolt/data` instead of creating a fresh database with an unrelated history. It runs `bd init` only in a project that has no Beads workspace yet.
 - **Existing info branches.** A project whose repository has `__dolt_remote_info__` deletes it once; [beads#5266](https://github.com/gastownhall/beads/issues/5266) confirms that is safe. Workbench's repository has none. When Beads publishes beads#7945, the `[env]` entry becomes redundant and harmless.
 
-### 4. Documents and configuration that change
+### 4. Claiming work across machines
+
+Agents claim through `mise run beads:claim -- <id>`, never with `bd update --claim` directly. The task:
+
+1. syncs;
+2. claims the item as `BEADS_ACTOR`, which it sets to `<login user>@<short host name>` unless the environment already sets it;
+3. syncs again;
+4. re-reads the item and checks who holds it.
+
+| Outcome | Exit status | Reported as |
+| --- | --- | --- |
+| `claimed` | 0 | The item is claimed and published. |
+| `claimed-unpublished` | 0 | The item is claimed on this machine, but a sync failed, so other machines cannot see the claim until a later sync succeeds. Gives the sync failure's reason. |
+| `held` | nonzero | Beads refused because another claimant holds the item. Names that claimant. |
+| `lost` | nonzero | After syncing, another claimant holds the item, meaning a concurrent claim won. Names that claimant. The agent must not start the work. |
+
+### 5. Agent documentation
+
+The `tracking-work` skill gains a section on Beads across machines. The owner reported that agents misread this, so the section must stand on its own. It teaches:
+
+- **The model.**
+    - Each machine has one replica per project, shared by all of that checkout's worktrees.
+    - `bd` commands read and write only that replica, and other machines' changes arrive only through a sync.
+    - The meeting point is `refs/dolt/data` on the project's `origin`. It is not a branch, does not appear in branch lists, and `git clone` does not fetch it.
+    - `git pull` brings Beads changes only because hk's `post-merge` hook syncs; `git fetch` brings none.
+    - `.beads/issues.jsonl` is an export for diffs and viewers, never a sync channel.
+- **When syncs happen.** `mise run status`, `git push`, and `git pull` sync on their own. The agent runs `mise run beads:sync` after creating, closing, or updating items another machine should see, and before ending a session that changed Beads.
+- **Claiming.** Claim only through `mise run beads:claim`. The skill explains what each outcome in section 4 means, and that an item held by another claimant is not available.
+- **Sync outcomes**, from `mise run status` and the tasks:
+    - `failed`: continue, and say that Beads may be stale.
+    - `conflict`: stop writing to Beads, give the human the `bd sync` output, and never force.
+    - `blocked`: report it to the human.
+    - `unavailable`: run `mise run setup`.
+- **Never:**
+    - run `bd dolt push`, `bd dolt pull`, or `bd sync` directly;
+    - run `bd update --claim` outside the task;
+    - run `bd init` in a project that has `.beads/config.yaml`;
+    - `bd import` the JSONL export;
+    - pass `--force` to a Beads push;
+    - `git push --mirror`;
+    - enable `dolt.auto-push`;
+    - create a Git branch or commit to carry Beads data;
+    - run `bd prime`, whose generic guidance contradicts these rules.
+- **A new machine.** `mise run setup` restores the replica.
+
+The skill's claim example and the word "atomic" are replaced. Conflict and recovery detail that only matters when something goes wrong lives in a supporting file in the skill's directory, linked from the section. The contract carries the short rules and points to the skill.
+
+### 6. Documents and configuration that change
 
 - **`AGENTS.md`:**
     - The harness setup table drops the lifecycle rows.
@@ -233,11 +293,11 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **`guides/adapting-your-harness.md`** drops "Wire lifecycle events" and the extension rows. A harness needs only the contract and the skills.
 - **`guides/getting-started.md` and `README.md`** stop describing lifecycle extensions.
 - **`.agents/rules/enforcement-hierarchy.md`'s Tier 0** drops `.omp/extensions/` and names the hk steps.
-- **[Record Validation and Workflow Status](../guides/record-validation.md)** and the **`tracking-work` skill** change as described in [section 2](#2-beads-in-mise-run-status).
+- **[Record Validation and Workflow Status](../guides/record-validation.md)** changes as described in [section 2](#2-beads-in-mise-run-status), and the **`tracking-work` skill** as described in sections 2 and 5.
 - **Configuration:**
-    - `mise.toml` gains the `[env]` entry, the `beads:sync` task, and the setup changes.
+    - `mise.toml` gains the `[env]` entry, the `beads:sync` and `beads:claim` tasks, and the setup changes.
     - `hk.pkl` gains the `pre-push` and `post-merge` steps.
-    - `tools/status.ts` and its tests gain the Beads section.
+    - `tools/status.ts` gains the Beads section. The new `tools/beads.ts` implements sync and claim. Both get tests.
 
 ## Compatibility
 
@@ -256,7 +316,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
     - a Dolt commit identity on every machine.
 - **Steps for an existing project:**
     1. Delete the three extensions.
-    2. Add the `[env]` entry, the `beads:sync` task, and the hk steps.
+    2. Add the `[env]` entry, the `beads:sync` and `beads:claim` tasks, and the hk steps.
     3. Turn off `dolt.auto-push`.
     4. Delete any `__dolt_remote_info__` branch.
     5. Run `mise run setup` on each machine.
@@ -264,16 +324,18 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 
 ## Scope
 
-- Delete the three extensions and their test, and update the documents in [section 4](#4-documents-and-configuration-that-change).
+- Delete the three extensions and their test, and update the documents in [section 6](#6-documents-and-configuration-that-change).
 - Add the Beads section to `mise run status`, with tests that stub `bd` for each outcome in [section 2](#2-beads-in-mise-run-status).
-- Add the `[env]` entry, the `beads:sync` task, the setup change, and the hk steps to Workbench.
+- Add `tools/beads.ts` with its sync and claim behavior, with tests that stub `bd` for each outcome in [section 4](#4-claiming-work-across-machines).
+- Write the agent documentation in [section 5](#5-agent-documentation).
+- Add the `[env]` entry, the `beads:sync` and `beads:claim` tasks, the setup change, and the hk steps to Workbench.
 
 ### Out of scope
 
 - **Packaging Workbench and porting `status` to Rust.** That is [proposal 0006](https://github.com/markmals/workbench/pull/10), which ports this behavior unchanged.
 - **Migrating consumer projects,** including deleting Recon's info branch. Each is a change in that repository.
 - **Changing Beads itself**, such as beads#7945.
-- **A shared Dolt server, a DoltHub or bucket remote, or per-machine identities for claims.** See Alternatives and Future directions.
+- **A shared Dolt server, or a DoltHub or bucket remote.** See Alternatives and Future directions.
 
 ## Preview
 
@@ -281,11 +343,12 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 - **Artifact:** this branch, exercised against the real GitHub remote from two clones, each with its own replica. Two clones on one machine behave as two machines for Beads; a second physical machine is optional.
 - **Exercise:**
     1. In clone A, run `mise run status` and read the Beads section.
-    2. In clone B, claim an item and run `mise run beads:sync`.
-    3. In A, run `mise run status` and see the claim.
-    4. Push a branch from A and confirm hk synced.
-    5. Run `git ls-remote origin` and confirm there is no `refs/heads/__dolt_remote_info__`.
-    6. Run `mise run status` with the network off and see the `failed` outcome.
+    2. In clone B, run `mise run beads:claim -- <id>`.
+    3. In A, run `mise run status` and see the item in progress, held by B's claimant.
+    4. In A, run `mise run beads:claim` on B's item and see `held`, naming B's claimant. Tests with a stubbed `bd` cover `lost`, which needs a race between two machines.
+    5. Push a branch from A and confirm hk synced.
+    6. Run `git ls-remote origin` and confirm there is no `refs/heads/__dolt_remote_info__`.
+    7. Run `mise run status` with the network off and see the `failed` outcome.
 - **Cleanup:** close the probe items, sync, and delete the second clone.
 
 ## Policies and decisions checked
@@ -299,7 +362,7 @@ Delete `.omp/extensions/prime-beads.ts`, `format-after-edit.ts`, and `check-befo
 
 ## Future directions
 
-- **Visible claimants.** A per-machine Beads actor, such as `BEADS_ACTOR=<user>@<host>`, would show which machine holds a claim. All machines currently claim as the same Git user.
+- **Per-session claimants.** A claimant that names the session as well as the machine would tell apart two agents working on one machine.
 - **A shared server.** A single Dolt server, for example on a home server over Tailscale, would make claims atomic across machines if double claims become a real problem.
 - **Timed syncs.** A sync on a timer could serve long sessions that rarely orient, push, or pull.
 
