@@ -6,12 +6,14 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Node
-# No trailing slash: worktrees link node_modules from the main checkout.
-node_modules
-.pnpm-store/
-.cache/
-dist/
+# Rust build output, and the release archives `mise run package` builds.
+/target/
+/dist/
+/artifacts/
+
+# The Workbench package link: machine-local, recreated by `mise run setup` here and by
+# `mise install` in a consumer.
+.workbench
 
 # mise — machine-local overrides and their lockfiles. mise.toml and mise.lock are committed.
 mise.local.toml
@@ -22,19 +24,12 @@ mise.*.local.toml
 # hk — machine-local hook overrides. hk.pkl is committed.
 hk.local.pkl
 
-# fnox — machine-local secret overrides. fnox.toml is committed; it holds no values.
-fnox.local.toml
-
 # Beads / Dolt files (added by bd init)
 .dolt/
 *.db
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
-
-# Docs site (VitePress)
-docs/.vitepress/cache/
-docs/.vitepress/dist/
 
 # Environment
 .env
@@ -45,12 +40,3 @@ docs/.vitepress/dist/
 *.log
 *.pid
 *.tmp
-
-# Tests
-coverage/
-
-# Rust build output
-/target/
-
-# The Workbench package link: machine-local, recreated by `mise install` and `mise run setup`.
-.workbench

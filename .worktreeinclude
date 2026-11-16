@@ -2,9 +2,5 @@
 # it is both gitignored and listed here, so this file is an allowlist of build caches
 # that are expensive to recreate and safe to share.
 
-node_modules
-
-# BEGIN PLATFORM INCLUDES
-# Nothing further. `docs/.vitepress/cache` and `docs/.vitepress/dist` are rebuilt by
-# `mise run docs:build` in seconds, and a stale copy of either is worse than none.
-# END PLATFORM INCLUDES
+# Cargo's build cache: a reflink on APFS, so a new worktree skips a cold build.
+target

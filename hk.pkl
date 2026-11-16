@@ -5,7 +5,8 @@
 /// every hook hk installed. Beads instead runs as hk steps below, calling the same
 /// `bd hooks run <hook>` entry point beads' own shims call.
 ///
-/// The hk version here must match the `hk` pin in mise.toml. Bump both together.
+/// The hooks match what `workbench project init` writes for a consumer, plus Workbench's own
+/// formatters and linters. The hk version here must match the `hk` pin in mise.toml.
 amends "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Config.pkl"
 
 import "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Builtins.pkl"
@@ -22,43 +23,22 @@ local linters = new Mapping<String, Step> {
     ["newlines"] = Builtins.newlines
     ["check_merge_conflict"] = Builtins.check_merge_conflict
 
-    // The workflows are part of the gate: `actionlint` is pinned in mise.toml, so
-    // the hook, `mise run check` and CI all check them with the same version. The
-    // builtin globs `.github/workflows/*.yml` and `*.yaml`.
+    // `actionlint` is pinned in mise.toml, so the hook, `mise run check` and CI all check the
+    // workflows with the same version.
     ["actionlint"] = Builtins.actionlint
 
-    // BEGIN PLATFORM STEPS
-    // Oxfmt formats far more than TypeScript — it also owns JSON, JSONC, YAML,
-    // TOML, Markdown and CSS in this repository, including fenced code blocks
-    // inside Markdown. Settings live in .oxfmtrc.jsonc.
-    ["oxfmt"] = (Builtins.oxfmt) {
-        exclude = List(
-            "**/pnpm-lock.yaml",
-            "**/package-lock.json",
-            // Built by `mise run docs:build`.
-            "docs/.vitepress/dist/**",
-            "docs/.vitepress/cache/**"
-        )
-    }
+    // dprint formats Markdown (prose unwrapped), JSON, YAML, and TOML; settings live in
+    // dprint.json. No formatter checks the Hugo templates or CSS.
+    ["dprint"] = Builtins.dprint
 
-    // `--deny-warnings` is the builtin's default, so a rule set to "warn" in
-    // .oxlintrc.jsonc still blocks a commit. Workbench ships zero warnings; if you
-    // add a rule you only want advisory, make it advisory for the hook too rather
-    // than leaving the hook red.
-    ["oxlint"] = (Builtins.ox_lint) {
-        exclude = List("docs/.vitepress/dist/**", "docs/.vitepress/cache/**")
-    }
+    ["cargo_fmt"] = Builtins.cargo_fmt
 
-    // Type checking runs through the mise task rather than `tsrs` directly, so there
-    // is one definition of how to type-check this project, used by the hook, CI, and
-    // a person at a terminal.
-    ["tsrs"] {
-        glob = List("**/*.ts", "**/*.tsx", "tsconfig.json")
-        exclude = List("docs/.vitepress/dist/**", "docs/.vitepress/cache/**")
-        check = "mise run typecheck"
-        exclusive = true
+    // Every target, every warning an error: the builtin's default checks only the library
+    // and lets warnings through.
+    ["cargo_clippy"] = (Builtins.cargo_clippy) {
+        check = "cargo clippy --all-targets --quiet -- -D warnings"
+        fix = "cargo clippy --all-targets --fix --allow-dirty --allow-staged --quiet -- -D warnings"
     }
-    // END PLATFORM STEPS
 }
 
 /// Syncs this machine's Beads replica where work crosses machines: before a push, and after
@@ -98,7 +78,7 @@ hooks {
     ["commit-msg"] {
         steps {
             ["scoped-commit"] {
-                check = "node tools/check-scoped-commit.ts {{commit_msg_file}}"
+                check = "workbench commits check --output text --message-file {{commit_msg_file}}"
             }
         }
     }
