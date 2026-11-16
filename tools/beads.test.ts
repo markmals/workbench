@@ -6,11 +6,12 @@ import path from "node:path";
 import { test, type TestContext } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { claimBeadsItem, closeBeadsItem } from "./beads-claims.ts";
 import { collectBeadsReport } from "./beads-report.ts";
-import { claimBeadsItem, syncBeads } from "./beads.ts";
+import { syncBeads } from "./beads.ts";
 import { installFakeBd, type FakeReply, type FakeScript } from "./fake-bd.ts";
 
-let beadsScript = fileURLToPath(new URL("./beads.ts", import.meta.url));
+let beadsCli = fileURLToPath(new URL("./beads-cli.ts", import.meta.url));
 
 // Every test drives a scripted `bd`, never the real one, so no test can reach a real
 // Beads database or remote: `BEADS_*` from the outer session is dropped along with git's
@@ -516,13 +517,68 @@ test("describing a conflict stays within the sync's time limit", t => {
     assert.match(result.detail, /bd diff main origin\/main/);
 });
 
+test("closing an item closes it as this machine's claimant, then publishes it", t => {
+    let { root, fake } = project(t, {
+        close: { json: [{ id: "wb-1", status: "closed" }] },
+        sync: SYNCED,
+    });
+
+    let result = closeBeadsItem(root, "wb-1", "Fixed in PR #42");
+
+    assert.equal(result.outcome, "closed");
+    let steps = fake.calls().filter(({ args }) => args[0] !== "dolt");
+    assert.deepEqual(
+        steps.map(({ args }) => args[0]),
+        ["close", "sync"],
+    );
+    assert.equal(steps[0]?.actor, "mark@alpha");
+    assert.ok(steps[0]?.args.includes("--reason=Fixed in PR #42"), steps[0]?.args.join(" "));
+});
+
+test("a close whose sync fails is closed on this machine only", t => {
+    let { root } = projectWithRemote(t, true, {
+        close: { json: [{ id: "wb-1", status: "closed" }] },
+        sync: { exit: 1, json: { error: "sync failed: remote unreachable" } },
+    });
+
+    let result = closeBeadsItem(root, "wb-1", "Done");
+
+    assert.equal(result.outcome, "closed-unpublished");
+    assert.match(result.detail, /remote unreachable/);
+});
+
+test("a close Beads refuses fails with Beads' reason and does not sync", t => {
+    let { root, calls } = project(t, {
+        close: {
+            exit: 1,
+            json: { error: 'cannot close wb-1: assignee is "mark@beta", actor is "mark@alpha"' },
+        },
+        sync: SYNCED,
+    });
+
+    assert.throws(() => closeBeadsItem(root, "wb-1", "Done"), /assignee is "mark@beta"/);
+    assert.ok(!calls().some(call => call.startsWith("sync")), calls().join("\n"));
+});
+
+test("closing in a replica whose Beads remote is another repository changes nothing", t => {
+    let { root, calls } = project(t, {
+        "dolt remote list": remotes("git+https://github.com/markmals/workbench.git"),
+        close: { json: [{ id: "wb-1", status: "closed" }] },
+        sync: SYNCED,
+    });
+    setOrigin(root, "https://github.com/someone/new-project.git");
+
+    assert.throws(() => closeBeadsItem(root, "wb-1", "Done"), /not this project's origin/);
+    assert.ok(!calls().some(call => call.startsWith("close")), calls().join("\n"));
+});
+
 function runTask(t: TestContext, script: FakeScript, ...arguments_: string[]) {
     let root = mkdtempSync(path.join(tmpdir(), "workbench-beads-task-"));
     t.after(() => rmSync(root, { force: true, recursive: true }));
     let bin = path.join(root, "bin");
     mkdirSync(bin);
     installFakeBd(bin, script);
-    return spawnSync(process.execPath, [beadsScript, ...arguments_], {
+    return spawnSync(process.execPath, [beadsCli, ...arguments_], {
         cwd: root,
         encoding: "utf8",
         env: {
@@ -576,4 +632,27 @@ test("beads:claim exits zero when claimed and nonzero when held, printing the ou
     assert.notEqual(held.status, 0);
     assert.match(held.stdout, /held/);
     assert.match(held.stdout, /mark@beta/);
+});
+
+test("beads:close exits zero when closed and nonzero when Beads refuses, printing the outcome", t => {
+    let closed = runTask(
+        t,
+        { where: AVAILABLE, close: { json: [{ id: "wb-1" }] }, sync: SYNCED },
+        "close",
+        "wb-1",
+        "Fixed in PR #42",
+    );
+    let refused = runTask(
+        t,
+        { where: AVAILABLE, close: { exit: 1, json: { error: "cannot close wb-1: held" } } },
+        "close",
+        "wb-1",
+        "Fixed in PR #42",
+    );
+
+    assert.equal(closed.status, 0, closed.stderr);
+    assert.match(closed.stdout, /Beads: closed\./);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stdout, /close failed/);
+    assert.match(refused.stdout, /cannot close wb-1: held/);
 });

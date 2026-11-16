@@ -1,28 +1,17 @@
-import { hostname, userInfo } from "node:os";
-
 import { bd, bdError, parseJson, type CommandRun } from "./bd.ts";
 import { foreignRemote, remoteLacksBeadsHistory } from "./beads-remote.ts";
 
-// Beads across machines: the one sync every sync point runs, and the claim that checks it
-// survived. `mise run beads:sync`, `mise run beads:claim -- <id>`, and `mise run status`
-// (through beads-report.ts) all run this module. The outcomes are a contract: the tracking-work
-// skill tells agents what each one means, and guides/record-validation.md documents the ones
-// `mise run status` reports.
+// Beads across machines: the one sync every sync point runs, and whether Beads is usable here.
+// `mise run beads:sync` (through beads-cli.ts), the claim and close tasks (beads-claims.ts), and
+// `mise run status` (beads-report.ts) all sync through this module. The outcomes are a contract:
+// the tracking-work skill tells agents what each one means, and guides/record-validation.md
+// documents the ones `mise run status` reports.
 
 export type SyncOutcome = "synced" | "failed" | "conflict" | "blocked";
 
 export interface SyncResult {
     outcome: SyncOutcome;
     detail: string;
-}
-
-export type ClaimOutcome = "claimed" | "claimed-unpublished" | "held" | "lost";
-
-export interface ClaimResult {
-    outcome: ClaimOutcome;
-    detail: string;
-    /** Who holds the item after the claim: this machine's claimant unless another won. */
-    holder: string | null;
 }
 
 /** How long one sync may take before its outcome is `failed`. */
@@ -91,78 +80,6 @@ function describeDiffEntry({ IssueID, OldValue, NewValue }: DiffEntry): string {
     let title = NewValue?.title ?? OldValue?.title;
     return title ? `${IssueID} (${title})` : IssueID;
 }
-/** The claimant this machine claims as: `BEADS_ACTOR`, or `<login user>@<short host name>`. */
-export function claimant(): string {
-    return process.env.BEADS_ACTOR || `${userInfo().username}@${hostname().split(".")[0]}`;
-}
-
-interface Item {
-    status?: string;
-    assignee?: string;
-}
-
-function readItem(root: string, id: string): Item | null {
-    let show = bd(["show", id, "--json"], root);
-    let items = parseJson(show.stdout);
-    if (show.status !== 0 || !Array.isArray(items)) return null;
-    return (items[0] as Item | undefined) ?? null;
-}
-
-/**
- * Claims an item so other machines see it: sync, claim as this machine's claimant, sync
- * again, then re-read who holds it. Throws, changing nothing, when the replica's Beads remote
- * is not this project's own, and throws when Beads rejects the claim for any reason other
- * than another claimant holding the item, such as an unknown id.
- */
-export function claimBeadsItem(
-    root: string,
-    id: string,
-    timeoutMs = SYNC_TIME_LIMIT_MS,
-): ClaimResult {
-    let foreign = foreignRemote(root, Date.now() + timeoutMs);
-    if (foreign) throw new Error(foreign);
-    let actor = claimant();
-    syncBeads(root, timeoutMs);
-    let claim = bd(["update", id, "--claim", "--json"], root, undefined, {
-        ...process.env,
-        BEADS_ACTOR: actor,
-    });
-    if (claim.status !== 0) {
-        let item = readItem(root, id);
-        if (item?.status === "in_progress" && item.assignee && item.assignee !== actor)
-            return {
-                outcome: "held",
-                holder: item.assignee,
-                detail: `${id} is held by ${item.assignee}. It is not available.`,
-            };
-        throw new Error(bdError(claim, "update --claim"));
-    }
-    let second = syncBeads(root, timeoutMs);
-    let item = readItem(root, id);
-    if (item === null) throw new Error(`Could not read ${id} back after claiming it.`);
-    if (item.status !== "in_progress" || item.assignee !== actor) {
-        let holder = item.status === "in_progress" ? (item.assignee ?? null) : null;
-        let now = holder
-            ? `is now held by ${holder}`
-            : `is no longer claimed (status ${item.status})`;
-        return {
-            outcome: "lost",
-            holder,
-            detail: `${id} ${now}: a change from another machine won. Do not start the work.`,
-        };
-    }
-    if (second.outcome !== "synced")
-        return {
-            outcome: "claimed-unpublished",
-            holder: actor,
-            detail: `${id} is claimed as ${actor} on this machine only; the sync ended ${second.outcome}: ${second.detail} Run \`mise run beads:sync\` until it succeeds.`,
-        };
-    return {
-        outcome: "claimed",
-        holder: actor,
-        detail: `${id} is claimed as ${actor}, and other machines can see the claim.`,
-    };
-}
 
 /** Why Beads cannot be used here, or null when it can: bd, a workspace, and its database. */
 export function beadsUnavailable(root: string): string | null {
@@ -186,32 +103,3 @@ export function formatOutcome(outcome: string, detail: string): string {
 export function formatUnavailable(reason: string): string {
     return formatOutcome("unavailable", `${reason}. Run \`mise run setup\`.`);
 }
-
-function main(): number {
-    let [command, id] = process.argv.slice(2);
-    if (command !== "sync" && !(command === "claim" && id)) {
-        console.error("Usage: node tools/beads.ts sync | node tools/beads.ts claim <id>");
-        return 2;
-    }
-    let root = process.cwd();
-    let unavailable = beadsUnavailable(root);
-    if (unavailable) {
-        console.log(formatUnavailable(unavailable));
-        return 1;
-    }
-    if (command === "sync") {
-        let result = syncBeads(root);
-        console.log(formatOutcome(result.outcome, result.detail));
-        return result.outcome === "synced" ? 0 : 1;
-    }
-    try {
-        let result = claimBeadsItem(root, id!);
-        console.log(formatOutcome(result.outcome, result.detail));
-        return result.outcome === "claimed" || result.outcome === "claimed-unpublished" ? 0 : 1;
-    } catch (error) {
-        console.log(formatOutcome("claim failed", (error as Error).message));
-        return 1;
-    }
-}
-
-if (import.meta.main) process.exitCode = main();

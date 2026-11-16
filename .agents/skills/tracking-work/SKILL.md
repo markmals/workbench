@@ -51,7 +51,7 @@ Priorities are `0`–`4`, `0` highest, default `2`. Apply the project's existing
 
 ```sh
 mise run beads:claim -- <id>   # claim before starting; see Claiming below
-bd close <id> --reason="Fixed in PR #42"
+mise run beads:close -- <id> "Fixed in PR #42"   # close as this machine's claimant, then sync
 bd remember "<durable project fact>"
 mise run beads:sync            # publish what you changed
 ```
@@ -96,6 +96,16 @@ A claim made on two machines before either syncs succeeds on both, and the later
 
 A claim made before claimants named machines holds a Git user name, such as `Mark Malstrom`, so `beads:claim` reports it as `held` on every machine. When you know the claim is this session's, or the human confirms it is this machine's, move it to this machine's claimant and publish it: `bd update <id> --if-assignee "<old name>" --assignee <user>@<short host name>`, then `mise run beads:sync`.
 
+### Closing
+
+Close only with `mise run beads:close -- <id> "<reason>"`. `bd close` refuses an item whose assignee is not the actor running it, and a plain `bd` command runs as the Git user name, not as this machine's claimant. The task closes the item as the claimant, then syncs:
+
+| Outcome | Exit | What it means |
+| --- | --- | --- |
+| `closed` | 0 | The item is closed, and other machines can see it. |
+| `closed-unpublished` | 0 | The item is closed on this machine, but the sync failed; the output gives the reason. Run `mise run beads:sync` until it succeeds. |
+| `close failed` | nonzero | Beads refused, for example because another claimant holds the item. The output gives Beads' reason. |
+
 ### Sync outcomes
 
 `mise run status`, `mise run beads:sync`, and `mise run beads:claim` report one of these. `mise run beads:sync` exits zero only for `synced`.
@@ -116,7 +126,7 @@ Whatever the resolution, never force a push, and never delete or re-bootstrap th
 ### Never
 
 - Run `bd dolt push`, `bd dolt pull`, or `bd sync` directly. The mise tasks set the environment that keeps Dolt from publishing a `__dolt_remote_info__` branch.
-- Run `bd update --claim` outside `mise run beads:claim`.
+- Run `bd update --claim` outside `mise run beads:claim`, or `bd close` outside `mise run beads:close`.
 - Run `bd init` in a project that has `.beads/config.yaml`.
 - `bd import` the JSONL export.
 - Pass `--force` to a Beads push.

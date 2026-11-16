@@ -93,11 +93,15 @@ run = "node tools/status.ts"
 
 [tasks."beads:sync"]
 description = "Sync this machine's Beads replica with the project's remote"
-run = "node tools/beads.ts sync"
+run = "node tools/beads-cli.ts sync"
 
 [tasks."beads:claim"]
 description = "Claim a Beads item as this machine and confirm the claim survived a sync: `mise run beads:claim -- <id>`"
-run = "node tools/beads.ts claim"
+run = "node tools/beads-cli.ts claim"
+
+[tasks."beads:close"]
+description = "Close a Beads item as this machine's claimant, then sync: `mise run beads:close -- <id> \"<reason>\"`"
+run = "node tools/beads-cli.ts close"
 
 [tasks.test]
 alias = "t"

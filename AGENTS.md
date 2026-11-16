@@ -70,7 +70,7 @@ mise run status               # syncs Beads, then shows ready work, items in pro
 bd show <id>                  # read one item before touching it
 mise run beads:claim -- <id>  # claim before starting
 bd create "Title" --description="why this exists" --type=task --priority=2
-bd close <id> --reason="Completed"
+mise run beads:close -- <id> "Completed"  # close as this machine's claimant, then sync
 bd remember "<fact>"          # durable project memory
 mise run beads:sync           # publish changes other machines should see
 ```
@@ -79,7 +79,7 @@ Rules that matter:
 
 - Never run `bd edit`; it opens an interactive editor and will hang a non-interactive agent. Use `bd update` flags.
 - Priorities are `0`–`4`, `0` highest. Default `2`. Do not invent a scale.
-- Claim before starting, only with `mise run beads:claim`, and close only when the work is actually done. Do not start work the claim reports as `held` or `lost`.
+- Claim before starting, only with `mise run beads:claim`, and close only when the work is actually done, only with `mise run beads:close`: plain `bd close` runs as the Git user name and is refused for an item claimed as `<user>@<short host>`. Do not start work the claim reports as `held` or `lost`.
 - Each machine has its own Beads replica, and other machines see your changes only after a sync. `mise run status`, `git push`, and `git pull` sync on their own; after creating, closing, or updating an item another machine should see, run `mise run beads:sync`.
 - Every sync runs through mise. Never run `bd dolt push`, `bd dolt pull`, or `bd sync` directly, and never `git push --mirror`, which deletes the remote's Beads data.
 - Resolve a Beads sync conflict yourself, as the skill describes, and report afterwards what you resolved and why.
