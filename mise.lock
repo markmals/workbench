@@ -566,6 +566,9 @@ version = "1.100.0"
 backend = "core:rust"
 specifiers = ["1.100.0"]
 
+[tools.rust.options]
+components = "clippy,rustfmt"
+
 [[tools.worktrunk]]
 version = "0.81.0"
 backend = "packslip:github.com/max-sixty/worktrunk"

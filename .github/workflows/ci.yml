@@ -24,7 +24,6 @@ jobs:
               with:
                   fetch-depth: 0
             - uses: jdx/mise-action@v5
-            - run: mise run link
             - run: mise run check
 
     commits:

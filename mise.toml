@@ -8,7 +8,8 @@ min_version = "2026.11.8"
 lockfile = true
 
 [tools]
-rust = "1.100.0"
+# hk's `cargo_fmt` and `cargo_clippy` steps need both components on every machine, CI included.
+rust = { version = "1.100.0", components = "rustfmt,clippy" }
 # hk's version must match the `amends`/`import` URLs in hk.pkl — bump both together.
 hk = "2.8.1"
 gh = "2.103.2"
@@ -77,7 +78,7 @@ run = "workbench workflow status --output text"
 
 [tasks.validate]
 description = "Check the records and this project's use of Workbench"
-depends = ["build"]
+depends = ["build", "link"]
 run = ["workbench records validate --output text", "workbench project validate --output text"]
 
 [tasks."beads:sync"]
@@ -111,10 +112,12 @@ description = "Build the site into docs/public with Hugo, then index it for sear
 # A deployed build sets its base URL through HUGO_BASEURL, which Hugo reads in place of
 # docs/hugo.toml's `baseURL`; a local build needs nothing set. The build also fails on a dead
 # relative link, which makes it the dead-link check inside `mise run check`.
+depends = ["link"]
 run = ["hugo build --source docs --cleanDestinationDir", "pagefind --site docs/public"]
 
 [tasks."docs:dev"]
 description = "Serve the site with live reload; search needs `mise run docs:build`"
+depends = ["link"]
 run = "hugo server --source docs"
 
 [tasks."cli:reference"]
