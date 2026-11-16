@@ -47,10 +47,16 @@ Revise its rule and applicable checks in the same change, keeping its logical id
 
 `workbench project validate` checks how the project uses Workbench rather than its records. Each problem is a violation with a `path` and a `message`, reported the same way as record violations, with `CHECK_FAILED` and exit status 1:
 
-- `.workbench` points at a different Workbench version than the `github:markmals/workbench` pin in `mise.toml`.
-- A harness declaration is missing: the `.claude/settings.json` marketplace and enabled plugin, or the `./.workbench` entry in `.omp/config.yml`.
-- A project skill `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` reuses the name of a skill or rule the pinned release ships. The message names the file and says to remove or rename it.
-- The project still vendors a Workbench file the package now supplies.
+- `mise.toml` pins no `github:markmals/workbench` version, or `.workbench` is missing or dangling, so harnesses load no Workbench content, or it points at a different Workbench version than the pin. The link's version is the `version` in its `.claude-plugin/plugin.json`. The fix for a missing pin is `mise use github:markmals/workbench@<version>`, and for the link, `mise install`. Workbench's own repository, whose `.workbench` links to its working tree's `plugin/`, has no pin and is exempt from this check.
+- A harness declaration is missing or unreadable: the `.claude/settings.json` marketplace and enabled plugin, or the `./.workbench` entry in `.omp/config.yml`.
+- A project skill `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` reuses the name of a skill or rule this release of Workbench ships. The message names the file and says to remove or rename it.
+- The project still vendors a Workbench file the package now supplies:
+    - a template in `.agents/templates/` identical to the package's template of the same name (a different one is an override, and allowed). Templates are compared with `.workbench/templates/`, or with the copies built into `workbench` from the same release when the link is missing;
+    - the Oh My Pi extensions `.omp/extensions/check-before-stop.ts`, `format-after-edit.ts`, and `prime-beads.ts`, and the workflow tool in `.omp/tools/dynamic-workflows/`;
+    - the TypeScript tools the CLI replaces, with their tests: `tools/validate.ts`, `status.ts`, `check-scoped-commit.ts`, `check-pr-commits.ts`, `require-changeset.ts`, `tag-release.ts`, `project-version.ts`, `bd.ts`, `fake-bd.ts`, and `beads*.ts`;
+    - `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`.
+
+`workbench context show` reports the same setup without judging it: the project root, branch, `origin`, and pull request; the pin, the running `workbench` version, and where `.workbench` points; the harness declarations; the Beads workspace, its remote, and the claimant; and the documentation site's configuration.
 
 ## Find the next actor
 

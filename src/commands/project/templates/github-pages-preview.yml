@@ -1,0 +1,77 @@
+# The documentation site's preview: each pull request's rendered site at its own URL under
+# `pr-preview/pr-<number>/` on the `gh-pages` branch, commented on the pull request and removed
+# when it closes.
+#
+# A public repository's preview is public too. A project whose guides must stay private should
+# publish to Cloudflare instead (`workbench project init --site cloudflare`), which can gate a
+# preview behind Cloudflare Access — GitHub Pages cannot serve privately outside Enterprise.
+#
+# Requires GitHub Pages enabled with its source set to the `gh-pages` branch.
+
+name: Preview
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, closed]
+
+concurrency:
+    group: preview-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    deploy:
+        if: github.event.action != 'closed'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: jdx/mise-action@v5
+
+            # The base URL must match the path the preview is served from, or every asset and link
+            # 404s. Hugo reads HUGO_BASEURL in place of `baseURL` in docs/hugo.toml.
+            - run: mise run docs:build
+              env:
+                  HUGO_BASEURL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-preview/pr-${{ github.event.pull_request.number }}/
+
+            # Concurrency cannot order runs that never overlap. A run created after the closing
+            # run has already finished will happily publish a preview for a merged pull request,
+            # because its event payload still describes an open one. Ask for live state instead of
+            # trusting the payload — and ask here, after the build, so the window between this
+            # answer and the publish below is as small as it can be.
+            - id: state
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR: ${{ github.event.pull_request.number }}
+              run: echo "pr=$(gh pr view "$PR" --json state --jq .state)" >>"$GITHUB_OUTPUT"
+
+            - if: steps.state.outputs.pr == 'OPEN'
+              uses: rossjrw/pr-preview-action@v1.8.1
+              with:
+                  source-dir: docs/public
+                  preview-branch: gh-pages
+                  umbrella-dir: pr-preview
+                  action: deploy
+
+            # Skipping is the correct outcome, not a failure. Failing here would put a red mark on
+            # a merged pull request for something nobody needs to act on.
+            - if: steps.state.outputs.pr != 'OPEN'
+              run: echo "::notice::Pull request is ${{ steps.state.outputs.pr }} — not publishing a preview."
+
+    remove:
+        if: github.event.action == 'closed'
+        runs-on: ubuntu-latest
+        # No job-level permissions block: it would replace the workflow's grant wholesale, and
+        # this job comments on the pull request as well as writing to gh-pages.
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: rossjrw/pr-preview-action@v1.8.1
+              with:
+                  source-dir: docs/public
+                  preview-branch: gh-pages
+                  umbrella-dir: pr-preview
+                  action: remove

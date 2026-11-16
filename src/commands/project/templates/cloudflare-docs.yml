@@ -1,0 +1,49 @@
+# Publishes the documentation site from the default branch to Cloudflare, as a Worker that
+# serves the built site as static assets (docs/wrangler.jsonc names the Worker).
+#
+# Requires the repository secrets CLOUDFLARE_API_TOKEN (permission to edit Workers Scripts) and
+# CLOUDFLARE_ACCOUNT_ID. Wrangler runs on the CI runner only; the project needs no Node.
+#
+# PRIVACY — READ BEFORE ADOPTING
+#
+# This publishes your guides to the public internet unless you put the Worker behind Cloudflare
+# Access. The kit's default is that guides are private: if yours are, enable Access on the
+# Worker (and on its Previews) before the first run.
+
+name: Docs
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+# A newer commit on the default branch supersedes an older deploy; cancelling the stale one is
+# correct. Previews are separate Worker Previews and never touch production.
+concurrency:
+    group: docs-production
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: jdx/mise-action@v5
+
+            # The Worker serves the site from the root of its URL. Hugo reads HUGO_BASEURL in
+            # place of `baseURL` in docs/hugo.toml.
+            - run: mise run docs:build
+              env:
+                  HUGO_BASEURL: /
+
+            - uses: cloudflare/wrangler-action@v4
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  wranglerVersion: "4.136.3"
+                  workingDirectory: docs
+                  command: deploy

@@ -1,0 +1,112 @@
+/// hk owns every git hook in this repository.
+///
+/// Install them with `hk install --mise` (from `mise run setup`). Never run `bd hooks install`:
+/// it points `core.hooksPath` at `.beads/hooks`, which disables every hook hk installed. Beads
+/// instead runs as hk steps below, calling the same `bd hooks run <hook>` entry point beads' own
+/// shims call.
+///
+/// The hk version here must match the `hk` pin in mise.toml. Bump both together.
+amends "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Config.pkl"
+
+import "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Builtins.pkl"
+
+/// Files another tool owns and rewrites: `bd` regenerates `.beads/metadata.json` and
+/// `.beads/issues.jsonl`.
+exclude = List(".beads/**")
+
+/// The project's formatters and linters. `check`, `fix`, and `pre-commit` share this set, so a
+/// clean `hk check --all` in CI means a clean pre-commit locally. Workbench adds none: the
+/// project chooses its own, for example `["oxfmt"] = Builtins.oxfmt`.
+local linters = new Mapping<String, Step> {}
+
+/// Syncs this machine's Beads replica where work crosses machines: before a push, and after a
+/// pull, merge, or rebase. A sync that does not succeed prints its outcome and never blocks git.
+local beadsSync: Step = new {
+    check = "mise run beads:sync"
+    allow_failure = true
+    output_summary = "combined"
+}
+
+/// `bd hooks run` exits 3 when the beads database is not initialized. Beads' own shims treat
+/// that as success so a fresh clone can commit before `mise run setup` has run; these steps do
+/// the same.
+hooks {
+    ["check"] {
+        steps = linters
+    }
+
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+
+    ["pre-commit"] {
+        fix = true
+        stage = true
+        stash = "git"
+        steps = (linters) {
+            ["beads"] {
+                check = "bd hooks run pre-commit || [ $? -eq 3 ]"
+                exclusive = true
+            }
+        }
+    }
+
+    // Every commit subject follows Scoped Commits, with the scopes `workbench` accepts.
+    ["commit-msg"] {
+        steps {
+            ["scoped-commit"] {
+                check = "workbench commits check --message-file {{commit_msg_file}}"
+            }
+        }
+    }
+
+    ["prepare-commit-msg"] {
+        steps {
+            ["beads"] {
+                check = "bd hooks run prepare-commit-msg {{hook_args}} || [ $? -eq 3 ]"
+            }
+        }
+    }
+
+    // No hook runs `mise run check`: CI runs it on every push, and agents wait for CI before
+    // marking a pull request ready or merging it.
+    ["pre-push"] {
+        steps {
+            ["beads-sync"] = beadsSync
+            ["beads"] {
+                depends = "beads-sync"
+                check = "bd hooks run pre-push {{hook_args}} || [ $? -eq 3 ]"
+            }
+        }
+    }
+
+    ["post-checkout"] {
+        steps {
+            ["beads"] {
+                check = "bd hooks run post-checkout {{hook_args}} || [ $? -eq 3 ]"
+            }
+        }
+    }
+
+    ["post-merge"] {
+        steps {
+            ["beads"] {
+                check = "bd hooks run post-merge {{hook_args}} || [ $? -eq 3 ]"
+            }
+            ["beads-sync"] = (beadsSync) {
+                depends = "beads"
+            }
+        }
+    }
+
+    // `git pull --rebase` runs `post-rewrite`, not `post-merge`. Git passes `rebase` or `amend`;
+    // an amend rewrites only local work, so it skips the sync.
+    ["post-rewrite"] {
+        steps {
+            ["beads-sync"] = (beadsSync) {
+                check = "[ \"{{hook_args}}\" != rebase ] || mise run beads:sync"
+            }
+        }
+    }
+}

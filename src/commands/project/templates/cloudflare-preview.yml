@@ -1,0 +1,95 @@
+# The documentation site's preview: each pull request gets a Cloudflare Worker Preview of the
+# site at its own URL, commented on the pull request and deleted when the pull request closes.
+# Put the Worker's Previews behind Cloudflare Access when the guides are private.
+#
+# Requires the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, which GitHub
+# withholds from pull requests opened from forks; those get no preview.
+
+name: Preview
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, closed]
+
+concurrency:
+    group: preview-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    deploy:
+        if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: jdx/mise-action@v5
+
+            # A Preview serves the site from the root of its URL. Hugo reads HUGO_BASEURL in place
+            # of `baseURL` in docs/hugo.toml.
+            - run: mise run docs:build
+              env:
+                  HUGO_BASEURL: /
+
+            # Concurrency cannot order runs that never overlap. A run created after the closing
+            # run has already finished will happily publish a preview for a merged pull request,
+            # because its event payload still describes an open one. Ask for live state instead of
+            # trusting the payload — and ask here, after the build, so the window between this
+            # answer and the publish below is as small as it can be.
+            - id: state
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR: ${{ github.event.pull_request.number }}
+              run: echo "pr=$(gh pr view "$PR" --json state --jq .state)" >>"$GITHUB_OUTPUT"
+
+            - id: preview
+              if: steps.state.outputs.pr == 'OPEN'
+              uses: cloudflare/wrangler-action@v4
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  wranglerVersion: "4.136.3"
+                  workingDirectory: docs
+                  command: preview --name pr-${{ github.event.pull_request.number }}
+
+            # One comment per pull request, updated on each push; the Preview URL itself is stable.
+            - if: steps.state.outputs.pr == 'OPEN'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR: ${{ github.event.pull_request.number }}
+                  PREVIEW_URL: ${{ steps.preview.outputs.preview-url }}
+              run: |
+                  gh pr comment "$PR" --edit-last --create-if-none --body "Documentation preview: $PREVIEW_URL"
+
+            # Skipping is the correct outcome, not a failure. Failing here would put a red mark on
+            # a merged pull request for something nobody needs to act on.
+            - if: steps.state.outputs.pr != 'OPEN'
+              run: echo "::notice::Pull request is ${{ steps.state.outputs.pr }} — not publishing a preview."
+
+    remove:
+        if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - id: delete
+              continue-on-error: true
+              uses: cloudflare/wrangler-action@v4
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  wranglerVersion: "4.136.3"
+                  workingDirectory: docs
+                  command: preview delete --name pr-${{ github.event.pull_request.number }} --skip-confirmation
+
+            # A pull request closed before its first preview has nothing to delete, which Cloudflare
+            # reports as "Preview not found" (code 10025). Any other failure leaves a preview online.
+            - if: steps.delete.outcome == 'failure' && !contains(steps.delete.outputs.command-stderr, '10025')
+              env:
+                  STDERR: ${{ steps.delete.outputs.command-stderr }}
+              run: |
+                  echo "::error::Could not delete the preview: $STDERR"
+                  exit 1

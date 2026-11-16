@@ -1,0 +1,9 @@
+// The Cloudflare Worker that serves the documentation site's build (docs/public) as static
+// assets. `.github/workflows/docs.yml` deploys it; `preview.yml` publishes a Preview per pull
+// request.
+{
+    "name": "{{worker}}",
+    "compatibility_date": "{{today}}",
+    "assets": { "directory": "./public", "not_found_handling": "404-page" },
+    "previews": {}
+}

@@ -235,6 +235,7 @@ pub fn example_project() -> Fixture {
             "guides/getting-started.md",
             "---\nid: guide.getting-started\ntitle: Getting Started\n---\n\n# Getting Started\n",
         );
+    declare_workbench(&fixture);
     fixture.commit_all("docs: add the example records");
     add_example_release_history(&fixture);
     fixture
@@ -255,4 +256,41 @@ fn add_example_release_history(fixture: &Fixture) {
     );
     fixture.commit_all("docs: describe the CSV export");
     fixture.git_command(&["checkout", "--quiet", "main"]);
+}
+
+/// The version of the package in this working tree's `plugin/`, which `link_package` links.
+pub fn package_version() -> String {
+    let manifest = fs::read_to_string(plugin_dir().join(".claude-plugin/plugin.json"))
+        .expect("plugin/.claude-plugin/plugin.json");
+    let manifest: Value = serde_json::from_str(&manifest).expect("a JSON plugin manifest");
+    manifest["version"]
+        .as_str()
+        .expect("the manifest names a version")
+        .to_string()
+}
+
+/// The `mise.toml` pin `workbench project init` requires, at the linked package's version.
+pub fn workbench_pin() -> String {
+    format!(
+        "[tools]\n\"github:markmals/workbench\" = \"{}\"\n",
+        package_version()
+    )
+}
+
+/// Declares Workbench as an adopted project does: the pin and both harness declarations. The
+/// `.workbench` link is separate: `link_package`.
+pub fn declare_workbench(fixture: &Fixture) -> &Fixture {
+    fixture
+        .write("mise.toml", &workbench_pin())
+        .write(
+            ".claude/settings.json",
+            r#"{
+    "extraKnownMarketplaces": {
+        "workbench": { "source": { "source": "directory", "path": "./.workbench" } }
+    },
+    "enabledPlugins": { "workbench@workbench": true }
+}
+"#,
+        )
+        .write(".omp/config.yml", "extensions:\n    - ./.workbench\n")
 }
