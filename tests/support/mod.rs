@@ -230,5 +230,23 @@ pub fn example_project() -> Fixture {
             "---\nid: guide.getting-started\ntitle: Getting Started\n---\n\n# Getting Started\n",
         );
     fixture.commit_all("docs: add the example records");
+    add_example_release_history(&fixture);
     fixture
+}
+
+/// A single-package `knope.toml` on `main`, and a `feature` branch whose commit adds a change
+/// file, so the `commits` and `change-files` examples have a project and a range to check.
+fn add_example_release_history(fixture: &Fixture) {
+    fixture.write(
+        "knope.toml",
+        "[package]\nversioned_files = []\nchangelog = \"CHANGELOG.md\"\n\n[changes]\nignore_conventional_commits = true\n",
+    );
+    fixture.commit_all("release: configure knope");
+    fixture.git_command(&["checkout", "--quiet", "-b", "feature"]);
+    fixture.write(
+        ".changeset/export_reports_as_csv.md",
+        "---\ndefault: minor\n---\n\n# Export reports as CSV\n",
+    );
+    fixture.commit_all("docs: describe the CSV export");
+    fixture.git_command(&["checkout", "--quiet", "main"]);
 }
