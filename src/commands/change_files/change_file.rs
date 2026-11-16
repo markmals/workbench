@@ -1,8 +1,9 @@
-//! Knope's change-file format: naming, writing, and checking the frontmatter.
+//! Knope's change-file format: naming, writing, and checking it.
 //!
-//! The rules follow the `changesets` crate Knope reads change files with: a `---` line, one
-//! `<package>: <type>` line per package (split at the first `:`, the package optionally quoted),
-//! and a closing `---` line.
+//! The frontmatter rules follow the `changesets` crate Knope reads change files with: a `---`
+//! line, one `<package>: <type>` line per package (split at the first `:`, the package
+//! optionally quoted), and a closing `---` line. After it comes the summary heading, which Knope
+//! turns into the changelog entry, then any detail.
 
 use super::knope::KnopeConfig;
 
@@ -37,32 +38,66 @@ pub fn render(package: &str, change_type: &str, summary: &str, body: Option<&str
     content
 }
 
-/// What keeps `content` from being a change file Knope accepts; empty when it is one. With a
-/// `config`, every package must be one it declares and every type one that package accepts.
+/// What keeps `content` from being a change file Knope accepts and the release notes can use;
+/// empty when it is one. With a `config`, every package must be one it declares and every type
+/// one that package accepts.
 pub fn problems(content: &str, config: Option<&KnopeConfig>) -> Vec<String> {
-    let entries = match frontmatter(content) {
-        Ok(entries) => entries,
+    let Parsed { entries, body } = match frontmatter(content) {
+        Ok(parsed) => parsed,
         Err(problem) => return vec![problem],
     };
-    entries
+    let mut problems: Vec<String> = entries
         .into_iter()
         .filter_map(|(package, change_type)| entry_problem(package, change_type, config))
-        .collect()
+        .collect();
+    if !opens_with_summary(body) {
+        problems.push(
+            "the first line after the frontmatter must be the summary, a heading such as \
+             `# Add the export queue`; Knope writes the summary into the changelog"
+                .into(),
+        );
+    }
+    problems
 }
 
-/// The `(package, type)` pairs of the frontmatter.
-fn frontmatter(content: &str) -> Result<Vec<(&str, &str)>, String> {
-    let mut lines = content.lines();
-    if lines.next().map(str::trim) != Some("---") {
+/// Whether the first non-blank line of `body` is an ATX heading with text: one to six `#`, then
+/// a space or tab, then something other than whitespace.
+fn opens_with_summary(body: &str) -> bool {
+    let Some(line) = body.lines().map(str::trim).find(|line| !line.is_empty()) else {
+        return false;
+    };
+    let text = line.trim_start_matches('#');
+    let level = line.len() - text.len();
+    (1..=6).contains(&level) && text.starts_with([' ', '\t']) && !text.trim().is_empty()
+}
+
+/// A change file split at its frontmatter.
+struct Parsed<'a> {
+    /// The `(package, type)` pairs of the frontmatter.
+    entries: Vec<(&'a str, &'a str)>,
+    /// Everything after the closing `---` line.
+    body: &'a str,
+}
+
+fn frontmatter(content: &str) -> Result<Parsed<'_>, String> {
+    let mut lines = content.split_inclusive('\n');
+    let opening = lines.next().unwrap_or_default();
+    if opening.trim() != "---" {
         return Err("the file must start with a `---` line opening its frontmatter".into());
     }
+    let mut offset = opening.len();
     let mut entries = Vec::new();
-    for line in lines.by_ref() {
+    for raw in lines {
+        offset += raw.len();
+        let line = raw.trim_end_matches(['\n', '\r']);
         if line.trim() == "---" {
             if entries.is_empty() {
                 return Err("the frontmatter names no package".into());
             }
-            return Ok(entries);
+            return Ok(Parsed {
+                entries,
+                body: &content[offset..],
+            });
         }
         let (package, change_type) = line.split_once(':').ok_or_else(|| {
             format!("frontmatter line `{line}` is not `<package>: <change type>`")

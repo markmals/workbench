@@ -79,7 +79,7 @@ Prefer many small, focused commits to one large commit. Commit at each natural g
 
 ## Change files
 
-Every pull request adds at least one change file in `.changeset/`, written for the person reading the release notes — not for the reviewer who already saw the diff. Create it with `workbench change-files create`, choosing the change type deliberately; never run `knope document-change`, which prompts. Commit the change file with the work it describes. A pull request with no user-visible change carries a `Release-Note: none` trailer on one of its commits instead (`git commit --trailer "Release-Note: none"`). CI runs `workbench change-files check` and rejects a pull request with neither; Knope's release pull request is exempt.
+Every pull request adds at least one change file in `.changeset/`, written for the person reading the release notes — not for the reviewer who already saw the diff. Create it with `workbench change-files create`, choosing the change type deliberately; never run `knope document-change`, which prompts. A change file opens with a heading that summarizes the change; a file without one does not count. Commit the change file with the work it describes. A pull request with no user-visible change carries a `Release-Note: none` trailer on one of its commits instead (`git commit --trailer "Release-Note: none"`). CI runs `workbench change-files check` and rejects a pull request with neither; Knope's release pull request is exempt.
 
 ## Push policy
 

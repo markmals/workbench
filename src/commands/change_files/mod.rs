@@ -126,14 +126,16 @@ pub static COMMANDS: &[CommandSpec] = &[
         path: &["change-files", "check"],
         summary: "Check that a commit range adds a valid change file or carries Release-Note: none",
         description: "Passes when the range, the commits reachable from head and not from base, \
-            either adds a Markdown file directly under `.changeset/` with valid change-file \
-            frontmatter, or has a commit carrying the Git trailer `Release-Note: none` (the key in \
-            any case, the value exactly `none`, parsed by Git the way `git interpret-trailers \
-            --parse` parses it). Added files are the ones head adds since its merge base with \
-            base, read as committed at head. Valid frontmatter is a `---` line, one `<package>: \
-            <type>` line per affected package, and a closing `---` line; when the project has a \
-            knope.toml, every package must be one it declares (`default` for a single \
-            `[package]`) and every type `major`, `minor`, `patch`, or one that package's \
+            either adds a valid change file, a Markdown file directly under `.changeset/`, or has \
+            a commit carrying the Git trailer `Release-Note: none` (the key in any case, the value \
+            exactly `none`, parsed by Git the way `git interpret-trailers --parse` parses it). \
+            Added files are the ones head adds since its merge base with base, read as committed \
+            at head. A valid change file has valid frontmatter, then a summary: the first \
+            non-blank line after the frontmatter is a heading with text, such as `# Add the export \
+            queue`, which Knope writes into the changelog. Valid frontmatter is a `---` line, one \
+            `<package>: <type>` line per affected package, and a closing `---` line; when the \
+            project has a knope.toml, every package must be one it declares (`default` for a \
+            single `[package]`) and every type `major`, `minor`, `patch`, or one that package's \
             `extra_changelog_sections` add. The result lists each added change file with its \
             problems and the commits carrying the trailer. Otherwise it fails with CHECK_FAILED \
             naming both ways to satisfy it. When the check passes but another added file is \

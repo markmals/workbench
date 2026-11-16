@@ -165,6 +165,40 @@ fn without_knope_toml_any_well_formed_frontmatter_counts() {
     }
 }
 
+/// Knope turns the summary into the changelog entry, so a file without one writes an empty
+/// bullet into the release notes.
+#[test]
+fn a_change_file_counts_only_when_a_summary_heading_comes_first() {
+    for content in [
+        "---\ndefault: minor\n---\n",
+        "---\ndefault: minor\n---\n\n",
+        "---\ndefault: minor\n---\n\nJust a sentence, no heading.\n",
+        "---\ndefault: minor\n---\n\nA sentence first.\n\n# Then a heading\n",
+        "---\ndefault: minor\n---\n\n#\n",
+        "---\ndefault: minor\n---\n\n#   \n",
+        "---\ndefault: minor\n---\n\n#No space\n",
+    ] {
+        let fixture = project(Some(SINGLE_PACKAGE));
+        fixture.write(".changeset/unsummarized.md", content);
+        fixture.commit_all("docs: describe a change");
+        let result = assert_check_fails(&fixture);
+        assert!(
+            problems_of(&result).contains("summary"),
+            "{content:?}: {result}"
+        );
+    }
+
+    for content in [
+        "---\ndefault: minor\n---\n# Add the export queue\n",
+        "---\ndefault: minor\n---\n\n\n## Add the export queue\n\nDetail.\n",
+    ] {
+        let fixture = project(Some(SINGLE_PACKAGE));
+        fixture.write(".changeset/summarized.md", content);
+        fixture.commit_all("docs: describe a change");
+        assert_check_passes(&fixture);
+    }
+}
+
 #[test]
 fn a_change_file_that_existed_before_the_range_does_not_count() {
     let fixture = Fixture::git();
