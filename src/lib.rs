@@ -9,6 +9,7 @@ pub mod package;
 pub mod parser;
 pub mod process;
 pub mod project;
+pub mod reference;
 pub mod registry;
 pub mod response;
 pub mod search;

@@ -305,7 +305,7 @@ pub struct ExampleDescription {
     pub command: String,
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ArgumentDescription {
     pub name: String,
