@@ -35,7 +35,7 @@ A repository you can clone that gives a project, on day one:
 
 - the artifact structure — vision, current specifications in whatever form suits each surface, policies, decisions, proposals, guides — with templates that make the right shape the easy shape, and optional guidance for specifying behavior in Gherkin;
 - skills covering each phase of the process, written so any competent coding agent can execute them;
-- a validator that mechanically enforces the parts of the process a machine can check, wired into continuous integration and a git hook;
+- a validator that mechanically enforces the parts of the process a machine can check, wired into continuous integration;
 - a documentation site that publishes the vision, the process, the record, and the guides;
 - a preview mechanism appropriate to what the project is.
 
@@ -74,6 +74,7 @@ Directions worth considering once the core is proven:
 
 ## Revision history
 
+- **2026-11-15** — Took every check out of the agent's loop and its git hooks, leaving the gate to continuous integration, and synced the Beads work graph across machines through each project's own repository, after human acceptance of [proposal.0006](proposals/0006-drop-harness-hooks-and-sync-beads.md).
 - **2026-11-15** — Made current specifications the owners of current requirements, kept proposals as the record of each change, and treated policies and decisions as current files revised in place, after human acceptance of [proposal.0005](proposals/0005-current-specifications.md).
 - **2026-11-03** — Limited intent to what a feature does and left look and feel to the human on the running software, after [proposal.0004](proposals/0004-make-room-for-ui-polish.md) gave interface polish a place outside proposals.
 - **2026-10-30** — Replaced the separate cross-artifact review with the implementer's self-check and recorded the first stage-cost measurement, after [proposal.0003](proposals/0003-fit-the-harness-to-current-models.md) collapsed the implementation phase's review ceremony.
