@@ -106,9 +106,15 @@ impl SyncResult {
         }
     }
 
-    /// `bd` reported a failure: rejected credentials, or a remote it could not reach.
+    /// `bd` reported a failure: rejected credentials, or a remote it could not reach. Dolt
+    /// appends `hint:` lines about credentials to every failed fetch, so only the other lines
+    /// can say the credentials were rejected.
     fn failed_with(reason: &str) -> SyncResult {
-        let problem = if REJECTED_CREDENTIALS.is_match(reason) {
+        let rejected = reason
+            .lines()
+            .filter(|line| !line.trim_start().starts_with("hint:"))
+            .any(|line| REJECTED_CREDENTIALS.is_match(line));
+        let problem = if rejected {
             SyncProblem::CredentialsRejected
         } else {
             SyncProblem::Unreachable

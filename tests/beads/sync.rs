@@ -301,6 +301,31 @@ fn a_stuck_dirty_working_set_is_blocked_with_beads_explanation() {
     assert!(message(&outcome).contains("pending graph edits blocked every attempt"));
 }
 
+/// Dolt appends hints about credentials to every failed fetch, so only Git's own error lines
+/// can say the credentials were rejected.
+#[test]
+fn an_unreachable_remote_is_unavailable_even_though_dolt_hints_at_credentials() {
+    let fixture = project_with_remote(
+        true,
+        replica().on(
+            "sync",
+            sync_failure(
+                "sync failed: pull: fetch from origin/main: fatal: unable to access \
+                 'https://github.com/owner/repo.git/': Could not resolve host: github.com\n\
+                 hint: dolt does not support interactive credential prompts\n\
+                 hint: configure git credentials (credential helper, token) for HTTPS remotes",
+            ),
+        ),
+    );
+
+    let outcome = fixture.run(&["beads", "sync"]);
+
+    assert_eq!(outcome.status, 5, "{}", outcome.stderr);
+    let error = outcome.error();
+    assert_eq!(error["code"], "UNAVAILABLE");
+    assert_eq!(error["retryable"], true);
+}
+
 #[test]
 fn push_retries_running_out_is_unavailable_and_retryable() {
     let fixture = project_with_remote(
