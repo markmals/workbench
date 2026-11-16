@@ -335,10 +335,11 @@ The body of `output-styles/workbench.md` after its frontmatter must equal the bo
 | `workbench check-commit <message-file>` | `tools/check-scoped-commit.ts` | Scopes below |
 | `workbench check-commits <base> <head>` | `tools/check-pr-commits.ts` | Every subject in the range |
 | `workbench check-change-files <base> <head>` | `tools/require-changeset.ts` | [Section 8](#8-change-files-and-releases) |
+| `workbench beads sync` and `workbench beads claim <id>` | Proposal 0007's `tools/beads.ts` | [Proposal 0007](https://github.com/markmals/workbench/pull/11), sections 3 and 4 |
 | `workbench init` | The GitHub template and Adapting Your Harness | [Section 11](#11-adopting-workbench) |
 
 - **Parity.** Each ported command keeps today's output, exit statuses, and JSON fields. Every case in today's `tools/*.test.ts` for a retained behavior becomes a Rust test. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
-- **Beads in `status`.** `workbench status` ports, unchanged, the Beads section and sync behavior that [proposal 0007](https://github.com/markmals/workbench/pull/11) adds to `mise run status`.
+- **Beads.** `workbench status` ports, unchanged, the Beads section that [proposal 0007](https://github.com/markmals/workbench/pull/11) adds to `mise run status`. `workbench beads sync` and `workbench beads claim` port 0007's sync and claim behavior, outcomes, and exit statuses. The `beads:sync` and `beads:claim` tasks call them.
 - **Commit scopes.** `check-commit` and `check-commits` accept three kinds of scope:
     - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
     - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
@@ -431,7 +432,7 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
     - the `postinstall` link hook;
     - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
     - the `[env]` entry `DOLT_REMOTE_INFO_BRANCH = ""` from proposal 0007;
-    - the tasks `status`, `validate`, and `beads:sync` when absent.
+    - the tasks `status`, `validate`, `beads:sync`, and `beads:claim` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
