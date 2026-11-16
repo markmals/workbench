@@ -553,6 +553,11 @@
 					<td><code>tools/check-scoped-commit.ts</code> and <code>tools/check-pr-commits.ts</code></td>
 			</tr>
 			<tr>
+					<td><code>workbench commits scopes</code></td>
+					<td>Reads</td>
+					<td>—</td>
+			</tr>
+			<tr>
 					<td><code>workbench change-files create --type &lt;type&gt; --summary &lt;text&gt; [--package &lt;name&gt;] [--body &lt;text|@file|-&gt;] [--dry-run]</code></td>
 					<td>Creates one file (<a href="#8-change-files-and-releases">section 8</a>)</td>
 					<td>Hand-written change files</td>
@@ -743,7 +748,7 @@
 <li>the scopes in <code>.agents/commit-scopes</code>, which is optional and keeps its current format;</li>
 <li>the <code>&lt;NNNN&gt;-&lt;slug&gt;</code> scope of any existing proposal file.</li>
 </ul>
-<p>A rejection lists every accepted scope.</p>
+<p>A rejection lists every accepted scope, and <code>workbench commits scopes</code> lists them, with where each comes from, before a commit is written.</p>
 </li>
 <li>
 <p><strong>The collision rule in <code>project validate</code>.</strong> A project skill directory <code>.agents/skills/&lt;name&gt;/</code> or rule <code>.agents/rules/&lt;name&gt;.md</code> whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release&rsquo;s skills and rules, so the check does not depend on <code>.workbench</code>.</p>
@@ -791,7 +796,7 @@
 <p><strong>Every pull request adds at least one change file</strong> in <code>.changeset/</code>, describing the change for someone reading release notes rather than for the reviewer of the diff. The only exception is a pull request with no user-visible change, which carries a <code>Release-Note: none</code> trailer instead.</p>
 <ul>
 <li>A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses <code>default: &lt;major|minor|patch&gt;</code>; a project&rsquo;s <code>knope.toml</code> may add types.</li>
-<li>The first heading is the summary. Text below it is the detail.</li>
+<li>The first heading is the summary, and it must come first: the first non-blank line after the frontmatter is a Markdown heading with text. Text below it is the detail.</li>
 <li>Agents create change files with <code>workbench change-files create</code>, which validates the type and package against <code>knope.toml</code> and writes the file. They never run <code>knope document-change</code>, which prompts interactively.</li>
 </ul>
 </li>
@@ -801,7 +806,7 @@
 <li>
 <p><strong><code>workbench change-files check &lt;base&gt; &lt;head&gt;</code></strong> passes when either:</p>
 <ul>
-<li>the range adds a file under <code>.changeset/</code> with valid change-file frontmatter; or</li>
+<li>the range adds a file under <code>.changeset/</code> with valid change-file frontmatter and a summary heading; or</li>
 <li>a commit in the range carries the Git trailer <code>Release-Note: none</code>. The key is case-insensitive and the value is exactly <code>none</code>, as <code>git interpret-trailers</code> parses it.</li>
 </ul>
 <p>Otherwise it fails with <code>CHECK_FAILED</code>, naming both ways to satisfy it. CI runs it on every pull request except Knope&rsquo;s release pull request.</p>
