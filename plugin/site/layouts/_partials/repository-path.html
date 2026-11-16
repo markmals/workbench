@@ -1,0 +1,8 @@
+{{- /*
+  The path of an absolute file name relative to the repository root, the parent of the Hugo
+  project directory (docs/); empty when the file lies outside the repository.
+*/ -}}
+{{- $root := printf "%s/" (path.Dir hugo.WorkingDir) -}}
+{{- $path := "" -}}
+{{- if strings.HasPrefix . $root }}{{ $path = strings.TrimPrefix $root . }}{{ end -}}
+{{- return $path -}}

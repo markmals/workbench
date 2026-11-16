@@ -1,0 +1,4 @@
+{{- /* A repository file's URL on `params.repository`, or empty when that is unset. */ -}}
+{{- $url := "" -}}
+{{- with site.Params.repository }}{{ $url = printf "%s/blob/main/%s" (strings.TrimSuffix "/" .) $ }}{{ end -}}
+{{- return $url -}}

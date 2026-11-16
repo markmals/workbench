@@ -1,0 +1,24 @@
+{{- /* Navigation through the current page's section, with superseded records grouped apart. */ -}}
+{{- $current := . -}}
+{{- $section := .CurrentSection -}}
+{{- if not $section.IsHome }}
+{{- $groups := partial "section-pages.html" $section }}
+<nav class="sidebar" aria-label="{{ partial "title.html" $section }}">
+  <a class="sidebar__section" href="{{ $section.RelPermalink }}"{{ if $current.Eq $section }} aria-current="page"{{ end }}>{{ partial "title.html" $section }}</a>
+  <ul>
+    {{- range $groups.current }}
+    <li><a href="{{ .RelPermalink }}"{{ if $current.Eq . }} aria-current="page"{{ end }}>{{ partial "title.html" . }}</a></li>
+    {{- end }}
+  </ul>
+  {{- with $groups.superseded }}
+  <details class="sidebar__superseded"{{ if eq $current.Params.status "superseded" }} open{{ end }}>
+    <summary>Superseded</summary>
+    <ul>
+      {{- range . }}
+      <li><a href="{{ .RelPermalink }}"{{ if $current.Eq . }} aria-current="page"{{ end }}>{{ partial "title.html" . }}</a></li>
+      {{- end }}
+    </ul>
+  </details>
+  {{- end }}
+</nav>
+{{- end }}

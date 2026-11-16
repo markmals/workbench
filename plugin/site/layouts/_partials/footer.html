@@ -1,0 +1,6 @@
+<footer class="site-footer">
+  <span>{{ site.Title }}</span>
+  {{- with site.Params.repository }}
+  <a href="{{ . }}">Repository</a>
+  {{- end }}
+</footer>

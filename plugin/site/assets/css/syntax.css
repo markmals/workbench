@@ -1,0 +1,72 @@
+/* Token colors for Chroma's highlighting classes, after GitHub's light and dark palettes. */
+
+:root {
+    --code-comment: #59636e;
+    --code-keyword: #cf222e;
+    --code-string: #0a3069;
+    --code-number: #0550ae;
+    --code-name: #8250df;
+    --code-attribute: #0550ae;
+    --code-tag: #116329;
+    --code-inserted: #116329;
+    --code-deleted: #82071e;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --code-comment: #9198a1;
+        --code-keyword: #ff7b72;
+        --code-string: #a5d6ff;
+        --code-number: #79c0ff;
+        --code-name: #d2a8ff;
+        --code-attribute: #79c0ff;
+        --code-tag: #7ee787;
+        --code-inserted: #aff5b4;
+        --code-deleted: #ffdcd7;
+    }
+}
+
+.chroma .line {
+    display: flex;
+}
+
+.chroma :is(.c, .ch, .cm, .c1, .cs, .cp, .cpf) {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.chroma :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .ow) {
+    color: var(--code-keyword);
+}
+
+.chroma :is(.s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss) {
+    color: var(--code-string);
+}
+
+.chroma :is(.m, .mb, .mf, .mh, .mi, .il, .mo) {
+    color: var(--code-number);
+}
+
+.chroma :is(.nf, .fm, .nc, .ne, .nn) {
+    color: var(--code-name);
+}
+
+.chroma :is(.na, .nb, .bp, .nv, .vc, .vg, .vi, .no) {
+    color: var(--code-attribute);
+}
+
+.chroma .nt {
+    color: var(--code-tag);
+}
+
+.chroma .gi {
+    color: var(--code-inserted);
+}
+
+.chroma .gd {
+    color: var(--code-deleted);
+}
+
+.chroma :is(.gh, .gu) {
+    font-weight: 600;
+}

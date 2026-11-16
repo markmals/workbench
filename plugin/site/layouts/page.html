@@ -1,0 +1,10 @@
+{{ define "main" }}
+<div class="layout">
+  {{- partial "sidebar.html" . }}
+  <article class="content" data-pagefind-body>
+    {{- partial "content.html" . }}
+    {{- partial "source-link.html" . }}
+  </article>
+  {{- partial "toc.html" . }}
+</div>
+{{ end }}

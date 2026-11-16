@@ -1,0 +1,8 @@
+{{- /* Maps each record ID (`proposal.0007`, `guide.getting-started`) to its page. Call through partialCached. */ -}}
+{{- $pages := newScratch -}}
+{{- range $page := site.Pages -}}
+  {{- with .Params.id -}}
+    {{- $pages.SetInMap "ids" . $page -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($pages.Get "ids" | default dict) -}}

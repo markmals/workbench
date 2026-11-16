@@ -1,0 +1,21 @@
+{{ define "main" }}
+<section class="hero">
+  <div class="hero__text">
+    <h1>{{ site.Title }}</h1>
+    {{- with site.Params.tagline | default site.Params.description }}
+    <p>{{ . }}</p>
+    {{- end }}
+    <nav class="hero__actions" aria-label="Sections">
+      {{- range $index, $entry := site.Menus.main }}
+      <a class="button{{ if eq $index 0 }} button--primary{{ end }}" href="{{ .URL }}">{{ .Name }}</a>
+      {{- end }}
+    </nav>
+  </div>
+  {{- with site.Params.heroImage }}
+  <div class="hero__art"><img src="{{ relURL . }}" alt=""></div>
+  {{- end }}
+</section>
+{{- with .Content }}
+<article class="content content--home" data-pagefind-body>{{ . }}</article>
+{{- end }}
+{{ end }}

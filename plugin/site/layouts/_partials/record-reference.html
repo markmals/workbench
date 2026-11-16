@@ -1,0 +1,6 @@
+{{- /* A record ID, linked to its page when the site publishes it. */ -}}
+{{- with index (partialCached "record-pages.html" site) . -}}
+<a href="{{ .RelPermalink }}"><code>{{ .Params.id }}</code></a>
+{{- else -}}
+<code>{{ . }}</code>
+{{- end -}}

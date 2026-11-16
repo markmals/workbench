@@ -1,0 +1,5 @@
+{{- with .File }}
+{{- with partial "repository-url.html" (partial "repository-path.html" .Filename) }}
+<p class="source-link" data-pagefind-ignore><a href="{{ . }}">View source</a></p>
+{{- end }}
+{{- end }}

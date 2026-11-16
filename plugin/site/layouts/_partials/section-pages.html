@@ -1,0 +1,18 @@
+{{- /*
+  A section's pages in reading order, split into current and superseded. Numbered records read
+  as history, newest first; other pages, such as guides, sort by title.
+*/ -}}
+{{- $numbered := slice -}}
+{{- $named := slice -}}
+{{- range .RegularPages -}}
+  {{- if findRE `^\d` .File.BaseFileName -}}
+    {{- $numbered = $numbered | append . -}}
+  {{- else -}}
+    {{- $named = $named | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- $ordered := union (sort $numbered "File.BaseFileName" "desc") (sort $named "Title") -}}
+{{- return dict
+  "current" (where $ordered "Params.status" "!=" "superseded")
+  "superseded" (where $ordered "Params.status" "superseded")
+-}}

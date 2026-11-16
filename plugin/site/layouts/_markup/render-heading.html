@@ -1,0 +1,4 @@
+<h{{ .Level }} id="{{ .Anchor }}">
+  {{- .Text -}}
+  {{- if gt .Level 1 }} <a class="heading-anchor" href="#{{ .Anchor }}" aria-label="Link to this section" data-pagefind-ignore>#</a>{{ end -}}
+</h{{ .Level }}>

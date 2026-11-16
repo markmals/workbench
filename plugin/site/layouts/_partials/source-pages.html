@@ -1,0 +1,14 @@
+{{- /*
+  Maps each published source file, by absolute path, to its page's URL. A section's index is
+  its directory's README, so the directory maps to that page too. Call through partialCached.
+*/ -}}
+{{- $pages := newScratch -}}
+{{- range $page := site.Pages -}}
+  {{- with .File -}}
+    {{- $pages.SetInMap "files" .Filename $page.RelPermalink -}}
+    {{- if $page.IsSection -}}
+      {{- $pages.SetInMap "files" (path.Dir .Filename) $page.RelPermalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($pages.Get "files" | default dict) -}}
