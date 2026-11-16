@@ -160,6 +160,15 @@ fn text_output_renders_for_humans() {
 }
 
 #[test]
+fn text_output_still_writes_the_structured_error() {
+    let outcome = Fixture::empty().run(&["schema", "no", "such", "--output", "text"]);
+    assert_eq!(outcome.status, 3);
+    assert_eq!(outcome.error_code(), "NOT_FOUND");
+    let parse_failure = Fixture::empty().run(&["cli", "search", "--output", "text"]);
+    assert_eq!(parse_failure.error_code(), "INVALID_ARGUMENT");
+}
+
+#[test]
 fn completions_print_a_script_for_the_shell() {
     let fixture = Fixture::empty();
     let result = fixture.run(&["cli", "completions", "bash"]).json();

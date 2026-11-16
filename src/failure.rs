@@ -162,13 +162,4 @@ impl Failure {
             }
         })
     }
-
-    pub fn to_text(&self) -> String {
-        let mut text = format!("error[{}]: {}", self.code.as_str(), self.message);
-        for suggestion in &self.suggestions {
-            text.push_str("\n  try: ");
-            text.push_str(suggestion);
-        }
-        text
-    }
 }

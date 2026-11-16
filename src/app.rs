@@ -172,10 +172,9 @@ fn report(output: OutputFormat, command: Option<&str>, outcome: Result<Response,
             command.map(|id| format!(" ({id})")).unwrap_or_default()
         ));
     }
-    let rendered = match output {
-        OutputFormat::Json => json_text(&failure.to_json(), std::io::stderr().is_terminal()),
-        OutputFormat::Text => failure.to_text(),
-    };
+    // `--output text` renders the result for humans; the error stays the structured object, so
+    // a caller can always parse stderr whatever format it asked the result in.
+    let rendered = json_text(&failure.to_json(), std::io::stderr().is_terminal());
     let _ = writeln!(stderr, "{rendered}");
     failure.code.exit_status()
 }
