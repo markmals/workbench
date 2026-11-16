@@ -514,12 +514,18 @@ Each run records task completion, invalid commands, the number of commands, and 
 
 This section replaces the "Changeset" section of `PROCESS.md` for every Workbench project.
 
-- **Every pull request adds at least one change file** in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer of the diff.
+- **Every pull request adds at least one change file** in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer of the diff. The only exception is a pull request with no user-visible change, which carries a `Release-Note: none` trailer instead.
     - A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses `default: <major|minor|patch>`; a project's `knope.toml` may add types.
     - The first heading is the summary. Text below it is the detail.
     - Agents create change files with `workbench change-files create`, which validates the type and package against `knope.toml` and writes the file. They never run `knope document-change`, which prompts interactively.
 - **`.changeset/` holds only change files**, because Knope fails on any other Markdown file there. Guidance that lives in `.changeset/README.md` today moves to `PROCESS.md` and the guides.
-- **`workbench change-files check <base> <head>`** passes when the range adds a file under `.changeset/` that has valid change-file frontmatter. It fails with `CHECK_FAILED` otherwise, naming what is missing. How a pull request with no user-visible change satisfies it is an [open question](#open-questions). CI runs it on every pull request except Knope's release pull request.
+- **`workbench change-files check <base> <head>`** passes when either:
+    - the range adds a file under `.changeset/` with valid change-file frontmatter; or
+    - a commit in the range carries the Git trailer `Release-Note: none`. The key is case-insensitive and the value is exactly `none`, as `git interpret-trailers` parses it.
+
+    Otherwise it fails with `CHECK_FAILED`, naming both ways to satisfy it. CI runs it on every pull request except Knope's release pull request.
+
+- **A pull request with no user-visible change** carries `Release-Note: none` on one of its commits (`git commit --trailer "Release-Note: none"`) instead of a change file. The trailer replaces Changesets' `--empty` changeset: it can be checked offline, and it stays in history next to the change it describes.
 - **A project's `knope.toml` is project-owned.** It sets `[changes] ignore_conventional_commits = true`. Scoped Commits subjects are not Conventional Commits, and versions come from change files only.
 - **Releases follow Knope's release pull request recipe:**
     - A workflow on every push to `main` runs Knope's prepare-release workflow. It keeps one release pull request open showing the next version, the changelog entry, and the version-file changes.
@@ -633,10 +639,10 @@ The Workbench repository stops being a GitHub template repository; the owner cha
     - Package content lives under `plugin/`: `.claude-plugin/`, `rules/`, `output-styles/`, `skills/`, `templates/`, and `site/`.
     - A release archive is the binary plus the contents of `plugin/`.
 - **Dogfooding.**
-    - `mise run setup` links `.workbench` to `plugin`.
-    - Workbench's tasks run the CLI from source.
+    - `mise run setup` links `.workbench` to `plugin` and builds the CLI.
+    - Workbench's `mise.toml` puts the build's output directory on `PATH`. In mise contexts, `workbench` therefore resolves to the working tree's build here and to the pinned release in a consumer.
     - Its `.claude/settings.json` and `.omp/config.yml` match a consumer's.
-    - Its hk steps call mise tasks, so the same `hk.pkl` works here and in consumers.
+    - Its `hk.pkl` matches what `project init` writes, because it calls `workbench` the same way.
 - **Removed:**
     - the npm and TypeScript toolchain: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `tools/`, `.oxfmtrc.jsonc`, `.oxlintrc.jsonc`;
     - `.omp/`;
@@ -664,7 +670,7 @@ This change touches many independent surfaces, so its outcomes are listed for re
 - [ ] `workbench records validate`, `commits check`, `change-files check`, `workflow status`, and the `beads` commands pass the cases ported from `tools/*.test.ts` and proposal 0006's tests.
 - [ ] Every registered command example runs and its output validates against its declared schema. Every Clap argument is in the registry. `cli search`, `schema`, and `docs search` work offline, without credentials. Every failure writes the structured error with its documented code and exit status.
 - [ ] `workbench project validate` reports a project skill or rule that reuses a Workbench name, and a `.workbench` link that disagrees with the pin.
-- [ ] `workbench change-files check` passes a range that adds a valid change file and fails one that adds none, and handles a no-change pull request as resolved below.
+- [ ] `workbench change-files check` passes a range that adds a valid change file, passes a range with a `Release-Note: none` trailer, and fails a range with neither.
 - [ ] In the agent evaluation, fresh sessions complete all five tasks using only discovery, without guessing at command syntax.
 - [ ] Merging Knope's release pull request publishes a GitHub release with Knope-written notes, four attested archives, and the tag. Installing that version through mise on macOS arm64 and on CI's Linux x64 yields a complete package root.
 - [ ] Workbench contains no `package.json`, npm lockfile, TypeScript source, or OMP package, pins no Node, pnpm, or Bun, and `mise run check` passes.
@@ -786,7 +792,8 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **Knope reading Changesets-format files unchanged.** The owner chose Knope-native change files and release notes.
 - **Keeping the template repository alongside the package.** Two distribution paths would drift apart the way the copies have.
 - **Keeping today's tool interfaces:** text by default, `--json` on request, and a flat list of commands with free-text errors. Agents then guess at command names, parse prose, and cannot tell a retryable failure from a permanent one. The owner's agent-first CLI guide sets the contract instead.
+- **Other ways to mark a pull request with no user-visible change.** A `--none` form of `change-files create` would write a marker file, which Knope would have to ignore and which only exists to satisfy the check. A pull-request label can only be checked in CI, and it is not recorded in Git history.
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: How does a pull request with no user-visible change satisfy the change-file requirement? Options: a commit trailer such as `Release-Note: none` that `workbench change-files check` accepts (recommended: checkable offline and kept in history), a `--none` form of `workbench change-files create` that writes an explicit no-release marker, or a pull-request label that CI checks.]
+None. On 2026-11-15 the owner chose the `Release-Note: none` commit trailer for pull requests with no user-visible change.
