@@ -18,13 +18,13 @@ The fix is not more review. It is making the agent commit to what it intends to 
 
 1. Add Workbench to a Git repository, new or existing:
 
-    ```sh
-    mise use github:markmals/workbench@3   # pin Workbench in mise.toml and install it
-    workbench project init                 # add what Workbench owns
-    mise install                           # link .workbench and install the tools init pinned
-    ```
+   ```sh
+   mise use github:markmals/workbench@3   # pin Workbench in mise.toml and install it
+   workbench project init                 # add what Workbench owns
+   mise install                           # link .workbench and install the tools init pinned
+   ```
 
-    `workbench project init` creates what is missing and never overwrites a file; run it with `--dry-run` first to see what it will do. Its receipt lists what your project still has to supply, such as the `setup`, `check`, and `fmt` tasks. [Getting Started](guides/getting-started.md) walks through a new project, and [Adopting Workbench](guides/adopting-workbench.md) moves a project off a copy of Workbench.
+   `workbench project init` creates what is missing and never overwrites a file; run it with `--dry-run` first to see what it will do. Its receipt lists what your project still has to supply, such as the `setup`, `check`, and `fmt` tasks. [Getting Started](guides/getting-started.md) walks through a new project, and [Adopting Workbench](guides/adopting-workbench.md) moves a project off a copy of Workbench.
 
 2. Commit what `project init` wrote, and open the project in [Claude Code](https://code.claude.com) or [Oh My Pi](https://omp.sh). Both load Workbench from `.workbench`, through the harness declarations `project init` wrote. Claude Code asks you to trust the folder first.
 3. Write your project's vision with your agent. `project init` starts `VISION.md` from Workbench's template.
@@ -101,31 +101,31 @@ Defects an agent finds along the way get filed in [Beads](https://github.com/ste
 
 ## What's in here
 
-| Path | What it is |
-| --- | --- |
-| `AGENTS.md` | Facts about this repository for agents: the crate, the package layout, the release, and the site. |
-| `PROCESS.md` | The full process description. |
-| `VISION.md` | Workbench's purpose and direction. |
-| `proposals/` | One document per change, kept as history after it ships. |
-| `policies/` | Current rules future work must keep enforcing, revised in place. |
-| `decisions/` | Current architectural choices and the context that produced them. |
-| `guides/` | User-facing documentation. Start at `getting-started.md`. |
-| `Cargo.toml`, `src/`, `tests/` | The `workbench` CLI, a Rust crate. |
-| `plugin/.claude-plugin/` | Claude Code's plugin and marketplace manifests. |
-| `plugin/rules/` | The process contract, `workbench.md`, and the code quality, commit discipline, enforcement hierarchy, and verification rules. |
-| `plugin/output-styles/` | The process contract as a Claude Code output style. |
-| `plugin/skills/` | Skills for each phase and cross-cutting concern, including optional Gherkin guidance. For the agent, not you. |
-| `plugin/templates/` | The canonical shape of every artifact. |
-| `plugin/reference/cli.md` | The CLI reference, generated from the command registry. |
-| `plugin/site/` | The Hugo theme for a project's record site. |
-| `docs/` | This repository's site, built with Hugo and Pagefind. Publishes the vision, the process, the record, and the guides. |
-| `knope.toml`, `.changeset/` | The release configuration, and the pending change files Knope turns into the changelog and release notes. |
-| `.agents/commit-scopes` | This repository's commit scopes beyond Workbench's built-in process scopes. |
-| `mise.toml` | Every pinned tool and every task. `mise.lock` pins the downloads. |
-| `hk.pkl` | Every git hook: formatting, Scoped Commits, and the Beads steps, including the Beads sync on push and pull. |
-| `dprint.json` | Formatting for Markdown, JSON, YAML, and TOML. |
-| `.github/workflows/` | Continuous integration, the release, the preview, and the published site. |
-| `.claude/settings.json`, `.omp/config.yml` | The harness declarations that load `.workbench`, the same as in any project. |
+| Path                                       | What it is                                                                                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                                | Facts about this repository for agents: the crate, the package layout, the release, and the site.                             |
+| `PROCESS.md`                               | The full process description.                                                                                                 |
+| `VISION.md`                                | Workbench's purpose and direction.                                                                                            |
+| `proposals/`                               | One document per change, kept as history after it ships.                                                                      |
+| `policies/`                                | Current rules future work must keep enforcing, revised in place.                                                              |
+| `decisions/`                               | Current architectural choices and the context that produced them.                                                             |
+| `guides/`                                  | User-facing documentation. Start at `getting-started.md`.                                                                     |
+| `Cargo.toml`, `src/`, `tests/`             | The `workbench` CLI, a Rust crate.                                                                                            |
+| `plugin/.claude-plugin/`                   | Claude Code's plugin and marketplace manifests.                                                                               |
+| `plugin/rules/`                            | The process contract, `workbench.md`, and the code quality, commit discipline, enforcement hierarchy, and verification rules. |
+| `plugin/output-styles/`                    | The process contract as a Claude Code output style.                                                                           |
+| `plugin/skills/`                           | Skills for each phase and cross-cutting concern, including optional Gherkin guidance. For the agent, not you.                 |
+| `plugin/templates/`                        | The canonical shape of every artifact.                                                                                        |
+| `plugin/reference/cli.md`                  | The CLI reference, generated from the command registry.                                                                       |
+| `plugin/site/`                             | The Hugo theme for a project's record site.                                                                                   |
+| `docs/`                                    | This repository's site, built with Hugo and Pagefind. Publishes the vision, the process, the record, and the guides.          |
+| `knope.toml`, `.changeset/`                | The release configuration, and the pending change files Knope turns into the changelog and release notes.                     |
+| `.agents/commit-scopes`                    | This repository's commit scopes beyond Workbench's built-in process scopes.                                                   |
+| `mise.toml`                                | Every pinned tool and every task. `mise.lock` pins the downloads.                                                             |
+| `hk.pkl`                                   | Every git hook: formatting, Scoped Commits, and the Beads steps, including the Beads sync on push and pull.                   |
+| `dprint.json`                              | Formatting for Markdown, JSON, YAML, and TOML.                                                                                |
+| `.github/workflows/`                       | Continuous integration, the release, the preview, and the published site.                                                     |
+| `.claude/settings.json`, `.omp/config.yml` | The harness declarations that load `.workbench`, the same as in any project.                                                  |
 
 A release is the `workbench` binary plus the contents of `plugin/`, one archive per platform. In this repository, `mise run setup` links `.workbench` to `plugin/` and builds the CLI, so Workbench runs on its own working tree.
 

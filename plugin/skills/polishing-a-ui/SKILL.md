@@ -9,13 +9,13 @@ Look and feel — how an interface looks and how it is operated — is decided b
 
 ## What counts
 
-| Look and feel: polish | What the feature does: proposal path |
-| --- | --- |
-| Layout, sizes, spacing, type, color, icons, motion | What a user can do or find out |
-| Which control presents a choice; what activating an element opens | States and outcomes the user observes |
-| Wording of labels and messages | What a message must tell the user; words that are themselves a requirement |
-| How a screen meets an accessibility commitment | The commitment itself |
-| A command-line tool's colors, alignment, progress display, help wording | Its commands, flags, exit codes, machine-readable output |
+| Look and feel: polish                                                   | What the feature does: proposal path                                       |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Layout, sizes, spacing, type, color, icons, motion                      | What a user can do or find out                                             |
+| Which control presents a choice; what activating an element opens       | States and outcomes the user observes                                      |
+| Wording of labels and messages                                          | What a message must tell the user; words that are themselves a requirement |
+| How a screen meets an accessibility commitment                          | The commitment itself                                                      |
+| A command-line tool's colors, alignment, progress display, help wording | Its commands, flags, exit codes, machine-readable output                   |
 
 The test: would the sentence change if the screen were redesigned while the feature did the same thing? A change that removes something a user could do or find out is never polish. When a request could be either, ask the human which it is in one line before acting.
 
@@ -41,10 +41,10 @@ Outside an approved proposal, suggest look-and-feel changes but make only the on
 
 ## Landing it
 
-| Where | What happens |
-| --- | --- |
-| A proposal being implemented or in `active-review` | Commits on its branch, then a refreshed preview. No proposal edit, no status change, no readiness report, no adversarial review. |
-| Between proposals | No proposal question. Land it the way the project lands other changes made without a proposal: a branch and pull request with a change file where the project works through pull requests, otherwise commits. Say which in one line. |
+| Where                                              | What happens                                                                                                                                                                                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A proposal being implemented or in `active-review` | Commits on its branch, then a refreshed preview. No proposal edit, no status change, no readiness report, no adversarial review.                                                                                                     |
+| Between proposals                                  | No proposal question. Land it the way the project lands other changes made without a proposal: a branch and pull request with a change file where the project works through pull requests, otherwise commits. Say which in one line. |
 
 ## When a request changes what the feature does
 
@@ -52,12 +52,12 @@ Stop on that request and keep polishing the rest. In review, it goes through the
 
 ## Red flags
 
-| You are about to | Instead |
-| --- | --- |
-| Edit a proposal to record look and feel | Commit the code; the running UI is the record |
-| Change a status or post a readiness report for a polish round | Push, refresh the preview, and say what changed |
-| Ask "Do you want a proposal?" for spacing, color, a control, or wording that is not a requirement | Make the change |
+| You are about to                                                                                     | Instead                                                   |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Edit a proposal to record look and feel                                                              | Commit the code; the running UI is the record             |
+| Change a status or post a readiness report for a polish round                                        | Push, refresh the preview, and say what changed           |
+| Ask "Do you want a proposal?" for spacing, color, a control, or wording that is not a requirement    | Make the change                                           |
 | Change words a proposal makes a requirement (legal text, text a user types or matches, a fixed term) | Treat it as what the feature does: take the proposal path |
-| Polish without a running UI the human can see | Start one first |
-| Update a test's expected color, size, or label to match the new look | Rewrite the test to assert behavior |
-| Call a change to what a user can do "polish" | Stop and take the proposal path |
+| Polish without a running UI the human can see                                                        | Start one first                                           |
+| Update a test's expected color, size, or label to match the new look                                 | Rewrite the test to assert behavior                       |
+| Call a change to what a user can do "polish"                                                         | Stop and take the proposal path                           |

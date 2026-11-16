@@ -11,11 +11,11 @@ The record holds project context that must outlive the proposal which revealed i
 
 ## The durable artifacts
 
-| Artifact | Purpose | When to update it |
-| --- | --- | --- |
-| [Vision](../VISION.md) | What the project is, its MVP, principles, and direction. | At completion, when accepted work changes the project's capabilities, MVP, or direction. |
-| Policy | A current rule that future work must keep enforcing. | When agreed work establishes, changes, or retires a durable constraint. |
-| Decision | A current architectural choice future work must understand. | When agreed work establishes, changes, or retires a durable choice and its rationale. |
+| Artifact               | Purpose                                                     | When to update it                                                                        |
+| ---------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Vision](../VISION.md) | What the project is, its MVP, principles, and direction.    | At completion, when accepted work changes the project's capabilities, MVP, or direction. |
+| Policy                 | A current rule that future work must keep enforcing.        | When agreed work establishes, changes, or retires a durable constraint.                  |
+| Decision               | A current architectural choice future work must understand. | When agreed work establishes, changes, or retires a durable choice and its rationale.    |
 
 All three are current documents. Each policy or decision file states the rule or choice that applies now; Git holds its earlier wording, and the proposal that changed it explains why. A proposal explains its own change and is not a current record.
 

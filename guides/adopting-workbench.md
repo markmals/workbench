@@ -38,17 +38,17 @@ mise install
 
 `project init` never overwrites or deletes a file. It creates what is missing and, in files that exist, adds only missing keys and entries:
 
-| File | What it adds |
-| --- | --- |
-| `mise.toml` | The `postinstall` hook that links `.workbench`; pins for hk, gh, and Beads; the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks |
-| `.gitignore` | `.workbench` |
-| `.claude/settings.json` | The `workbench` marketplace and the `workbench@workbench` plugin |
-| `.omp/config.yml` | `./.workbench` in `extensions:` |
-| `.claude/skills`, `.claude/rules` | Links to `../.agents/skills` and `../.agents/rules`, when those directories exist |
-| `hk.pkl` | Created when absent: the Scoped Commits check on `commit-msg`, and the Beads hook steps and syncs |
-| `.github/workflows/workbench.yml` | Created when absent: the commit and change-file checks on every pull request except Knope's release pull request |
-| `AGENTS.md` | Created when absent, as a stub stating that Workbench loads from `.workbench` |
-| `VISION.md`, the `proposals/`, `policies/`, `decisions/`, and `guides/` READMEs, `.agents/commit-scopes`, `docs/hugo.toml` | Created when absent |
+| File                                                                                                                       | What it adds                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mise.toml`                                                                                                                | The `postinstall` hook that links `.workbench`; pins for hk, gh, and Beads; the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks |
+| `.gitignore`                                                                                                               | `.workbench`                                                                                                                                               |
+| `.claude/settings.json`                                                                                                    | The `workbench` marketplace and the `workbench@workbench` plugin                                                                                           |
+| `.omp/config.yml`                                                                                                          | `./.workbench` in `extensions:`                                                                                                                            |
+| `.claude/skills`, `.claude/rules`                                                                                          | Links to `../.agents/skills` and `../.agents/rules`, when those directories exist                                                                          |
+| `hk.pkl`                                                                                                                   | Created when absent: the Scoped Commits check on `commit-msg`, and the Beads hook steps and syncs                                                          |
+| `.github/workflows/workbench.yml`                                                                                          | Created when absent: the commit and change-file checks on every pull request except Knope's release pull request                                           |
+| `AGENTS.md`                                                                                                                | Created when absent, as a stub stating that Workbench loads from `.workbench`                                                                              |
+| `VISION.md`, the `proposals/`, `policies/`, `decisions/`, and `guides/` READMEs, `.agents/commit-scopes`, `docs/hugo.toml` | Created when absent                                                                                                                                        |
 
 When an entry it would add already exists with other content, such as a `status` task that still runs an old script, it leaves the entry alone and lists it under `attention`. Running it again is safe; a second run reports `unchanged`.
 
@@ -89,18 +89,18 @@ Everything in the receipt's `vendored` list is a copy of something the package n
 
 - **mise tasks.** `attention` names each `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` task that differs from Workbench's. Make each one match the task `project init` writes, which you can see by running it in an empty repository, or replace it with this:
 
-    ```toml
-    [tasks.status]
-    description = "Where the work stands: current phase, next action, who acts, and Beads"
-    run = "workbench workflow status --output text"
-    ```
+  ```toml
+  [tasks.status]
+  description = "Where the work stands: current phase, next action, who acts, and Beads"
+  run = "workbench workflow status --output text"
+  ```
 
 - **`hk.pkl`.** Its `commit-msg` step becomes `workbench commits check --message-file {{commit_msg_file}}`. To see the hk configuration `project init` writes, move yours aside, run `project init`, then carry your project's own steps, such as formatters, into the new file and delete the old one:
 
-    ```sh
-    git mv hk.pkl hk.old.pkl
-    workbench project init
-    ```
+  ```sh
+  git mv hk.pkl hk.old.pkl
+  workbench project init
+  ```
 
 - **CI.** `.github/workflows/workbench.yml` now runs the commit and change-file checks. Delete the jobs that ran `tools/check-pr-commits.ts` and `tools/require-changeset.ts`.
 - **Node.** If Workbench's tools were the project's only use of Node, remove the `node`, `pnpm`, and `bun` pins and `package.json`.
@@ -147,16 +147,16 @@ Use `--site cloudflare` to publish to Cloudflare instead. Either adds the `hugo`
 
 - **GitHub Pages** serves the `gh-pages` branch, which the first publish creates. `docs.yml` publishes only while the repository is public. Point Pages at the branch once:
 
-    ```sh
-    gh api --method POST "repos/{owner}/{repo}/pages" -f "source[branch]=gh-pages" -f "source[path]=/"
-    ```
+  ```sh
+  gh api --method POST "repos/{owner}/{repo}/pages" -f "source[branch]=gh-pages" -f "source[path]=/"
+  ```
 
 - **Cloudflare** serves the site from a Worker that `docs/wrangler.jsonc` names after the project, with a Worker Preview for each pull request. Put the Worker and its Previews behind Cloudflare Access if the guides are private. The workflows need two repository secrets, an API token allowed to edit Workers Scripts and the account ID; each command prompts for the value:
 
-    ```sh
-    gh secret set CLOUDFLARE_API_TOKEN
-    gh secret set CLOUDFLARE_ACCOUNT_ID
-    ```
+  ```sh
+  gh secret set CLOUDFLARE_API_TOKEN
+  gh secret set CLOUDFLARE_ACCOUNT_ID
+  ```
 
 Delete the VitePress dependencies. [Choosing a Preview](./choosing-a-preview.md) covers previews for everything else a project ships.
 
@@ -188,9 +188,9 @@ After the pin changes and `mise install` runs, new sessions load the new release
 ## Harness notes
 
 - **Claude Code** loads the process contract as the `workbench` output style, forced while the plugin is enabled, so it replaces your own output style in Workbench projects.
-    - It applies the project's marketplace and plugin declarations only in a folder you trust. Accept the trust prompt in the first session.
-    - It ignores `AGENTS.md` when a `CLAUDE.md` exists that does not import it with `@AGENTS.md`.
-    - In a Git worktree it can resolve the project to the main checkout, so `./.workbench` may be the main checkout's link. Run `mise install` in the main checkout as well whenever the pin changes.
+  - It applies the project's marketplace and plugin declarations only in a folder you trust. Accept the trust prompt in the first session.
+  - It ignores `AGENTS.md` when a `CLAUDE.md` exists that does not import it with `@AGENTS.md`.
+  - In a Git worktree it can resolve the project to the main checkout, so `./.workbench` may be the main checkout's link. Run `mise install` in the main checkout as well whenever the pin changes.
 - **Oh My Pi** lists the package's rules and skills itself. A project's `extensions:` list replaces your user-level list rather than adding to it, so repeat any user-level extension you rely on in `.omp/config.yml`.
 - **Pico** loads `AGENTS.md` and `.agents/` but not the package until it supports project-declared plugins ([pico#61](https://github.com/markmals/pico/issues/61)).
 

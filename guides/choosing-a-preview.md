@@ -20,14 +20,14 @@ Reviewing prose is not reviewing behavior. The preview exists so you can use the
 
 Choose the surface the proposal changes. The agent wires the matching preview; you exercise it from the pull request before review.
 
-| Repository kind | Preview | What you exercise |
-| --- | --- | --- |
-| Library | Prerelease package | Install it in a dependent project. |
-| Web app | Preview deployment | Click through the changed flow. |
-| API | Preview endpoint | Make real requests. |
-| Documentation | Deployed documentation site | Read the changed documentation. |
-| CLI | Installable executable | Install it and run the changed command. |
-| Desktop or mobile app | Installable build | Install it on a real device and use the changed behavior. |
+| Repository kind       | Preview                     | What you exercise                                         |
+| --------------------- | --------------------------- | --------------------------------------------------------- |
+| Library               | Prerelease package          | Install it in a dependent project.                        |
+| Web app               | Preview deployment          | Click through the changed flow.                           |
+| API                   | Preview endpoint            | Make real requests.                                       |
+| Documentation         | Deployed documentation site | Read the changed documentation.                           |
+| CLI                   | Installable executable      | Install it and run the changed command.                   |
+| Desktop or mobile app | Installable build           | Install it on a real device and use the changed behavior. |
 
 A mixed repository previews the surface the proposal changed, not every repository shape by habit. A proposal that changes an API does not need a documentation preview as well.
 
@@ -89,10 +89,10 @@ Teardown belongs to completion. Remove a preview when its pull request closes or
 
 ## Red flags
 
-| Red flag | Correction |
-| --- | --- |
-| “The artifact uploaded successfully.” | Deploy or install the artifact in the way a reviewer will actually use it. |
-| “The workflow is green.” | Open the preview and exercise the changed behavior. |
-| “We can reuse the production environment.” | Choose the cheapest isolated review surface instead. |
-| “Every repository needs every preview.” | Preview only the surface changed by the proposal. |
-| “We will leave it up for later.” | Teardown the preview at completion. |
+| Red flag                                   | Correction                                                                 |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| “The artifact uploaded successfully.”      | Deploy or install the artifact in the way a reviewer will actually use it. |
+| “The workflow is green.”                   | Open the preview and exercise the changed behavior.                        |
+| “We can reuse the production environment.” | Choose the cheapest isolated review surface instead.                       |
+| “Every repository needs every preview.”    | Preview only the surface changed by the proposal.                          |
+| “We will leave it up for later.”           | Teardown the preview at completion.                                        |

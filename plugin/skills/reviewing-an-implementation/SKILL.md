@@ -22,11 +22,11 @@ Then ask whether this is the implementation that should remain. Does its structu
 
 Resolve each disagreement in exactly one way:
 
-| Resolution | Use when | Action |
-| --- | --- | --- |
-| Fix the wrong artifact | Intent has not changed | Correct the specification, tests, guides, or code within the approved change, and rerun the affected gates. |
-| Revise the proposal | Intent or scope changed | Discuss with the human first, then revise the affected specifications and derive the other artifacts again. |
-| Record the divergence | It remains deliberate for human review | Name the behavior, sources, impact, and reason in the readiness report. |
+| Resolution             | Use when                               | Action                                                                                                      |
+| ---------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Fix the wrong artifact | Intent has not changed                 | Correct the specification, tests, guides, or code within the approved change, and rerun the affected gates. |
+| Revise the proposal    | Intent or scope changed                | Discuss with the human first, then revise the affected specifications and derive the other artifacts again. |
+| Record the divergence  | It remains deliberate for human review | Name the behavior, sources, impact, and reason in the readiness report.                                     |
 
 You may edit specifications, tests, guides, and code within the approved change. You must not revise a proposal without the human.
 
@@ -36,13 +36,13 @@ Dispatch one subagent with fresh context for `adversarial-review`, on a differen
 
 Do not replace this dispatch with your own review. Consume its report:
 
-| Report item | Response |
-| --- | --- |
+| Report item                                  | Response                                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Confirmed defect inside the proposal's scope | Fix it and refresh the affected evidence. Run the review once more only when the fix was substantial. |
-| Suspicion | Verify it or drop it; never fix it blind. |
-| Proposal gap | Surface it to the human; do not silently choose an interpretation. |
-| Finding outside the proposal's scope | Never widen the change to fix it. Decline it with reasoning, or file it through `tracking-work`. |
-| Declined finding | Preserve it with reasoning for the readiness report. |
+| Suspicion                                    | Verify it or drop it; never fix it blind.                                                             |
+| Proposal gap                                 | Surface it to the human; do not silently choose an interpretation.                                    |
+| Finding outside the proposal's scope         | Never widen the change to fix it. Decline it with reasoning, or file it through `tracking-work`.      |
+| Declined finding                             | Preserve it with reasoning for the readiness report.                                                  |
 
 A disputed finding does not disappear because you decline it.
 
@@ -81,17 +81,17 @@ Previews are private by default. Do not publish one publicly unless the project 
 
 Compose the pull-request comment from the readiness report template: `.agents/templates/READINESS_REPORT.md` when the project overrides it, otherwise `.workbench/templates/READINESS_REPORT.md`. Fill every template section and add the self-check's recorded divergences and their resolutions.
 
-| Report section | Required content |
-| --- | --- |
-| Proposal | State `FULLY` implemented only when every promised behavior exists. For `PARTIALLY`, name completed and omitted behavior, limitations, and reason. Silent partial implementation is not allowed. |
-| What was built | Delivered behavior, not internals, with links to the current specifications and records the change revised. |
-| How to exercise it | Preview link or honest absence, setup, actions, and expected results. |
-| Validation performed | Every command actually run in this session and its observed result, per `.workbench/rules/verification.md`. Never report an unrun gate as passing. |
-| Adversarial findings adopted | Each accepted or fixed finding, or `- None.` |
-| Adversarial findings declined, with reasoning | Every declined finding and why it was declined, or `- None.` This section is always present. |
-| Defects discovered and deferred | Each deliberate, out-of-scope defect as a linked Beads item from `tracking-work`, or `- None.` |
-| Remaining limitations | Known behavior gaps, including specified behavior no check exercised, or `- None.` |
-| What to look at first | The first behavior, preview action, or diff the human should inspect. |
+| Report section                                | Required content                                                                                                                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Proposal                                      | State `FULLY` implemented only when every promised behavior exists. For `PARTIALLY`, name completed and omitted behavior, limitations, and reason. Silent partial implementation is not allowed. |
+| What was built                                | Delivered behavior, not internals, with links to the current specifications and records the change revised.                                                                                      |
+| How to exercise it                            | Preview link or honest absence, setup, actions, and expected results.                                                                                                                            |
+| Validation performed                          | Every command actually run in this session and its observed result, per `.workbench/rules/verification.md`. Never report an unrun gate as passing.                                               |
+| Adversarial findings adopted                  | Each accepted or fixed finding, or `- None.`                                                                                                                                                     |
+| Adversarial findings declined, with reasoning | Every declined finding and why it was declined, or `- None.` This section is always present.                                                                                                     |
+| Defects discovered and deferred               | Each deliberate, out-of-scope defect as a linked Beads item from `tracking-work`, or `- None.`                                                                                                   |
+| Remaining limitations                         | Known behavior gaps, including specified behavior no check exercised, or `- None.`                                                                                                               |
+| What to look at first                         | The first behavior, preview action, or diff the human should inspect.                                                                                                                            |
 
 Declined adversarial findings keep the independent review useful. Do not quietly omit a narrow, uncomfortable, or disputed finding.
 

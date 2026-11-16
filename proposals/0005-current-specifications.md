@@ -53,14 +53,14 @@ Pitlane's `packages/content/README.md` specifies that `createContent()` returns 
 
 The conceptual distinctions are:
 
-| Concept | Identity and lifetime |
-| --- | --- |
-| Capability | A stable area of product behavior that can be changed by many proposals. |
-| Current specification | The required behavior or contract for a particular repository revision. It changes with the capability. |
-| Proposal | One proposed change, its reasons, scope, and implementation approach. It remains evidence of that change after completion. |
-| Policy | One continuing constraint, with applicability and exceptions. Its file changes while that logical policy remains in force. |
-| Decision | One current significant choice, with the context and consequences needed to understand it. Its file changes when that choice changes. |
-| Verification | Evidence about a specification and implementation at a revision. A passing example is evidence for that example, not proof of every possible execution. |
+| Concept               | Identity and lifetime                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Capability            | A stable area of product behavior that can be changed by many proposals.                                                                                |
+| Current specification | The required behavior or contract for a particular repository revision. It changes with the capability.                                                 |
+| Proposal              | One proposed change, its reasons, scope, and implementation approach. It remains evidence of that change after completion.                              |
+| Policy                | One continuing constraint, with applicability and exceptions. Its file changes while that logical policy remains in force.                              |
+| Decision              | One current significant choice, with the context and consequences needed to understand it. Its file changes when that choice changes.                   |
+| Verification          | Evidence about a specification and implementation at a revision. A passing example is evidence for that example, not proof of every possible execution. |
 
 The ontology assessment is REVISE. The material conflation is a change record also acting as an indefinitely current definition of a capability. The missing distinction is between authority over current requirements and provenance explaining how those requirements changed. No new work-item or approval concept is needed.
 
@@ -101,18 +101,18 @@ A feature branch contains the proposed end state. The proposal bounds the author
 
 `PROCESS.md` defines the following inventory and links to concise authoring guidance. These are conditional roles. A file can fulfill more than one role, and a feature need not produce an artifact for every row. The short agent contract points to that guidance instead of repeating the inventory or loading every specialized procedure.
 
-| Role | Current authority and expected home | Creation and maintenance trigger |
-| --- | --- | --- |
-| Behavioral specification | Public API contract documentation, current reference prose, or Gherkin files, organized by capability or interface. Owns observable behavior, defaults, failures, and guarantees. | Revise when required behavior changes. Reuse the source that already owns it. |
-| Native contract | The subsystem's declarations, schema, protocol definition, or persisted-format definition. | Revise when its structural boundary changes. Keep the native source rather than a Markdown copy. |
-| Tests | Native test locations and frameworks, including behavioral, type, property, integration, and other appropriate tests. | Verify the current contract and relevant implementation risks. Use Gherkin bindings when that representation is chosen. |
-| Guides | `guides/` or the project's existing user-documentation home, written for the intended user, including consuming developers. | Revise when users must do or understand something differently. |
-| Implementation | Code and executable configuration, including build definitions, tasks, environment schemas, and design tokens. | Change to realize the approved behavior or technical change. |
-| Vision | `VISION.md`: purpose, audience, goals, principles, boundaries, and direction. | Revise when these change. Avoid an exhaustive feature catalogue. |
-| Domain references | Short explanations near the owning specifications of shared terminology, identity, relationships, and lifecycle meanings. | Add only when existing feature or interface documentation cannot adequately explain a shared meaning. |
-| Policies | `policies/<NNNN>-<slug>.md`: one continuing constraint, its scope, rationale, and enforcement. | Add after human agreement, revise in place, and delete when retired. |
-| Decisions | `decisions/<NNNN>-<slug>.md`: one current significant choice, context, alternatives, and consequences. | Add after human agreement, revise in place, and delete when no longer applicable. |
-| Proposals | `proposals/<NNNN>-<slug>.md`: one change, its scope, approach, and reasons. | Revise while designing and reviewing the change; preserve the completed record as history. |
+| Role                     | Current authority and expected home                                                                                                                                               | Creation and maintenance trigger                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Behavioral specification | Public API contract documentation, current reference prose, or Gherkin files, organized by capability or interface. Owns observable behavior, defaults, failures, and guarantees. | Revise when required behavior changes. Reuse the source that already owns it.                                           |
+| Native contract          | The subsystem's declarations, schema, protocol definition, or persisted-format definition.                                                                                        | Revise when its structural boundary changes. Keep the native source rather than a Markdown copy.                        |
+| Tests                    | Native test locations and frameworks, including behavioral, type, property, integration, and other appropriate tests.                                                             | Verify the current contract and relevant implementation risks. Use Gherkin bindings when that representation is chosen. |
+| Guides                   | `guides/` or the project's existing user-documentation home, written for the intended user, including consuming developers.                                                       | Revise when users must do or understand something differently.                                                          |
+| Implementation           | Code and executable configuration, including build definitions, tasks, environment schemas, and design tokens.                                                                    | Change to realize the approved behavior or technical change.                                                            |
+| Vision                   | `VISION.md`: purpose, audience, goals, principles, boundaries, and direction.                                                                                                     | Revise when these change. Avoid an exhaustive feature catalogue.                                                        |
+| Domain references        | Short explanations near the owning specifications of shared terminology, identity, relationships, and lifecycle meanings.                                                         | Add only when existing feature or interface documentation cannot adequately explain a shared meaning.                   |
+| Policies                 | `policies/<NNNN>-<slug>.md`: one continuing constraint, its scope, rationale, and enforcement.                                                                                    | Add after human agreement, revise in place, and delete when retired.                                                    |
+| Decisions                | `decisions/<NNNN>-<slug>.md`: one current significant choice, context, alternatives, and consequences.                                                                            | Add after human agreement, revise in place, and delete when no longer applicable.                                       |
+| Proposals                | `proposals/<NNNN>-<slug>.md`: one change, its scope, approach, and reasons.                                                                                                       | Revise while designing and reviewing the change; preserve the completed record as history.                              |
 
 The first five roles describe and realize the product. The next four provide project context. The proposal records a change to whichever current sources it affects.
 

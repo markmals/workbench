@@ -59,7 +59,7 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
 1. **Read the record and the current sources.** Read `VISION.md`, `policies/`, `decisions/`, and the current specifications that own the surface the change touches. Completed proposals explain earlier changes; they do not define what applies now. In **Policies and decisions checked**, list each relevant record and its constraint; write `None` when none apply.
 
-    If the change conflicts with a policy or decision, surface the conflict in that section. The human chooses either to revise the proposal or to revise or retire the record. Never quietly violate it.
+   If the change conflicts with a policy or decision, surface the conflict in that section. The human chooses either to revise the proposal or to revise or retire the record. Never quietly violate it.
 
 2. **Ground the problem.** When the change depends on domain knowledge that cannot safely be inferred from the request, use `grounding-a-problem` before comparing solutions. Prefer primary or authoritative evidence and separate it from repository observations, inference, and hypotheses. In **Domain grounding**, record the concepts, constraints, quality bar, and remaining uncertainty needed to assess the proposal. If no independent grounding is needed, state why there.
 
@@ -68,28 +68,28 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 4. **Study the baseline.** After grounding, inspect the closest existing implementation, prototype, workflow, or prior attempt. In **Existing baseline**, name what to preserve and what is incidental or compromised. If there is no relevant baseline, state that explicitly rather than inventing one.
 
 5. **Discover one answer at a time.** Ask one question, wait for its answer, then ask the next. Use multiple-choice questions when the answer space is finite. Cover:
-    - who needs the change and the outcome they seek;
-    - the trigger, success condition, and boundaries;
-    - dependencies, constraints, and affected records; and
-    - what is deliberately out of scope.
+   - who needs the change and the outcome they seek;
+   - the trigger, success condition, and boundaries;
+   - dependencies, constraints, and affected records; and
+   - what is deliberately out of scope.
 
-    Do not guess. Ask, or record `[NEEDS CLARIFICATION: <question>]` in **Open questions** and continue.
+   Do not guess. Ask, or record `[NEEDS CLARIFICATION: <question>]` in **Open questions** and continue.
 
 6. **Compare approaches.** Present two or three viable approaches with tradeoffs. Recommend one and explain why. Ask the human to select an approach or direct a revision before treating the design as settled.
 
 7. **Choose the preview now.** When the change has an exercisable surface, select the cheapest realistic artifact through which the human will exercise it. Record the repository shape, artifact, private access path, and completion cleanup in **Preview**. For a pure refactor without such a surface, record that no preview applies and why.
 
-    | Repository shape | Preview artifact                            |
-    | ---------------- | ------------------------------------------- |
-    | Library          | prerelease package                          |
-    | Web app          | preview deployment                          |
-    | API              | preview endpoint deployment                 |
-    | Docs             | deployed documentation site                 |
-    | CLI              | installable executable                      |
-    | Desktop          | installable build                           |
-    | Mobile           | installable build (ad-hoc / internal track) |
+   | Repository shape | Preview artifact                            |
+   | ---------------- | ------------------------------------------- |
+   | Library          | prerelease package                          |
+   | Web app          | preview deployment                          |
+   | API              | preview endpoint deployment                 |
+   | Docs             | deployed documentation site                 |
+   | CLI              | installable executable                      |
+   | Desktop          | installable build                           |
+   | Mobile           | installable build (ad-hoc / internal track) |
 
-    Keep the preview private unless the project deliberately opts into publication. Do not configure unused preview mechanisms.
+   Keep the preview private unless the project deliberately opts into publication. Do not configure unused preview mechanisms.
 
 8. **Author the proposal.** Fill the template from the grounding, baseline, answers, and selected approach. State behavior and boundaries plainly, as changes to the current sources you linked. When the human chooses Gherkin for a surface, use `specifying-behavior-with-gherkin` for its shape. Record rejected approaches and why they lost. Keep unresolved questions as markers rather than inventing answers.
 
@@ -127,18 +127,18 @@ Then enter Phase 3 — Implementation with `implementing-a-proposal`.
 
 ## Red flags — stop and correct
 
-| Symptom | Required response |
-| --- | --- |
-| No explicit yes to the proposal question for this change | Ask before creating a branch, draft PR, or proposal. |
-| No pushed branch or draft pull request | Return to Phase 1 — Preparation. |
-| Two unrelated motivations or more than roughly six criteria | Split the proposal. |
-| A record conflicts with the change | Surface it; the human chooses to revise the proposal or to revise or retire the record. |
-| Detailed design restates an existing contract in full | Link the current source and state only what changes. |
-| An unknown detail has no clarification marker | Ask or add the marker. |
-| Detailed design names sizes, colors, controls, or click steps, or quotes words that are not themselves a requirement | Rewrite it as what the user can do, find out, and is told. |
-| Preview names no exercisable artifact for a behavior change | Choose and record one before approval. |
-| A newly discovered defect expands scope | File it in Beads with the `tracking-work` skill; keep the proposal bounded. |
-| Existing code suggests the design | Treat it as evidence, not authority; settle intent in the proposal. |
+| Symptom                                                                                                              | Required response                                                                       |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| No explicit yes to the proposal question for this change                                                             | Ask before creating a branch, draft PR, or proposal.                                    |
+| No pushed branch or draft pull request                                                                               | Return to Phase 1 — Preparation.                                                        |
+| Two unrelated motivations or more than roughly six criteria                                                          | Split the proposal.                                                                     |
+| A record conflicts with the change                                                                                   | Surface it; the human chooses to revise the proposal or to revise or retire the record. |
+| Detailed design restates an existing contract in full                                                                | Link the current source and state only what changes.                                    |
+| An unknown detail has no clarification marker                                                                        | Ask or add the marker.                                                                  |
+| Detailed design names sizes, colors, controls, or click steps, or quotes words that are not themselves a requirement | Rewrite it as what the user can do, find out, and is told.                              |
+| Preview names no exercisable artifact for a behavior change                                                          | Choose and record one before approval.                                                  |
+| A newly discovered defect expands scope                                                                              | File it in Beads with the `tracking-work` skill; keep the proposal bounded.             |
+| Existing code suggests the design                                                                                    | Treat it as evidence, not authority; settle intent in the proposal.                     |
 
 **Do not use the existing implementation to teach yourself the domain when independent domain knowledge is available. Ground yourself first; then inspect the implementation as a specimen.**
 

@@ -9,11 +9,11 @@ Gherkin is one optional representation for a behavioral specification. A feature
 
 ## Choose the representation
 
-| Surface | Owner of the current requirement |
-| --- | --- |
-| Library function or type | Declarations plus contract documentation: defaults, errors, side effects, ordering, lifecycle, compatibility. |
-| Workflow across actors, steps, or state | Gherkin, when the human chooses it or rules and examples help reviewers; otherwise current reference prose. |
-| Protocol or persisted format | The native schema plus its semantic requirements. |
+| Surface                                 | Owner of the current requirement                                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Library function or type                | Declarations plus contract documentation: defaults, errors, side effects, ordering, lifecycle, compatibility. |
+| Workflow across actors, steps, or state | Gherkin, when the human chooses it or rules and examples help reviewers; otherwise current reference prose.   |
+| Protocol or persisted format            | The native schema plus its semantic requirements.                                                             |
 
 Revise whichever source already owns a requirement rather than copying it into a `.feature` file. `.workbench/skills/specifying-behavior-with-gherkin/examples.md` contrasts Pitlane's `getStylesheets()` contract with two workflows where Gherkin helps.
 
@@ -29,13 +29,13 @@ Start from the feature template: `.agents/templates/FEATURE.feature` when the pr
 
 Standard semantics, from the [Gherkin reference](https://cucumber.io/docs/gherkin/reference):
 
-| Construct | Meaning |
-| --- | --- |
-| `Background:` | Given steps run before each scenario of its Feature or Rule. One per level. |
-| `Scenario Outline:`, `Examples:` | One scenario per row. `<column>` placeholders are replaced before steps are matched. |
-| Data table, doc string | Attached to the step above; its binding receives it. |
-| Tags | Inherited by the Rules, scenarios, and Examples beneath them. |
-| `And`, `But`, `*` | `And` and `But` continue the preceding step kind; `*` is a wildcard step keyword. The selected integration defines step matching. |
+| Construct                        | Meaning                                                                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Background:`                    | Given steps run before each scenario of its Feature or Rule. One per level.                                                       |
+| `Scenario Outline:`, `Examples:` | One scenario per row. `<column>` placeholders are replaced before steps are matched.                                              |
+| Data table, doc string           | Attached to the step above; its binding receives it.                                                                              |
+| Tags                             | Inherited by the Rules, scenarios, and Examples beneath them.                                                                     |
+| `And`, `But`, `*`                | `And` and `But` continue the preceding step kind; `*` is a wildcard step keyword. The selected integration defines step matching. |
 
 Examples illustrate a rule at chosen points. They do not prove it for every input. Security, concurrency, and performance claims need evidence suited to the claim.
 

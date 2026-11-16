@@ -26,17 +26,17 @@ Skipping a step is lying.
 
 ## What proves what
 
-| Claim | Required evidence | Insufficient |
-| --- | --- | --- |
-| Tests pass | Test command output, 0 failures, this turn | "Last run was clean", "should pass now" |
-| Linter clean | Linter output, 0 errors, this turn | A partial check, or related code passing |
-| Build succeeds | Build exit 0, this turn | Linter or type check passed |
-| Bug fixed | The failing reproduction now passes | Code changed, "I think it's fixed" |
-| Regression test works | The full red-green proof below | The test passing once against the fix |
-| Subagent finished | `git status` and `git diff` show the changes | The subagent's own success report |
-| Preview works | Load or install it, then exercise the changed behavior | The workflow going green |
-| Proposal implemented | `mise run check` exit 0, this turn | The code looking right |
-| All behavior implemented | The self-check: each behavior the change specifies traced to its current specification, test, guide, and code | Tests passing |
+| Claim                    | Required evidence                                                                                             | Insufficient                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Tests pass               | Test command output, 0 failures, this turn                                                                    | "Last run was clean", "should pass now"  |
+| Linter clean             | Linter output, 0 errors, this turn                                                                            | A partial check, or related code passing |
+| Build succeeds           | Build exit 0, this turn                                                                                       | Linter or type check passed              |
+| Bug fixed                | The failing reproduction now passes                                                                           | Code changed, "I think it's fixed"       |
+| Regression test works    | The full red-green proof below                                                                                | The test passing once against the fix    |
+| Subagent finished        | `git status` and `git diff` show the changes                                                                  | The subagent's own success report        |
+| Preview works            | Load or install it, then exercise the changed behavior                                                        | The workflow going green                 |
+| Proposal implemented     | `mise run check` exit 0, this turn                                                                            | The code looking right                   |
+| All behavior implemented | The self-check: each behavior the change specifies traced to its current specification, test, guide, and code | Tests passing                            |
 
 The red-green proof for a regression test:
 

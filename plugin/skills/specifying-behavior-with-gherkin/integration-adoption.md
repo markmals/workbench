@@ -29,15 +29,15 @@ Run features through the task the gate already runs, such as `mise run check`, `
 
 Make each change below in a scratch copy, run the project's test task, record what happened, and revert.
 
-| Change | Required result |
-| --- | --- |
-| Add a step that no binding matches | The task fails and names the feature file and step. |
-| Add a second binding that matches an existing step | The task fails and reports the ambiguity. |
-| Replace a bound step with text that no binding recognizes, preserving any scenario identifier | The task fails rather than running only the test formerly linked to the identifier. |
-| Change the expected value in one `Then` step | That scenario fails at that step, and the report names its feature file and scenario. |
-| Change the expected value in one outline row | Only that row fails, and the report shows one result per row. |
-| Remove the binding for a `Background` step | The task fails, reports the missing step, and does not count affected scenarios as passed. |
-| Exclude one scenario with the integration's filter or skip mechanism | The report shows it as skipped or excluded, not passed. |
+| Change                                                                                        | Required result                                                                            |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Add a step that no binding matches                                                            | The task fails and names the feature file and step.                                        |
+| Add a second binding that matches an existing step                                            | The task fails and reports the ambiguity.                                                  |
+| Replace a bound step with text that no binding recognizes, preserving any scenario identifier | The task fails rather than running only the test formerly linked to the identifier.        |
+| Change the expected value in one `Then` step                                                  | That scenario fails at that step, and the report names its feature file and scenario.      |
+| Change the expected value in one outline row                                                  | Only that row fails, and the report shows one result per row.                              |
+| Remove the binding for a `Background` step                                                    | The task fails, reports the missing step, and does not count affected scenarios as passed. |
+| Exclude one scenario with the integration's filter or skip mechanism                          | The report shows it as skipped or excluded, not passed.                                    |
 
 If a result differs from the table, enable the integration's strict option, correct its configuration, or choose another integration. Until the check behaves as required, report that gap and make no automated-coverage claim that depends on it.
 

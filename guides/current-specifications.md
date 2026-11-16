@@ -17,17 +17,17 @@ Each normative fact has one current owner. A change edits that owner directly, o
 
 The roles are conditional. One file can fill several of them, and a feature needs an artifact only for the roles it actually touches. Public declarations with semantic documentation can be both the behavioral specification and the native contract. A Gherkin rule can carry a product policy.
 
-| Role | How to write and keep it |
-| --- | --- |
-| Behavioral specification | State observable behavior, defaults, failures, and guarantees, organized by capability or interface. Reuse the source that already owns the behavior. |
-| Native contract | Keep declarations, schemas, protocol definitions, and persisted formats in their native form rather than copying them into Markdown. |
-| Tests | Verify the current contract and the implementation risks that matter, in the project's own frameworks. Name each test after the behavior it checks. |
-| Guides | Explain how to accomplish a task for the intended reader, including developers consuming an API. Link to the reference that states the contract rather than restating it. |
-| Implementation | Code and executable configuration: build definitions, tasks, environment schemas, design tokens. |
-| Vision | Purpose, audience, goals, principles, boundaries, and direction. Leave out the feature catalogue. |
-| Domain references | A short explanation of a shared term, identity, relationship, or lifecycle, placed near the specifications that use it. Write one only when existing feature or interface documentation leaves a shared meaning ambiguous. It needs no ID, status, or frontmatter schema. |
-| Policies and decisions | Current files, revised in place and deleted when they no longer apply. [Keeping the Record](./keeping-the-record.md) covers when to write one. |
-| Proposals | One change, its scope, approach, and reasons. Revise it while the change is designed and reviewed; afterward it is the record of that change. |
+| Role                     | How to write and keep it                                                                                                                                                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Behavioral specification | State observable behavior, defaults, failures, and guarantees, organized by capability or interface. Reuse the source that already owns the behavior.                                                                                                                     |
+| Native contract          | Keep declarations, schemas, protocol definitions, and persisted formats in their native form rather than copying them into Markdown.                                                                                                                                      |
+| Tests                    | Verify the current contract and the implementation risks that matter, in the project's own frameworks. Name each test after the behavior it checks.                                                                                                                       |
+| Guides                   | Explain how to accomplish a task for the intended reader, including developers consuming an API. Link to the reference that states the contract rather than restating it.                                                                                                 |
+| Implementation           | Code and executable configuration: build definitions, tasks, environment schemas, design tokens.                                                                                                                                                                          |
+| Vision                   | Purpose, audience, goals, principles, boundaries, and direction. Leave out the feature catalogue.                                                                                                                                                                         |
+| Domain references        | A short explanation of a shared term, identity, relationship, or lifecycle, placed near the specifications that use it. Write one only when existing feature or interface documentation leaves a shared meaning ambiguous. It needs no ID, status, or frontmatter schema. |
+| Policies and decisions   | Current files, revised in place and deleted when they no longer apply. [Keeping the Record](./keeping-the-record.md) covers when to write one.                                                                                                                            |
+| Proposals                | One change, its scope, approach, and reasons. Revise it while the change is designed and reviewed; afterward it is the record of that change.                                                                                                                             |
 
 None of this requires separate narrative, use-case, flow, error-catalogue, view-model, toolchain, or architecture-overview documents, and none of it introduces a registry, metadata schema, or pointer from code back to a specification. A useful diagram can sit in a domain reference or a decision. An entity diagram can be generated from a schema.
 
@@ -35,26 +35,26 @@ None of this requires separate narrative, use-case, flow, error-catalogue, view-
 
 One project can use several representations without choosing a project-wide mode:
 
-| Surface | Current specification |
-| --- | --- |
-| Library or SDK | Public declarations and the contract documentation beside them: defaults, errors, side effects, ordering, lifecycle, compatibility. |
-| Protocol, wire format, or stored data | The native schema, with semantic requirements next to it. |
-| Application workflow | Gherkin rules and scenarios, or current reference prose. |
-| Process or tooling | Reference prose and the tool's own documentation. |
+| Surface                               | Current specification                                                                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Library or SDK                        | Public declarations and the contract documentation beside them: defaults, errors, side effects, ordering, lifecycle, compatibility. |
+| Protocol, wire format, or stored data | The native schema, with semantic requirements next to it.                                                                           |
+| Application workflow                  | Gherkin rules and scenarios, or current reference prose.                                                                            |
+| Process or tooling                    | Reference prose and the tool's own documentation.                                                                                   |
 
 Contract text and type expectations are written or revised before implementation. Documentation colocated with source can state intended behavior independently of the function body, and generated API reference publishes that source; it does not infer requirements from the code. Look and feel stays out of every representation, as it stays out of proposals.
 
 ## Where Workbench's own requirements live
 
-| Subject | Current owner |
-| --- | --- |
-| The workflow, its phases, roles, and approval points | [The process](../PROCESS.md) |
-| What `workbench records validate` and `workbench workflow status` detect and report | [Record Validation and Workflow Status](./record-validation.md) |
-| What an agent must do in a session | The process contract, [`plugin/rules/workbench.md`](../plugin/rules/workbench.md), and the rules and skills beside it in `plugin/` |
-| The shape of each record | The templates in [`plugin/templates/`](../plugin/templates/README.md) |
-| The `workbench` CLI's commands, arguments, results, and errors | The command registry in `src/`, published as the [CLI reference](../plugin/reference/cli.md), and the Rust tests in `tests/` |
-| Purpose and direction | [The vision](../VISION.md) |
-| Why any of these changed | The proposals and their pull requests |
+| Subject                                                                             | Current owner                                                                                                                      |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| The workflow, its phases, roles, and approval points                                | [The process](../PROCESS.md)                                                                                                       |
+| What `workbench records validate` and `workbench workflow status` detect and report | [Record Validation and Workflow Status](./record-validation.md)                                                                    |
+| What an agent must do in a session                                                  | The process contract, [`plugin/rules/workbench.md`](../plugin/rules/workbench.md), and the rules and skills beside it in `plugin/` |
+| The shape of each record                                                            | The templates in [`plugin/templates/`](../plugin/templates/README.md)                                                              |
+| The `workbench` CLI's commands, arguments, results, and errors                      | The command registry in `src/`, published as the [CLI reference](../plugin/reference/cli.md), and the Rust tests in `tests/`       |
+| Purpose and direction                                                               | [The vision](../VISION.md)                                                                                                         |
+| Why any of these changed                                                            | The proposals and their pull requests                                                                                              |
 
 ## How a change moves through the sources
 
@@ -134,11 +134,11 @@ A project uses Gherkin only where rules and examples communicate a requirement w
 2. Repoint or remove current references. A guide that linked it now describes pnpm and links whatever owns that requirement today.
 3. Where a historical link must survive, such as a completed proposal that cited the policy, replace it with an immutable Git revision URL. Before the deletion, `git log -1 --format=%H -- policies/0001-use-yarn.md` prints a commit that still contains the file:
 
-    ```md
-    [policy.0001](https://github.com/acme/app/blob/4f2c9e1d7a3b5c6e8f9a0b1c2d3e4f5a6b7c8d9e/policies/0001-use-yarn.md)
-    ```
+   ```md
+   [policy.0001](https://github.com/acme/app/blob/4f2c9e1d7a3b5c6e8f9a0b1c2d3e4f5a6b7c8d9e/policies/0001-use-yarn.md)
+   ```
 
-    A completed proposal receives no edit beyond that link repair.
+   A completed proposal receives no edit beyond that link repair.
 
 4. Delete the file in the same change, and do not reuse `policy.0001` for a different rule.
 5. Run `mise run check`. The documentation build reports any link the search missed.

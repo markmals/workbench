@@ -87,12 +87,12 @@ The same project is worked on from several machines. Read this section before yo
 
 Claim only with `workbench beads claim <id>`. It syncs, claims the item as this machine's claimant, syncs again, and re-reads the item to see who holds it:
 
-| Outcome | Exit | What it means | What you do |
-| --- | --- | --- | --- |
-| `claimed` | 0 | The item is yours, and other machines can see it. The receipt says `published: true`. | Start the work. |
-| `claimed-unpublished` | 0 | The item is yours on this machine, but a sync failed, so other machines cannot see the claim yet. The receipt says `published: false`, and stderr gives the reason. | Start the work, and run `workbench beads sync` until it succeeds. Say that the claim is unpublished. |
-| `held` | 4, `CONFLICT` | Another claimant already holds the item. The error's `details.holder` names it. | The item is not available. Pick other work, or ask the human. |
-| `lost` | 4, `CONFLICT` | You claimed it, but after syncing another claimant holds it: a concurrent claim from another machine won. `details.holder` names it. | Do not start the work. |
+| Outcome               | Exit          | What it means                                                                                                                                                       | What you do                                                                                          |
+| --------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `claimed`             | 0             | The item is yours, and other machines can see it. The receipt says `published: true`.                                                                               | Start the work.                                                                                      |
+| `claimed-unpublished` | 0             | The item is yours on this machine, but a sync failed, so other machines cannot see the claim yet. The receipt says `published: false`, and stderr gives the reason. | Start the work, and run `workbench beads sync` until it succeeds. Say that the claim is unpublished. |
+| `held`                | 4, `CONFLICT` | Another claimant already holds the item. The error's `details.holder` names it.                                                                                     | The item is not available. Pick other work, or ask the human.                                        |
+| `lost`                | 4, `CONFLICT` | You claimed it, but after syncing another claimant holds it: a concurrent claim from another machine won. `details.holder` names it.                                | Do not start the work.                                                                               |
 
 An unknown item is `NOT_FOUND` (exit 3). A claim Beads refuses for another reason, such as a closed item, is `PRECONDITION_FAILED` (exit 3) with Beads' reason. When the replica's Beads remote is not this project's `origin`, the claim changes nothing and fails with `PRECONDITION_FAILED`.
 
@@ -104,28 +104,28 @@ A claim made before claimants named machines holds a Git user name, such as `Mar
 
 Close only with `workbench beads close <id> --reason "<reason>"`. `bd close` refuses an item whose assignee is not the actor running it, and a plain `bd` command runs as the Git user name, not as this machine's claimant. The command closes the item as the claimant, then syncs:
 
-| Outcome | Exit | What it means |
-| --- | --- | --- |
-| `closed` | 0 | The item is closed, and other machines can see it. The receipt says `published: true`. |
-| `closed-unpublished` | 0 | The item is closed on this machine, but the sync failed. The receipt says `published: false`, and stderr gives the reason. Run `workbench beads sync` until it succeeds. |
-| Refused: held | 4, `CONFLICT` | Another claimant holds the item. The error's `details.holder` names it, and its message gives Beads' reason. Nothing was synced. |
-| Refused: unknown item | 3, `NOT_FOUND` | No item has that id. |
-| Refused: other | 3, `PRECONDITION_FAILED` | Beads refused for another reason, which the message gives. |
+| Outcome               | Exit                     | What it means                                                                                                                                                            |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `closed`              | 0                        | The item is closed, and other machines can see it. The receipt says `published: true`.                                                                                   |
+| `closed-unpublished`  | 0                        | The item is closed on this machine, but the sync failed. The receipt says `published: false`, and stderr gives the reason. Run `workbench beads sync` until it succeeds. |
+| Refused: held         | 4, `CONFLICT`            | Another claimant holds the item. The error's `details.holder` names it, and its message gives Beads' reason. Nothing was synced.                                         |
+| Refused: unknown item | 3, `NOT_FOUND`           | No item has that id.                                                                                                                                                     |
+| Refused: other        | 3, `PRECONDITION_FAILED` | Beads refused for another reason, which the message gives.                                                                                                               |
 
 ### Sync outcomes
 
 `workbench workflow status` reports the outcome of its sync in `beads.sync` (`outcome` and `detail`) and exits 0 whatever it is; `--no-sync` skips the sync and reports `skipped`. `workbench beads sync` exits 0 only for `synced`. Otherwise it writes an error to stderr whose code says what happened, and whose `details.outcome` is the outcome below:
 
-| Outcome | Error code | Exit | Cause |
-| --- | --- | --- | --- |
-| `failed` | `UNAVAILABLE` (retryable) | 5 | The remote or the network was unreachable, push retries ran out, or Beads failed for another reason. |
-| `failed` | `TIMEOUT` (retryable) | 5 | The sync passed its time limit: 20 seconds, or `--timeout`. |
-| `failed` | `UNAUTHENTICATED` | 3 | The remote rejected Git's credentials. |
-| `failed` | `PRECONDITION_FAILED` | 3 | The replica's Beads remote is not this project's `origin`, or the checkout has no `origin`. Nothing was pulled or pushed. |
-| `conflict` | `CONFLICT` | 4 | Beads halted on a conflict. `details.tables` names the conflicted tables, and `details.differing` the items that differ from the remote. |
-| `blocked` | `PRECONDITION_FAILED` | 3 | A dirty working set stops publishing. |
-| `unavailable` | `DEPENDENCY_MISSING` | 3 | `bd` is not installed. |
-| `unavailable` | `PRECONDITION_FAILED` | 3 | There is no Beads workspace, or its database is not initialized. |
+| Outcome       | Error code                | Exit | Cause                                                                                                                                    |
+| ------------- | ------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `failed`      | `UNAVAILABLE` (retryable) | 5    | The remote or the network was unreachable, push retries ran out, or Beads failed for another reason.                                     |
+| `failed`      | `TIMEOUT` (retryable)     | 5    | The sync passed its time limit: 20 seconds, or `--timeout`.                                                                              |
+| `failed`      | `UNAUTHENTICATED`         | 3    | The remote rejected Git's credentials.                                                                                                   |
+| `failed`      | `PRECONDITION_FAILED`     | 3    | The replica's Beads remote is not this project's `origin`, or the checkout has no `origin`. Nothing was pulled or pushed.                |
+| `conflict`    | `CONFLICT`                | 4    | Beads halted on a conflict. `details.tables` names the conflicted tables, and `details.differing` the items that differ from the remote. |
+| `blocked`     | `PRECONDITION_FAILED`     | 3    | A dirty working set stops publishing.                                                                                                    |
+| `unavailable` | `DEPENDENCY_MISSING`      | 3    | `bd` is not installed.                                                                                                                   |
+| `unavailable` | `PRECONDITION_FAILED`     | 3    | There is no Beads workspace, or its database is not initialized.                                                                         |
 
 What each outcome asks of you:
 
@@ -133,11 +133,11 @@ What each outcome asks of you:
 - **`skipped`**: nothing was pulled or pushed; run `workbench workflow status` without `--no-sync`, or `workbench beads sync`, before relying on what another machine changed.
 - **`failed`**: continue, and say that Beads may be stale. The reason says why; a later sync point retries. When the reason says the Beads remote is not this project's `origin`, nothing was pulled or pushed and no later sync will be: stop and tell the human, as [Recovering a Beads sync](recovering-a-sync.md#failed) describes.
 - **`conflict`**: Beads halted on a conflict it cannot settle, and nothing was pushed. Resolve it with your best judgement:
-    1. Export a backup outside the repository: `bd export --all -o <path>`.
-    2. Find the items. With embedded storage, which Workbench uses, the halted merge is aborted, so `bd conflicts list` shows nothing: compare `bd diff main origin/main` with `bd show <id>`. When `bd conflicts list` does show live conflicts, `bd conflicts show` presents them field by field.
-    3. Settle an aborted merge with `bd vc merge origin/main --strategy ours` or `--strategy theirs`, and live conflicts with `bd conflicts resolve <id> --ours` or `--theirs`. When the right answer combines both sides, follow up with `bd update`.
-    4. Finish with `workbench beads sync`.
-    5. Tell the human what you resolved and why, as a report rather than a request for approval.
+  1. Export a backup outside the repository: `bd export --all -o <path>`.
+  2. Find the items. With embedded storage, which Workbench uses, the halted merge is aborted, so `bd conflicts list` shows nothing: compare `bd diff main origin/main` with `bd show <id>`. When `bd conflicts list` does show live conflicts, `bd conflicts show` presents them field by field.
+  3. Settle an aborted merge with `bd vc merge origin/main --strategy ours` or `--strategy theirs`, and live conflicts with `bd conflicts resolve <id> --ours` or `--theirs`. When the right answer combines both sides, follow up with `bd update`.
+  4. Finish with `workbench beads sync`.
+  5. Tell the human what you resolved and why, as a report rather than a request for approval.
 - **`blocked`**: a dirty working set stops publishing. Back up first, find what left it dirty and clear it, finish with `workbench beads sync`, and report afterwards the same way.
 - **`unavailable`**: run `mise run setup`. When a read of the replica failed after the sync, the reason names the read and the sync's outcome; a locked or damaged database needs [Recovering a Beads sync](recovering-a-sync.md) rather than setup.
 

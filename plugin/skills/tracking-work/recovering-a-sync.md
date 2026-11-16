@@ -18,18 +18,18 @@ Beads settles most concurrent edits on its own, field by field, with the later w
 
 ```json
 {
-  "error": {
-    "code": "CONFLICT",
-    "message": "Beads: conflict. Beads halted on a conflict in issues; nothing was pushed.\nDiffers from the remote: lab-7ku (Probe one renamed)",
-    "retryable": false,
-    "details": {
-      "outcome": "conflict",
-      "remote": "git+https://github.com/owner/project.git",
-      "tables": ["issues"],
-      "differing": [{ "id": "lab-7ku", "title": "Probe one renamed", "change": "removed" }]
-    },
-    "suggestions": ["…"]
-  }
+    "error": {
+        "code": "CONFLICT",
+        "message": "Beads: conflict. Beads halted on a conflict in issues; nothing was pushed.\nDiffers from the remote: lab-7ku (Probe one renamed)",
+        "retryable": false,
+        "details": {
+            "outcome": "conflict",
+            "remote": "git+https://github.com/owner/project.git",
+            "tables": ["issues"],
+            "differing": [{ "id": "lab-7ku", "title": "Probe one renamed", "change": "removed" }]
+        },
+        "suggestions": ["…"]
+    }
 }
 ```
 
@@ -38,12 +38,12 @@ Beads settles most concurrent edits on its own, field by field, with the later w
 1. Back up.
 2. See what the remote has. `bd diff main origin/main` lists every item that differs between this replica (`main`) and the remote as last fetched (`origin/main`); `--json` gives both sides' values:
 
-    ```text
-    - Removed (1):
-      - lab-7ku: Probe one renamed
-    ```
+   ```text
+   - Removed (1):
+     - lab-7ku: Probe one renamed
+   ```
 
-    The remote deleted `lab-7ku`; this replica renamed it. `bd show lab-7ku` shows the local side, and `bd history lab-7ku` how it got there.
+   The remote deleted `lab-7ku`; this replica renamed it. `bd show lab-7ku` shows the local side, and `bd history lab-7ku` how it got there.
 
 3. Decide which side should stand. Here: did the other machine delete the item on purpose, for example as a duplicate, or is the rename work that should survive?
 4. Settle the merge. Take the remote's side of every conflict with `bd vc merge origin/main --strategy theirs`, or this replica's with `--strategy ours`. The strategy applies only to the conflicting rows; everything else merges normally.

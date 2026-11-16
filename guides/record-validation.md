@@ -13,13 +13,13 @@ Run `workbench records validate` anywhere in the project's Git checkout; it chec
 
 The validator reads `VISION.md` and Markdown files directly inside `proposals/`, `policies/`, `decisions/`, and `guides/`. Directory READMEs are indexes, not records. Empty or absent optional record directories are allowed. Nested Markdown records are rejected. Symlinked regular files are checked; symlinked directories are not traversed.
 
-| Record | Required frontmatter | Allowed status |
-| --- | --- | --- |
-| Vision | `title`, `updated` as `YYYY-MM-DD` | None |
+| Record   | Required frontmatter                                                                 | Allowed status                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vision   | `title`, `updated` as `YYYY-MM-DD`                                                   | None                                                                                                                                            |
 | Proposal | `id`, `title`, non-empty `authors` list, `status`, `pull-request`, `supersedes` list | `draft`, `awaiting-implementation`, `active-review`, `returned-for-revisions`, `accepted`, `implemented`, `rejected`, `withdrawn`, `superseded` |
-| Policy | `id`, `title`, `status` | `draft`, `active` |
-| Decision | `id`, `title`, `status` | `proposed`, `accepted` |
-| Guide | `id`, `title` | None |
+| Policy   | `id`, `title`, `status`                                                              | `draft`, `active`                                                                                                                               |
+| Decision | `id`, `title`, `status`                                                              | `proposed`, `accepted`                                                                                                                          |
+| Guide    | `id`, `title`                                                                        | None                                                                                                                                            |
 
 Proposal, policy, and decision filenames use `<NNNN>-<slug>.md`, with IDs such as `policy.0001`. Guides use kebab-case filenames and IDs such as `guide.record-validation`. IDs must match their filenames and be unique. Frontmatter supports scalar values and inline lists; duplicate keys and malformed lists are errors. Proposal `issues`, when present, is an inline list.
 
@@ -51,10 +51,10 @@ Revise its rule and applicable checks in the same change, keeping its logical id
 - A harness declaration is missing or unreadable: the `.claude/settings.json` marketplace and enabled plugin, or the `./.workbench` entry in `.omp/config.yml`.
 - A project skill `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` reuses the name of a skill or rule this release of Workbench ships. The message names the file and says to remove or rename it.
 - The project still vendors a Workbench file the package now supplies:
-    - a template in `.agents/templates/` identical to the package's template of the same name (a different one is an override, and allowed). Templates are compared with `.workbench/templates/`, or with the copies built into `workbench` from the same release when the link is missing;
-    - the Oh My Pi extensions `.omp/extensions/check-before-stop.ts`, `format-after-edit.ts`, and `prime-beads.ts`, and the workflow tool in `.omp/tools/dynamic-workflows/`;
-    - the TypeScript tools the CLI replaces, with their tests: `tools/validate.ts`, `status.ts`, `check-scoped-commit.ts`, `check-pr-commits.ts`, `require-changeset.ts`, `tag-release.ts`, `project-version.ts`, `bd.ts`, `fake-bd.ts`, and `beads*.ts`;
-    - `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`.
+  - a template in `.agents/templates/` identical to the package's template of the same name (a different one is an override, and allowed). Templates are compared with `.workbench/templates/`, or with the copies built into `workbench` from the same release when the link is missing;
+  - the Oh My Pi extensions `.omp/extensions/check-before-stop.ts`, `format-after-edit.ts`, and `prime-beads.ts`, and the workflow tool in `.omp/tools/dynamic-workflows/`;
+  - the TypeScript tools the CLI replaces, with their tests: `tools/validate.ts`, `status.ts`, `check-scoped-commit.ts`, `check-pr-commits.ts`, `require-changeset.ts`, `tag-release.ts`, `project-version.ts`, `bd.ts`, `fake-bd.ts`, and `beads*.ts`;
+  - `.changeset/config.json`, `docs/.vitepress/`, and `fnox.toml`.
 
 `workbench context show` reports the same setup without judging it: the project root, branch, `origin`, and pull request; the pin, the running `workbench` version, and where `.workbench` points; the harness declarations; the Beads workspace, its remote, and the claimant; and the documentation site's configuration.
 
@@ -70,14 +70,14 @@ Missing or unavailable GitHub state is reported as unknown rather than assumed t
 
 Before reporting, `workbench workflow status` runs one Beads sync with the project's remote, the same one `workbench beads sync` runs, limited to 20 seconds. `--no-sync` skips the sync. After the phase report it adds a Beads section: the sync outcome, ready work from `bd ready`, the items in progress and who holds them from `bd list --status in_progress`, and the project's memories from `bd prime --memories-only`. The ready work, items in progress, and memories are this machine's replica after the sync.
 
-| Outcome | Meaning | Reported with |
-| --- | --- | --- |
-| `synced` | This replica pulled every change on the remote and published its own. | One line. |
-| `skipped` | `--no-sync` was passed; nothing was pulled or pushed. | One line. |
-| `failed` | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout's `origin`, or the checkout has no `origin` to compare it with. | The reason, and that the rest of the section shows this machine's state. |
-| `conflict` | Beads halted on a conflict it cannot settle; nothing was pushed. | The conflicted tables Beads names, and the items that differ between this replica and the remote. |
-| `blocked` | A dirty working set stops Beads from publishing; nothing was pushed. | Beads' explanation. |
-| `unavailable` | `bd` is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed. | The reason and a pointer to `mise run setup`, in place of the whole section. When a read failed, the reason names it and keeps the sync's outcome. |
+| Outcome       | Meaning                                                                                                                                                                                                                                                                                             | Reported with                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `synced`      | This replica pulled every change on the remote and published its own.                                                                                                                                                                                                                               | One line.                                                                                                                                          |
+| `skipped`     | `--no-sync` was passed; nothing was pulled or pushed.                                                                                                                                                                                                                                               | One line.                                                                                                                                          |
+| `failed`      | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout's `origin`, or the checkout has no `origin` to compare it with. | The reason, and that the rest of the section shows this machine's state.                                                                           |
+| `conflict`    | Beads halted on a conflict it cannot settle; nothing was pushed.                                                                                                                                                                                                                                    | The conflicted tables Beads names, and the items that differ between this replica and the remote.                                                  |
+| `blocked`     | A dirty working set stops Beads from publishing; nothing was pushed.                                                                                                                                                                                                                                | Beads' explanation.                                                                                                                                |
+| `unavailable` | `bd` is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed.                                                                                                                                                                           | The reason and a pointer to `mise run setup`, in place of the whole section. When a read failed, the reason names it and keeps the sync's outcome. |
 
 Beads outcomes never change the exit status of `workbench workflow status`. Its result's `beads` field holds either `sync` (`outcome` and `detail`), `ready` (each item's `id`, `title`, and `priority`), `inProgress` (each item's `id`, `title`, and `assignee`), and `memories` (text); or `unavailable` (the reason). The `tracking-work` skill says how an agent responds to each outcome.
 

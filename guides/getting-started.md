@@ -114,16 +114,16 @@ You are not expected to memorise commands, skill names, or process steps. “Kee
 
 ## Where things live
 
-| Path | What it holds | When you use it |
-| --- | --- | --- |
-| `VISION.md` | Your project's purpose, minimum viable product, and direction | Write it before feature work; update it after accepted work changes the project. |
-| `proposals/` | One numbered record of each change and its reasons | Write and settle a proposal before implementation. |
-| Contract documentation, schemas, feature files | The current specifications, wherever each surface keeps them | The agent revises the affected ones first, once you approve a proposal. |
-| `guides/` | Reader-facing behavior and usage guides | The agent writes or updates these from the intended contract before code. |
-| `policies/` | Current rules future work must keep enforcing | Add one when agreed work establishes a durable rule; revise or delete it when that rule changes. |
-| `decisions/` | Current architectural choices and their context | Add one when agreed work establishes a durable choice; revise or delete it when that choice changes. |
-| `.workbench` | The pinned Workbench package: the process contract, rules, skills, and templates | Never edit it; change the pin in `mise.toml` and run `mise install`. |
-| `.agents/` | Your project's own skills, rules, template overrides, and commit scopes | Add to it when the project needs instructions of its own. |
+| Path                                           | What it holds                                                                    | When you use it                                                                                      |
+| ---------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `VISION.md`                                    | Your project's purpose, minimum viable product, and direction                    | Write it before feature work; update it after accepted work changes the project.                     |
+| `proposals/`                                   | One numbered record of each change and its reasons                               | Write and settle a proposal before implementation.                                                   |
+| Contract documentation, schemas, feature files | The current specifications, wherever each surface keeps them                     | The agent revises the affected ones first, once you approve a proposal.                              |
+| `guides/`                                      | Reader-facing behavior and usage guides                                          | The agent writes or updates these from the intended contract before code.                            |
+| `policies/`                                    | Current rules future work must keep enforcing                                    | Add one when agreed work establishes a durable rule; revise or delete it when that rule changes.     |
+| `decisions/`                                   | Current architectural choices and their context                                  | Add one when agreed work establishes a durable choice; revise or delete it when that choice changes. |
+| `.workbench`                                   | The pinned Workbench package: the process contract, rules, skills, and templates | Never edit it; change the pin in `mise.toml` and run `mise install`.                                 |
+| `.agents/`                                     | Your project's own skills, rules, template overrides, and commit scopes          | Add to it when the project needs instructions of its own.                                            |
 
 ## Continue from here
 

@@ -26,13 +26,13 @@ Split the work only into slices that are independent, touch separate files, and 
 
 Before any test or production code, revise each current source the proposal changes so it states the approved end state. The source that owns a surface today stays its owner:
 
-| Surface | What you revise |
-| --- | --- |
-| Library API | The declaration and its contract documentation (doc comment, or the reference the package publishes): defaults, errors, side effects, ordering, lifecycle, compatibility. Edit the doc comment now, before the function body. |
-| Protocol or stored data | The native schema and the semantic requirements beside it. |
-| Application workflow | Its feature file or behavioral reference. For `.feature` files, use the `specifying-behavior-with-gherkin` skill. |
-| Process or tooling | The reference prose that owns it. |
-| Agreed policy or decision | The same file, keeping its ID, or its deletion when the change retires it (`completing-a-feature` skill, §2). |
+| Surface                   | What you revise                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Library API               | The declaration and its contract documentation (doc comment, or the reference the package publishes): defaults, errors, side effects, ordering, lifecycle, compatibility. Edit the doc comment now, before the function body. |
+| Protocol or stored data   | The native schema and the semantic requirements beside it.                                                                                                                                                                    |
+| Application workflow      | Its feature file or behavioral reference. For `.feature` files, use the `specifying-behavior-with-gherkin` skill.                                                                                                             |
+| Process or tooling        | The reference prose that owns it.                                                                                                                                                                                             |
+| Agreed policy or decision | The same file, keeping its ID, or its deletion when the change retires it (`completing-a-feature` skill, §2).                                                                                                                 |
 
 Reuse each source's representation. Add a source only for a requirement with no adequate home, and keep it as small as the requirement allows. When another document restates the contract, such as a README repeating the API reference, revise it in the same edit or replace the restatement with a link, so each fact keeps one owner. Write only what the proposal authorizes; a new substantive decision goes to the human. Never write a specification from what the code happens to do.
 

@@ -11,10 +11,10 @@ description: Use after a human has reviewed a pull request and the accepted chan
 
 Read the human's PR comments and direct commits before acting. Classify each item:
 
-| Feedback changes | Action |
-| --- | --- |
-| The implementation | Fix it, then rerun the affected implementation loop and review evidence. |
-| Intended design | Update the proposal first with the human, then rerun current specifications → tests → guides → code → quality gates → review against the revision. |
+| Feedback changes   | Action                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The implementation | Fix it, then rerun the affected implementation loop and review evidence.                                                                           |
+| Intended design    | Update the proposal first with the human, then rerun current specifications → tests → guides → code → quality gates → review against the revision. |
 
 Never encode a design change in specifications, code, tests, or guides while leaving the proposal stale.
 
@@ -49,11 +49,11 @@ Keep prose for judgment a deterministic check cannot decide. Prose policies are 
 
 A policy or decision file states what applies now, and Git with the proposal keeps what applied before.
 
-| The agreed record | Do this |
-| --- | --- |
-| Changes meaning or scope | Edit the same file. Keep its filename and ID, revise its rationale and enforcement together, and update current references in the same change. |
-| No longer applies | Delete the file. First repoint or remove current links to it. Replace each historical link that must keep working, such as one in a completed proposal, with an immutable Git revision URL; `git log -1 --format=%H -- <file>` gives a commit that contains it. Never reuse its ID. |
-| Still binds a supported compatibility promise or an unfinished migration | It still applies. Keep it until that obligation ends. |
+| The agreed record                                                        | Do this                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Changes meaning or scope                                                 | Edit the same file. Keep its filename and ID, revise its rationale and enforcement together, and update current references in the same change.                                                                                                                                      |
+| No longer applies                                                        | Delete the file. First repoint or remove current links to it. Replace each historical link that must keep working, such as one in a completed proposal, with an immutable Git revision URL; `git log -1 --format=%H -- <file>` gives a commit that contains it. Never reuse its ID. |
+| Still binds a supported compatibility promise or an unfinished migration | It still applies. Keep it until that obligation ends.                                                                                                                                                                                                                               |
 
 Write no replacement record and no `supersedes` or `superseded` metadata on a policy or decision; the validator rejects both. Workbench's guide [Keeping Current Specifications](https://github.com/markmals/workbench/blob/main/guides/current-specifications.md#worked-example-revising-and-retiring-a-policy) works through one revision and one retirement.
 

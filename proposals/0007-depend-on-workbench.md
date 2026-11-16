@@ -27,10 +27,10 @@ Compared by size against 49 files the template ships, each project matched betwe
 
 - **Projects lag.** The starters' and Pico's `tools/status.ts` predate the template's current step model. Hive and Bento still run the tooling generation before Workbench 2.
 - **Projects customize shared files in place:**
-    - Trove appends its conventions to `code-quality.md`.
-    - Trove and Pico add project rows to `verification.md`.
-    - Pitlane and Bento add sections to `PROPOSAL.md`.
-    - Recon replaced `check-before-stop.ts` with a no-op.
+  - Trove appends its conventions to `code-quality.md`.
+  - Trove and Pico add project rows to `verification.md`.
+  - Pitlane and Bento add sections to `PROPOSAL.md`.
+  - Recon replaced `check-before-stop.ts` with a no-op.
 - **Projects improve shared files without sending the improvement back.** Pico's, Recon's, and Trove's validators each handle cases the template's does not.
 
 None of this is visible from any single repository. Copying again cannot fix it without discarding the customizations.
@@ -76,23 +76,23 @@ Tooling:
 - **mise github backend.** mise's `github:` backend installs GitHub release assets and records per-platform URLs and checksums in `mise.lock` ([backends](https://mise.jdx.dev/dev-tools/backends/), [lockfile](https://mise.jdx.dev/dev-tools/mise-lock.html)).
 - **Renovate.** Its mise manager updates `github:` backend pins. Its `mise.lock` refresh is documented, but users report it failing on hosted Renovate. jdx publishes a workflow that regenerates the lock on Renovate branches ([manager](https://docs.renovatebot.com/modules/manager/mise/), [renovate-config#19](https://github.com/jdx/renovate-config/pull/19)).
 - **Knope change files.** Knope reads change files from `.changeset/` and deletes them after use. Each file maps packages to change types. Knope does not use a `config.json` ([change file](https://knope.tech/reference/concepts/change-file/)).
-    - `PrepareRelease` bumps versioned files, writes the changelog, and stages the result. `[changes] ignore_conventional_commits` limits version sources to change files ([PrepareRelease](https://knope.tech/reference/config-file/steps/prepare-release/)).
-    - Release notes support extra sections and change templates ([customizing release notes](https://knope.tech/recipes/customizing-release-notes/)).
-    - The release-PR recipe keeps one release pull request open from `main`. Merging it runs `Release`, which creates the GitHub release and uploads assets before publishing ([recipe](https://knope.tech/recipes/1-preview-releases-with-pull-requests/), [Release](https://knope.tech/reference/config-file/steps/release/)).
-    - `knope document-change` prompts interactively.
+  - `PrepareRelease` bumps versioned files, writes the changelog, and stages the result. `[changes] ignore_conventional_commits` limits version sources to change files ([PrepareRelease](https://knope.tech/reference/config-file/steps/prepare-release/)).
+  - Release notes support extra sections and change templates ([customizing release notes](https://knope.tech/recipes/customizing-release-notes/)).
+  - The release-PR recipe keeps one release pull request open from `main`. Merging it runs `Release`, which creates the GitHub release and uploads assets before publishing ([recipe](https://knope.tech/recipes/1-preview-releases-with-pull-requests/), [Release](https://knope.tech/reference/config-file/steps/release/)).
+  - `knope document-change` prompts interactively.
 - **Single binaries.** [Hugo](https://gohugo.io), [Pagefind](https://pagefind.app), and [dprint](https://dprint.dev) are single binaries with no Node requirement.
 - **Varlock** keeps a project's environment contract in a committed, typed `.env.schema`, with decorators such as `@sensitive` and `@required`. Values come from gitignored `.env` files or from plugins such as 1Password's, and `varlock run -- <command>` resolves and injects them ([Varlock](https://varlock.dev), [1Password plugin](https://varlock.dev/plugins/1password/)). It ships as a standalone binary in its GitHub releases. This machine runs 1.25.0 as `github:dmno-dev/varlock` through mise. Gourmand, Trove, and Vice already use it; Gourmand pins `npm:varlock`, which needs Node.
 - **Agent-first CLIs.** The owner's guide (`~/Documents/Documentation/Programming/agentic-dev/agent-first-clis.md`) draws on Cloudflare's `cf` CLI. Its principle: "Make capabilities discoverable, inputs predictable, outputs structured, and effects verifiable."
-    - One authoritative command registry generates the parser, help, discovery, and documentation.
-    - Discovery and inspection commands (`cli search`, `schema`, `docs search`) never mutate anything.
-    - The grammar is `<resource> <operation>`.
-    - JSON is the default output on stdout, with diagnostics on stderr.
-    - Errors are structured and carry stable codes.
-    - Mutations offer `--dry-run`, and the current context can be inspected.
-    - Commands never prompt.
-    - The CLI is evaluated with agents that start with no knowledge of it.
+  - One authoritative command registry generates the parser, help, discovery, and documentation.
+  - Discovery and inspection commands (`cli search`, `schema`, `docs search`) never mutate anything.
+  - The grammar is `<resource> <operation>`.
+  - JSON is the default output on stdout, with diagnostics on stderr.
+  - Errors are structured and carry stable codes.
+  - Mutations offer `--dry-run`, and the current context can be inspected.
+  - Commands never prompt.
+  - The CLI is evaluated with agents that start with no knowledge of it.
 
-    Pico's `pico` CLI already follows this shape (`pico schema`, `pico cli search`).
+  Pico's `pico` CLI already follows this shape (`pico schema`, `pico cli search`).
 
 ### Repository observations
 
@@ -100,19 +100,19 @@ Throwaway fixtures exercised the load-bearing claims on 2026-11-15 and were then
 
 - **OMP 18.20.2 through `extensions:`.** OMP loaded a skill, an `alwaysApply` rule, and a `hooks/post/*.ts` factory from a directory named in `.omp/config.yml`. This held both when the directory sat behind a symlink inside a gitignored `node_modules` and when it was a `.workbench` symlink into mise's install directory. A rule without frontmatter, in a plugin's `rules/` or a project's `.agents/rules/`, never reached the model. Workbench's four rules have no frontmatter (Beads `workbench-0ky`).
 - **Claude Code 2.1.325 with a directory marketplace.** The marketplace was declared at `./.workbench`, a symlink to a mise-installed directory outside the project.
-    - `claude plugin details` listed its skill and SessionStart hook.
-    - After workspace trust, a `-p` run executed that hook, a plain executable, with `CLAUDE_PLUGIN_ROOT` set to the symlink path. No install step ran.
-    - Whether the model saw the plugin's content was not observed: Claude Code was not logged in.
+  - `claude plugin details` listed its skill and SessionStart hook.
+  - After workspace trust, a `-p` run executed that hook, a plain executable, with `CLAUDE_PLUGIN_ROOT` set to the symlink path. No install step ran.
+  - Whether the model saw the plugin's content was not observed: Claude Code was not logged in.
 - **mise 2026.11.8.**
-    - It installed an archive with its directory tree intact and put its `bin/` on PATH.
-    - It locked checksums for seven platforms.
-    - A project `[hooks] postinstall` ran on every `mise install`, including when nothing new installed, and re-pointed a symlink after a version bump.
-    - The `github:` backend stripped the top-level directory of a cargo-dist release archive (`github:max-sixty/worktrunk@0.81.0`).
+  - It installed an archive with its directory tree intact and put its `bin/` on PATH.
+  - It locked checksums for seven platforms.
+  - A project `[hooks] postinstall` ran on every `mise install`, including when nothing new installed, and re-pointed a symlink after a version bump.
+  - The `github:` backend stripped the top-level directory of a cargo-dist release archive (`github:max-sixty/worktrunk@0.81.0`).
 - **Hugo 0.170.0.**
-    - It built Workbench's proposals and guides in place, through module mounts of `../proposals`, `../guides`, and `../VISION.md`, in 13 ms.
-    - It exposed custom frontmatter such as `id` and `status`.
-    - A ten-line link template resolved `.md` links under a PR-preview base URL and failed the build on a dead link.
-    - It loaded a theme through a symlinked `.workbench`.
+  - It built Workbench's proposals and guides in place, through module mounts of `../proposals`, `../guides`, and `../VISION.md`, in 13 ms.
+  - It exposed custom frontmatter such as `id` and `status`.
+  - A ten-line link template resolved `.md` links under a PR-preview base URL and failed the build on a dead link.
+  - It loaded a theme through a symlinked `.workbench`.
 - **Pagefind 1.6.0.** Installed as `github:CloudCannon/pagefind`, it indexed the output.
 - **Zola 0.23.6** silently dropped custom top-level frontmatter.
 - **dprint 0.64.3.** With Markdown `textWrap: "never"`, it unwrapped hand-wrapped prose and normalized frontmatter. hk 2.8.1 has builtins for `dprint`, `cargo_fmt`, `cargo_clippy`, and `taplo`.
@@ -121,17 +121,17 @@ Throwaway fixtures exercised the load-bearing claims on 2026-11-15 and were then
 
 The concepts this change introduces or renames:
 
-| Concept | Identity and lifetime |
-| --- | --- |
-| Workbench package | One published, immutable release of Workbench, identified by its version and tag `v<version>`: the CLI plus the plugin content, one archive per platform. |
-| Plugin content | The process contract, skills, rules, templates, and site theme inside the package. Harness-neutral Markdown plus the manifests that let harnesses find it. |
-| Process contract | The always-loaded agent instructions for the Workbench process. Ships in the package and changes with it. |
-| Project contract | A project's `AGENTS.md`: facts about that project only. Owned and edited by the project. |
-| Package pin | The project's `github:markmals/workbench` version in `mise.toml`, with checksums in `mise.lock`. The single place a project names the Workbench version it uses. |
-| Package link | `.workbench`: a gitignored, machine-local symlink from the project root to the installed package for the pinned version. Derived state, recreated by `mise install`. |
-| Harness declaration | Committed `.claude/settings.json` and `.omp/config.yml` entries that point a harness at `.workbench`. |
-| Task interface | The project tasks the process contract invokes: `setup`, `check`, and `fmt`, which each project implements. Workbench's own operations are `workbench` commands; the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks wrap them for humans and git hooks. |
-| Change file | One Knope change file in `.changeset/`, describing one change for release notes. Knope calls the collection a changeset; Workbench says "change file" for one file. |
+| Concept             | Identity and lifetime                                                                                                                                                                                                                                                               |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workbench package   | One published, immutable release of Workbench, identified by its version and tag `v<version>`: the CLI plus the plugin content, one archive per platform.                                                                                                                           |
+| Plugin content      | The process contract, skills, rules, templates, and site theme inside the package. Harness-neutral Markdown plus the manifests that let harnesses find it.                                                                                                                          |
+| Process contract    | The always-loaded agent instructions for the Workbench process. Ships in the package and changes with it.                                                                                                                                                                           |
+| Project contract    | A project's `AGENTS.md`: facts about that project only. Owned and edited by the project.                                                                                                                                                                                            |
+| Package pin         | The project's `github:markmals/workbench` version in `mise.toml`, with checksums in `mise.lock`. The single place a project names the Workbench version it uses.                                                                                                                    |
+| Package link        | `.workbench`: a gitignored, machine-local symlink from the project root to the installed package for the pinned version. Derived state, recreated by `mise install`.                                                                                                                |
+| Harness declaration | Committed `.claude/settings.json` and `.omp/config.yml` entries that point a harness at `.workbench`.                                                                                                                                                                               |
+| Task interface      | The project tasks the process contract invokes: `setup`, `check`, and `fmt`, which each project implements. Workbench's own operations are `workbench` commands; the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks wrap them for humans and git hooks. |
+| Change file         | One Knope change file in `.changeset/`, describing one change for release notes. Knope calls the collection a changeset; Workbench says "change file" for one file.                                                                                                                 |
 
 The ontology review is REVISE. Today the process and a project's copy of it are the same files. Nothing identifies which version of Workbench a project uses, so "update Workbench" has no referent. The missing concept is the package pin. The package link is derived from it and is never committed.
 
@@ -152,9 +152,9 @@ Other constraints:
 ### Remaining uncertainty
 
 - **Claude Code delivery.** Not yet observed in a real model session:
-    - a forced plugin output style delivering the contract;
-    - plugin skill listings arriving through it;
-    - whether the first session after trust needs `/reload-plugins`.
+  - a forced plugin output style delivering the contract;
+  - plugin skill listings arriving through it;
+  - whether the first session after trust needs `/reload-plugins`.
 - **Claude and project symlinks.** Whether Claude Code follows committed `.claude/skills` and `.claude/rules` symlinks into `.agents/` is unverified.
 - **Renovate lock updates.** Whether Renovate's `mise.lock` update succeeds for the `github:` pin, or needs the lock-regeneration workflow.
 - **Locked platforms without assets.** How `mise lock` treats platforms with no matching asset, such as Windows. Projects may need to narrow the platforms they lock.
@@ -226,27 +226,27 @@ Three committed lines of harness declaration replace per-harness wiring. Harness
 
 A Workbench release is identified by a semantic version and the Git tag `v<version>`. It is published as a GitHub release of `markmals/workbench`. The release carries one archive per supported target, named `workbench-<target>.tar.gz`, where `<target>` is `aarch64-apple-darwin`, `x86_64-apple-darwin`, `aarch64-unknown-linux-musl`, or `x86_64-unknown-linux-musl`. Each archive holds one top-level directory, `workbench-<target>/`, whose contents are the package root:
 
-| Path | Content |
-| --- | --- |
-| `workbench` | The CLI ([section 5](#5-the-workbench-cli)). |
-| `.claude-plugin/plugin.json` | Claude Code manifest: `name: "workbench"`, `version` equal to the release version, `description`, `repository`. |
-| `.claude-plugin/marketplace.json` | A marketplace named `workbench` listing one plugin, `workbench`, with source `"./"`. |
-| `rules/workbench.md` | The process contract (section 4), with frontmatter `alwaysApply: true`. |
-| `rules/code-quality.md`, `rules/commit-discipline.md`, `rules/enforcement-hierarchy.md`, `rules/verification.md` | Today's four rules, each given a one-sentence `description` frontmatter field. |
-| `output-styles/workbench.md` | The process contract for Claude Code: the same body as `rules/workbench.md`, with frontmatter `name`, `description`, `force-for-plugin: true`, and `keep-coding-instructions: true`. |
-| `skills/<name>/` | Today's twelve skills and their supporting files. |
-| `templates/` | Today's artifact templates. |
-| `site/` | The Hugo theme ([section 9](#9-the-documentation-site)). |
+| Path                                                                                                             | Content                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `workbench`                                                                                                      | The CLI ([section 5](#5-the-workbench-cli)).                                                                                                                                         |
+| `.claude-plugin/plugin.json`                                                                                     | Claude Code manifest: `name: "workbench"`, `version` equal to the release version, `description`, `repository`.                                                                      |
+| `.claude-plugin/marketplace.json`                                                                                | A marketplace named `workbench` listing one plugin, `workbench`, with source `"./"`.                                                                                                 |
+| `rules/workbench.md`                                                                                             | The process contract (section 4), with frontmatter `alwaysApply: true`.                                                                                                              |
+| `rules/code-quality.md`, `rules/commit-discipline.md`, `rules/enforcement-hierarchy.md`, `rules/verification.md` | Today's four rules, each given a one-sentence `description` frontmatter field.                                                                                                       |
+| `output-styles/workbench.md`                                                                                     | The process contract for Claude Code: the same body as `rules/workbench.md`, with frontmatter `name`, `description`, `force-for-plugin: true`, and `keep-coding-instructions: true`. |
+| `skills/<name>/`                                                                                                 | Today's twelve skills and their supporting files.                                                                                                                                    |
+| `templates/`                                                                                                     | Today's artifact templates.                                                                                                                                                          |
+| `site/`                                                                                                          | The Hugo theme ([section 9](#9-the-documentation-site)).                                                                                                                             |
 
 Every archive in a release carries identical content apart from the `workbench` binary. Each archive has a GitHub build-provenance attestation.
 
 **Versioning.**
 
 - **Major** for any change a project must act on:
-    - the record schema `validate` accepts;
-    - the task interface;
-    - the files a project must hold, or their layout;
-    - a removed or redefined CLI command, flag, exit status, or JSON field.
+  - the record schema `validate` accepts;
+  - the task interface;
+  - the files a project must hold, or their layout;
+  - a removed or redefined CLI command, flag, exit status, or JSON field.
 - **Minor** for added commands, skills, rules, templates, or contract guidance.
 - **Patch** for corrections.
 
@@ -296,14 +296,14 @@ extensions:
 
 ### 3. How each harness loads the package
 
-| Content | Claude Code | Oh My Pi | Pico |
-| --- | --- | --- | --- |
-| Process contract | `output-styles/workbench.md`, forced while the plugin is enabled | `rules/workbench.md`, `alwaysApply` in the system prompt | Plugin rules, once #61 supports them |
-| Workbench rules | Linked by path from the contract (`.workbench/rules/<name>.md`) | Listed by description; read on demand | Plugin rules, once #61 supports them |
-| Workbench skills | `workbench:<name>`, descriptions listed | Bare names, descriptions listed | Plugin skills, once #61 supports them |
-| Templates and skill resources | Read at `.workbench/...` | Read at `.workbench/...` | Read at `.workbench/...` |
-| Project `AGENTS.md` | Native, when no `CLAUDE.md` exists | Native | Native |
-| Project skills and rules in `.agents/` | Through committed `.claude/skills` and `.claude/rules` links | Native | Native |
+| Content                                | Claude Code                                                      | Oh My Pi                                                 | Pico                                  |
+| -------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------- |
+| Process contract                       | `output-styles/workbench.md`, forced while the plugin is enabled | `rules/workbench.md`, `alwaysApply` in the system prompt | Plugin rules, once #61 supports them  |
+| Workbench rules                        | Linked by path from the contract (`.workbench/rules/<name>.md`)  | Listed by description; read on demand                    | Plugin rules, once #61 supports them  |
+| Workbench skills                       | `workbench:<name>`, descriptions listed                          | Bare names, descriptions listed                          | Plugin skills, once #61 supports them |
+| Templates and skill resources          | Read at `.workbench/...`                                         | Read at `.workbench/...`                                 | Read at `.workbench/...`              |
+| Project `AGENTS.md`                    | Native, when no `CLAUDE.md` exists                               | Native                                                   | Native                                |
+| Project skills and rules in `.agents/` | Through committed `.claude/skills` and `.claude/rules` links     | Native                                                   | Native                                |
 
 - The package declares no hooks, tools, commands, MCP servers, or agents for any harness.
 - Pico needs no Pico-specific file. When #61 lands, it reads the same `.claude/settings.json` declaration.
@@ -366,23 +366,23 @@ The registry generates the Clap parser, `--help`, shell completions, `workbench 
 
 The grammar is `workbench <resource> <operation> [arguments] [options]`, in kebab-case. Collections are plural (`records`, `commits`, `change-files`). Singletons are singular (`project`, `workflow`, `context`). `beads` names the Beads database.
 
-| Command | Effect | Replaces |
-| --- | --- | --- |
-| `workbench cli search <query>` | Reads | — |
-| `workbench cli completions <shell>` | Reads | — |
-| `workbench schema [<command>]` | Reads | — |
-| `workbench docs search <query>` | Reads | — |
-| `workbench context show` | Reads | — |
-| `workbench workflow status [--no-sync]` | Reads; syncs Beads unless `--no-sync` | `tools/status.ts` and proposal 0006's Beads section |
-| `workbench records validate` | Reads | `tools/validate.ts` |
-| `workbench project validate` | Reads | — |
-| `workbench project init [--site github-pages\|cloudflare] [--dry-run]` | Creates files ([section 11](#11-adopting-workbench)) | The GitHub template and Adapting Your Harness |
-| `workbench commits check --message-file <path>` and `workbench commits check <base> <head>` | Reads | `tools/check-scoped-commit.ts` and `tools/check-pr-commits.ts` |
-| `workbench change-files create --type <type> --summary <text> [--package <name>] [--body <text\|@file\|->] [--dry-run]` | Creates one file ([section 8](#8-change-files-and-releases)) | Hand-written change files |
-| `workbench change-files check <base> <head>` | Reads | `tools/require-changeset.ts` |
-| `workbench beads sync [--dry-run]` | Syncs the Beads replica | Proposal 0006's `beads:sync` |
-| `workbench beads claim <id> [--dry-run]` | Claims an item and syncs | Proposal 0006's `beads:claim` |
-| `workbench beads close <id> --reason <text> [--dry-run]` | Closes an item as the claimant and syncs | Proposal 0006's `beads:close` |
+| Command                                                                                                                 | Effect                                                       | Replaces                                                       |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| `workbench cli search <query>`                                                                                          | Reads                                                        | —                                                              |
+| `workbench cli completions <shell>`                                                                                     | Reads                                                        | —                                                              |
+| `workbench schema [<command>]`                                                                                          | Reads                                                        | —                                                              |
+| `workbench docs search <query>`                                                                                         | Reads                                                        | —                                                              |
+| `workbench context show`                                                                                                | Reads                                                        | —                                                              |
+| `workbench workflow status [--no-sync]`                                                                                 | Reads; syncs Beads unless `--no-sync`                        | `tools/status.ts` and proposal 0006's Beads section            |
+| `workbench records validate`                                                                                            | Reads                                                        | `tools/validate.ts`                                            |
+| `workbench project validate`                                                                                            | Reads                                                        | —                                                              |
+| `workbench project init [--site github-pages\|cloudflare] [--dry-run]`                                                  | Creates files ([section 11](#11-adopting-workbench))         | The GitHub template and Adapting Your Harness                  |
+| `workbench commits check --message-file <path>` and `workbench commits check <base> <head>`                             | Reads                                                        | `tools/check-scoped-commit.ts` and `tools/check-pr-commits.ts` |
+| `workbench change-files create --type <type> --summary <text> [--package <name>] [--body <text\|@file\|->] [--dry-run]` | Creates one file ([section 8](#8-change-files-and-releases)) | Hand-written change files                                      |
+| `workbench change-files check <base> <head>`                                                                            | Reads                                                        | `tools/require-changeset.ts`                                   |
+| `workbench beads sync [--dry-run]`                                                                                      | Syncs the Beads replica                                      | Proposal 0006's `beads:sync`                                   |
+| `workbench beads claim <id> [--dry-run]`                                                                                | Claims an item and syncs                                     | Proposal 0006's `beads:claim`                                  |
+| `workbench beads close <id> --reason <text> [--dry-run]`                                                                | Closes an item as the claimant and syncs                     | Proposal 0006's `beads:close`                                  |
 
 The mise tasks wrap these commands for humans and hooks:
 
@@ -408,27 +408,27 @@ None of these mutates anything.
 - **Standard streams.** stdout carries only the result. Progress, warnings, and diagnostics go to stderr.
 - **Collections** return `items`, plus `hasMore` and `nextCursor` whenever the command bounds the result. No command truncates a collection silently.
 - **Receipts.** A modifying command returns a receipt with:
-    - its `status`;
-    - its target: the project root, plus the Beads remote for Beads commands;
-    - the identifiers it produced (file paths, item IDs);
-    - the fields that matter for the operation, such as a claim's `claimant` and `published`, or a close's `published`.
+  - its `status`;
+  - its target: the project root, plus the Beads remote for Beads commands;
+  - the identifiers it produced (file paths, item IDs);
+  - the fields that matter for the operation, such as a claim's `claimant` and `published`, or a close's `published`.
 
 #### Errors and exit statuses
 
 A failure writes `{"error": {"code", "message", "retryable", "details", "suggestions"}}` to stderr. A check that ran and found violations is a failure too, but its result, listing the violations, still goes to stdout.
 
-| Code | Exit | Retryable | Meaning |
-| --- | --- | --- | --- |
-| `CHECK_FAILED` | 1 | No | A check ran and found violations. |
-| `INVALID_ARGUMENT` | 2 | No | Input is missing or malformed. `details` lists the missing fields and accepted values. |
-| `NOT_FOUND` | 3 | No | A named record, item, commit, or file does not exist. |
-| `PRECONDITION_FAILED` | 3 | No | The project is not ready: not a Git repository, no pin, no `.workbench` link, Beads not initialized, or a Beads remote that is not the checkout's `origin` (or no `origin` to compare it with). `suggestions` names the fix. |
-| `DEPENDENCY_MISSING` | 3 | No | A required program (`git`, `gh`, `bd`) is absent. |
-| `UNAUTHENTICATED` | 3 | No | `gh` or Git credentials are missing or rejected. |
-| `CONFLICT` | 4 | No | Another claimant holds the item, so a claim or close was refused; a claim was lost; or a Beads sync stopped on a conflict for the agent to resolve. |
-| `TIMEOUT` | 5 | Yes | An operation exceeded its time limit. |
-| `UNAVAILABLE` | 5 | Yes | The remote or the network was unreachable. |
-| `INTERNAL` | 70 | No | A defect in `workbench` itself. |
+| Code                  | Exit | Retryable | Meaning                                                                                                                                                                                                                      |
+| --------------------- | ---- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CHECK_FAILED`        | 1    | No        | A check ran and found violations.                                                                                                                                                                                            |
+| `INVALID_ARGUMENT`    | 2    | No        | Input is missing or malformed. `details` lists the missing fields and accepted values.                                                                                                                                       |
+| `NOT_FOUND`           | 3    | No        | A named record, item, commit, or file does not exist.                                                                                                                                                                        |
+| `PRECONDITION_FAILED` | 3    | No        | The project is not ready: not a Git repository, no pin, no `.workbench` link, Beads not initialized, or a Beads remote that is not the checkout's `origin` (or no `origin` to compare it with). `suggestions` names the fix. |
+| `DEPENDENCY_MISSING`  | 3    | No        | A required program (`git`, `gh`, `bd`) is absent.                                                                                                                                                                            |
+| `UNAUTHENTICATED`     | 3    | No        | `gh` or Git credentials are missing or rejected.                                                                                                                                                                             |
+| `CONFLICT`            | 4    | No        | Another claimant holds the item, so a claim or close was refused; a claim was lost; or a Beads sync stopped on a conflict for the agent to resolve.                                                                          |
+| `TIMEOUT`             | 5    | Yes       | An operation exceeded its time limit.                                                                                                                                                                                        |
+| `UNAVAILABLE`         | 5    | Yes       | The remote or the network was unreachable.                                                                                                                                                                                   |
+| `INTERNAL`            | 70   | No        | A defect in `workbench` itself.                                                                                                                                                                                              |
 
 - **Exit status 0** means the operation completed.
 - **Partial completion is reported, not hidden.** A claim or close made locally whose sync failed exits 0, but its receipt says `published: false`, and stderr says why.
@@ -437,13 +437,13 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
 #### Preview, safety, and verification
 
 - **`--dry-run`** is available on every modifying command. A dry run validates input, resolves the target, and describes the changes without making them:
-    - for `project init`, the files it would create or add to;
-    - for `change-files create`, the file it would write;
-    - for `beads claim`, the item, its current claimant, and the claimant it would claim as;
-    - for `beads close`, the item, its current claimant, and the claimant it would close as;
-    - for `beads sync`, the remote and any unpublished local commits.
+  - for `project init`, the files it would create or add to;
+  - for `change-files create`, the file it would write;
+  - for `beads claim`, the item, its current claimant, and the claimant it would claim as;
+  - for `beads close`, the item, its current claimant, and the claimant it would close as;
+  - for `beads sync`, the remote and any unpublished local commits.
 
-    A dry run states what it cannot predict; a sync, for example, cannot predict merge conflicts.
+  A dry run states what it cannot predict; a sync, for example, cannot predict merge conflicts.
 
 - **No destructive operations.** `project init` never overwrites or deletes, so no command needs a confirmation flag.
 - **Verification.** Receipts return stable identifiers. `beads claim` reads the claimant back after syncing. After `project init`, `context show` and `project validate` read back the resulting setup.
@@ -479,20 +479,20 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
 `records validate`, `commits check`, `change-files check`, `workflow status`, and the `beads` commands detect the same conditions as today's tools and proposal 0006. Every case in `tools/*.test.ts` and 0006's tests for a retained behavior becomes a Rust test. Their output follows this section instead of today's formats. `tag-release.ts` and `project-version.ts` are removed; Knope tags releases and owns versions.
 
 - **Commit scopes.** `commits check` accepts three kinds of scope:
-    - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
-    - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
-    - the `<NNNN>-<slug>` scope of any existing proposal file.
+  - the built-in process scopes `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
+  - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
+  - the `<NNNN>-<slug>` scope of any existing proposal file.
 
-    A rejection lists every accepted scope.
+  A rejection lists every accepted scope.
 
 - **The collision rule in `project validate`.** A project skill directory `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release's skills and rules, so the check does not depend on `.workbench`.
 
 - **Beads.** The `beads` commands and the Beads part of `workflow status` keep what proposal 0006 established:
-    - **The claimant.** Claims and closes act as `BEADS_ACTOR`, or `<login user>@<short host name>` when it is unset. `bd close` refuses an item claimed by another actor, which is why closing has a command.
-    - **Only the project's own remote.** No sync, claim, or close runs when the replica's Dolt remote is not the same repository as the checkout's `origin`, or when there is no `origin`. Hosted URLs compare across SSH, HTTPS, `git+`, credentials, `.git`, and case; local paths compare exactly, resolving relative origins from the checkout.
-    - **The first publish.** When `bd sync` fails and the remote positively has no `refs/dolt/data`, the sync publishes with `bd dolt push`.
-    - **Conflicts.** Embedded storage aborts a halted merge, so a conflict's `details` name the conflicted tables Beads reports and the items that differ from the remote (`bd diff main origin/main`), within the sync's time limit.
-    - **Reads after the sync.** `workflow status` syncs before reading ready work, items in progress, and memories. When a read fails, the result says which, and keeps the sync's outcome.
+  - **The claimant.** Claims and closes act as `BEADS_ACTOR`, or `<login user>@<short host name>` when it is unset. `bd close` refuses an item claimed by another actor, which is why closing has a command.
+  - **Only the project's own remote.** No sync, claim, or close runs when the replica's Dolt remote is not the same repository as the checkout's `origin`, or when there is no `origin`. Hosted URLs compare across SSH, HTTPS, `git+`, credentials, `.git`, and case; local paths compare exactly, resolving relative origins from the checkout.
+  - **The first publish.** When `bd sync` fails and the remote positively has no `refs/dolt/data`, the sync publishes with `bd dolt push`.
+  - **Conflicts.** Embedded storage aborts a halted merge, so a conflict's `details` name the conflicted tables Beads reports and the items that differ from the remote (`bd diff main origin/main`), within the sync's time limit.
+  - **Reads after the sync.** `workflow status` syncs before reading ready work, items in progress, and memories. When a read fails, the result says which, and keeps the sync's outcome.
 
 #### Evaluating the CLI with agents
 
@@ -514,10 +514,10 @@ Each run records task completion, invalid commands, the number of commands, and 
 
 - Delete `.omp/tools/dynamic-workflows/` and its Vitest suites, the Bun pin, and the `@oh-my-pi/pi-coding-agent` dependency.
 - Rewrite the "Agent orchestration" section of `PROCESS.md` and the delegation paragraph of the contract without naming a tool:
-    - Work inline by default.
-    - Delegate independent slices that touch separate files, or a fresh-context review, using the harness's own delegation.
-    - Pass a delegate bounded ownership.
-    - Treat a failed delegate's missing result as missing, not as success.
+  - Work inline by default.
+  - Delegate independent slices that touch separate files, or a fresh-context review, using the harness's own delegation.
+  - Pass a delegate bounded ownership.
+  - Treat a failed delegate's missing result as missing, not as success.
 - Workflow orchestration now lives in OMP's native helpers and in Pico (#62). A comment on pico#62 records the last revision containing the tool, [`8988abd`](https://github.com/markmals/workbench/tree/8988abd700fad9164f4c597dff761425912d7d02/.omp/tools/dynamic-workflows), for reference.
 
 ### 8. Change files and releases
@@ -525,61 +525,61 @@ Each run records task completion, invalid commands, the number of commands, and 
 This section replaces the "Changeset" section of `PROCESS.md` for every Workbench project.
 
 - **Every pull request adds at least one change file** in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer of the diff. The only exception is a pull request with no user-visible change, which carries a `Release-Note: none` trailer instead.
-    - A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses `default: <major|minor|patch>`; a project's `knope.toml` may add types.
-    - The first heading is the summary. Text below it is the detail.
-    - Agents create change files with `workbench change-files create`, which validates the type and package against `knope.toml` and writes the file. They never run `knope document-change`, which prompts interactively.
+  - A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses `default: <major|minor|patch>`; a project's `knope.toml` may add types.
+  - The first heading is the summary. Text below it is the detail.
+  - Agents create change files with `workbench change-files create`, which validates the type and package against `knope.toml` and writes the file. They never run `knope document-change`, which prompts interactively.
 - **`.changeset/` holds only change files**, because Knope fails on any other Markdown file there. Guidance that lives in `.changeset/README.md` today moves to `PROCESS.md` and the guides.
 - **`workbench change-files check <base> <head>`** passes when either:
-    - the range adds a file under `.changeset/` with valid change-file frontmatter; or
-    - a commit in the range carries the Git trailer `Release-Note: none`. The key is case-insensitive and the value is exactly `none`, as `git interpret-trailers` parses it.
+  - the range adds a file under `.changeset/` with valid change-file frontmatter; or
+  - a commit in the range carries the Git trailer `Release-Note: none`. The key is case-insensitive and the value is exactly `none`, as `git interpret-trailers` parses it.
 
-    Otherwise it fails with `CHECK_FAILED`, naming both ways to satisfy it. CI runs it on every pull request except Knope's release pull request.
+  Otherwise it fails with `CHECK_FAILED`, naming both ways to satisfy it. CI runs it on every pull request except Knope's release pull request.
 
 - **A pull request with no user-visible change** carries `Release-Note: none` on one of its commits (`git commit --trailer "Release-Note: none"`) instead of a change file. The trailer replaces Changesets' `--empty` changeset: it can be checked offline, and it stays in history next to the change it describes.
 - **A project's `knope.toml` is project-owned.** It sets `[changes] ignore_conventional_commits = true`. Scoped Commits subjects are not Conventional Commits, and versions come from change files only.
 - **Releases follow Knope's release pull request recipe:**
-    - A workflow on every push to `main` runs Knope's prepare-release workflow. It keeps one release pull request open showing the next version, the changelog entry, and the version-file changes.
-    - Merging that pull request runs the release workflow. It builds the project's artifacts, then runs `knope release`, which tags `v<version>`, creates the GitHub release with the changelog entry as its notes, and uploads the artifacts before publishing.
-    - Merging the release pull request is the explicit release authorization the process requires.
+  - A workflow on every push to `main` runs Knope's prepare-release workflow. It keeps one release pull request open showing the next version, the changelog entry, and the version-file changes.
+  - Merging that pull request runs the release workflow. It builds the project's artifacts, then runs `knope release`, which tags `v<version>`, creates the GitHub release with the changelog entry as its notes, and uploads the artifacts before publishing.
+  - Merging the release pull request is the explicit release authorization the process requires.
 - **Workbench's own `knope.toml`:**
-    - `versioned_files = ["Cargo.toml", "Cargo.lock"]` and `changelog = "CHANGELOG.md"`.
-    - `assets` naming the four archives.
-    - `[github]` owner `markmals` and repo `workbench`.
-    - `[changes] ignore_conventional_commits = true`.
-    - GitHub-style release notes:
+  - `versioned_files = ["Cargo.toml", "Cargo.lock"]` and `changelog = "CHANGELOG.md"`.
+  - `assets` naming the four archives.
+  - `[github]` owner `markmals` and repo `workbench`.
+  - `[changes] ignore_conventional_commits = true`.
+  - GitHub-style release notes:
 
-        ```toml
-        [release_notes]
-        change_templates = [
-            "### $summary\n\n$details",
-            "* $summary by @$pr_author_login in #$pr_number",
-            "* $summary",
-        ]
-        ```
+    ```toml
+    [release_notes]
+    change_templates = [
+        "### $summary\n\n$details",
+        "* $summary by @$pr_author_login in #$pr_number",
+        "* $summary",
+    ]
+    ```
 - **Getting to the first release.** Workbench's `Cargo.toml` starts at version `2.0.0`, and this proposal's change file is `major`, so the first release is `3.0.0`. The four pending Changesets entries become Knope change files. `.changeset/config.json` and `.changeset/README.md` are removed.
 
 ### 9. The documentation site
 
 - **The theme ships in the package.** The package's `site/` directory is a Hugo theme. A project's `docs/hugo.toml` selects it with `themesDir = "../.workbench"` and `theme = "site"`, and mounts the record files where they live. Nothing is copied and no generated content is committed. A project's `docs/layouts/` and `docs/static/` override the theme.
 - **Pages.**
-    - The site publishes the same pages as today: home, `VISION.md`, `PROCESS.md`, the guides, and the proposal, policy, and decision records. Each directory README serves as its section's index.
-    - Record pages show the metadata today's header shows: `id`, `status`, `authors`, `pull-request`, `issues`, `supersedes`, and `established-by`.
-    - Proposals are presented as history, with superseded proposals grouped apart.
-    - `[NEEDS CLARIFICATION: …]` markers in proposal prose are highlighted.
+  - The site publishes the same pages as today: home, `VISION.md`, `PROCESS.md`, the guides, and the proposal, policy, and decision records. Each directory README serves as its section's index.
+  - Record pages show the metadata today's header shows: `id`, `status`, `authors`, `pull-request`, `issues`, `supersedes`, and `established-by`.
+  - Proposals are presented as history, with superseded proposals grouped apart.
+  - `[NEEDS CLARIFICATION: …]` markers in proposal prose are highlighted.
 - **Links.**
-    - A relative link to a published Markdown file resolves to its page, keeping any anchor.
-    - A relative link to an unpublished repository file resolves to that file on the repository named by `params.repository`.
-    - A relative link to a file that does not exist fails the build, naming the file that contains it. This keeps the site build as the dead-link check inside `mise run check`.
+  - A relative link to a published Markdown file resolves to its page, keeping any anchor.
+  - A relative link to an unpublished repository file resolves to that file on the repository named by `params.repository`.
+  - A relative link to a file that does not exist fails the build, naming the file that contains it. This keeps the site build as the dead-link check inside `mise run check`.
 - **Builds and tools.**
-    - Each build takes its base URL from the build command, so a preview can be served under any path, including GitHub Pages' `/pr-preview/pr-<N>/`.
-    - Pagefind indexes the built site, and the theme offers search over that index.
-    - A project pins `hugo` and `github:CloudCannon/pagefind`. The theme declares its minimum Hugo version and fails with that requirement when built with an older one.
-    - `docs:build` runs Hugo, then Pagefind. `docs:dev` serves the site with reload; search needs a build.
+  - Each build takes its base URL from the build command, so a preview can be served under any path, including GitHub Pages' `/pr-preview/pr-<N>/`.
+  - Pagefind indexes the built site, and the theme offers search over that index.
+  - A project pins `hugo` and `github:CloudCannon/pagefind`. The theme declares its minimum Hugo version and fails with that requirement when built with an older one.
+  - `docs:build` runs Hugo, then Pagefind. `docs:dev` serves the site with reload; search needs a build.
 - **Hosting.** A project publishes its site to GitHub Pages or to Cloudflare; each suits different projects, so Workbench supports both.
-    - On either host, `main` publishes the site. Each pull request gets a preview at its own URL, linked from the pull request and removed when the pull request closes.
-    - `workbench project init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows ([section 11](#11-adopting-workbench)).
-    - Cloudflare publishing uses Cloudflare's GitHub Action, which runs Wrangler on the CI runner only; the project still needs no Node. It needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets.
-    - Workbench's own site stays on GitHub Pages.
+  - On either host, `main` publishes the site. Each pull request gets a preview at its own URL, linked from the pull request and removed when the pull request closes.
+  - `workbench project init --site github-pages` or `--site cloudflare` writes that host's publishing and preview workflows ([section 11](#11-adopting-workbench)).
+  - Cloudflare publishing uses Cloudflare's GitHub Action, which runs Wrangler on the CI runner only; the project still needs no Node. It needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets.
+  - Workbench's own site stays on GitHub Pages.
 - **Look and feel** are left to the owner on the preview, per [proposal 0004](0004-make-room-for-ui-polish.md). Matching the VitePress theme is not a requirement.
 
 ### 10. Formatting
@@ -592,22 +592,22 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 `workbench project init` adds Workbench to a Git repository: a new project, a holotype template, or an existing project. It writes only what Workbench owns. Formatters, tests, builds, releases, and environment schemas belong to the project or its holotype template. It runs where `mise.toml` already pins `github:markmals/workbench` (`mise use github:markmals/workbench@<version>` writes that pin). It creates each missing item and never overwrites an existing file. For structured files it adds only missing keys or entries:
 
 - **`mise.toml`:**
-    - the `postinstall` link hook;
-    - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
-    - the tasks `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` when absent.
+  - the `postinstall` link hook;
+  - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
+  - the tasks `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` when absent.
 - **Ignore and harness files:**
-    - the `.gitignore` entry;
-    - the `.claude/settings.json` keys;
-    - the `.omp/config.yml` extension entry, appended to an existing list;
-    - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
+  - the `.gitignore` entry;
+  - the `.claude/settings.json` keys;
+  - the `.omp/config.yml` extension entry, appended to an existing list;
+  - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
 - **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench commits check --message-file`, and Beads gets proposal 0006's sync steps (`pre-push`, `post-merge`, and `post-rewrite` after a rebase), which call `workbench beads sync`. It runs no check before a push.
 - **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `workbench commits check` and `workbench change-files check` on every pull request except Knope's release pull request.
 - **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, the receipt says so.
 - **Records:**
-    - `VISION.md` from the template when absent;
-    - `proposals/`, `policies/`, `decisions/`, and `guides/` with their READMEs when absent;
-    - `.agents/commit-scopes` when absent;
-    - `docs/hugo.toml` when absent.
+  - `VISION.md` from the template when absent;
+  - `proposals/`, `policies/`, `decisions/`, and `guides/` with their READMEs when absent;
+  - `.agents/commit-scopes` when absent;
+  - `docs/hugo.toml` when absent.
 - **With `--site github-pages` or `--site cloudflare`:** pins for `hugo` and `github:CloudCannon/pagefind`, the `docs:build` and `docs:dev` tasks, and that host's publishing and preview workflows, each when absent.
 
 Its receipt lists:
@@ -645,31 +645,31 @@ The Workbench repository stops being a GitHub template repository; the owner cha
 ### 12. The Workbench repository
 
 - **Layout.**
-    - The Rust crate sits at the root: `Cargo.toml`, `Cargo.lock`, `src/`, and `tests/`, with the toolchain pinned through mise.
-    - Package content lives under `plugin/`: `.claude-plugin/`, `rules/`, `output-styles/`, `skills/`, `templates/`, and `site/`.
-    - A release archive is the binary plus the contents of `plugin/`.
+  - The Rust crate sits at the root: `Cargo.toml`, `Cargo.lock`, `src/`, and `tests/`, with the toolchain pinned through mise.
+  - Package content lives under `plugin/`: `.claude-plugin/`, `rules/`, `output-styles/`, `skills/`, `templates/`, and `site/`.
+  - A release archive is the binary plus the contents of `plugin/`.
 - **Dogfooding.**
-    - `mise run setup` links `.workbench` to `plugin` and builds the CLI.
-    - Workbench's `mise.toml` puts the build's output directory on `PATH`. In mise contexts, `workbench` therefore resolves to the working tree's build here and to the pinned release in a consumer.
-    - Its `.claude/settings.json` and `.omp/config.yml` match a consumer's.
-    - Its `hk.pkl` matches what `project init` writes, because it calls `workbench` the same way.
+  - `mise run setup` links `.workbench` to `plugin` and builds the CLI.
+  - Workbench's `mise.toml` puts the build's output directory on `PATH`. In mise contexts, `workbench` therefore resolves to the working tree's build here and to the pinned release in a consumer.
+  - Its `.claude/settings.json` and `.omp/config.yml` match a consumer's.
+  - Its `hk.pkl` matches what `project init` writes, because it calls `workbench` the same way.
 - **Removed:**
-    - the npm and TypeScript toolchain: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `tools/`, `.oxfmtrc.jsonc`, `.oxlintrc.jsonc`;
-    - `.omp/`;
-    - the VitePress site: `docs/.vitepress/` and the Vue home page;
-    - Changesets: `.changeset/config.json` and `.changeset/README.md`;
-    - the process files under `.agents/`, which move to `plugin/`.
+  - the npm and TypeScript toolchain: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `tools/`, `.oxfmtrc.jsonc`, `.oxlintrc.jsonc`;
+  - `.omp/`;
+  - the VitePress site: `docs/.vitepress/` and the Vue home page;
+  - Changesets: `.changeset/config.json` and `.changeset/README.md`;
+  - the process files under `.agents/`, which move to `plugin/`.
 - **Kept.** `.agents/commit-scopes` keeps Workbench's repository-only scopes.
 - **`mise.toml`** drops `node`, `pnpm`, `bun`, `fnox`, and `1password`, and its `[secrets.fnox]` block; `fnox.toml` is deleted. It also drops the `DOLT_REMOTE_INFO_BRANCH` `[env]` entry, which the CLI makes redundant. It adds Rust, `hugo`, `github:CloudCannon/pagefind`, `knope`, and `dprint`. It keeps `hk`, `gh`, `actionlint`, `worktrunk`, and Beads. Workbench needs no environment variables or secrets, so it has no `.env.schema`.
 - **`mise run check`** runs the Rust tests, `hk check --all`, `validate`, and `docs:build`.
 - **Workflows:** CI (check, commit subjects, change files), docs publishing, PR previews, prepare-release, and release.
 - **Documents updated with the change:**
-    - `AGENTS.md`, `PROCESS.md`, and `README.md`;
-    - the guides that name paths, tools, or Changesets;
-    - the skills and templates, for paths and skill names;
-    - `.github/pull_request_template.md`.
+  - `AGENTS.md`, `PROCESS.md`, and `README.md`;
+  - the guides that name paths, tools, or Changesets;
+  - the skills and templates, for paths and skill names;
+  - `.github/pull_request_template.md`.
 
-    `VISION.md` is revised at completion.
+  `VISION.md` is revised at completion.
 
 ## Acceptance criteria
 
@@ -692,14 +692,14 @@ This change touches many independent surfaces, so its outcomes are listed for re
 This breaks every existing Workbench project. Nothing changes in a project until that project adopts the package. Each adoption is its own change, made by following the adoption guide.
 
 - **Records** keep the format of [proposal 0005](0005-current-specifications.md).
-    - Record validation detects what it detects today. Project validation, with the collision rule, is new.
-    - `change-files check` replaces the changeset check.
-    - The `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` task names are unchanged.
+  - Record validation detects what it detects today. Project validation, with the collision rule, is new.
+  - `change-files check` replaces the changeset check.
+  - The `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` task names are unchanged.
 - **CLI output.** The `workbench` commands output JSON by default, with new result shapes and structured errors. Anything that parsed the old tools' text output or `--json` shape must change.
 - **Changesets to Knope.**
-    - Pending Changesets entries become change files.
-    - Existing `CHANGELOG.md` history stays as written, and new entries use Knope's format.
-    - Release workflows are replaced. Projects that publish through another pipeline rewire it by hand, such as the cli starter's cargo-dist release and Pitlane's packages.
+  - Pending Changesets entries become change files.
+  - Existing `CHANGELOG.md` history stays as written, and new entries use Knope's format.
+  - Release workflows are replaced. Projects that publish through another pipeline rewire it by hand, such as the cli starter's cargo-dist release and Pitlane's packages.
 - **The workflow tool.** Projects that still carry a copy (Trove, Pitlane, Hive, and Bento) lose it on migration. OMP's native helpers replace it there.
 - **Pico.** Until #61 supports declared plugins and their rules, Pico sessions in an adopted project load its `AGENTS.md` and `.agents/` content but not the package. Today's vendored copies do reach Pico. Pico is not the owner's daily harness yet.
 - **OMP users with user-level `extensions:`** must repeat those entries in the project list, because a project list replaces the user list.
@@ -710,9 +710,9 @@ This breaks every existing Workbench project. Nothing changes in a project until
 ## Implications on adoption
 
 - **Requirements, at the versions this proposal tested** (the implementation sets `min_version` and the documented floors from what it verifies):
-    - mise 2026.11.8, `git`, and `gh`;
-    - Claude Code 2.1.325 or OMP 18.20.2;
-    - for the site, Hugo 0.170.0 and Pagefind 1.6.0.
+  - mise 2026.11.8, `git`, and `gh`;
+  - Claude Code 2.1.325 or OMP 18.20.2;
+  - for the site, Hugo 0.170.0 and Pagefind 1.6.0.
 - **Adoption follows the guide in [section 11](#11-adopting-workbench).** A new project is one `mise use`, one `mise install`, and `workbench project init`. An existing project also moves its additions out of shared files and deletes its vendored copies.
 - **Updates** arrive through the pin, from Renovate's mise manager or by hand. Regenerate `mise.lock` where Renovate's lock update fails.
 - **Reversal.** Revert the adoption commits; the vendored files return from history. Pinning an older release reverts only package changes.
@@ -721,9 +721,9 @@ This breaks every existing Workbench project. Nothing changes in a project until
 
 - The Rust `workbench` CLI described in [section 5](#5-the-workbench-cli): its command registry, discovery and documentation commands, output and error contract, Rust tests ported from `tools/*.test.ts` and proposal 0006, and the agent evaluation.
 - The package layout under `plugin/`:
-    - the process contract extracted from `AGENTS.md`, plus its output-style copy and their equality test;
-    - rule frontmatter, which resolves workbench-0ky;
-    - updated skill and template paths.
+  - the process contract extracted from `AGENTS.md`, plus its output-style copy and their equality test;
+  - rule frontmatter, which resolves workbench-0ky;
+  - updated skill and template paths.
 - The release pipeline: Knope configuration, the per-target builds, attestations, and the prepare-release and release workflows. Publishing `3.0.0` requires the owner's explicit authorization.
 - The Hugo theme, Workbench's site on it, and PR previews.
 - dprint and the revised `hk.pkl`.
@@ -748,28 +748,28 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **Repository shape:** a CLI, a harness plugin, and a documentation site.
 - **Artifact:** a prerelease of the package, `3.0.0-rc.<n>`, published by a manually dispatched workflow from this branch, plus this pull request's documentation preview. Exercising the package means installing it into a real project and opening real sessions, so the prerelease is the cheapest realistic artifact.
 - **Access:**
-    - The prerelease is a public GitHub prerelease, because the repository is public. Publishing it requires the owner's explicit confirmation.
-    - The site preview publishes at `https://markmals.github.io/workbench/pr-preview/pr-10/`, as this repository already does.
+  - The prerelease is a public GitHub prerelease, because the repository is public. Publishing it requires the owner's explicit confirmation.
+  - The site preview publishes at `https://markmals.github.io/workbench/pr-preview/pr-10/`, as this repository already does.
 - **Exercise:**
-    1. In a disposable fixture repository, pin the prerelease and run `mise install`.
-    2. Open an OMP session and a Claude Code session and find the contract and the skills.
-    3. Run `mise run status` and `mise run validate`.
-    4. Bump the pin to the next release candidate and see the next session load it.
-    5. Run `workbench project init --dry-run`, then `workbench project init`, in an empty repository, then `mise run check`.
-    6. Starting from `workbench --help`, find and run `beads claim` and `change-files create` using only `cli search` and `schema`.
-    7. Browse the site preview: record headers, proposal history, and search. A deliberately dead link fails CI.
+  1. In a disposable fixture repository, pin the prerelease and run `mise install`.
+  2. Open an OMP session and a Claude Code session and find the contract and the skills.
+  3. Run `mise run status` and `mise run validate`.
+  4. Bump the pin to the next release candidate and see the next session load it.
+  5. Run `workbench project init --dry-run`, then `workbench project init`, in an empty repository, then `mise run check`.
+  6. Starting from `workbench --help`, find and run `beads claim` and `change-files create` using only `cli search` and `schema`.
+  7. Browse the site preview: record headers, proposal history, and search. A deliberately dead link fails CI.
 - **Cleanup:** delete the fixtures. After acceptance, delete the prerelease and its tag, with the owner's confirmation.
 
 ## Policies and decisions checked
 
 - **Policies and decisions.** None: `policies/` and `decisions/` hold only their READMEs.
 - **[VISION.md](../VISION.md):**
-    - Its minimum viable product is "a repository you can clone". This proposal makes it a versioned package plus `workbench project init`.
-    - Its non-goal says infrastructure "ships harness-neutral in `.agents/`". The infrastructure becomes harness-neutral content in the package, with small committed harness declarations.
-    - Both statements are revised at completion.
-    - The vision's principles hold:
-        - Enforcement stays mechanical at commit time and in CI.
-        - The package content assumes no language, framework, or platform.
+  - Its minimum viable product is "a repository you can clone". This proposal makes it a versioned package plus `workbench project init`.
+  - Its non-goal says infrastructure "ships harness-neutral in `.agents/`". The infrastructure becomes harness-neutral content in the package, with small committed harness declarations.
+  - Both statements are revised at completion.
+  - The vision's principles hold:
+    - Enforcement stays mechanical at commit time and in CI.
+    - The package content assumes no language, framework, or platform.
 - **[Proposal 0001](0001-workbench-2.md)** established the template-repository distribution and the Workbench 2 tooling. This proposal replaces both and leaves that record as history.
 - **[Proposal 0004](0004-make-room-for-ui-polish.md)** leaves look and feel to the running product. The site's appearance follows that.
 - **[Proposal 0005](0005-current-specifications.md)** defined the current-record model and the record and status contract in `guides/record-validation.md`, both preserved. Its "changesets and changelogs" role passes to change files and Knope's changelog.
@@ -789,10 +789,10 @@ This breaks every existing Workbench project. Nothing changes in a project until
 
 - **An npm package in `node_modules`.** Tested working in both harnesses, with versions pinned by the lockfile and updated by Renovate. It requires `package.json` and Node in every project. That requirement is what this proposal removes.
 - **The harnesses' own marketplaces.** That means a Claude Code GitHub marketplace with `claude plugin install --scope project`, and `omp plugin install --scope project`.
-    - Claude Code keeps one marketplace checkout per user, so pins float across projects.
-    - Each clone needs an install step per harness.
-    - OMP ignores Claude's marketplace declarations, and its project installs record absolute cache paths.
-    - CI never sees the version a session uses.
+  - Claude Code keeps one marketplace checkout per user, so pins float across projects.
+  - Each clone needs an install step per harness.
+  - OMP ignores Claude's marketplace declarations, and its project installs record absolute cache paths.
+  - CI never sees the version a session uses.
 - **A Git submodule at `.workbench/`.** It pins per project without a runtime. The CLI would still need a second pin or a runtime, and submodules add clone and update friction.
 - **TypeScript compiled with `bun build --compile`.** It removes Node from projects but keeps TypeScript in Workbench. The owner chose Rust.
 - **cargo-dist for builds and releases.** It and Knope both create the GitHub release, and Knope owns the notes the owner asked for. A plain build per target with attestations is simpler.
