@@ -1,5 +1,7 @@
-import { spawnSync } from "node:child_process";
 import { hostname, userInfo } from "node:os";
+
+import { bd, bdError, parseJson, type CommandRun } from "./bd.ts";
+import { foreignRemote, remoteLacksBeadsHistory } from "./beads-remote.ts";
 
 // Beads across machines: the one sync every sync point runs, and the claim that checks it
 // survived. `mise run beads:sync`, `mise run beads:claim -- <id>`, and `mise run status`
@@ -26,63 +28,6 @@ export interface ClaimResult {
 /** How long one sync may take before its outcome is `failed`. */
 export const SYNC_TIME_LIMIT_MS = 20_000;
 
-interface CommandRun {
-    status: number | null;
-    stdout: string;
-    stderr: string;
-    missing: boolean;
-    timedOut: boolean;
-}
-
-export function runCommand(
-    command: string,
-    arguments_: string[],
-    root: string,
-    { timeoutMs, env }: { timeoutMs?: number; env?: NodeJS.ProcessEnv } = {},
-): CommandRun {
-    let result = spawnSync(command, arguments_, {
-        cwd: root,
-        encoding: "utf8",
-        env: env ?? process.env,
-        stdio: ["ignore", "pipe", "pipe"],
-        timeout: timeoutMs,
-    });
-    let code = (result.error as NodeJS.ErrnoException | undefined)?.code;
-    return {
-        status: result.status,
-        stdout: result.stdout ?? "",
-        stderr: result.stderr ?? "",
-        missing: code === "ENOENT",
-        timedOut: code === "ETIMEDOUT",
-    };
-}
-
-// bd prints machine-readable output with --json, but an older or failing bd may not.
-export function parseJson(text: string): unknown {
-    try {
-        return JSON.parse(text);
-    } catch {
-        return undefined;
-    }
-}
-
-/** The most specific reason bd gave for a failed command. */
-export function bdError(run: CommandRun, command: string): string {
-    let output = parseJson(run.stdout) as
-        | { failed?: { error?: string }[]; message?: string; error?: string }
-        | undefined;
-    let reason = output?.failed?.[0]?.error ?? output?.message ?? output?.error;
-    if (reason) return reason;
-    let errorLines = run.stderr.split("\n").filter(line => line.startsWith("Error"));
-    if (errorLines.length > 0) return errorLines.join(" ");
-    return run.stderr.trim() || `bd ${command} exited with status ${run.status}`;
-}
-
-function bd(arguments_: string[], root: string, deadline?: number, env?: NodeJS.ProcessEnv) {
-    let timeoutMs = deadline === undefined ? undefined : Math.max(1, deadline - Date.now());
-    return runCommand("bd", arguments_, root, { timeoutMs, env });
-}
-
 function timedOut(timeoutMs: number): SyncResult {
     return {
         outcome: "failed",
@@ -92,11 +37,14 @@ function timedOut(timeoutMs: number): SyncResult {
 
 /**
  * Runs one sync with the project's Beads remote: `bd sync`, or `bd dolt push` when the
- * remote has no Beads history yet, so the project's first sync publishes it. Never throws;
- * every way the sync can end is one of the outcomes.
+ * remote has no Beads history yet, so the project's first sync publishes it. A replica whose
+ * remote is not the checkout's own `origin` is never synced. Never throws; every way the
+ * sync can end is one of the outcomes.
  */
 export function syncBeads(root: string, timeoutMs = SYNC_TIME_LIMIT_MS): SyncResult {
     let deadline = Date.now() + timeoutMs;
+    let foreign = foreignRemote(root, deadline);
+    if (foreign) return { outcome: "failed", detail: foreign };
     let sync = bd(["sync", "--json"], root, deadline);
     if (sync.timedOut) return timedOut(timeoutMs);
     if (sync.status === 0)
@@ -143,27 +91,6 @@ function describeDiffEntry({ IssueID, OldValue, NewValue }: DiffEntry): string {
     let title = NewValue?.title ?? OldValue?.title;
     return title ? `${IssueID} (${title})` : IssueID;
 }
-
-/** True only when the remote is reachable and positively has no `refs/dolt/data`. */
-function remoteLacksBeadsHistory(root: string, deadline: number): boolean {
-    let remotes = parseJson(bd(["dolt", "remote", "list", "--json"], root, deadline).stdout);
-    if (!Array.isArray(remotes)) return false;
-    let remote = (remotes as { name?: string; url?: string }[]).find(
-        ({ name }) => name === "origin",
-    );
-    if (!remote?.url) return false;
-    let timeoutMs = Math.max(1, deadline - Date.now());
-    let listing = runCommand(
-        "git",
-        ["ls-remote", remote.url.replace(/^git\+/, ""), "refs/dolt/data"],
-        root,
-        {
-            timeoutMs,
-        },
-    );
-    return listing.status === 0 && listing.stdout.trim() === "";
-}
-
 /** The claimant this machine claims as: `BEADS_ACTOR`, or `<login user>@<short host name>`. */
 export function claimant(): string {
     return process.env.BEADS_ACTOR || `${userInfo().username}@${hostname().split(".")[0]}`;

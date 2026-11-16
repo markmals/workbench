@@ -64,6 +64,7 @@ The rest of the report is this machine's state. Continue, say that Beads may be 
 - **Unreachable remote or timeout**: the network, or GitHub, is down or slow. Nothing to repair.
 - **Authentication**: Beads uses Git's credentials for `origin`. If `git fetch origin` also fails, fix the credentials; that is the human's machine setup.
 - **Push retries exhausted**: another machine kept winning the push race. Run `mise run beads:sync` again.
+- **The Beads remote is not this project's `origin`**: `.beads/config.yaml` points at another repository, usually because the project was created from the Workbench template and still carries Workbench's tracker. The guard refused before anything was pulled or pushed. Tell the human; replacing the tracker, as Workbench's getting-started guide describes, deletes `.beads/` and is their decision.
 
 ## `unavailable` after a sync: a replica that cannot be read
 

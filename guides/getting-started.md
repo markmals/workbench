@@ -29,6 +29,14 @@ From the repository root, provision the pinned tools. `mise.toml` pins them and 
 mise install
 ```
 
+If you created this repository from the Workbench template, replace Workbench's work tracker before the first setup. `.beads/` holds Workbench's own tracker, pointed at Workbench's repository, and Beads refuses to sync a project whose tracker points at another repository. Delete it, and in the `setup` task in `mise.toml` change `--prefix workbench` to a short name for your project, which Beads puts in every item's ID:
+
+```sh
+git rm -r -q .beads
+```
+
+Setup then creates your project's tracker, pointed at your repository; commit the `.beads/` files it writes.
+
 Then bootstrap the repository. This installs the npm dependencies with the pinned pnpm, restores this machine's copy of the Beads work tracker from the project's repository (or creates the tracker in a project that has none yet), and installs every git hook — including the `commit-msg` hook that holds commits to [Scoped Commits](https://scopedcommits.com/). It is idempotent; run it again whenever the tooling changes, and once on every machine you work from:
 
 ```sh
@@ -65,8 +73,8 @@ $ node tools/validate.ts
 Validation passed: 0 violations
 
 $ node --test 'tools/**/*.test.ts'
-ℹ tests 162
-ℹ pass 162
+ℹ tests 164
+ℹ pass 164
 ℹ fail 0
 
 $ vitest run --dir .omp/tools

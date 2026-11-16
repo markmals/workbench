@@ -129,6 +129,56 @@ test("a first publish that fails reports failed with its reason", t => {
     assert.match(result.detail, /push rejected by the remote/);
 });
 
+/** Makes the project directory a Git checkout whose `origin` is `url`. */
+function setOrigin(root: string, url: string): void {
+    execFileSync("git", ["init", "-q", root], { env: cleanEnv });
+    execFileSync("git", ["-C", root, "remote", "add", "origin", url], { env: cleanEnv });
+}
+
+test("a replica whose Beads remote is another repository fails without pulling or pushing", t => {
+    let { root, calls } = project(t, {
+        "dolt remote list": remotes("git+https://github.com/markmals/workbench.git"),
+        sync: SYNCED,
+        "dolt push": { stdout: "Push complete.\n" },
+    });
+    setOrigin(root, "https://github.com/someone/new-project.git");
+
+    let result = syncBeads(root);
+
+    assert.equal(result.outcome, "failed");
+    assert.match(result.detail, /markmals\/workbench/);
+    assert.match(result.detail, /someone\/new-project/);
+    assert.deepEqual(
+        calls().filter(call => call.startsWith("sync") || call.startsWith("dolt push")),
+        [],
+    );
+});
+
+test("the same repository written another way is this project's own remote", t => {
+    let pairs = [
+        ["git@github.com:markmals/Workbench.git", "git+https://github.com/markmals/workbench.git"],
+        [
+            "ssh://git@github.com:22/markmals/workbench",
+            "git+https://github.com/markmals/workbench.git/",
+        ],
+        [
+            "https://token@github.com/markmals/workbench.git",
+            "git+https://github.com/markmals/workbench",
+        ],
+        ["/srv/git/project.git", "git+file:///srv/git/project.git"],
+    ];
+    let { root, bin } = project(t, {});
+    setOrigin(root, "unset");
+    for (let [origin, beadsRemote] of pairs) {
+        installFakeBd(bin, { "dolt remote list": remotes(beadsRemote!), sync: SYNCED });
+        execFileSync("git", ["-C", root, "remote", "set-url", "origin", origin!], {
+            env: cleanEnv,
+        });
+
+        assert.equal(syncBeads(root).outcome, "synced", `${origin} and ${beadsRemote}`);
+    }
+});
+
 test("a conflict Beads cannot settle names the tables and the items that differ from the remote", t => {
     let { root } = project(t, {
         sync: { exit: 2, json: { status: "conflict", conflicts: ["issues"], pushed: false } },

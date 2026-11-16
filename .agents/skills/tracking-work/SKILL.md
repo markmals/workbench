@@ -101,7 +101,7 @@ A claim made before claimants named machines holds a Git user name, such as `Mar
 `mise run status`, `mise run beads:sync`, and `mise run beads:claim` report one of these. `mise run beads:sync` exits zero only for `synced`.
 
 - **`synced`**: nothing to do.
-- **`failed`**: continue, and say that Beads may be stale. The reason says why; a later sync point retries.
+- **`failed`**: continue, and say that Beads may be stale. The reason says why; a later sync point retries. When the reason says the Beads remote is not this project's `origin`, nothing was pulled or pushed and no later sync will be: stop and tell the human, as [Recovering a Beads sync](recovering-a-sync.md#failed) describes.
 - **`conflict`**: Beads halted on a conflict it cannot settle, and nothing was pushed. Resolve it with your best judgement:
     1. Export a backup outside the repository: `bd export --all -o <path>`.
     2. Find the items. With embedded storage, which Workbench uses, the halted merge is aborted, so `bd conflicts list` shows nothing: compare `bd diff main origin/main` with `bd show <id>`. When `bd conflicts list` does show live conflicts, `bd conflicts show` presents them field by field.

@@ -16,7 +16,7 @@ The fix is not more review. It is making the agent commit to what it intends to 
 
 ## Quick start
 
-1. Click **Use this template** on GitHub, then clone your repository.
+1. Click **Use this template** on GitHub, then clone your repository. Before the first `mise run setup`, replace Workbench's work tracker with your own, as [Getting Started](guides/getting-started.md#install-and-verify) describes.
 2. If you use [Oh My Pi](https://omp.sh), Workbench is already wired. Otherwise, ask your agent to adopt it, pointing it at [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). That wires Workbench into whichever harness you use — a one-time change you commit and forget.
 3. Write your project's vision with your agent, from [`.agents/templates/VISION.md`](.agents/templates/VISION.md).
 4. Start your first feature. Say what you want built. Your agent branches, opens a draft pull request, and writes a proposal before it writes any code.
