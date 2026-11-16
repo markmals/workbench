@@ -13,6 +13,7 @@ const DEFAULT_UNIT: &str = "    ";
 pub fn add_member(source: &str, path: &[&str], key: &str, value: &Value) -> Result<String, String> {
     let bytes = source.as_bytes();
     let mut object = parse_object(bytes, skip_whitespace(bytes, 0))?;
+    reject_duplicate_keys(&object)?;
     for name in path {
         let member = object
             .members
@@ -20,6 +21,7 @@ pub fn add_member(source: &str, path: &[&str], key: &str, value: &Value) -> Resu
             .find(|member| member.key == *name)
             .ok_or_else(|| format!("no `{name}` member"))?;
         object = parse_object(bytes, member.value_start)?;
+        reject_duplicate_keys(&object)?;
     }
 
     let base = line_indent(source, object.open);
@@ -75,6 +77,20 @@ struct Member {
     key_start: usize,
     value_start: usize,
     value_end: usize,
+}
+
+/// JSON readers disagree on which of two same-named members wins, so a member added to one of
+/// them may be the one that is ignored.
+fn reject_duplicate_keys(object: &Object) -> Result<(), String> {
+    for (index, member) in object.members.iter().enumerate() {
+        if object.members[..index]
+            .iter()
+            .any(|earlier| earlier.key == member.key)
+        {
+            return Err(format!("it has the key `{}` more than once", member.key));
+        }
+    }
+    Ok(())
 }
 
 fn parse_object(bytes: &[u8], open: usize) -> Result<Object, String> {

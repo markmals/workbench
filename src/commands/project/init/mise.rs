@@ -105,13 +105,21 @@ fn add_postinstall(document: &mut DocumentMut, additions: &mut Additions) {
             hooks.insert("postinstall", value(POSTINSTALL));
             additions.added.push("hooks.postinstall".into());
         }
-        Some(existing) if !runs(existing).iter().any(|run| run.contains(".workbench")) => {
+        Some(existing) if !runs(existing).iter().any(|run| links_package(run)) => {
             additions.conflicts.push(format!(
                 "`hooks.postinstall` does not link `.workbench`; add `{POSTINSTALL}` to it"
             ));
         }
         Some(_) => {}
     }
+}
+
+/// Whether a hook command links `.workbench` to the installed package, as `POSTINSTALL` does,
+/// rather than merely mentioning it.
+fn links_package(run: &str) -> bool {
+    run.contains("ln ")
+        && run.contains("mise where github:markmals/workbench")
+        && run.contains(".workbench")
 }
 
 fn add_tools<'a>(

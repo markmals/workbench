@@ -26,6 +26,17 @@ pub fn extensions(source: &str) -> Option<Vec<String>> {
     )
 }
 
+/// Whether `with_extension` can add to the file: it has no `extensions:` key, or the key holds a
+/// block list or a flow list. A single value on the key's line is neither.
+pub fn extendable(source: &str) -> bool {
+    let lines: Vec<&str> = source.lines().collect();
+    let Some(key_line) = key_line(&lines) else {
+        return true;
+    };
+    let value = without_comment(&lines[key_line][KEY.len()..]).trim();
+    value.is_empty() || flow_list(value).is_some()
+}
+
 /// `source` with `entry` appended to its top-level `extensions:` list, adding the key when the
 /// file has none. Every other line is kept as it was.
 pub fn with_extension(source: &str, entry: &str) -> String {

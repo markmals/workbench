@@ -12,5 +12,7 @@ mod init_consumer;
 mod init_files;
 #[path = "project/init_site.rs"]
 mod init_site;
+#[path = "project/init_unmergeable.rs"]
+mod init_unmergeable;
 #[path = "project/validate.rs"]
 mod validate;

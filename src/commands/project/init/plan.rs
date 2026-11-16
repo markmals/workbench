@@ -86,7 +86,7 @@ pub struct Project<'a> {
 
 pub fn plan(project: Project) -> Plan {
     let mut plan = Plan::default();
-    plan_mise(&mut plan, project.mise, project.site);
+    plan_mise(&mut plan, project.root, project.mise, project.site);
     plan_gitignore(&mut plan, project.root);
     plan_claude_settings(&mut plan, project.root);
     plan_omp_config(&mut plan, project.root);
@@ -95,10 +95,21 @@ pub fn plan(project: Project) -> Plan {
     plan
 }
 
-fn plan_mise(plan: &mut Plan, mut document: DocumentMut, site: Option<Site>) {
+fn plan_mise(plan: &mut Plan, root: &Path, mut document: DocumentMut, site: Option<Site>) {
     let additions = mise::add_missing(&mut document, site.is_some());
     for conflict in additions.conflicts {
         plan.attention("mise.toml", conflict);
+    }
+    let linked = fs::symlink_metadata(root.join("mise.toml"))
+        .is_ok_and(|metadata| metadata.file_type().is_symlink());
+    if linked && !additions.added.is_empty() {
+        let missing = additions.added.join(", ");
+        return plan.attention(
+            "mise.toml",
+            format!(
+                "it is a symbolic link, which init never writes through; add {missing} by hand"
+            ),
+        );
     }
     plan.add_to("mise.toml", document.to_string(), additions.added);
 }
@@ -166,6 +177,14 @@ fn plan_omp_config(plan: &mut Plan, root: &Path) {
         .any(|entry| setup::is_package_link(entry));
     if declared {
         plan.unchanged.push(path.to_string());
+    } else if !omp_config::extendable(&source) {
+        plan.attention(
+            path,
+            format!(
+                "`extensions` holds a single value, not a list, so nothing was added; make it a \
+                 list that includes `{PACKAGE_PATH}`"
+            ),
+        );
     } else {
         let contents = omp_config::with_extension(&source, PACKAGE_PATH);
         plan.add_to(path, contents, vec![PACKAGE_PATH.to_string()]);
@@ -219,9 +238,17 @@ fn check_agents_line(plan: &mut Plan, root: &Path) {
     }
 }
 
-/// The file's text, `None` when it does not exist, or why it cannot be read.
+/// The file's text, `None` when it does not exist, or why init leaves it alone: it cannot be
+/// read, or it is a symbolic link, which init never writes through because its target may lie
+/// outside the project.
 fn read_existing(root: &Path, relative: &str) -> Result<Option<String>, String> {
-    match fs::read_to_string(root.join(relative)) {
+    let path = root.join(relative);
+    if fs::symlink_metadata(&path).is_ok_and(|metadata| metadata.file_type().is_symlink()) {
+        return Err(
+            "it is a symbolic link, which init never writes through, so nothing was added".into(),
+        );
+    }
+    match fs::read_to_string(path) {
         Ok(text) => Ok(Some(text)),
         Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
         Err(error) => Err(format!("it cannot be read ({error}), so nothing was added")),
