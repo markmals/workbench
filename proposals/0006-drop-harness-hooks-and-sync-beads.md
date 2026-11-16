@@ -264,6 +264,8 @@ Agents claim through `mise run beads:claim -- <id>`, never with `bd update --cla
 | `held` | nonzero | Beads refused because another claimant holds the item. Names that claimant. |
 | `lost` | nonzero | After syncing, another claimant holds the item, meaning a concurrent claim won. Names that claimant. The agent must not start the work. |
 
+**Closing.** `bd close` refuses an item claimed by a different actor, and an agent's plain `bd` runs as the Git user name rather than the claimant. Agents therefore close through `mise run beads:close -- <id> "<reason>"`, which closes the item as `BEADS_ACTOR` (set the same way) and then syncs. It reports `closed` (exit 0), `closed-unpublished` when the sync failed (exit 0, with the reason), or Beads' refusal (nonzero). The owner added this on 2026-11-15 after the preview found the gap.
+
 ### 5. Agent documentation
 
 The `tracking-work` skill gains a section on Beads across machines. The owner reported that agents misread this, so the section must stand on its own. It teaches:
