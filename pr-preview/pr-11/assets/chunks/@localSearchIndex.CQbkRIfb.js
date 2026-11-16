@@ -1,0 +1,1 @@
+import{t as e}from"./framework.BmaFRZVf.js";var t={root:()=>e(()=>import(`./@localSearchIndexroot.Dv3lNr9d.js`),[])};export{t as default};
