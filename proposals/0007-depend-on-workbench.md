@@ -2,7 +2,7 @@
 id: proposal.0007
 title: Depend on Workbench Instead of Copying It
 authors: [markmals, anthropic/claude-opus-5-5]
-status: draft
+status: awaiting-implementation
 pull-request: https://github.com/markmals/workbench/pull/10
 issues: [workbench-0ky]
 supersedes: []
