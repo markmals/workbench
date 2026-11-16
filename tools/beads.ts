@@ -110,7 +110,8 @@ function readItem(root: string, id: string): Item | null {
 
 /**
  * Claims an item so other machines see it: sync, claim as this machine's claimant, sync
- * again, then re-read who holds it. Throws when Beads rejects the claim for any reason other
+ * again, then re-read who holds it. Throws, changing nothing, when the replica's Beads remote
+ * is not this project's own, and throws when Beads rejects the claim for any reason other
  * than another claimant holding the item, such as an unknown id.
  */
 export function claimBeadsItem(
@@ -118,6 +119,8 @@ export function claimBeadsItem(
     id: string,
     timeoutMs = SYNC_TIME_LIMIT_MS,
 ): ClaimResult {
+    let foreign = foreignRemote(root, Date.now() + timeoutMs);
+    if (foreign) throw new Error(foreign);
     let actor = claimant();
     syncBeads(root, timeoutMs);
     let claim = bd(["update", id, "--claim", "--json"], root, undefined, {

@@ -93,9 +93,8 @@ test("a sync that pulls and pushes reports synced", t => {
 });
 
 test("a sync Beads cannot complete reports failed with Beads' reason", t => {
-    let { root, calls } = project(t, {
+    let { root, calls } = projectWithRemote(t, true, {
         sync: { exit: 1, json: { error: "sync failed: push: authentication required" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
     });
 
     let result = syncBeads(root);
@@ -106,9 +105,8 @@ test("a sync Beads cannot complete reports failed with Beads' reason", t => {
 });
 
 test("the first sync to a remote without Beads history publishes this replica", t => {
-    let { root, calls } = project(t, {
+    let { root, calls } = projectWithRemote(t, false, {
         sync: { exit: 1, json: { error: "fetch failed: no branches found in remote 'origin'" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: false })),
         "dolt push": { stdout: "Push complete.\n" },
     });
 
@@ -117,9 +115,8 @@ test("the first sync to a remote without Beads history publishes this replica", 
 });
 
 test("a first publish that fails reports failed with its reason", t => {
-    let { root } = project(t, {
+    let { root } = projectWithRemote(t, false, {
         sync: { exit: 1, json: { error: "fetch failed: no branches found in remote 'origin'" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: false })),
         "dolt push": { exit: 1, stderr: "Error: push rejected by the remote\n" },
     });
 
@@ -129,10 +126,20 @@ test("a first publish that fails reports failed with its reason", t => {
     assert.match(result.detail, /push rejected by the remote/);
 });
 
-/** Makes the project directory a Git checkout whose `origin` is `url`. */
+/** Makes the project directory a Git checkout whose `origin` is `url`, minus Dolt's `git+`. */
 function setOrigin(root: string, url: string): void {
     execFileSync("git", ["init", "-q", root], { env: cleanEnv });
-    execFileSync("git", ["-C", root, "remote", "add", "origin", url], { env: cleanEnv });
+    execFileSync("git", ["-C", root, "remote", "add", "origin", url.replace(/^git\+/, "")], {
+        env: cleanEnv,
+    });
+}
+
+/** A project whose replica's Beads remote and Git `origin` are the same local bare repository. */
+function projectWithRemote(t: TestContext, withBeadsHistory: boolean, script: FakeScript) {
+    let url = remote(t, { withBeadsHistory });
+    let created = project(t, { ...script, "dolt remote list": remotes(url) });
+    setOrigin(created.root, url);
+    return created;
 }
 
 test("a replica whose Beads remote is another repository fails without pulling or pushing", t => {
@@ -152,6 +159,43 @@ test("a replica whose Beads remote is another repository fails without pulling o
         calls().filter(call => call.startsWith("sync") || call.startsWith("dolt push")),
         [],
     );
+});
+
+test("a checkout without a Git origin does not sync a replica that has a Beads remote", t => {
+    let { root, calls } = project(t, {
+        "dolt remote list": remotes("git+https://github.com/markmals/workbench.git"),
+        sync: SYNCED,
+    });
+    execFileSync("git", ["init", "-q", root], { env: cleanEnv });
+
+    let result = syncBeads(root);
+
+    assert.equal(result.outcome, "failed");
+    assert.match(result.detail, /no origin/);
+    assert.ok(!calls().some(call => call.startsWith("sync")), calls().join("\n"));
+});
+
+test("two local repositories that differ only by .git are different remotes", t => {
+    let { root } = project(t, {
+        "dolt remote list": remotes("git+file:///srv/git/project.git"),
+        sync: SYNCED,
+    });
+    setOrigin(root, "/srv/git/project");
+
+    assert.equal(syncBeads(root).outcome, "failed");
+});
+
+test("claiming in a replica whose Beads remote is another repository changes nothing", t => {
+    let { root, calls } = project(t, {
+        "dolt remote list": remotes("git+https://github.com/markmals/workbench.git"),
+        sync: SYNCED,
+        update: { json: [{ id: "wb-1" }] },
+        show: { json: [{ id: "wb-1", status: "in_progress", assignee: "mark@alpha" }] },
+    });
+    setOrigin(root, "https://github.com/someone/new-project.git");
+
+    assert.throws(() => claimBeadsItem(root, "wb-1"), /not this project's origin/);
+    assert.ok(!calls().some(call => call.startsWith("update")), calls().join("\n"));
 });
 
 test("the same repository written another way is this project's own remote", t => {
@@ -177,6 +221,16 @@ test("the same repository written another way is this project's own remote", t =
 
         assert.equal(syncBeads(root).outcome, "synced", `${origin} and ${beadsRemote}`);
     }
+
+    let relativeOrigin = "../shared/repo.git";
+    installFakeBd(bin, {
+        "dolt remote list": remotes(`git+file://${path.resolve(root, relativeOrigin)}`),
+        sync: SYNCED,
+    });
+    execFileSync("git", ["-C", root, "remote", "set-url", "origin", relativeOrigin], {
+        env: cleanEnv,
+    });
+    assert.equal(syncBeads(root).outcome, "synced", "a relative origin resolves from the checkout");
 });
 
 test("a conflict Beads cannot settle names the tables and the items that differ from the remote", t => {
@@ -220,9 +274,8 @@ test("a stuck dirty working set reports blocked with Beads' explanation", t => {
 });
 
 test("push retries running out reports failed", t => {
-    let { root } = project(t, {
+    let { root } = projectWithRemote(t, true, {
         sync: { exit: 3, json: { error: "push race: retries exhausted" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
     });
 
     let result = syncBeads(root);
@@ -250,18 +303,18 @@ test("claiming an unheld item syncs, claims, syncs again, and confirms the claim
     let result = claimBeadsItem(root, "wb-1");
 
     assert.equal(result.outcome, "claimed");
+    let steps = fake.calls().filter(({ args }) => args[0] !== "dolt");
     assert.deepEqual(
-        fake.calls().map(({ args }) => args[0]),
+        steps.map(({ args }) => args[0]),
         ["sync", "update", "sync", "show"],
     );
-    assert.equal(fake.calls()[1]?.actor, "mark@alpha");
-    assert.ok(fake.calls()[1]?.args.includes("--claim"));
+    assert.equal(steps[1]?.actor, "mark@alpha");
+    assert.ok(steps[1]?.args.includes("--claim"));
 });
 
 test("a claim whose second sync fails is claimed on this machine only", t => {
-    let { root } = project(t, {
+    let { root } = projectWithRemote(t, true, {
         sync: [SYNCED, { exit: 1, json: { error: "sync failed: remote unreachable" } }],
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
         update: { json: [{ id: "wb-1" }] },
         show: { json: [{ id: "wb-1", status: "in_progress", assignee: "mark@alpha" }] },
     });
@@ -377,7 +430,9 @@ test("the report syncs first, then lists ready work, items in progress, and memo
         },
     );
     assert.deepEqual(
-        calls().map(call => call.split(" ")[0]),
+        calls()
+            .filter(call => !call.startsWith("dolt"))
+            .map(call => call.split(" ")[0]),
         ["where", "sync", "ready", "list", "prime"],
     );
     assert.ok(calls().includes("list --status in_progress --json"), calls().join("\n"));
@@ -385,10 +440,9 @@ test("the report syncs first, then lists ready work, items in progress, and memo
 });
 
 test("a failed sync still reports this machine's replica", t => {
-    let { root } = project(t, {
+    let { root } = projectWithRemote(t, true, {
         where: AVAILABLE,
         sync: { exit: 1, json: { error: "sync failed: remote unreachable" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
         ready: { json: [{ id: "wb-1", title: "Fix the parser", priority: 2 }] },
         list: { json: [] },
         prime: { stdout: "No memories stored.\n" },
@@ -434,10 +488,9 @@ test("a workspace whose database is not initialized is unavailable", t => {
 });
 
 test("a replica that cannot be read is unavailable, and the report keeps the sync's outcome", t => {
-    let { root } = project(t, {
+    let { root } = projectWithRemote(t, true, {
         where: AVAILABLE,
         sync: { exit: 1, json: { error: "sync failed: remote unreachable" } },
-        "dolt remote list": remotes(remote(t, { withBeadsHistory: true })),
         ready: { exit: 1, json: { error: "database is locked" } },
     });
 

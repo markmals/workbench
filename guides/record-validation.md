@@ -58,7 +58,7 @@ Before reporting, `mise run status` runs one Beads sync with the project's remot
 | Outcome | Meaning | Reported with |
 | --- | --- | --- |
 | `synced` | This replica pulled every change on the remote and published its own. | One line. |
-| `failed` | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout's `origin`. | The reason, and that the rest of the section shows this machine's state. |
+| `failed` | The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout's `origin`, or the checkout has no `origin` to compare it with. | The reason, and that the rest of the section shows this machine's state. |
 | `conflict` | Beads halted on a conflict it cannot settle; nothing was pushed. | The conflicted tables Beads names, and the items that differ between this replica and the remote. |
 | `blocked` | A dirty working set stops Beads from publishing; nothing was pushed. | Beads' explanation. |
 | `unavailable` | `bd` is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed. | The reason and a pointer to `mise run setup`, in place of the whole section. When a read failed, the reason names it and keeps the sync's outcome. |
