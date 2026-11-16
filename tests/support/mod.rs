@@ -9,6 +9,9 @@ use std::process::Command;
 use serde_json::Value;
 use tempfile::TempDir;
 
+pub mod fake_bd;
+pub mod fake_gh;
+
 pub fn plugin_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("plugin")
 }
@@ -216,7 +219,10 @@ pub fn assert_matches_output_schema(path: &[&str], result: &Value) {
 /// The project every registered example runs in: a Workbench project with records, a package
 /// link, and fake `bd` and `gh` programs. Extend it when a new example needs more.
 pub fn example_project() -> Fixture {
-    let fixture = Fixture::git();
+    let mut fixture = Fixture::git();
+    fake_bd::example_replica(fake_bd::EXAMPLE_CLAIMANT).install(&fixture);
+    fake_gh::install_fake_gh(&fixture, "main", "main", &serde_json::json!([]));
+    fixture.set_env("BEADS_ACTOR", fake_bd::EXAMPLE_CLAIMANT);
     fixture.link_package();
     fixture
         .write(
