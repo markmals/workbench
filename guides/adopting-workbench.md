@@ -95,7 +95,7 @@ Everything in the receipt's `vendored` list is a copy of something the package n
   run = "workbench workflow status --output text"
   ```
 
-- **`hk.pkl`.** Its `commit-msg` step becomes `workbench commits check --message-file {{commit_msg_file}}`. To see the hk configuration `project init` writes, move yours aside, run `project init`, then carry your project's own steps, such as formatters, into the new file and delete the old one:
+- **`hk.pkl`.** Its `commit-msg` step becomes `workbench commits check --output text --message-file {{commit_msg_file}}`. To see the hk configuration `project init` writes, move yours aside, run `project init`, then carry your project's own steps, such as formatters, into the new file and delete the old one:
 
   ```sh
   git mv hk.pkl hk.old.pkl

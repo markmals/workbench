@@ -56,7 +56,7 @@ hooks {
     ["commit-msg"] {
         steps {
             ["scoped-commit"] {
-                check = "workbench commits check --message-file {{commit_msg_file}}"
+                check = "workbench commits check --output text --message-file {{commit_msg_file}}"
             }
         }
     }

@@ -61,7 +61,9 @@ pub fn assert_hooks_and_checks(fixture: &Fixture) {
     assert!(hooks.contains(
         r#"amends "package://github.com/jdx/hk/releases/download/v2.8.1/hk@2.8.1#/Config.pkl""#
     ));
-    assert!(hooks.contains("workbench commits check --message-file {{commit_msg_file}}"));
+    assert!(
+        hooks.contains("workbench commits check --output text --message-file {{commit_msg_file}}")
+    );
     assert!(hooks.contains("bd hooks run pre-commit"));
     for hook in ["pre-push", "post-merge", "post-rewrite"] {
         assert!(hooks.contains(&format!("[\"{hook}\"]")), "{hook}");
