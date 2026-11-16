@@ -39,7 +39,7 @@ The copy carries three further costs:
 
 - **Node everywhere.** Workbench's own tooling requires Node, pnpm, and Bun in every project, including Swift and Rust projects that need none of them otherwise. That tooling is TypeScript scripts in `tools/`, a VitePress site, Oxfmt, Changesets, and an OMP tool whose test runs OMP's loader on Bun.
 - **OMP packages everywhere.** The harness wiring is OMP extension code in TypeScript, so every project inherits OMP-specific packages.
-- **A slower agent loop.** That wiring runs the full gate at the end of every turn. [Proposal 0006](https://github.com/markmals/workbench/pull/11) removes it, and this proposal builds on that.
+- **A slower agent loop.** That wiring ran the full gate at the end of every turn. [Proposal 0006](0006-drop-harness-hooks-and-sync-beads.md) removed it, and this proposal keeps it out of the package.
 
 The owner wants skills, rules, templates, the agent contract, and tools to update the way a dependency does, including in repositories that are not cloned locally. Changes to the record format should remain explicit migrations. They want Workbench's tooling in Rust, like their other CLIs, and want Workbench to require no TypeScript and no OMP-specific packages.
 
@@ -130,7 +130,7 @@ The concepts this change introduces or renames:
 | Package pin | The project's `github:markmals/workbench` version in `mise.toml`, with checksums in `mise.lock`. The single place a project names the Workbench version it uses. |
 | Package link | `.workbench`: a gitignored, machine-local symlink from the project root to the installed package for the pinned version. Derived state, recreated by `mise install`. |
 | Harness declaration | Committed `.claude/settings.json` and `.omp/config.yml` entries that point a harness at `.workbench`. |
-| Task interface | The project tasks the process contract invokes: `setup`, `check`, and `fmt`, which each project implements. Workbench's own operations are `workbench` commands; the `status`, `validate`, `beads:sync`, and `beads:claim` tasks wrap them for humans and git hooks. |
+| Task interface | The project tasks the process contract invokes: `setup`, `check`, and `fmt`, which each project implements. Workbench's own operations are `workbench` commands; the `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` tasks wrap them for humans and git hooks. |
 | Change file | One Knope change file in `.changeset/`, describing one change for release notes. Knope calls the collection a changeset; Workbench says "change file" for one file. |
 
 The ontology review is REVISE. Today the process and a project's copy of it are the same files. Nothing identifies which version of Workbench a project uses, so "update Workbench" has no referent. The missing concept is the package pin. The package link is derived from it and is never committed.
@@ -180,7 +180,8 @@ Incidental, and replaced here:
 - The VitePress and VoidZero theme, and Oxfmt and Oxlint.
 - Changesets with `@changesets/changelog-github`, and `tag-release.ts` and `project-version.ts`, which exist only to serve Changesets.
 - Fnox, with `fnox.toml`, the `[secrets.fnox]` task grants, and the 1Password CLI pin it shells out to.
-- The OMP `workflow` tool. [Proposal 0006](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions.
+- The OMP `workflow` tool. [Proposal 0006](0006-drop-harness-hooks-and-sync-beads.md) removed the three OMP extensions and the pre-push check.
+- The TypeScript Beads tools from proposal 0006 (`tools/bd.ts` and `tools/beads*.ts`). Their behavior is preserved; their implementation is not.
 - The vendored `.agents/` copies.
 - `guides/adapting-your-harness.md`, which asks each project to hand-wire its harness.
 
@@ -381,12 +382,13 @@ The grammar is `workbench <resource> <operation> [arguments] [options]`, in keba
 | `workbench change-files check <base> <head>` | Reads | `tools/require-changeset.ts` |
 | `workbench beads sync [--dry-run]` | Syncs the Beads replica | Proposal 0006's `beads:sync` |
 | `workbench beads claim <id> [--dry-run]` | Claims an item and syncs | Proposal 0006's `beads:claim` |
+| `workbench beads close <id> --reason <text> [--dry-run]` | Closes an item as the claimant and syncs | Proposal 0006's `beads:close` |
 
 The mise tasks wrap these commands for humans and hooks:
 
 - `status` runs `workbench workflow status --output text`.
 - `validate` runs `workbench records validate --output text` and `workbench project validate --output text`.
-- `beads:sync` and `beads:claim` call their commands.
+- `beads:sync`, `beads:claim`, and `beads:close` call their commands.
 
 hk's `commit-msg` hook runs `workbench commits check --message-file {{commit_msg_file}}`.
 
@@ -409,7 +411,7 @@ None of these mutates anything.
     - its `status`;
     - its target: the project root, plus the Beads remote for Beads commands;
     - the identifiers it produced (file paths, item IDs);
-    - the fields that matter for the operation, such as a claim's `claimant` and `published`.
+    - the fields that matter for the operation, such as a claim's `claimant` and `published`, or a close's `published`.
 
 #### Errors and exit statuses
 
@@ -420,16 +422,16 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
 | `CHECK_FAILED` | 1 | No | A check ran and found violations. |
 | `INVALID_ARGUMENT` | 2 | No | Input is missing or malformed. `details` lists the missing fields and accepted values. |
 | `NOT_FOUND` | 3 | No | A named record, item, commit, or file does not exist. |
-| `PRECONDITION_FAILED` | 3 | No | The project is not ready: not a Git repository, no pin, no `.workbench` link, or Beads not initialized. `suggestions` names the fix. |
+| `PRECONDITION_FAILED` | 3 | No | The project is not ready: not a Git repository, no pin, no `.workbench` link, Beads not initialized, or a Beads remote that is not the checkout's `origin` (or no `origin` to compare it with). `suggestions` names the fix. |
 | `DEPENDENCY_MISSING` | 3 | No | A required program (`git`, `gh`, `bd`) is absent. |
 | `UNAUTHENTICATED` | 3 | No | `gh` or Git credentials are missing or rejected. |
-| `CONFLICT` | 4 | No | Another claimant holds the item, a claim was lost, or a Beads sync stopped on a conflict for the agent to resolve. |
+| `CONFLICT` | 4 | No | Another claimant holds the item, so a claim or close was refused; a claim was lost; or a Beads sync stopped on a conflict for the agent to resolve. |
 | `TIMEOUT` | 5 | Yes | An operation exceeded its time limit. |
 | `UNAVAILABLE` | 5 | Yes | The remote or the network was unreachable. |
 | `INTERNAL` | 70 | No | A defect in `workbench` itself. |
 
 - **Exit status 0** means the operation completed.
-- **Partial completion is reported, not hidden.** A claim made locally whose sync failed exits 0, but its receipt says `published: false`, and stderr says why.
+- **Partial completion is reported, not hidden.** A claim or close made locally whose sync failed exits 0, but its receipt says `published: false`, and stderr says why.
 - **`workflow status`** reports a Beads sync failure inside its result and still exits 0, as in proposal 0006.
 
 #### Preview, safety, and verification
@@ -438,6 +440,7 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
     - for `project init`, the files it would create or add to;
     - for `change-files create`, the file it would write;
     - for `beads claim`, the item, its current claimant, and the claimant it would claim as;
+    - for `beads close`, the item, its current claimant, and the claimant it would close as;
     - for `beads sync`, the remote and any unpublished local commits.
 
     A dry run states what it cannot predict; a sync, for example, cannot predict merge conflicts.
@@ -484,11 +487,18 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
 
 - **The collision rule in `project validate`.** A project skill directory `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release's skills and rules, so the check does not depend on `.workbench`.
 
+- **Beads.** The `beads` commands and the Beads part of `workflow status` keep what proposal 0006 established:
+    - **The claimant.** Claims and closes act as `BEADS_ACTOR`, or `<login user>@<short host name>` when it is unset. `bd close` refuses an item claimed by another actor, which is why closing has a command.
+    - **Only the project's own remote.** No sync, claim, or close runs when the replica's Dolt remote is not the same repository as the checkout's `origin`, or when there is no `origin`. Hosted URLs compare across SSH, HTTPS, `git+`, credentials, `.git`, and case; local paths compare exactly, resolving relative origins from the checkout.
+    - **The first publish.** When `bd sync` fails and the remote positively has no `refs/dolt/data`, the sync publishes with `bd dolt push`.
+    - **Conflicts.** Embedded storage aborts a halted merge, so a conflict's `details` name the conflicted tables Beads reports and the items that differ from the remote (`bd diff main origin/main`), within the sync's time limit.
+    - **Reads after the sync.** `workflow status` syncs before reading ready work, items in progress, and memories. When a read fails, the result says which, and keeps the sync's outcome.
+
 #### Evaluating the CLI with agents
 
 Before `3.0.0` is released, fresh agent sessions attempt five tasks in a fixture project. Each session starts with no Workbench context beyond the output of `workbench --help`:
 
-1. find and claim the next ready item;
+1. find and claim the next ready item, then close it;
 2. add a change file for a fix;
 3. find out why `records validate` fails, and repair the record;
 4. set up Workbench in an empty repository and verify the setup;
@@ -498,7 +508,7 @@ Each run records task completion, invalid commands, the number of commands, and 
 
 ### 6. No harness hooks
 
-[Proposal 0006](https://github.com/markmals/workbench/pull/11) removes the three OMP extensions and the pre-push check, moves Beads orientation into `mise run status`, and defines the Beads sync points. This proposal assumes 0006 has landed. The package declares hooks for no harness.
+[Proposal 0006](0006-drop-harness-hooks-and-sync-beads.md) removed the three OMP extensions and the pre-push check, moved Beads orientation into `mise run status`, and defined the Beads sync points: `mise run status`, hk's `pre-push`, `post-merge`, and `post-rewrite` after a rebase, and the `beads:sync`, `beads:claim`, and `beads:close` tasks. This proposal keeps them. The package declares hooks for no harness.
 
 ### 7. No workflow tool
 
@@ -584,13 +594,13 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 - **`mise.toml`:**
     - the `postinstall` link hook;
     - pins for `hk`, `gh`, and Beads when absent, at the versions the release was tested with;
-    - the tasks `status`, `validate`, `beads:sync`, and `beads:claim` when absent.
+    - the tasks `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` when absent.
 - **Ignore and harness files:**
     - the `.gitignore` entry;
     - the `.claude/settings.json` keys;
     - the `.omp/config.yml` extension entry, appended to an existing list;
     - `.claude/skills` and `.claude/rules` links to `../.agents/skills` and `../.agents/rules`, when those directories exist and the links do not.
-- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench commits check --message-file`, and Beads gets proposal 0006's sync steps, which call `workbench beads sync`. It runs no check before a push.
+- **Hooks:** `hk.pkl` when absent. Its `commit-msg` hook runs `workbench commits check --message-file`, and Beads gets proposal 0006's sync steps (`pre-push`, `post-merge`, and `post-rewrite` after a rebase), which call `workbench beads sync`. It runs no check before a push.
 - **Workbench's checks:** `.github/workflows/workbench.yml` when absent. It runs `workbench commits check` and `workbench change-files check` on every pull request except Knope's release pull request.
 - **`AGENTS.md`** when absent, as a project stub with the `.workbench` line. When `AGENTS.md` exists without that line, the receipt says so.
 - **Records:**
@@ -630,7 +640,7 @@ The vendored files it lists cover:
 
 It also covers the harness caveats: Claude Code's workspace trust, `CLAUDE.md` imports, and worktrees resolving to the main checkout; OMP's project `extensions:` replacing the user-level list; and Pico's dependence on #61.
 
-The Workbench repository stops being a GitHub template repository; the owner changes that setting. `README.md` and the getting-started guide describe `mise use` and `workbench project init` in its place.
+The Workbench repository stops being a GitHub template repository; the owner changes that setting. `README.md` and the getting-started guide describe `mise use` and `workbench project init` in its place. Their step for replacing Workbench's `.beads/` in a copy of the template goes with the template.
 
 ### 12. The Workbench repository
 
@@ -650,7 +660,7 @@ The Workbench repository stops being a GitHub template repository; the owner cha
     - Changesets: `.changeset/config.json` and `.changeset/README.md`;
     - the process files under `.agents/`, which move to `plugin/`.
 - **Kept.** `.agents/commit-scopes` keeps Workbench's repository-only scopes.
-- **`mise.toml`** drops `node`, `pnpm`, `bun`, `fnox`, and `1password`, and its `[secrets.fnox]` block; `fnox.toml` is deleted. It adds Rust, `hugo`, `github:CloudCannon/pagefind`, `knope`, and `dprint`. It keeps `hk`, `gh`, `actionlint`, `worktrunk`, and Beads. Workbench needs no environment variables or secrets, so it has no `.env.schema`.
+- **`mise.toml`** drops `node`, `pnpm`, `bun`, `fnox`, and `1password`, and its `[secrets.fnox]` block; `fnox.toml` is deleted. It also drops the `DOLT_REMOTE_INFO_BRANCH` `[env]` entry, which the CLI makes redundant. It adds Rust, `hugo`, `github:CloudCannon/pagefind`, `knope`, and `dprint`. It keeps `hk`, `gh`, `actionlint`, `worktrunk`, and Beads. Workbench needs no environment variables or secrets, so it has no `.env.schema`.
 - **`mise run check`** runs the Rust tests, `hk check --all`, `validate`, and `docs:build`.
 - **Workflows:** CI (check, commit subjects, change files), docs publishing, PR previews, prepare-release, and release.
 - **Documents updated with the change:**
@@ -684,7 +694,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **Records** keep the format of [proposal 0005](0005-current-specifications.md).
     - Record validation detects what it detects today. Project validation, with the collision rule, is new.
     - `change-files check` replaces the changeset check.
-    - The `status` and `validate` task names are unchanged.
+    - The `status`, `validate`, `beads:sync`, `beads:claim`, and `beads:close` task names are unchanged.
 - **CLI output.** The `workbench` commands output JSON by default, with new result shapes and structured errors. Anything that parsed the old tools' text output or `--json` shape must change.
 - **Changesets to Knope.**
     - Pending Changesets entries become change files.
@@ -763,7 +773,7 @@ This breaks every existing Workbench project. Nothing changes in a project until
 - **[Proposal 0001](0001-workbench-2.md)** established the template-repository distribution and the Workbench 2 tooling. This proposal replaces both and leaves that record as history.
 - **[Proposal 0004](0004-make-room-for-ui-polish.md)** leaves look and feel to the running product. The site's appearance follows that.
 - **[Proposal 0005](0005-current-specifications.md)** defined the current-record model and the record and status contract in `guides/record-validation.md`, both preserved. Its "changesets and changelogs" role passes to change files and Knope's changelog.
-- **[Proposal 0006](https://github.com/markmals/workbench/pull/11)** removes the harness hooks and the pre-push check, and adds Beads sync. This proposal depends on it: the package declares no hooks, and `workbench workflow status` and the `beads` commands carry over 0006's behavior.
+- **[Proposal 0006](0006-drop-harness-hooks-and-sync-beads.md)**, merged in PR #11, removed the harness hooks and the pre-push check and added Beads sync, claims, and closes. This proposal depends on it: the package declares no hooks, and `workbench workflow status` and the `beads` commands carry over 0006's behavior, including the refinements made during its implementation (the conflict report for embedded storage, the `post-rewrite` sync, the guard against another repository's Beads, and `beads:close`).
 - **`.agents/rules/enforcement-hierarchy.md`.** Moving the checks into the package keeps them deterministic: `commit-msg`, `pre-commit`, CI, `records validate`, and `project validate`. It adds the collision check.
 
 ## Future directions
