@@ -29,6 +29,7 @@ worktrunk = "0.81.0" # provides `wt`
 # Oh My Pi's real custom-tool loader, and that loader only runs on Bun. Pinning it
 # here is what makes `mise run test` work on a fresh clone and on a CI runner.
 bun = "1.3.9"
+rust = "1.100.0"
 
 [env]
 # Locally installed CLIs — oxfmt, oxlint, tsrs, vitest, vitepress, changeset —

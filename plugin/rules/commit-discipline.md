@@ -1,3 +1,7 @@
+---
+description: When and how to commit, stage, push, and open pull requests in a Workbench project, including Scoped Commits subjects and change files.
+---
+
 # Commit Discipline
 
 Commit often, atomically, and with messages a careful human would write. Commits are durable review units, not an afterthought.

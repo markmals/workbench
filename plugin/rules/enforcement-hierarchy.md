@@ -1,3 +1,7 @@
+---
+description: Where a new rule belongs in a Workbench project — a check, a task, a template, a skill, or prose, strongest first.
+---
+
 # Enforcement Hierarchy
 
 A rule an agent must remember is the weakest kind of rule. Under load, prose gets missed. Durable conventions are machine-enforced, not merely recalled. When you add a rule, reach down this hierarchy first.

@@ -1,3 +1,7 @@
+---
+description: What counts as evidence that work is done in a Workbench project, and which command proves each kind of claim.
+---
+
 # Verification
 
 Claiming work is complete without verification is dishonesty, not efficiency.

@@ -1,0 +1,13 @@
+{
+    "name": "workbench",
+    "owner": {
+        "name": "Mark Malstrom"
+    },
+    "plugins": [
+        {
+            "name": "workbench",
+            "source": "./",
+            "description": "The Workbench development process: its contract, skills, rules, and templates."
+        }
+    ]
+}

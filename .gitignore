@@ -48,3 +48,9 @@ docs/.vitepress/dist/
 
 # Tests
 coverage/
+
+# Rust build output
+/target/
+
+# The Workbench package link: machine-local, recreated by `mise install` and `mise run setup`.
+.workbench

@@ -1,3 +1,7 @@
+---
+description: What good code looks like in a Workbench project — small focused files and functions, names for the reader, separated concerns, few comments, no speculative abstraction, and surfaced errors.
+---
+
 # Code Quality
 
 > **This file is part of the agent contract.** Keep it tight — every line costs context.
