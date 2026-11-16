@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Adopting Workbench · Workbench</title>
+<meta name="description" content="A platform-agnostic, harness-agnostic agentic development process kit.">
+<link rel="icon" href="/workbench/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/workbench/css/site.min.6858dcfd9ef536c6838cfcac556c73c4c9472c5186119967c658c25bd331e2b8.css" integrity="sha256-aFjc/Z71NsaDjPysVWxzxMlHLFGGEZlnxljCW9Mx4rg=">
+<script src="/workbench/js/search.min.91c03ab0618e873fdf0408644ae4cec995e27513bfe7aefce72be2867e757830.js" integrity="sha256-kcA6sGGOhz/fBAhkSuTOyZXidRO/56785yvihn51eDA=" defer></script>
+
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="site-header__brand" href="/workbench/"><img src="/workbench/workbench-icon.png" alt="" width="32" height="32"><span>Workbench</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Main">
+    <a href="/workbench/vision/">Vision</a>
+    <a href="/workbench/process/">Process</a>
+    <a href="/workbench/guides/" class="is-active">Guides</a>
+    <a href="/workbench/proposals/">Change history</a>
+    <a href="/workbench/policies/">Policies</a>
+    <a href="/workbench/decisions/">Decisions</a>
+  </nav>
+  <button class="site-header__search" type="button" data-search-open aria-haspopup="dialog">
+    <span>Search</span><kbd>/</kbd>
+  </button>
+</header>
+
+    <main id="main">
+<div class="layout">
+<nav class="sidebar" aria-label="Guides">
+  <a class="sidebar__section" href="/workbench/guides/">Guides</a>
+  <ul>
+    <li><a href="/workbench/guides/adopting-workbench/" aria-current="page">Adopting Workbench</a></li>
+    <li><a href="/workbench/guides/choosing-a-preview/">Choosing a Preview</a></li>
+    <li><a href="/workbench/guides/cli-reference/">CLI Reference</a></li>
+    <li><a href="/workbench/guides/getting-started/">Getting Started</a></li>
+    <li><a href="/workbench/guides/current-specifications/">Keeping Current Specifications</a></li>
+    <li><a href="/workbench/guides/keeping-the-record/">Keeping the Record</a></li>
+    <li><a href="/workbench/guides/record-validation/">Record Validation and Workflow Status</a></li>
+    <li><a href="/workbench/guides/running-a-feature/">Running a Feature</a></li>
+    <li><a href="/workbench/guides/writing-a-good-proposal/">Writing a Good Proposal</a></li>
+  </ul>
+</nav>
+
+  <article class="content" data-pagefind-body><h1 id="adopting-workbench">Adopting Workbench</h1>
+
+<h2 id="how-do-i-add-workbench-to-a-project">How do I add Workbench to a project? <a class="heading-anchor" href="#how-do-i-add-workbench-to-a-project" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Workbench is a package: the <code>workbench</code> command-line tool plus the process contract, rules, skills, templates, and documentation-site theme your harness loads. A project depends on one pinned release through <a href="https://mise.jdx.dev">mise</a>. <code>workbench project init</code> then adds the files Workbench owns, and the package itself stays out of the repository behind <code>.workbench</code>, a gitignored link that <code>mise install</code> keeps pointed at the pinned release.</p>
+<p>This guide covers a new repository, a project made from a holotype template, and an existing project, including one copied from the old Workbench template repository. A new project needs only step 1 and step 7. An existing project works through all of them.</p>
+<p>You need mise activated in your shell (see <a href="https://mise.jdx.dev/getting-started.html">mise&rsquo;s guide</a>), a Git repository, and the <a href="https://cli.github.com">GitHub CLI</a>. If mise is not activated, prefix each <code>workbench</code> command below with <code>mise x --</code>.</p>
+<h2 id="1-pin-workbench-and-run-project-init">1. Pin Workbench and run <code>project init</code> <a class="heading-anchor" href="#1-pin-workbench-and-run-project-init" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Pin a release in <code>mise.toml</code>. <code>mise use</code> writes the pin and installs that release:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">mise use github:markmals/workbench@3.0.0</span></span></code></pre></div><p>Preview what <code>project init</code> will do. It writes nothing with <code>--dry-run</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">workbench project init --dry-run --output text</span></span></code></pre></div><p>The receipt lists what it would create, what it would add to existing files and which entries, what is already in place, anything that needs your attention, every Workbench file the project still vendors, and the project-owned pieces Workbench relies on but does not create. Without <code>--output text</code> the same receipt is JSON. <code>workbench schema project init</code> states the complete contract.</p>
+<p>Then run it, and run <code>mise install</code> so the new <code>postinstall</code> hook links <code>.workbench</code> and the tools <code>project init</code> pinned are installed:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">workbench project init
+</span></span><span class="line"><span class="cl">mise install</span></span></code></pre></div><p><code>project init</code> never overwrites or deletes a file. It creates what is missing and, in files that exist, adds only missing keys and entries:</p>
+<table>
+	<thead>
+			<tr>
+					<th>File</th>
+					<th>What it adds</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>mise.toml</code></td>
+					<td>The <code>postinstall</code> hook that links <code>.workbench</code>; pins for hk, gh, and Beads; the <code>status</code>, <code>validate</code>, <code>beads:sync</code>, <code>beads:claim</code>, and <code>beads:close</code> tasks</td>
+			</tr>
+			<tr>
+					<td><code>.gitignore</code></td>
+					<td><code>.workbench</code></td>
+			</tr>
+			<tr>
+					<td><code>.claude/settings.json</code></td>
+					<td>The <code>workbench</code> marketplace and the <code>workbench@workbench</code> plugin</td>
+			</tr>
+			<tr>
+					<td><code>.omp/config.yml</code></td>
+					<td><code>./.workbench</code> in <code>extensions:</code></td>
+			</tr>
+			<tr>
+					<td><code>.claude/skills</code>, <code>.claude/rules</code></td>
+					<td>Links to <code>../.agents/skills</code> and <code>../.agents/rules</code>, when those directories exist</td>
+			</tr>
+			<tr>
+					<td><code>hk.pkl</code></td>
+					<td>Created when absent: the Scoped Commits check on <code>commit-msg</code>, and the Beads hook steps and syncs</td>
+			</tr>
+			<tr>
+					<td><code>.github/workflows/workbench.yml</code></td>
+					<td>Created when absent: the commit and change-file checks on every pull request except Knope&rsquo;s release pull request</td>
+			</tr>
+			<tr>
+					<td><code>AGENTS.md</code></td>
+					<td>Created when absent, as a stub stating that Workbench loads from <code>.workbench</code></td>
+			</tr>
+			<tr>
+					<td><code>VISION.md</code>, the <code>proposals/</code>, <code>policies/</code>, <code>decisions/</code>, and <code>guides/</code> READMEs, <code>.agents/commit-scopes</code>, <code>docs/hugo.toml</code></td>
+					<td>Created when absent</td>
+			</tr>
+	</tbody>
+</table>
+<p>When an entry it would add already exists with other content, such as a <code>status</code> task that still runs an old script, it leaves the entry alone and lists it under <code>attention</code>. Running it again is safe; a second run reports <code>unchanged</code>.</p>
+<p>Check the result. <code>context show</code> reads the setup back, and <code>project validate</code> reports anything still wrong with it, as <a href="/workbench/guides/record-validation/#validate-the-projects-workbench-setup">Record Validation</a> describes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">workbench context show --output text
+</span></span><span class="line"><span class="cl">workbench project validate --output text</span></span></code></pre></div><p>Last, add the project-owned pieces the receipt lists under <code>missing</code>. Workbench relies on a <code>setup</code> task, a <code>check</code> task that is the project&rsquo;s whole gate, and an <code>fmt</code> task, but their contents depend on the project&rsquo;s language and tools, so <code>project init</code> writes none of them. A <code>setup</code> task usually restores this machine&rsquo;s Beads replica and installs the Git hooks:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">tasks</span><span class="p">.</span><span class="nx">setup</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">description</span> <span class="p">=</span> <span class="s2">&#34;Idempotent first-run bootstrap: this machine&#39;s Beads replica and the Git hooks&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">run</span> <span class="p">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;if [ -f .beads/config.yaml ]; then bd bootstrap --yes; else bd init --non-interactive --prefix myproject --skip-agents --skip-hooks; fi&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;bd config set export.auto true&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;bd config set dolt.auto-push false&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;hk install --mise&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span></span></span></code></pre></div><p>Replace <code>myproject</code> with the short name Beads puts in every item&rsquo;s ID. <code>--skip-hooks</code> matters: hk owns every Git hook, and <code>bd init</code> would otherwise point Git at its own. The receipt&rsquo;s last missing piece, a release flow, is step 4.</p>
+<h2 id="2-move-project-additions-out-of-shared-files">2. Move project additions out of shared files <a class="heading-anchor" href="#2-move-project-additions-out-of-shared-files" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>A project that copied Workbench&rsquo;s files has often edited them. Move each addition to a place the project owns before deleting the copies:</p>
+<ul>
+<li><strong>An edited skill or rule</strong> becomes a project skill in <code>.agents/skills/&lt;name&gt;/</code> or a project rule in <code>.agents/rules/&lt;name&gt;.md</code>, under a name of its own. Never reuse a Workbench skill or rule name: Oh My Pi ranks the package&rsquo;s skill above the project&rsquo;s while Claude Code loads both, so the same name behaves differently in each harness, and <code>workbench project validate</code> reports it.</li>
+<li><strong>An edited template</strong> stays at <code>.agents/templates/&lt;name&gt;</code>. A project template overrides the package&rsquo;s template of the same name, and the receipt marks it <code>different</code>. A template identical to the package&rsquo;s is marked <code>identical</code>, and you delete it in step 3.</li>
+<li><strong><code>AGENTS.md</code></strong> keeps only what is true of this project: its purpose and layout, commands beyond the task interface, platform rules, and how to preview a change. Delete the process contract you copied from Workbench; the package supplies it. Keep the line saying that Workbench loads from <code>.workbench</code>, a gitignored link <code>mise install</code> restores, so an agent that cannot see the contract still learns the fix. When <code>AGENTS.md</code> lacks it, the receipt says so.</li>
+<li><strong>A <code>CLAUDE.md</code></strong> you keep must contain the line <code>@AGENTS.md</code>, or Claude Code ignores <code>AGENTS.md</code>.</li>
+</ul>
+<h2 id="3-delete-the-vendored-copies">3. Delete the vendored copies <a class="heading-anchor" href="#3-delete-the-vendored-copies" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Everything in the receipt&rsquo;s <code>vendored</code> list is a copy of something the package now supplies, except templates marked <code>different</code>. Before deleting the TypeScript tools, point whatever runs them at <code>workbench</code>:</p>
+<ul>
+<li>
+<p><strong>mise tasks.</strong> <code>attention</code> names each <code>status</code>, <code>validate</code>, <code>beads:sync</code>, <code>beads:claim</code>, and <code>beads:close</code> task that differs from Workbench&rsquo;s. Make each one match the task <code>project init</code> writes, which you can see by running it in an empty repository, or replace it with this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">tasks</span><span class="p">.</span><span class="nx">status</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">description</span> <span class="p">=</span> <span class="s2">&#34;Where the work stands: current phase, next action, who acts, and Beads&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">run</span> <span class="p">=</span> <span class="s2">&#34;workbench workflow status --output text&#34;</span></span></span></code></pre></div></li>
+<li>
+<p><strong><code>hk.pkl</code>.</strong> Its <code>commit-msg</code> step becomes <code>workbench commits check --output text --message-file {{commit_msg_file}}</code>. To see the hk configuration <code>project init</code> writes, move yours aside, run <code>project init</code>, then carry your project&rsquo;s own steps, such as formatters, into the new file and delete the old one:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git mv hk.pkl hk.old.pkl
+</span></span><span class="line"><span class="cl">workbench project init</span></span></code></pre></div></li>
+<li>
+<p><strong>CI.</strong> <code>.github/workflows/workbench.yml</code> now runs the commit and change-file checks. Delete the jobs that ran <code>tools/check-pr-commits.ts</code> and <code>tools/require-changeset.ts</code>.</p>
+</li>
+<li>
+<p><strong>Node.</strong> If Workbench&rsquo;s tools were the project&rsquo;s only use of Node, remove the <code>node</code>, <code>pnpm</code>, and <code>bun</code> pins and <code>package.json</code>.</p>
+</li>
+</ul>
+<p>Then delete the copies. With <a href="https://jqlang.org">jq</a> installed, this removes every vendored path except template overrides:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">workbench project init --dry-run <span class="p">|</span> jq -r <span class="s1">&#39;.vendored[] | select(.template != &#34;different&#34;) | .path&#39;</span> <span class="p">|</span> xargs git rm -r --quiet</span></span></code></pre></div><p><code>workbench project validate --output text</code> lists whatever remains.</p>
+<h2 id="4-convert-pending-change-entries-and-release-with-knope">4. Convert pending change entries and release with Knope <a class="heading-anchor" href="#4-convert-pending-change-entries-and-release-with-knope" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Workbench projects describe each user-visible change in a change file in <code>.changeset/</code> and release with <a href="https://knope.tech">Knope</a>. Every pull request adds a change file, or carries a <code>Release-Note: none</code> commit trailer when nothing user-visible changed; <code>.github/workflows/workbench.yml</code> checks this.</p>
+<p>Turn each pending Changesets entry into a change file, then delete the old entry. In a single-package project, <code>--package</code> is unnecessary:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">workbench change-files create --type minor --summary <span class="s2">&#34;Add the export command&#34;</span> --body <span class="s2">&#34;Exports the record as JSON.&#34;</span></span></span></code></pre></div><p><code>.changeset/</code> must then hold only change files, because Knope fails on any other Markdown file there: delete <code>.changeset/README.md</code> and <code>.changeset/config.json</code>. A pull request with no user-visible change carries the trailer instead:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git commit --trailer <span class="s2">&#34;Release-Note: none&#34;</span></span></span></code></pre></div><p>The release flow is the project&rsquo;s own. Write a <code>knope.toml</code> that sets <code>ignore_conventional_commits = true</code> under <code>[changes]</code>, because Scoped Commits subjects are not Conventional Commits and versions come only from change files, and follow Knope&rsquo;s <a href="https://knope.tech/recipes/1-preview-releases-with-pull-requests/">preview releases with pull requests</a> recipe. Keep its release branch named <code>release</code>, which <code>workbench.yml</code> exempts from the change-file check. Merging the release pull request is the release authorization. Delete the Changesets release workflow and dependencies.</p>
+<h2 id="5-move-a-published-site-to-hugo">5. Move a published site to Hugo <a class="heading-anchor" href="#5-move-a-published-site-to-hugo" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Workbench&rsquo;s documentation site is a Hugo theme in the package; <code>docs/hugo.toml</code> selects it and mounts the vision, records, and guides where they live. A project publishes it to GitHub Pages or to Cloudflare. <code>project init</code> never replaces an existing file, so first remove what the VitePress site used beyond <code>docs/.vitepress/</code>, which step 3 deleted: its workflows, and its <code>docs:build</code> and <code>docs:dev</code> tasks in <code>mise.toml</code>. VitePress serves static files from <code>docs/public/</code>, which is Hugo&rsquo;s build output, so move them to <code>docs/static/</code>. Then let <code>project init</code> add the site:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">git rm --quiet .github/workflows/docs.yml .github/workflows/preview.yml
+</span></span><span class="line"><span class="cl">git mv docs/public docs/static
+</span></span><span class="line"><span class="cl">workbench project init --site github-pages
+</span></span><span class="line"><span class="cl">mise install
+</span></span><span class="line"><span class="cl">mise run docs:build</span></span></code></pre></div><p>Use <code>--site cloudflare</code> to publish to Cloudflare instead. Either adds the <code>hugo</code> and <code>github:CloudCannon/pagefind</code> pins, the <code>docs:build</code> and <code>docs:dev</code> tasks, <code>docs/.gitignore</code> for the build output in <code>docs/public/</code>, and two workflows: <code>.github/workflows/docs.yml</code> publishes <code>main</code>, and <code>.github/workflows/preview.yml</code> publishes each pull request at its own URL, comments the link on the pull request, and removes the preview when it closes. A deployed build takes its base URL from <code>HUGO_BASEURL</code>, so a preview builds for its own path; a local build needs nothing set. Set <code>params.repository</code> in <code>docs/hugo.toml</code> when <code>project init</code> could not derive it from <code>origin</code>: links to files the site does not publish resolve there.</p>
+<ul>
+<li>
+<p><strong>GitHub Pages</strong> serves the <code>gh-pages</code> branch, which the first publish creates. <code>docs.yml</code> publishes only while the repository is public. Point Pages at the branch once:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gh api --method POST <span class="s2">&#34;repos/{owner}/{repo}/pages&#34;</span> -f <span class="s2">&#34;source[branch]=gh-pages&#34;</span> -f <span class="s2">&#34;source[path]=/&#34;</span></span></span></code></pre></div></li>
+<li>
+<p><strong>Cloudflare</strong> serves the site from a Worker that <code>docs/wrangler.jsonc</code> names after the project, with a Worker Preview for each pull request. Put the Worker and its Previews behind Cloudflare Access if the guides are private. The workflows need two repository secrets, an API token allowed to edit Workers Scripts and the account ID; each command prompts for the value:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gh secret <span class="nb">set</span> CLOUDFLARE_API_TOKEN
+</span></span><span class="line"><span class="cl">gh secret <span class="nb">set</span> CLOUDFLARE_ACCOUNT_ID</span></span></code></pre></div></li>
+</ul>
+<p>Delete the VitePress dependencies. <a href="/workbench/guides/choosing-a-preview/">Choosing a Preview</a> covers previews for everything else a project ships.</p>
+<h2 id="6-replace-fnox-with-varlock">6. Replace Fnox with Varlock <a class="heading-anchor" href="#6-replace-fnox-with-varlock" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Workbench projects declare environment variables and secrets with <a href="https://varlock.dev">Varlock</a> instead of Fnox. Declare each variable in <code>.env.schema</code> and commit it; if <code>.gitignore</code> ignores <code>.env.*</code>, add <code>!.env.schema</code> after that line. Run each task that needs a secret under <code>varlock run --</code>, for example <code>run = &quot;varlock run -- ./scripts/deploy.sh&quot;</code>. Then delete <code>fnox.toml</code>, the <code>fnox</code> and <code>1password</code> pins, the <code>[secrets.fnox]</code> block, and every task&rsquo;s <code>secrets</code> grant. A project made from a holotype template gets this from its template.</p>
+<h2 id="7-run-the-gate">7. Run the gate <a class="heading-anchor" href="#7-run-the-gate" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Bootstrap the repository on this machine and run the project&rsquo;s whole gate:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">mise run setup
+</span></span><span class="line"><span class="cl">mise run check</span></span></code></pre></div><p>Then run one small feature end to end, as <a href="/workbench/guides/running-a-feature/">Running a Feature</a> describes. The first pass exposes what your harness does not do well while the change is still cheap.</p>
+<h2 id="8-optionally-let-renovate-update-the-pin">8. Optionally let Renovate update the pin <a class="heading-anchor" href="#8-optionally-let-renovate-update-the-pin" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p><a href="https://docs.renovatebot.com">Renovate</a>&rsquo;s mise manager finds the <code>github:markmals/workbench</code> pin in <code>mise.toml</code> and opens a pull request for each release. When such a pull request changes the pin without updating <code>mise.lock</code>, regenerate the lock on its branch and push:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">mise lock</span></span></code></pre></div><p>After the pin changes and <code>mise install</code> runs, new sessions load the new release. A running session keeps what it loaded.</p>
+<h2 id="harness-notes">Harness notes <a class="heading-anchor" href="#harness-notes" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li><strong>Claude Code</strong> loads the process contract as the <code>workbench</code> output style, forced while the plugin is enabled, so it replaces your own output style in Workbench projects.
+<ul>
+<li>It applies the project&rsquo;s marketplace and plugin declarations only in a folder you trust. Accept the trust prompt in the first session.</li>
+<li>It ignores <code>AGENTS.md</code> when a <code>CLAUDE.md</code> exists that does not import it with <code>@AGENTS.md</code>.</li>
+<li>In a Git worktree it can resolve the project to the main checkout, so <code>./.workbench</code> may be the main checkout&rsquo;s link. Run <code>mise install</code> in the main checkout as well whenever the pin changes.</li>
+</ul>
+</li>
+<li><strong>Oh My Pi</strong> lists the package&rsquo;s rules and skills itself. A project&rsquo;s <code>extensions:</code> list replaces your user-level list rather than adding to it, so repeat any user-level extension you rely on in <code>.omp/config.yml</code>.</li>
+<li><strong>Pico</strong> loads <code>AGENTS.md</code> and <code>.agents/</code> but not the package until it supports project-declared plugins (<a href="https://github.com/markmals/pico/issues/61">pico#61</a>).</li>
+</ul>
+<p>If <code>.workbench</code> is missing or dangling, a harness loads no Workbench content and tasks that call <code>workbench</code> fail with mise&rsquo;s missing-tool error; <code>mise install</code> restores both.</p>
+<h2 id="configure-the-readiness-report-account">Configure the readiness-report account <a class="heading-anchor" href="#configure-the-readiness-report-account" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>The readiness report comes from a service account so the pull request distinguishes statements the agent made from statements you made. Create a bot account or GitHub App, give it write access to the repository, and expose its token in the agent&rsquo;s environment as <code>SERVICE_ACCOUNT_TOKEN</code>.</p>
+<p>The agent sets <code>GH_TOKEN</code> from <code>SERVICE_ACCOUNT_TOKEN</code> only when posting its own readiness-report comment. Marking the pull request ready happens with the ordinary <code>gh pr ready</code> identity, after the complete implementation is verified and pushed. Exporting the service token as a global <code>GH_TOKEN</code> would attribute unrelated GitHub actions to the bot. Without a service account, the agent identifies the account it used in the report.</p>
+
+<p class="source-link" data-pagefind-ignore><a href="https://github.com/markmals/workbench/blob/main/guides/adopting-workbench.md">View source</a></p>
+
+  </article>
+<aside class="toc" aria-label="On this page">
+  <p class="toc__title">On this page</p>
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#how-do-i-add-workbench-to-a-project">How do I add Workbench to a project?</a></li>
+    <li><a href="#1-pin-workbench-and-run-project-init">1. Pin Workbench and run <code>project init</code></a></li>
+    <li><a href="#2-move-project-additions-out-of-shared-files">2. Move project additions out of shared files</a></li>
+    <li><a href="#3-delete-the-vendored-copies">3. Delete the vendored copies</a></li>
+    <li><a href="#4-convert-pending-change-entries-and-release-with-knope">4. Convert pending change entries and release with Knope</a></li>
+    <li><a href="#5-move-a-published-site-to-hugo">5. Move a published site to Hugo</a></li>
+    <li><a href="#6-replace-fnox-with-varlock">6. Replace Fnox with Varlock</a></li>
+    <li><a href="#7-run-the-gate">7. Run the gate</a></li>
+    <li><a href="#8-optionally-let-renovate-update-the-pin">8. Optionally let Renovate update the pin</a></li>
+    <li><a href="#harness-notes">Harness notes</a></li>
+    <li><a href="#configure-the-readiness-report-account">Configure the readiness-report account</a></li>
+  </ul>
+</nav>
+</aside>
+
+</div>
+
+    </main><footer class="site-footer">
+  <span>Workbench</span>
+  <a href="https://github.com/markmals/workbench">Repository</a>
+</footer>
+<dialog class="search" aria-label="Search" data-search-base="/workbench/" data-search-bundle="/workbench/pagefind/">
+  <div class="search__ui" id="search-ui"></div>
+  <p class="search__unavailable" hidden>Search runs over a built site. Build it with <code>mise run docs:build</code> and serve <code>docs/public</code>.</p>
+</dialog>
+
+  </body>
+</html>
