@@ -378,6 +378,7 @@ The grammar is `workbench <resource> <operation> [arguments] [options]`, in keba
 | `workbench project validate`                                                                                            | Reads                                                        | —                                                              |
 | `workbench project init [--site github-pages\|cloudflare] [--dry-run]`                                                  | Creates files ([section 11](#11-adopting-workbench))         | The GitHub template and Adapting Your Harness                  |
 | `workbench commits check --message-file <path>` and `workbench commits check <base> <head>`                             | Reads                                                        | `tools/check-scoped-commit.ts` and `tools/check-pr-commits.ts` |
+| `workbench commits scopes`                                                                                              | Reads                                                        | —                                                              |
 | `workbench change-files create --type <type> --summary <text> [--package <name>] [--body <text\|@file\|->] [--dry-run]` | Creates one file ([section 8](#8-change-files-and-releases)) | Hand-written change files                                      |
 | `workbench change-files check <base> <head>`                                                                            | Reads                                                        | `tools/require-changeset.ts`                                   |
 | `workbench beads sync [--dry-run]`                                                                                      | Syncs the Beads replica                                      | Proposal 0006's `beads:sync`                                   |
@@ -483,7 +484,7 @@ A failure writes `{"error": {"code", "message", "retryable", "details", "suggest
   - the scopes in `.agents/commit-scopes`, which is optional and keeps its current format;
   - the `<NNNN>-<slug>` scope of any existing proposal file.
 
-  A rejection lists every accepted scope.
+  A rejection lists every accepted scope, and `workbench commits scopes` lists them, with where each comes from, before a commit is written.
 
 - **The collision rule in `project validate`.** A project skill directory `.agents/skills/<name>/` or rule `.agents/rules/<name>.md` whose name matches a skill or rule shipped in the same release is a violation. The message names the file and says to remove or rename it. The binary embeds the names of its release's skills and rules, so the check does not depend on `.workbench`.
 
@@ -526,11 +527,11 @@ This section replaces the "Changeset" section of `PROCESS.md` for every Workbenc
 
 - **Every pull request adds at least one change file** in `.changeset/`, describing the change for someone reading release notes rather than for the reviewer of the diff. The only exception is a pull request with no user-visible change, which carries a `Release-Note: none` trailer instead.
   - A change file is Markdown with frontmatter mapping each affected package to a change type. A single-package project uses `default: <major|minor|patch>`; a project's `knope.toml` may add types.
-  - The first heading is the summary. Text below it is the detail.
+  - The first heading is the summary, and it must come first: the first non-blank line after the frontmatter is a Markdown heading with text. Text below it is the detail.
   - Agents create change files with `workbench change-files create`, which validates the type and package against `knope.toml` and writes the file. They never run `knope document-change`, which prompts interactively.
 - **`.changeset/` holds only change files**, because Knope fails on any other Markdown file there. Guidance that lives in `.changeset/README.md` today moves to `PROCESS.md` and the guides.
 - **`workbench change-files check <base> <head>`** passes when either:
-  - the range adds a file under `.changeset/` with valid change-file frontmatter; or
+  - the range adds a file under `.changeset/` with valid change-file frontmatter and a summary heading; or
   - a commit in the range carries the Git trailer `Release-Note: none`. The key is case-insensitive and the value is exactly `none`, as `git interpret-trailers` parses it.
 
   Otherwise it fails with `CHECK_FAILED`, naming both ways to satisfy it. CI runs it on every pull request except Knope's release pull request.
