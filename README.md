@@ -113,11 +113,11 @@ Defects an agent finds along the way get filed in [Beads](https://github.com/ste
 | `.agents/templates/` | The canonical shape of every artifact. |
 | `.agents/commit-scopes` | The commit scopes the `commit-msg` hook accepts. |
 | `mise.toml` | Every pinned tool and every task. `mise.lock` pins the downloads. |
-| `hk.pkl` | Every git hook: formatting, Scoped Commits, Beads, the pre-push gate. |
+| `hk.pkl` | Every git hook: formatting, Scoped Commits, and the Beads steps, including the Beads sync on push and pull. |
 | `fnox.toml` | Secret names, never values. Workbench itself needs none. |
 | `.changeset/` | Pending changelog entries, applied by `mise run version`. |
 | `.github/workflows/` | Continuous integration, the release, the preview, and the published site. |
-| `.omp/` | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
+| `.omp/` | Oh My Pi wiring: the `workflow` tool. |
 
 ## Enforcement
 
@@ -133,11 +133,11 @@ mise run validate    # record frontmatter, ids, cross-references
 mise run docs:build  # the site builds
 ```
 
-`mise run validate` enforces that identifiers match filenames and are unique, that proposal `supersedes` and optional `established-by` references resolve, that superseding a proposal marks the superseded one, and that no proposal approved for implementation still carries an unresolved question. It rejects supersession metadata on policies and decisions, and `describes` on guides, with migration guidance; [`guides/record-validation.md`](guides/record-validation.md) is its full contract. [hk](https://hk.jdx.dev) owns the git hooks: `commit-msg` holds every commit to [Scoped Commits](https://scopedcommits.com/) against the scopes in `.agents/commit-scopes`, and `pre-push` runs the gate. Continuous integration runs the same `mise run check`, so no gate depends on the agent remembering.
+`mise run validate` enforces that identifiers match filenames and are unique, that proposal `supersedes` and optional `established-by` references resolve, that superseding a proposal marks the superseded one, and that no proposal approved for implementation still carries an unresolved question. It rejects supersession metadata on policies and decisions, and `describes` on guides, with migration guidance; [`guides/record-validation.md`](guides/record-validation.md) is its full contract. [hk](https://hk.jdx.dev) owns the git hooks: `commit-msg` holds every commit to [Scoped Commits](https://scopedcommits.com/) against the scopes in `.agents/commit-scopes`, and `pre-commit` formats and lints staged files. Continuous integration runs `mise run check` on every push, and a pull request is marked ready or merged only after it passes, so no gate depends on the agent remembering.
 
 ## Harness support
 
-`AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral. Workbench ships wiring for one harness, [Oh My Pi](https://omp.sh), in `.omp/`: the `workflow` tool, formatting after every edit, and the full gate before the agent ends its turn. Any other harness needs a small one-time adaptation — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). This is deliberate: shipping configuration for four harnesses when only one can be genuinely verified is worse than an honest adaptation step.
+`AGENTS.md` is the contract and `.agents/` is the infrastructure. Both are harness-neutral, and Workbench wires no harness lifecycle events: the agent runs `mise run status`, `mise run fmt`, and `mise run check` itself, and nothing slows its loop between turns. Workbench ships configuration for one harness, [Oh My Pi](https://omp.sh), in `.omp/`: the `workflow` tool. Any other harness needs a small one-time adaptation — see [`guides/adapting-your-harness.md`](guides/adapting-your-harness.md). This is deliberate: shipping configuration for four harnesses when only one can be genuinely verified is worse than an honest adaptation step.
 
 The checks that matter most — the validator, continuous integration, and the commit hook — do not depend on the harness noticing anything.
 

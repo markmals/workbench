@@ -75,3 +75,5 @@ sync:
     remote: "git+https://github.com/markmals/workbench.git"
 export:
     auto: true
+dolt:
+    auto-push: false

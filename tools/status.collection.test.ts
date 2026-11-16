@@ -6,14 +6,26 @@ import path from "node:path";
 import { test, type TestContext } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { installFakeBd, type FakeScript } from "./fake-bd.ts";
+
 let statusScript = fileURLToPath(new URL("./status.ts", import.meta.url));
 
-// hk runs this suite from `pre-push`, and git exports GIT_DIR, GIT_INDEX_FILE and
-// GIT_WORK_TREE to its hooks. A child `git` inheriting those acts on the outer
-// repository rather than on the fixture, so every fixture runs without them.
+// Git exports GIT_DIR, GIT_INDEX_FILE and GIT_WORK_TREE to anything a hook runs, and a
+// child `git` inheriting those acts on the outer repository rather than on the fixture.
+// `BEADS_*` would point Beads at the outer session's database. Every fixture runs without
+// either, and with a scripted `bd`, so no test can reach a real Beads replica.
 let fixtureEnv = Object.fromEntries(
-    Object.entries(process.env).filter(([name]) => !name.startsWith("GIT_")),
+    Object.entries(process.env).filter(
+        ([name]) => !name.startsWith("GIT_") && !name.startsWith("BEADS_"),
+    ),
 );
+
+const NO_BEADS_WORKSPACE: FakeScript = {
+    where: {
+        exit: 1,
+        json: { error: "no_beads_directory", message: "No active beads workspace found." },
+    },
+};
 
 function statusWithPullRequests(t: TestContext, pullRequests: object[]): string {
     let root = mkdtempSync(path.join(tmpdir(), "workbench-status-"));
@@ -54,6 +66,7 @@ function statusWithPullRequests(t: TestContext, pullRequests: object[]): string 
         ].join("\n"),
     );
     chmodSync(gh, 0o755);
+    installFakeBd(bin, NO_BEADS_WORKSPACE);
     mkdirSync(path.join(root, "proposals"));
     writeFileSync(
         path.join(root, "proposals", "0001-feature.md"),
@@ -105,7 +118,10 @@ test("does not select an arbitrary PR when a branch name has been reused", t => 
     );
 });
 
-function statusInRepositoryWithoutRemote(t: TestContext): string {
+function statusInRepositoryWithoutRemote(
+    t: TestContext,
+    { beads = NO_BEADS_WORKSPACE, stayOnMain = false, json = false } = {},
+): string {
     let root = mkdtempSync(path.join(tmpdir(), "workbench-status-local-"));
     t.after(() => rmSync(root, { force: true, recursive: true }));
     execFileSync("git", ["init", "-q", "-b", "main", root], { env: fixtureEnv });
@@ -125,7 +141,8 @@ function statusInRepositoryWithoutRemote(t: TestContext): string {
         ],
         { env: fixtureEnv },
     );
-    execFileSync("git", ["-C", root, "switch", "-q", "-c", "feature/x"], { env: fixtureEnv });
+    if (!stayOnMain)
+        execFileSync("git", ["-C", root, "switch", "-q", "-c", "feature/x"], { env: fixtureEnv });
 
     // No origin and no usable gh, so refs/heads/main is the only evidence of which
     // branch is the default one.
@@ -134,8 +151,9 @@ function statusInRepositoryWithoutRemote(t: TestContext): string {
     let gh = path.join(bin, "gh");
     writeFileSync(gh, `#!${process.execPath}\nprocess.exit(1);\n`);
     chmodSync(gh, 0o755);
+    installFakeBd(bin, beads);
 
-    return execFileSync(process.execPath, [statusScript], {
+    return execFileSync(process.execPath, [statusScript, ...(json ? ["--json"] : [])], {
         cwd: root,
         encoding: "utf8",
         env: {
@@ -155,4 +173,80 @@ test("recognizes a local default branch when there is no remote and no gh", t =>
         !report.includes("Branch role unknown"),
         `expected report to omit "Branch role unknown":\n${report}`,
     );
+});
+
+const AVAILABLE_BEADS: FakeScript = {
+    where: { json: { database_path: "/project/.beads/embeddeddolt", path: "/project/.beads" } },
+    ready: { json: [{ id: "wb-1", title: "Fix the parser", priority: 1, status: "open" }] },
+    list: {
+        json: [{ id: "wb-2", title: "Port status", status: "in_progress", assignee: "mark@beta" }],
+    },
+    prime: { stdout: "## Persistent Memories (1)\n\n### fact\nA durable fact.\n" },
+};
+
+test("reports Beads after the phase: sync outcome, ready work, items in progress, memories", t => {
+    let report = statusInRepositoryWithoutRemote(t, {
+        stayOnMain: true,
+        beads: { ...AVAILABLE_BEADS, sync: { json: { status: "ok", pulled: true, pushed: true } } },
+    });
+
+    assert.ok(
+        report.indexOf("Phase 1 — Preparation") < report.indexOf("Beads"),
+        `expected the Beads section after the phase report:\n${report}`,
+    );
+    for (let expected of [
+        "synced",
+        "wb-1",
+        "Fix the parser",
+        "wb-2",
+        "mark@beta",
+        "A durable fact.",
+    ])
+        assertContains(report, expected);
+});
+
+test("adds a beads object to the JSON status", t => {
+    let status = JSON.parse(
+        statusInRepositoryWithoutRemote(t, {
+            stayOnMain: true,
+            json: true,
+            beads: { ...AVAILABLE_BEADS, sync: { json: { status: "ok" } } },
+        }),
+    );
+
+    assert.equal(status.phase, "1");
+    assert.equal(status.beads.sync.outcome, "synced");
+    assert.equal(typeof status.beads.sync.detail, "string");
+    assert.deepEqual(status.beads.ready, [{ id: "wb-1", title: "Fix the parser", priority: 1 }]);
+    assert.deepEqual(status.beads.in_progress, [
+        { id: "wb-2", title: "Port status", assignee: "mark@beta" },
+    ]);
+    assert.equal(status.beads.memories, "## Persistent Memories (1)\n\n### fact\nA durable fact.");
+});
+
+test("a failed Beads sync is reported with its reason and does not fail status", t => {
+    let report = statusInRepositoryWithoutRemote(t, {
+        stayOnMain: true,
+        beads: {
+            ...AVAILABLE_BEADS,
+            sync: { exit: 1, json: { error: "sync failed: could not resolve host github.com" } },
+            "dolt remote list": { exit: 1, stderr: "Error: no remotes\n" },
+        },
+    });
+
+    assertContains(report, "failed");
+    assertContains(report, "could not resolve host github.com");
+    assertContains(report, "this machine");
+    assertContains(report, "Fix the parser");
+});
+
+test("an unavailable Beads workspace replaces the section with a pointer to setup", t => {
+    let report = statusInRepositoryWithoutRemote(t, { stayOnMain: true });
+    let status = JSON.parse(statusInRepositoryWithoutRemote(t, { stayOnMain: true, json: true }));
+
+    assertContains(report, "unavailable");
+    assertContains(report, "No active beads workspace found.");
+    assertContains(report, "mise run setup");
+    assert.deepEqual(Object.keys(status.beads), ["unavailable"]);
+    assert.match(status.beads.unavailable, /No active beads workspace found/);
 });

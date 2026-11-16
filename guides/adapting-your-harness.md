@@ -7,7 +7,7 @@ title: Adapting Your Harness
 
 ## How do I wire this into the agent I actually use?
 
-Workbench ships its infrastructure harness-neutral in `.agents/` and comes wired for [Oh My Pi](https://omp.sh). Any other harness needs a deliberate one-time adaptation: point it at the contract, make its skills discoverable, and wire the lifecycle events it supports. Commit that configuration, then leave `.agents/` as the source of truth.
+Workbench ships its infrastructure harness-neutral in `.agents/` and comes wired for [Oh My Pi](https://omp.sh). Any other harness needs a deliberate one-time adaptation: point it at the contract and make its skills discoverable. Workbench wires no harness lifecycle events, so there is nothing else to adapt. Commit that configuration, then leave `.agents/` as the source of truth.
 
 The checks that matter most do not depend on a harness noticing anything. The validator, continuous integration, and the commit hook run independently of the agent's instructions.
 
@@ -17,38 +17,31 @@ Ask your agent to make the harness-specific changes below. You should review and
 
 ## What ships
 
-| Path                    | What it contains                                                   |
-| ----------------------- | ------------------------------------------------------------------ |
-| `AGENTS.md`             | The agent contract — the one file every harness must load.         |
-| `PROCESS.md`            | The full process description.                                      |
-| `VISION.md`             | Your project's vision; replace Workbench's.                        |
-| `proposals/`            | One document per change, preserved as history.                     |
-| `policies/`             | Rules future work must keep enforcing.                             |
-| `decisions/`            | Architectural choices and the context that produced them.          |
-| `guides/`               | User-facing documentation.                                         |
-| `docs/`                 | The site that publishes the vision, record, and guides.            |
-| `tools/`                | The artifact validator and the small scripts the tasks run.        |
-| `.agents/skills/`       | One skill directory per process phase or cross-cutting concern.    |
-| `.agents/rules/`        | Code quality, commit discipline, and enforcement hierarchy.        |
-| `.agents/templates/`    | The canonical shape of every artifact.                             |
-| `.agents/commit-scopes` | The commit scopes the `commit-msg` hook accepts.                   |
-| `mise.toml`             | Every pinned tool and every task.                                  |
-| `hk.pkl`                | Every git hook, including the Scoped Commits check.                |
-| `.github/workflows/`    | Continuous integration and the preview workflow.                   |
-| `.omp/`                 | Oh My Pi wiring: the `workflow` tool and the lifecycle extensions. |
+| Path                    | What it contains                                                |
+| ----------------------- | --------------------------------------------------------------- |
+| `AGENTS.md`             | The agent contract — the one file every harness must load.      |
+| `PROCESS.md`            | The full process description.                                   |
+| `VISION.md`             | Your project's vision; replace Workbench's.                     |
+| `proposals/`            | One document per change, preserved as history.                  |
+| `policies/`             | Rules future work must keep enforcing.                          |
+| `decisions/`            | Architectural choices and the context that produced them.       |
+| `guides/`               | User-facing documentation.                                      |
+| `docs/`                 | The site that publishes the vision, record, and guides.         |
+| `tools/`                | The artifact validator and the small scripts the tasks run.     |
+| `.agents/skills/`       | One skill directory per process phase or cross-cutting concern. |
+| `.agents/rules/`        | Code quality, commit discipline, and enforcement hierarchy.     |
+| `.agents/templates/`    | The canonical shape of every artifact.                          |
+| `.agents/commit-scopes` | The commit scopes the `commit-msg` hook accepts.                |
+| `mise.toml`             | Every pinned tool and every task.                               |
+| `hk.pkl`                | Every git hook, including the Scoped Commits check.             |
+| `.github/workflows/`    | Continuous integration and the preview workflow.                |
+| `.omp/`                 | Oh My Pi wiring: the `workflow` tool.                           |
 
 When a harness needs its own configuration, generate it from `.agents/` rather than replacing the source. This prevents two copies of the process from becoming two different processes.
 
 ## If you use Oh My Pi
 
-Nothing needs adapting. Oh My Pi loads `AGENTS.md` from the repository root and discovers `.agents/skills/` on its own, and `.omp/` carries the rest:
-
-| Path | What it does |
-| --- | --- |
-| `.omp/tools/dynamic-workflows/` | Registers the `workflow` tool. |
-| `.omp/extensions/prime-beads.ts` | Runs `bd prime` before the first turn, injecting the work graph and durable memories into the session. |
-| `.omp/extensions/format-after-edit.ts` | Runs the project's formatter on changed files, skips unsupported extensions such as `.feature`, and reports reformats or parse failures for supported files. |
-| `.omp/extensions/check-before-stop.ts` | Runs `mise run check` before the agent ends its turn. A failure, or a gate that does not finish within 25 seconds, sends the agent back once with the reason. |
+Nothing needs adapting. Oh My Pi loads `AGENTS.md` from the repository root and discovers `.agents/skills/` on its own, and `.omp/tools/dynamic-workflows/` registers the `workflow` tool.
 
 Continue at [Configure the readiness-report account](#configure-the-readiness-report-account).
 
@@ -78,22 +71,11 @@ If your harness discovers skills from a fixed directory, point that directory at
 
 A harness without a skill mechanism can still use Workbench. `AGENTS.md` names each skill at the point where it applies, so the agent can read it directly. Confirm that it follows those paths. If it cannot, put the two or three most important skill bodies in `AGENTS.md` rather than maintaining a parallel skills tree.
 
-## Wire lifecycle events
+## Git hooks need no adaptation
 
-Workbench needs these events attached where your harness allows them:
+Git hooks are not harness wiring. [hk](https://hk.jdx.dev) owns them, `mise run setup` installs them with `hk install --mise`, and they run for every commit regardless of who or what made it — including the `commit-msg` step that holds every subject to Scoped Commits against the scopes in `.agents/commit-scopes`, the `pre-commit` step that formats staged files, and the steps that sync Beads on `git push` and `git pull`.
 
-| When                           | Run                       |
-| ------------------------------ | ------------------------- |
-| Before the first turn          | `bd prime`                |
-| After the agent edits a file   | `mise run fmt -- <files>` |
-| Before the agent ends its turn | `mise run check`          |
-| At session start               | Load `AGENTS.md`          |
-
-`.omp/extensions/` is the Oh My Pi wiring for the first three events and a working reference for another harness's configuration.
-
-Git hooks are not harness wiring and need no adaptation. [hk](https://hk.jdx.dev) owns them, `mise run setup` installs them with `hk install --mise`, and they run for every commit regardless of who or what made it — including the `commit-msg` step that holds every subject to Scoped Commits against the scopes in `.agents/commit-scopes`.
-
-Continuous integration checks every commit in a pull request wherever it was made, so the hook is a fast local signal rather than the only line of defence.
+No hook runs the full gate. Continuous integration runs `mise run check` on every push and checks every commit in a pull request wherever it was made, and the agent waits for it before marking a pull request ready or merging. Orientation and formatting are commands the agent runs itself, `mise run status` and `mise run fmt -- <files>`, so a harness needs no event to trigger them.
 
 ## Configure the readiness-report account
 
@@ -129,7 +111,7 @@ Then run one small feature end to end: branch, draft pull request, proposal, cur
 
 ## Add another harness without forking
 
-Repeat the contract, skill, and lifecycle steps for the new harness. Do not fork `.agents/`; derive the new harness configuration from it.
+Repeat the contract and skill steps for the new harness. Do not fork `.agents/`; derive the new harness configuration from it.
 
 If two harnesses need genuinely different instructions, make that difference an explicit note in `AGENTS.md`. Do not leave two divergent copies of the contract or skills for future maintainers to reconcile.
 
