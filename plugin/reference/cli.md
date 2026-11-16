@@ -556,6 +556,598 @@ Result schema:
 }
 ```
 
+### `workflow`
+
+Where the work stands and what happens next.
+
+#### `workbench workflow status`
+
+Report where the work stands, what happens next and who does it, and this machine's Beads work.
+
+Reads the branch, its pull request (through `gh`), and the active proposal, and reports the phase, the situation, the next action, whether the agent or the human (`you`) takes it, the skill that covers it, notices, and the `facts` they were derived from. A pull request `gh` cannot look up — `gh` missing, not authenticated, or not answering — is `unknown` with the reason, never `none`. Before reporting it runs one Beads sync with the project's remote, the same one `workbench beads sync` runs; `--no-sync` skips it. `beads` then holds the sync's `outcome` (`synced`, `skipped`, `failed`, `conflict`, or `blocked`) and `detail`, the ready work, the items in progress and who holds them, and the project's memories; or `unavailable` with the reason. `--timeout` limits the sync and each `gh` query (default 20 seconds). Beads outcomes never change the exit status: the command exits 0 whenever it can read the checkout.
+
+- **Effect:** reads only
+- **Requires:** `git`, `gh`, `gh-authentication`, `bd`, `network`
+- **Dry run:** no
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--no-sync` | boolean | no | — | Report this machine's Beads replica without syncing it first |
+| `--timeout <integer>` | integer | no | `20` | Seconds the Beads sync, and each GitHub query, may take |
+
+Examples:
+
+```sh
+# Orient at the start of a session
+workbench workflow status
+# Report without syncing Beads, as when offline
+workbench workflow status --no-sync
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "Actor": {
+      "description": "Who acts next: the agent, or the human reading the report.",
+      "enum": [
+        "agent",
+        "you"
+      ],
+      "type": "string"
+    },
+    "BeadsReport": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BeadsState"
+        },
+        {
+          "$ref": "#/$defs/BeadsUnavailable"
+        }
+      ],
+      "description": "This machine's Beads replica after the sync, or why it cannot be read."
+    },
+    "BeadsState": {
+      "properties": {
+        "inProgress": {
+          "description": "Items in progress and who holds them, from `bd list --status in_progress`.",
+          "items": {
+            "$ref": "#/$defs/InProgressItem"
+          },
+          "type": "array"
+        },
+        "memories": {
+          "description": "The project's memories, from `bd prime --memories-only`.",
+          "type": "string"
+        },
+        "ready": {
+          "description": "Work no open item blocks, from `bd ready`.",
+          "items": {
+            "$ref": "#/$defs/ReadyItem"
+          },
+          "type": "array"
+        },
+        "sync": {
+          "$ref": "#/$defs/SyncResult"
+        }
+      },
+      "required": [
+        "sync",
+        "ready",
+        "inProgress",
+        "memories"
+      ],
+      "type": "object"
+    },
+    "BeadsUnavailable": {
+      "properties": {
+        "unavailable": {
+          "description": "Why: `bd` is missing, there is no workspace or database, or a read after the sync failed.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unavailable"
+      ],
+      "type": "object"
+    },
+    "Facts": {
+      "properties": {
+        "branch": {
+          "description": "The checked-out branch, or `null` when Git cannot name it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defaultBranch": {
+          "description": "The repository's default branch, or `null` when it cannot be determined.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hasUpstream": {
+          "type": "boolean"
+        },
+        "isDefaultBranch": {
+          "description": "Whether the branch is the default branch; `null` when that is unknown.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Proposal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The proposal the work is about, if any."
+        },
+        "proposalSelection": {
+          "$ref": "#/$defs/ProposalSelection"
+        },
+        "proposalSuccessor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProposalSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The proposal that supersedes a superseded one."
+        },
+        "pullRequest": {
+          "$ref": "#/$defs/PullRequestLookup"
+        },
+        "unpushedCommits": {
+          "description": "Commits on the branch that its upstream does not have.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hasUpstream",
+        "unpushedCommits",
+        "pullRequest",
+        "proposalSelection"
+      ],
+      "type": "object"
+    },
+    "InProgressItem": {
+      "properties": {
+        "assignee": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "type": "object"
+    },
+    "Notice": {
+      "description": "Something the next actor should know besides the phase.",
+      "oneOf": [
+        {
+          "description": "The proposal has unresolved clarification markers.",
+          "properties": {
+            "count": {
+              "format": "uint",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "clarifications",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "count"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The branch has commits its upstream does not.",
+          "properties": {
+            "count": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "unpushed-commits",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "count"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The proposal is in active review, but its pull request is still a draft.",
+          "properties": {
+            "kind": {
+              "const": "draft-active-review",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The proposal was chosen by a heuristic, or names another pull request.",
+          "properties": {
+            "kind": {
+              "const": "ambiguous-proposal-selection",
+              "type": "string"
+            },
+            "otherCandidates": {
+              "items": {
+                "$ref": "#/$defs/ProposalSummary"
+              },
+              "type": "array"
+            },
+            "proposalPullRequest": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pullRequestMismatch": {
+              "type": "boolean"
+            },
+            "pullRequestNumber": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "selected": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "otherCandidates",
+            "pullRequestMismatch"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Proposal": {
+      "description": "A proposal as its frontmatter states it. A field with the wrong shape reads as absent:\nreporting status must not fail on a record `records validate` would reject.",
+      "properties": {
+        "clarificationCount": {
+          "description": "Unresolved `[NEEDS CLARIFICATION: …]` markers in its prose.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pullRequest": {
+          "description": "The `pull-request` the proposal names: a number or a URL.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "clarificationCount"
+      ],
+      "type": "object"
+    },
+    "ProposalSelection": {
+      "description": "How the proposal was chosen, when the choice was not certain.",
+      "properties": {
+        "otherCandidates": {
+          "description": "Other unfinished proposals the heuristic passed over.",
+          "items": {
+            "$ref": "#/$defs/ProposalSummary"
+          },
+          "type": "array"
+        },
+        "pullRequestMismatch": {
+          "description": "Whether the chosen proposal names a different pull request than the branch's.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "otherCandidates",
+        "pullRequestMismatch"
+      ],
+      "type": "object"
+    },
+    "ProposalSummary": {
+      "properties": {
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "PullRequest": {
+      "properties": {
+        "baseRefName": {
+          "type": "string"
+        },
+        "isDraft": {
+          "type": "boolean"
+        },
+        "number": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/PullRequestState"
+        },
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "state",
+        "baseRefName",
+        "isDraft",
+        "url",
+        "title"
+      ],
+      "type": "object"
+    },
+    "PullRequestLookup": {
+      "description": "The branch's pull request, as far as `gh` could tell.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PullRequest",
+          "description": "The branch has exactly this pull request, open or not.",
+          "properties": {
+            "status": {
+              "const": "found",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`gh` positively found no pull request for the branch.",
+          "properties": {
+            "status": {
+              "const": "none",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`gh` could not tell, so whether a pull request exists is unknown.",
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "status": {
+              "const": "unknown",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "reason"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "PullRequestState": {
+      "enum": [
+        "OPEN",
+        "CLOSED",
+        "MERGED"
+      ],
+      "type": "string"
+    },
+    "ReadyItem": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "priority": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "priority"
+      ],
+      "type": "object"
+    },
+    "SyncOutcome": {
+      "oneOf": [
+        {
+          "const": "synced",
+          "description": "This replica pulled every change on the remote and published its own.",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "description": "`--no-sync` was passed; nothing was pulled or pushed.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "The sync did not finish, or was refused before it started.",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "description": "Beads halted on a conflict it cannot settle; nothing was pushed.",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "description": "A dirty working set stops Beads from publishing; nothing was pushed.",
+          "type": "string"
+        }
+      ]
+    },
+    "SyncResult": {
+      "description": "How one sync ended.",
+      "properties": {
+        "detail": {
+          "description": "What happened, in words; for anything but `synced`, why.",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/SyncOutcome"
+        }
+      },
+      "required": [
+        "outcome",
+        "detail"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The status report.",
+  "properties": {
+    "actor": {
+      "$ref": "#/$defs/Actor"
+    },
+    "beads": {
+      "$ref": "#/$defs/BeadsReport"
+    },
+    "facts": {
+      "$ref": "#/$defs/Facts"
+    },
+    "next": {
+      "type": "string"
+    },
+    "notices": {
+      "items": {
+        "$ref": "#/$defs/Notice"
+      },
+      "type": "array"
+    },
+    "phase": {
+      "type": "string"
+    },
+    "reason": {
+      "description": "Why the pull request is unknown, when it is.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "situation": {
+      "type": "string"
+    },
+    "skill": {
+      "description": "The skill that covers the next action, by name.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "phase",
+    "title",
+    "situation",
+    "next",
+    "actor",
+    "notices",
+    "facts",
+    "beads"
+  ],
+  "title": "WorkflowStatus",
+  "type": "object"
+}
+```
+
 ### `records`
 
 The project's proposals, policies, decisions, guides, and vision.
@@ -1022,5 +1614,605 @@ Result schema:
   ],
   "title": "ChangeFilesCheck",
   "type": "object"
+}
+```
+
+### `beads`
+
+This machine's Beads replica: sync, claim, and close.
+
+#### `workbench beads sync`
+
+Sync this machine's Beads replica with the project's remote.
+
+Pulls every change other machines published to the project's Beads remote (`refs/dolt/data` on the checkout's `origin`) and publishes this replica's, with `bd sync`; when the remote has no Beads history yet, the first sync publishes it with `bd dolt push`. Refuses, changing nothing, when the replica's Beads remote is not the checkout's `origin` or there is no `origin`. Limited to `--timeout` seconds (default 20). Exits 0 only when the receipt's `status` is `synced`. Otherwise the error's `details.outcome` is `failed`, `conflict`, or `blocked`, and its code says why: UNAVAILABLE (remote or network unreachable, push retries exhausted), TIMEOUT, UNAUTHENTICATED (credentials rejected), PRECONDITION_FAILED (a foreign remote or no `origin`, no Beads workspace, or a dirty working set that blocks publishing), DEPENDENCY_MISSING (no `bd`), or CONFLICT (a halted merge; `details.tables` and `details.differing` name what conflicts). `--dry-run` reports the remote and the changes this replica has not published, without syncing.
+
+- **Effect:** modifies this machine's Beads replica and the project's Beads remote
+- **Requires:** `git`, `bd`, `network`
+- **Dry run:** yes
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `UNAUTHENTICATED`, `CONFLICT`, `TIMEOUT`, `UNAVAILABLE`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--dry-run` | boolean | no | — | Validate input, resolve the target, and describe the changes without making them |
+| `--timeout <integer>` | integer | no | `20` | Seconds each sync with the Beads remote may take before it fails |
+
+Examples:
+
+```sh
+# Publish what this machine changed and pull what the others did
+workbench beads sync
+# See the remote and the unpublished changes without syncing
+workbench beads sync --dry-run
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "DifferingItem": {
+      "description": "An item that differs between two states of the database.",
+      "properties": {
+        "change": {
+          "description": "How it differs, as Beads names it: `added`, `removed`, or `modified`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "description": "Its title on whichever side has it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "SyncOutcome": {
+      "oneOf": [
+        {
+          "const": "synced",
+          "description": "This replica pulled every change on the remote and published its own.",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "description": "`--no-sync` was passed; nothing was pulled or pushed.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "The sync did not finish, or was refused before it started.",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "description": "Beads halted on a conflict it cannot settle; nothing was pushed.",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "description": "A dirty working set stops Beads from publishing; nothing was pushed.",
+          "type": "string"
+        }
+      ]
+    },
+    "SyncPreview": {
+      "properties": {
+        "cannotPredict": {
+          "description": "What the dry run cannot know until the sync runs.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "project": {
+          "type": "string"
+        },
+        "remote": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "description": "`dry-run`.",
+          "type": "string"
+        },
+        "unpublished": {
+          "$ref": "#/$defs/UnpublishedChanges"
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "unpublished",
+        "cannotPredict"
+      ],
+      "type": "object"
+    },
+    "Synced": {
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "project": {
+          "description": "The project root.",
+          "type": "string"
+        },
+        "remote": {
+          "description": "The Beads remote, without credentials; `null` when there is none.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/SyncOutcome",
+          "description": "`synced`."
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "detail"
+      ],
+      "type": "object"
+    },
+    "UnpublishedChanges": {
+      "description": "The changes this replica has not published, as far as it knows.",
+      "properties": {
+        "determined": {
+          "description": "Whether they could be determined. Beads compares this replica with the remote as last\nfetched (`bd diff origin/main main`), by item rather than by commit.",
+          "type": "boolean"
+        },
+        "items": {
+          "description": "The items that differ from the remote as last fetched.",
+          "items": {
+            "$ref": "#/$defs/DifferingItem"
+          },
+          "type": "array"
+        },
+        "reason": {
+          "description": "Why they could not be determined.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "determined",
+        "items"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Synced"
+    },
+    {
+      "$ref": "#/$defs/SyncPreview"
+    }
+  ],
+  "description": "A completed sync, or a dry run's description of one.",
+  "title": "SyncReceipt"
+}
+```
+
+#### `workbench beads claim`
+
+Claim a Beads item as this machine's claimant, so other machines see the claim.
+
+Syncs, claims the item as this machine's claimant (`BEADS_ACTOR`, or `<login user>@<short host name>` when it is unset), syncs again, and reads the item back to confirm who holds it. The receipt's `status` is `claimed` (`published: true`) or, when the second sync failed, `claimed-unpublished` (`published: false`, with the reason on stderr): both exit 0 and the item is yours. CONFLICT (exit 4) means another claimant already held the item (`details.outcome: held`) or a concurrent claim from another machine won (`lost`); `details.holder` names the holder. Do not start the work then. An unknown id is NOT_FOUND; another refusal from Beads, or a replica whose Beads remote is not the checkout's `origin`, is PRECONDITION_FAILED and changes nothing. Each sync is limited to `--timeout` seconds (default 20). `--dry-run` reports the item, its current claimant, and the claimant it would claim as.
+
+- **Effect:** modifies the item's assignee and status, in this replica and on the Beads remote
+- **Requires:** `git`, `bd`, `network`
+- **Dry run:** yes
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `NOT_FOUND`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `CONFLICT`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `<id>` | string | yes | — | The Beads item's id, such as wb-1 |
+| `--dry-run` | boolean | no | — | Validate input, resolve the target, and describe the changes without making them |
+| `--timeout <integer>` | integer | no | `20` | Seconds each sync with the Beads remote may take before it fails |
+
+Examples:
+
+```sh
+# Claim wb-1 before starting it
+workbench beads claim wb-1
+# See who holds wb-1 and who the claim would be made as
+workbench beads claim wb-1 --dry-run
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "ItemChange": {
+      "description": "A change Beads accepted.",
+      "properties": {
+        "claimant": {
+          "description": "Who the change was made as.",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The item.",
+          "type": "string"
+        },
+        "project": {
+          "description": "The project root.",
+          "type": "string"
+        },
+        "published": {
+          "description": "Whether other machines can see the change.",
+          "type": "boolean"
+        },
+        "remote": {
+          "description": "The Beads remote, without credentials; `null` when there is none.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "description": "`claimed` or `closed` when other machines can see the change; `claimed-unpublished` or\n`closed-unpublished` when only this machine has it because the sync failed.",
+          "type": "string"
+        },
+        "sync": {
+          "$ref": "#/$defs/SyncResult",
+          "description": "The sync that published the change, or failed to."
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "id",
+        "claimant",
+        "published",
+        "sync",
+        "detail"
+      ],
+      "type": "object"
+    },
+    "ItemPreview": {
+      "description": "What a claim or close would act on.",
+      "properties": {
+        "cannotPredict": {
+          "description": "What the dry run cannot know until the change runs.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "claimant": {
+          "description": "The claimant the change would be made as.",
+          "type": "string"
+        },
+        "currentClaimant": {
+          "description": "Who holds the item in this replica now, if anyone.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "itemStatus": {
+          "description": "The item's status in this replica: `open`, `in_progress`, `closed`, and so on.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "project": {
+          "type": "string"
+        },
+        "remote": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "description": "`dry-run`.",
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "id",
+        "claimant",
+        "cannotPredict"
+      ],
+      "type": "object"
+    },
+    "SyncOutcome": {
+      "oneOf": [
+        {
+          "const": "synced",
+          "description": "This replica pulled every change on the remote and published its own.",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "description": "`--no-sync` was passed; nothing was pulled or pushed.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "The sync did not finish, or was refused before it started.",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "description": "Beads halted on a conflict it cannot settle; nothing was pushed.",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "description": "A dirty working set stops Beads from publishing; nothing was pushed.",
+          "type": "string"
+        }
+      ]
+    },
+    "SyncResult": {
+      "description": "How one sync ended.",
+      "properties": {
+        "detail": {
+          "description": "What happened, in words; for anything but `synced`, why.",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/SyncOutcome"
+        }
+      },
+      "required": [
+        "outcome",
+        "detail"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ItemChange"
+    },
+    {
+      "$ref": "#/$defs/ItemPreview"
+    }
+  ],
+  "description": "A claim or close, made or previewed.",
+  "title": "ItemReceipt"
+}
+```
+
+#### `workbench beads close`
+
+Close a Beads item as this machine's claimant, then sync so other machines see it.
+
+Closes the item with the reason as this machine's claimant (`BEADS_ACTOR`, or `<login user>@<short host name>` when it is unset) — a plain `bd close` runs as the Git user name and is refused for an item the claimant holds — then syncs. The receipt's `status` is `closed` (`published: true`) or, when the sync failed, `closed-unpublished` (`published: false`, with the reason on stderr); both exit 0. When Beads refuses because another claimant holds the item the error is CONFLICT, with `details.holder`; an unknown id is NOT_FOUND; another refusal, or a replica whose Beads remote is not the checkout's `origin`, is PRECONDITION_FAILED. A refused close syncs nothing. The sync is limited to `--timeout` seconds (default 20). `--dry-run` reports the item, its current claimant, and the claimant it would close as.
+
+- **Effect:** modifies the item's status, in this replica and on the Beads remote
+- **Requires:** `git`, `bd`, `network`
+- **Dry run:** yes
+- **Idempotent:** yes
+- **Errors:** `INVALID_ARGUMENT`, `NOT_FOUND`, `PRECONDITION_FAILED`, `DEPENDENCY_MISSING`, `CONFLICT`, `INTERNAL`
+
+| Argument | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `<id>` | string | yes | — | The Beads item's id, such as wb-1 |
+| `--reason <string>` | string | yes | — | Why the item is closed, such as the pull request that resolved it |
+| `--dry-run` | boolean | no | — | Validate input, resolve the target, and describe the changes without making them |
+| `--timeout <integer>` | integer | no | `20` | Seconds each sync with the Beads remote may take before it fails |
+
+Examples:
+
+```sh
+# Close wb-1 once its fix is in a pull request
+workbench beads close wb-1 --reason 'Fixed in PR #42'
+# See who holds wb-1 and who the close would be made as
+workbench beads close wb-1 --reason Done --dry-run
+```
+
+Result schema:
+
+```json
+{
+  "$defs": {
+    "ItemChange": {
+      "description": "A change Beads accepted.",
+      "properties": {
+        "claimant": {
+          "description": "Who the change was made as.",
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The item.",
+          "type": "string"
+        },
+        "project": {
+          "description": "The project root.",
+          "type": "string"
+        },
+        "published": {
+          "description": "Whether other machines can see the change.",
+          "type": "boolean"
+        },
+        "remote": {
+          "description": "The Beads remote, without credentials; `null` when there is none.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "description": "`claimed` or `closed` when other machines can see the change; `claimed-unpublished` or\n`closed-unpublished` when only this machine has it because the sync failed.",
+          "type": "string"
+        },
+        "sync": {
+          "$ref": "#/$defs/SyncResult",
+          "description": "The sync that published the change, or failed to."
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "id",
+        "claimant",
+        "published",
+        "sync",
+        "detail"
+      ],
+      "type": "object"
+    },
+    "ItemPreview": {
+      "description": "What a claim or close would act on.",
+      "properties": {
+        "cannotPredict": {
+          "description": "What the dry run cannot know until the change runs.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "claimant": {
+          "description": "The claimant the change would be made as.",
+          "type": "string"
+        },
+        "currentClaimant": {
+          "description": "Who holds the item in this replica now, if anyone.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "itemStatus": {
+          "description": "The item's status in this replica: `open`, `in_progress`, `closed`, and so on.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "project": {
+          "type": "string"
+        },
+        "remote": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "description": "`dry-run`.",
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "project",
+        "id",
+        "claimant",
+        "cannotPredict"
+      ],
+      "type": "object"
+    },
+    "SyncOutcome": {
+      "oneOf": [
+        {
+          "const": "synced",
+          "description": "This replica pulled every change on the remote and published its own.",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "description": "`--no-sync` was passed; nothing was pulled or pushed.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "The sync did not finish, or was refused before it started.",
+          "type": "string"
+        },
+        {
+          "const": "conflict",
+          "description": "Beads halted on a conflict it cannot settle; nothing was pushed.",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "description": "A dirty working set stops Beads from publishing; nothing was pushed.",
+          "type": "string"
+        }
+      ]
+    },
+    "SyncResult": {
+      "description": "How one sync ended.",
+      "properties": {
+        "detail": {
+          "description": "What happened, in words; for anything but `synced`, why.",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/SyncOutcome"
+        }
+      },
+      "required": [
+        "outcome",
+        "detail"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ItemChange"
+    },
+    {
+      "$ref": "#/$defs/ItemPreview"
+    }
+  ],
+  "description": "A claim or close, made or previewed.",
+  "title": "ItemReceipt"
 }
 ```
