@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Record Validation and Workflow Status · Workbench</title>
+<meta name="description" content="A platform-agnostic, harness-agnostic agentic development process kit.">
+<link rel="icon" href="/workbench/pr-preview/pr-14/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/workbench/pr-preview/pr-14/css/site.min.6858dcfd9ef536c6838cfcac556c73c4c9472c5186119967c658c25bd331e2b8.css" integrity="sha256-aFjc/Z71NsaDjPysVWxzxMlHLFGGEZlnxljCW9Mx4rg=">
+<script src="/workbench/pr-preview/pr-14/js/search.min.91c03ab0618e873fdf0408644ae4cec995e27513bfe7aefce72be2867e757830.js" integrity="sha256-kcA6sGGOhz/fBAhkSuTOyZXidRO/56785yvihn51eDA=" defer></script>
+
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="site-header__brand" href="/workbench/pr-preview/pr-14/"><img src="/workbench/pr-preview/pr-14/workbench-icon.png" alt="" width="32" height="32"><span>Workbench</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Main">
+    <a href="/workbench/pr-preview/pr-14/vision/">Vision</a>
+    <a href="/workbench/pr-preview/pr-14/process/">Process</a>
+    <a href="/workbench/pr-preview/pr-14/guides/" class="is-active">Guides</a>
+    <a href="/workbench/pr-preview/pr-14/proposals/">Change history</a>
+    <a href="/workbench/pr-preview/pr-14/policies/">Policies</a>
+    <a href="/workbench/pr-preview/pr-14/decisions/">Decisions</a>
+  </nav>
+  <button class="site-header__search" type="button" data-search-open aria-haspopup="dialog">
+    <span>Search</span><kbd>/</kbd>
+  </button>
+</header>
+
+    <main id="main">
+<div class="layout">
+<nav class="sidebar" aria-label="Guides">
+  <a class="sidebar__section" href="/workbench/pr-preview/pr-14/guides/">Guides</a>
+  <ul>
+    <li><a href="/workbench/pr-preview/pr-14/guides/adopting-workbench/">Adopting Workbench</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/choosing-a-preview/">Choosing a Preview</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/cli-reference/">CLI Reference</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/getting-started/">Getting Started</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/current-specifications/">Keeping Current Specifications</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/keeping-the-record/">Keeping the Record</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/record-validation/" aria-current="page">Record Validation and Workflow Status</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/running-a-feature/">Running a Feature</a></li>
+    <li><a href="/workbench/pr-preview/pr-14/guides/writing-a-good-proposal/">Writing a Good Proposal</a></li>
+  </ul>
+</nav>
+
+  <article class="content" data-pagefind-body><h1 id="record-validation-and-workflow-status">Record Validation and Workflow Status</h1>
+
+<p><code>workbench records validate</code> checks the current record metadata. <code>workbench workflow status</code> identifies the active proposal and the next actor. This page is their current public contract for what they detect and report; the <a href="/workbench/pr-preview/pr-14/guides/cli-reference/">CLI reference</a> states their arguments, result shapes, and error codes, and the <a href="/workbench/pr-preview/pr-14/process/">process</a> defines the surrounding workflow. <code>mise run validate</code> and <code>mise run status</code> run the same commands with text output for humans.</p>
+<h2 id="validate-the-record">Validate the record <a class="heading-anchor" href="#validate-the-record" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Run <code>workbench records validate</code> anywhere in the project&rsquo;s Git checkout; it checks the project root. Its result lists every violation with the file&rsquo;s <code>path</code> and a <code>message</code>, and their <code>count</code>. With no violations it exits zero. With any, it still writes the result to stdout, reports <code>CHECK_FAILED</code> on stderr, and exits 1. <code>mise run validate</code> runs it, and <code>workbench project validate</code>, with <code>--output text</code>.</p>
+<p>The validator reads <code>VISION.md</code> and Markdown files directly inside <code>proposals/</code>, <code>policies/</code>, <code>decisions/</code>, and <code>guides/</code>. Directory READMEs are indexes, not records. Empty or absent optional record directories are allowed. Nested Markdown records are rejected. Symlinked regular files are checked; symlinked directories are not traversed.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Record</th>
+					<th>Required frontmatter</th>
+					<th>Allowed status</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Vision</td>
+					<td><code>title</code>, <code>updated</code> as <code>YYYY-MM-DD</code></td>
+					<td>None</td>
+			</tr>
+			<tr>
+					<td>Proposal</td>
+					<td><code>id</code>, <code>title</code>, non-empty <code>authors</code> list, <code>status</code>, <code>pull-request</code>, <code>supersedes</code> list</td>
+					<td><code>draft</code>, <code>awaiting-implementation</code>, <code>active-review</code>, <code>returned-for-revisions</code>, <code>accepted</code>, <code>implemented</code>, <code>rejected</code>, <code>withdrawn</code>, <code>superseded</code></td>
+			</tr>
+			<tr>
+					<td>Policy</td>
+					<td><code>id</code>, <code>title</code>, <code>status</code></td>
+					<td><code>draft</code>, <code>active</code></td>
+			</tr>
+			<tr>
+					<td>Decision</td>
+					<td><code>id</code>, <code>title</code>, <code>status</code></td>
+					<td><code>proposed</code>, <code>accepted</code></td>
+			</tr>
+			<tr>
+					<td>Guide</td>
+					<td><code>id</code>, <code>title</code></td>
+					<td>None</td>
+			</tr>
+	</tbody>
+</table>
+<p>Proposal, policy, and decision filenames use <code>&lt;NNNN&gt;-&lt;slug&gt;.md</code>, with IDs such as <code>policy.0001</code>. Guides use kebab-case filenames and IDs such as <code>guide.record-validation</code>. IDs must match their filenames and be unique. Frontmatter supports scalar values and inline lists; duplicate keys and malformed lists are errors. Proposal <code>issues</code>, when present, is an inline list.</p>
+<p>Policies and decisions may carry <code>established-by: proposal.&lt;NNNN&gt;</code> as historical provenance. It must be a scalar reference to an existing proposal. It remains optional when a record changes in place. A current policy or decision cannot contain <code>supersedes</code> or use <code>status: superseded</code>; the error explains how to revise or retire it instead. These fields still describe historical relationships between proposals. A replacement proposal names its predecessor in <code>supersedes</code>, that predecessor is marked <code>superseded</code>, and the relationship must not form a cycle.</p>
+<p>Guides use ordinary links to their current sources. The obsolete <code>describes</code> field is rejected with migration guidance. The validator checks metadata references; the documentation build checks local Markdown links. Run the full <code>mise run check</code> before publishing a retirement, because metadata validation alone cannot detect a broken prose link.</p>
+<p>An unresolved clarification marker in proposal prose blocks <code>awaiting-implementation</code>, <code>active-review</code>, <code>accepted</code>, <code>implemented</code>, and <code>superseded</code>. Draft, returned, rejected, and withdrawn proposals may contain unresolved questions. Inline code and fenced examples of the marker are ignored.</p>
+<h2 id="revise-and-retire-a-policy">Revise and retire a policy <a class="heading-anchor" href="#revise-and-retire-a-policy" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>A current policy can start with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">policy.0001</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">Preserve User Focus</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l">active</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nn">---</span></span></span></code></pre></div><p>Revise its rule and applicable checks in the same change, keeping its logical identity. No replacement policy or supersession entry is needed. When the policy ceases to apply, repair its current links and remove the file. Preserve any historical link that still matters by pointing it at the Git revision that contains the old policy. See <a href="/workbench/pr-preview/pr-14/guides/keeping-the-record/">Keeping the Record</a> for the human decision and migration procedure.</p>
+<h2 id="validate-the-projects-workbench-setup">Validate the project&rsquo;s Workbench setup <a class="heading-anchor" href="#validate-the-projects-workbench-setup" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p><code>workbench project validate</code> checks how the project uses Workbench rather than its records. Each problem is a violation with a <code>path</code> and a <code>message</code>, reported the same way as record violations, with <code>CHECK_FAILED</code> and exit status 1:</p>
+<ul>
+<li><code>mise.toml</code> pins no <code>github:markmals/workbench</code> version, or <code>.workbench</code> is missing or dangling, so harnesses load no Workbench content, or it points at a different Workbench version than the pin. The link&rsquo;s version is the <code>version</code> in its <code>.claude-plugin/plugin.json</code>. The fix for a missing pin is <code>mise use github:markmals/workbench@&lt;version&gt;</code>, and for the link, <code>mise install</code>. Workbench&rsquo;s own repository, whose <code>.workbench</code> links to its working tree&rsquo;s <code>plugin/</code>, has no pin and is exempt from this check.</li>
+<li>A harness declaration is missing or unreadable: the <code>.claude/settings.json</code> marketplace and enabled plugin, or the <code>./.workbench</code> entry in <code>.omp/config.yml</code>.</li>
+<li>A project skill <code>.agents/skills/&lt;name&gt;/</code> or rule <code>.agents/rules/&lt;name&gt;.md</code> reuses the name of a skill or rule this release of Workbench ships. The message names the file and says to remove or rename it.</li>
+<li>The project still vendors a Workbench file the package now supplies:
+<ul>
+<li>a template in <code>.agents/templates/</code> identical to the package&rsquo;s template of the same name (a different one is an override, and allowed). Templates are compared with <code>.workbench/templates/</code>, or with the copies built into <code>workbench</code> from the same release when the link is missing;</li>
+<li>the Oh My Pi extensions <code>.omp/extensions/check-before-stop.ts</code>, <code>format-after-edit.ts</code>, and <code>prime-beads.ts</code>, and the workflow tool in <code>.omp/tools/dynamic-workflows/</code>;</li>
+<li>the TypeScript tools the CLI replaces, with their tests: <code>tools/validate.ts</code>, <code>status.ts</code>, <code>check-scoped-commit.ts</code>, <code>check-pr-commits.ts</code>, <code>require-changeset.ts</code>, <code>tag-release.ts</code>, <code>project-version.ts</code>, <code>bd.ts</code>, <code>fake-bd.ts</code>, and <code>beads*.ts</code>;</li>
+<li><code>.changeset/config.json</code>, <code>docs/.vitepress/</code>, and <code>fnox.toml</code>.</li>
+</ul>
+</li>
+</ul>
+<p><code>workbench context show</code> reports the same setup without judging it: the project root, branch, <code>origin</code>, and pull request; the pin, the running <code>workbench</code> version, and where <code>.workbench</code> points; the harness declarations; the Beads workspace, its remote, and the claimant; and the documentation site&rsquo;s configuration.</p>
+<h2 id="find-the-next-actor">Find the next actor <a class="heading-anchor" href="#find-the-next-actor" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Run <code>workbench workflow status</code> with no arguments. It reads the branch, pull request, and active proposal, then reports the phase, situation, next action, and whether the agent or human acts next, with the facts it derived them from. <code>mise run status</code> prints the same report as text.</p>
+<p>An approved proposal routes to updating current specifications, then failing tests, guides, implementation, and review. The human still owns approval to implement and acceptance of the result. <code>implemented</code> records accepted implementation before merge; it does not prove integration or release. A closed, unmerged PR with accepted work requires human reconciliation rather than being treated as delivered.</p>
+<p>Missing or unavailable GitHub state is reported as unknown rather than assumed to mean that no pull request exists. Ambiguous proposal selection, unresolved questions, unpushed commits, and disagreement between PR draft state and proposal review state appear as notices. See <a href="/workbench/pr-preview/pr-14/guides/running-a-feature/">Running a Feature</a> for the phase-by-phase process.</p>
+<h3 id="beads-in-the-status-report">Beads in the status report <a class="heading-anchor" href="#beads-in-the-status-report" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<p>Before reporting, <code>workbench workflow status</code> runs one Beads sync with the project&rsquo;s remote, the same one <code>workbench beads sync</code> runs, limited to 20 seconds. <code>--no-sync</code> skips the sync. After the phase report it adds a Beads section: the sync outcome, ready work from <code>bd ready</code>, the items in progress and who holds them from <code>bd list --status in_progress</code>, and the project&rsquo;s memories from <code>bd prime --memories-only</code>. The ready work, items in progress, and memories are this machine&rsquo;s replica after the sync.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Outcome</th>
+					<th>Meaning</th>
+					<th>Reported with</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>synced</code></td>
+					<td>This replica pulled every change on the remote and published its own.</td>
+					<td>One line.</td>
+			</tr>
+			<tr>
+					<td><code>skipped</code></td>
+					<td><code>--no-sync</code> was passed; nothing was pulled or pushed.</td>
+					<td>One line.</td>
+			</tr>
+			<tr>
+					<td><code>failed</code></td>
+					<td>The sync did not finish: the remote was unreachable, authentication failed, push retries ran out, or 20 seconds passed. It also fails, without pulling or pushing, when the Beads remote is not the same repository as the checkout&rsquo;s <code>origin</code>, or the checkout has no <code>origin</code> to compare it with.</td>
+					<td>The reason, and that the rest of the section shows this machine&rsquo;s state.</td>
+			</tr>
+			<tr>
+					<td><code>conflict</code></td>
+					<td>Beads halted on a conflict it cannot settle; nothing was pushed.</td>
+					<td>The conflicted tables Beads names, and the items that differ between this replica and the remote.</td>
+			</tr>
+			<tr>
+					<td><code>blocked</code></td>
+					<td>A dirty working set stops Beads from publishing; nothing was pushed.</td>
+					<td>Beads&rsquo; explanation.</td>
+			</tr>
+			<tr>
+					<td><code>unavailable</code></td>
+					<td><code>bd</code> is not installed, there is no Beads workspace, its database is not initialized, or reading it after the sync failed.</td>
+					<td>The reason and a pointer to <code>mise run setup</code>, in place of the whole section. When a read failed, the reason names it and keeps the sync&rsquo;s outcome.</td>
+			</tr>
+	</tbody>
+</table>
+<p>Beads outcomes never change the exit status of <code>workbench workflow status</code>, and a sync that cannot reach the remote never stops work: claims and closes still happen on this machine and say they are unpublished. Its result&rsquo;s <code>beads</code> field holds either <code>sync</code> (<code>outcome</code> and <code>detail</code>), <code>ready</code> (each item&rsquo;s <code>id</code>, <code>title</code>, and <code>priority</code>), <code>inProgress</code> (each item&rsquo;s <code>id</code>, <code>title</code>, and <code>assignee</code>), and <code>memories</code> (text); or <code>unavailable</code> (the reason). A sync that did not end <code>synced</code> or <code>skipped</code> also names its cause with the <code>code</code> that <code>workbench beads sync</code> would fail with, and whether retrying can succeed (<code>retryable</code>): an unreachable remote or network is <code>UNAVAILABLE</code> and retryable, a time limit <code>TIMEOUT</code> and retryable, rejected credentials <code>UNAUTHENTICATED</code>, a halted merge <code>CONFLICT</code>, and a refused remote or a blocked working set <code>PRECONDITION_FAILED</code>. The same <code>sync</code> object appears in the receipts of <code>workbench beads claim</code> and <code>workbench beads close</code>. The <code>tracking-work</code> skill says how an agent responds to each outcome.</p>
+<h2 id="what-these-commands-do-not-establish">What these commands do not establish <a class="heading-anchor" href="#what-these-commands-do-not-establish" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>The checks cannot decide whether a specification states the right behavior, a test asserts enough, or a policy is still needed. Review those claims against the current requirements and human-approved intent. Gherkin bindings, native schemas, API examples, and platform checks use the project&rsquo;s own tools. Workbench introduces no universal specification registry or mandatory Gherkin runner.</p>
+
+<p class="source-link" data-pagefind-ignore><a href="https://github.com/markmals/workbench/blob/main/guides/record-validation.md">View source</a></p>
+
+  </article>
+<aside class="toc" aria-label="On this page">
+  <p class="toc__title">On this page</p>
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#validate-the-record">Validate the record</a></li>
+    <li><a href="#revise-and-retire-a-policy">Revise and retire a policy</a></li>
+    <li><a href="#validate-the-projects-workbench-setup">Validate the project&rsquo;s Workbench setup</a></li>
+    <li><a href="#find-the-next-actor">Find the next actor</a>
+      <ul>
+        <li><a href="#beads-in-the-status-report">Beads in the status report</a></li>
+      </ul>
+    </li>
+    <li><a href="#what-these-commands-do-not-establish">What these commands do not establish</a></li>
+  </ul>
+</nav>
+</aside>
+
+</div>
+
+    </main><footer class="site-footer">
+  <span>Workbench</span>
+  <a href="https://github.com/markmals/workbench">Repository</a>
+</footer>
+<dialog class="search" aria-label="Search" data-search-base="/workbench/pr-preview/pr-14/" data-search-bundle="/workbench/pr-preview/pr-14/pagefind/">
+  <div class="search__ui" id="search-ui"></div>
+  <p class="search__unavailable" hidden>Search runs over a built site. Build it with <code>mise run docs:build</code> and serve <code>docs/public</code>.</p>
+</dialog>
+
+  </body>
+</html>
