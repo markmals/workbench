@@ -74,7 +74,7 @@ pub fn assert_hooks_and_checks(fixture: &Fixture) {
     let workflow = fixture.read(".github/workflows/workbench.yml");
     for expected in [
         "pull_request",
-        "github.head_ref != 'release'",
+        "if: github.head_ref != 'release' || github.event.pull_request.head.repo.full_name != github.repository",
         "actions/checkout@v7",
         "fetch-depth: 0",
         "jdx/mise-action@v5",

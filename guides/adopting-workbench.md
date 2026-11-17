@@ -129,7 +129,7 @@ workbench change-files create --type minor --summary "Add the export command" --
 git commit --trailer "Release-Note: none"
 ```
 
-The release flow is the project's own. Write a `knope.toml` that sets `ignore_conventional_commits = true` under `[changes]`, because Scoped Commits subjects are not Conventional Commits and versions come only from change files, and follow Knope's [preview releases with pull requests](https://knope.tech/recipes/1-preview-releases-with-pull-requests/) recipe. Keep its release branch named `release`, which `workbench.yml` exempts from the change-file check. Merging the release pull request is the release authorization. Delete the Changesets release workflow and dependencies.
+The release flow is the project's own. Write a `knope.toml` that sets `ignore_conventional_commits = true` under `[changes]`, because Scoped Commits subjects are not Conventional Commits and versions come only from change files, and follow Knope's [preview releases with pull requests](https://knope.tech/recipes/1-preview-releases-with-pull-requests/) recipe. Keep its release branch named `release`, which `workbench.yml` exempts from the change-file check; a pull request from a fork's branch of that name is still checked. Merging the release pull request is the release authorization. Delete the Changesets release workflow and dependencies.
 
 ## 5. Move a published site to Hugo
 

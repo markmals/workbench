@@ -42,10 +42,11 @@ jobs:
                   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
               run: mise exec -- workbench commits check --output text "$BASE_SHA" "$HEAD_SHA"
 
-    # Knope's release pull request consumes change files instead of adding one, so it is exempt.
+    # Knope's release pull request, from the `release` branch of this repository, consumes change
+    # files instead of adding one, so it is exempt. A fork's branch named `release` is checked.
     change-files:
         name: Change files
-        if: github.event_name == 'pull_request' && github.head_ref != 'release'
+        if: github.event_name == 'pull_request' && (github.head_ref != 'release' || github.event.pull_request.head.repo.full_name != github.repository)
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7

@@ -1,6 +1,7 @@
 # Workbench's checks on every pull request: Scoped Commits subjects, and a change file or a
-# `Release-Note: none` trailer. Knope's release pull request, from the `release` branch, consumes
-# change files instead of adding one, so it is exempt.
+# `Release-Note: none` trailer. Knope's release pull request, from the `release` branch of this
+# repository, consumes change files instead of adding one, so it is exempt. A fork's branch named
+# `release` is not Knope's, so it is checked.
 
 name: Workbench
 
@@ -17,7 +18,7 @@ concurrency:
 jobs:
     checks:
         name: Commits and change files
-        if: github.head_ref != 'release'
+        if: github.head_ref != 'release' || github.event.pull_request.head.repo.full_name != github.repository
         runs-on: ubuntu-latest
         env:
             BASE_SHA: ${{ github.event.pull_request.base.sha }}
