@@ -1,6 +1,6 @@
 {
     "name": "workbench",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "description": "The Workbench development process: its contract, skills, rules, and templates.",
     "author": {
         "name": "Mark Malstrom"
