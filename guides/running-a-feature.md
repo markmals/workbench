@@ -46,7 +46,7 @@ Tell the agent: “Project members need to export a report.” Then do nothing w
 
 ### The agent
 
-The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. The PR becomes ready after the complete implementation is verified and pushed; agent review and the readiness report follow.
+The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. It names both for the part of the project the feature changes, such as a pull request titled `reports: export a report` on a branch named `report-export`, so a list of branches or pull requests shows what each one is about. The PR becomes ready after the complete implementation is verified and pushed; agent review and the readiness report follow.
 
 The pull request exists this early because it is the durable workspace for one feature: its proposal, implementation, review discussion, and readiness report accumulate there as one reviewable thing.
 

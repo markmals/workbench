@@ -23,6 +23,8 @@ If the answer is no, do not write a proposal or open a draft pull request for it
 
 Only after an explicit yes for this change, confirm the change has a branch pushed to `origin` and an open draft pull request before writing the proposal. This consent covers later revisions of the same proposal; a different change needs a new answer.
 
+Name the branch and title the draft pull request for the feature area the proposal changes, as `.workbench/rules/commit-discipline.md` describes: `exports: queue report exports` on `export-queue`, never `proposal: …` or `proposal/…`. Commits on the branch take the same area's scope or, once the proposal file exists, its `<NNNN>-<slug>`.
+
 ## Output
 
 Create exactly one `proposals/<NNNN>-<slug>.md`. Copy the proposal template: `.agents/templates/PROPOSAL.md` when the project overrides it, otherwise `.workbench/templates/PROPOSAL.md`. Do not replace it with a folder or auxiliary planning files.
