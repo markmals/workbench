@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Make Room for UI Polish · Workbench</title>
+<meta name="description" content="A platform-agnostic, harness-agnostic agentic development process kit.">
+<link rel="icon" href="/workbench/pr-preview/pr-16/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/workbench/pr-preview/pr-16/css/site.min.6858dcfd9ef536c6838cfcac556c73c4c9472c5186119967c658c25bd331e2b8.css" integrity="sha256-aFjc/Z71NsaDjPysVWxzxMlHLFGGEZlnxljCW9Mx4rg=">
+<script src="/workbench/pr-preview/pr-16/js/search.min.91c03ab0618e873fdf0408644ae4cec995e27513bfe7aefce72be2867e757830.js" integrity="sha256-kcA6sGGOhz/fBAhkSuTOyZXidRO/56785yvihn51eDA=" defer></script>
+
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="site-header__brand" href="/workbench/pr-preview/pr-16/"><img src="/workbench/pr-preview/pr-16/workbench-icon.png" alt="" width="32" height="32"><span>Workbench</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Main">
+    <a href="/workbench/pr-preview/pr-16/vision/">Vision</a>
+    <a href="/workbench/pr-preview/pr-16/process/">Process</a>
+    <a href="/workbench/pr-preview/pr-16/guides/">Guides</a>
+    <a href="/workbench/pr-preview/pr-16/proposals/" class="is-active">Change history</a>
+    <a href="/workbench/pr-preview/pr-16/policies/">Policies</a>
+    <a href="/workbench/pr-preview/pr-16/decisions/">Decisions</a>
+  </nav>
+  <button class="site-header__search" type="button" data-search-open aria-haspopup="dialog">
+    <span>Search</span><kbd>/</kbd>
+  </button>
+</header>
+
+    <main id="main">
+<div class="layout">
+<nav class="sidebar" aria-label="Proposals">
+  <a class="sidebar__section" href="/workbench/pr-preview/pr-16/proposals/">Proposals</a>
+  <ul>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0007-depend-on-workbench/">Depend on Workbench Instead of Copying It</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0006-drop-harness-hooks-and-sync-beads/">Drop Harness Hooks and Sync Beads Across Machines</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0005-current-specifications/">Keep Current Specifications Alongside Change Proposals</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0004-make-room-for-ui-polish/" aria-current="page">Make Room for UI Polish</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0003-fit-the-harness-to-current-models/">Fit the Harness to Current Models</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/proposals/0001-workbench-2/">Workbench 2.0</a></li>
+  </ul>
+</nav>
+
+  <article class="content" data-pagefind-body><h1 id="make-room-for-ui-polish">Make Room for UI Polish</h1>
+<aside class="record-header" aria-label="Record metadata" data-pagefind-ignore>
+  <p class="record-header__note">This proposal records a change. The <a href="/workbench/pr-preview/pr-16/guides/current-specifications/">current specifications</a> state what applies now.</p>
+  <div class="record-header__summary"><code class="record-header__id">proposal.0004</code><span class="status status--implemented">Implemented</span>
+  </div>
+  <dl class="record-header__details">
+    <div><dt>Authors</dt><dd><span>markmals</span><span>claude-opus-5-5</span></dd></div>
+    <div><dt>Pull request</dt><dd><a href="https://github.com/markmals/workbench/pull/8">#8</a></dd></div>
+  </dl>
+</aside>
+
+<h2 id="summary">Summary <a class="heading-anchor" href="#summary" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Proposals say what a feature does; the human decides its look and feel on the running UI. Look-and-feel changes never revise a proposal, are applied while work stays in review, and need no proposal between features. A short polish skill holds the method.</p>
+<h2 id="motivation">Motivation <a class="heading-anchor" href="#motivation" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Polishing an interface is iterative and visual: the human looks at a running screen, asks for a change, looks again, and repeats until it is right. Current models are good at this loop. Workbench gives it no place.</p>
+<p><strong>During implementation and review, every tweak becomes a proposal revision.</strong> In Pico&rsquo;s Mac app (<a href="https://github.com/markmals/pico/blob/main/proposals/0005-mac-app-ui-workspace.md">proposal 0005</a>, <a href="https://github.com/markmals/pico/pull/41">PR #41</a>), the approved proposal went through five rounds of revise → approve → implement → active review. Twenty of the pull request&rsquo;s 35 commits were proposal bookkeeping, fifteen of them from those five rounds, and each round posted a new readiness report. The proposal now records that the window has &ldquo;a fixed width of 715 points&rdquo; and &ldquo;a fixed 215-point sidebar&rdquo;, then concedes &ldquo;Human visual refinement may adjust these point values&rdquo; (L138). It specifies Sign Out as &ldquo;a red, destructive button standing on its own below a provider page&rsquo;s Account group&rdquo; (L104). Some of those rounds did change what the feature does — a sample data mode, collapsing &ldquo;set up&rdquo; and &ldquo;needs sign-in&rdquo; into signed in or not, dropping the model search — and belonged in the proposal. Much of the rest was look and feel: a sheet instead of a pull-down, a button&rsquo;s color and label, a window&rsquo;s width, tile insets.</p>
+<p><strong>Between proposals, there is no sanctioned way to polish.</strong> Pico&rsquo;s proposal closes with &ldquo;Further refinement of the panes needs its own proposal&rdquo; (L330). The agent read the contract correctly. <code>AGENTS.md</code> offers two paths: a correction whose intent already exists, or the proposal question for anything that &ldquo;decides something&rdquo;, with &ldquo;If a small fix turns out to need a design decision, stop and ask the proposal question then.&rdquo; Polish is neither a correction nor a feature, so it always lands on the proposal question, and <code>mise run status</code> on a pull request without a proposal reports <strong>Phase 2 — Proposal</strong>.</p>
+<p>The cost falls on the people Workbench is for — a single owner working with an agent daily — and grows as more of that work is interface work. Proposals bloat into screen specifications that drift from the product, review stalls in status churn, and the owner either fights the process for every spacing change or works around it.</p>
+<h2 id="domain-grounding">Domain grounding <a class="heading-anchor" href="#domain-grounding" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<h3 id="established-context">Established context <a class="heading-anchor" href="#established-context" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><strong>Requirements and interface details are separate concerns.</strong> Mike Cohn&rsquo;s <em><a href="https://www.informit.com/store/user-stories-applied-for-agile-software-development-9780321205681">User Stories Applied</a></em> advises keeping the user interface out of stories &ldquo;as long as possible&rdquo;, because mixing requirements with solution specification, &ldquo;most commonly with aspects of the user interface&rdquo;, has &ldquo;plagued every approach to software requirements&rdquo;.</li>
+<li><strong>Shaped work is concrete about what, rough about how it looks.</strong> Basecamp&rsquo;s <em><a href="https://basecamp.com/shapeup/1.1-chapter-02">Shape Up</a></em> says &ldquo;Wireframes are too concrete&rdquo;: defining &ldquo;too much detail too early&rdquo; leaves designers &ldquo;no room&rdquo;, and fixed details stop a team from reconsidering &ldquo;a design decision that is turning out to cost more than it&rsquo;s worth&rdquo;. Words alone are &ldquo;too abstract&rdquo;. Shaped work &ldquo;defines what the feature does, how it works, and where it fits into existing flows&rdquo; at the level of places, affordances, and connections.</li>
+<li><strong>Look and feel is settled on the running product.</strong> <em><a href="https://basecamp.com/shapeup/3.2-chapter-11">Shape Up, &ldquo;Get One Piece Done&rdquo;</a></em>: &ldquo;Questions about font, color, spacing, and layout can be resolved after the raw affordances are in place.&rdquo; Its case study&rsquo;s designer, once a toggle was wired, &ldquo;could continue to experiment with copy, placement, color, mobile view rendering, and more&rdquo;, judging it by clicking it &ldquo;with live data on a staging server&rdquo;; a demo &ldquo;led to a few more tweaks and then they were able to call the toggle &lsquo;done.&rsquo;&rdquo; &ldquo;First make it work, then make it beautiful.&rdquo;</li>
+<li><strong>Behavior specifications describe what, not how.</strong> Cucumber&rsquo;s <em><a href="https://cucumber.io/docs/bdd/better-gherkin/">Writing better Gherkin</a></em> separates functional requirements from &ldquo;procedural reference&rdquo;, observes that imperative scenarios are &ldquo;so closely tied to the mechanics of the current UI&rdquo; that they need updating whenever it changes, and offers a test: &ldquo;Will this wording need to change if the implementation does?&rdquo;</li>
+<li><strong>The established name for the other side of the line.</strong> <a href="https://en.wikipedia.org/wiki/Look_and_feel">Look and feel</a> &ldquo;comprises aspects of its design, including elements such as colors, shapes, layout, and typefaces (the &rsquo;look&rsquo;), as well as the behavior of dynamic elements such as buttons, boxes, and menus (the &lsquo;feel&rsquo;)&rdquo; — &ldquo;parts … not related to its functional properties&rdquo;.</li>
+<li><strong>The owner&rsquo;s user-story guidance already draws this line.</strong> Mark&rsquo;s <code>writing-user-stories</code> skill (<code>~/Developer/Templates/agent-skills/writing-user-stories/SKILL.md</code>): stories describe &ldquo;what and why, never how&rdquo;; &ldquo;No specific UI elements (buttons, dialogs, dropdowns) by name&rdquo;; &ldquo;Express intent, not mechanics. UI choices belong in design, not in acceptance criteria&rdquo;; outcomes are &ldquo;what the user can see, receive, or experience&rdquo;; and the test &ldquo;Imagine it&rsquo;s 1922.&rdquo;</li>
+<li><strong>Teams give polish its own small path.</strong> GitLab runs a UX Paper Cuts effort for &ldquo;small yet impactful usability issues&rdquo;, which starts from a merge request rather than a feature process (<a href="https://gitlab.com/groups/gitlab-org/-/epics/10026">epic</a>, as summarized in search results; not read directly).</li>
+</ul>
+<h3 id="relevant-constraints-and-principles">Relevant constraints and principles <a class="heading-anchor" href="#relevant-constraints-and-principles" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><strong>Ontology: one word doing two jobs.</strong> Workbench&rsquo;s &ldquo;design&rdquo; and &ldquo;decides something&rdquo; name both <em>what the feature does</em> — capability, information, states, outcomes, errors, guarantees — and its <em>look and feel</em>. The two change independently (Pico&rsquo;s window width changed with no behavioral consequence), are decided through different media (a reviewed document versus the running UI), are verified differently (tests versus the human&rsquo;s eye), and keep different records (the proposal versus the product and its commits). Every rule written to protect the first also fires on the second. Polish is an activity, not an artifact, phase, or status; it differs from a correction, whose intent already exists, in that the human decides look and feel in the moment by seeing it.</li>
+<li><strong>Vision: keep the human as the final authority.</strong> The human still decides look and feel — by looking at it rather than by approving prose. The agent&rsquo;s look-and-feel choices during implementation are provisional until the human has seen them.</li>
+<li><strong>Vision: previews expose behavior, not descriptions of behavior.</strong> A paragraph naming a point width is a description; the running window is the artifact. Deciding look and feel on the running UI applies this principle.</li>
+<li><strong>Vision: no single artifact defines a feature.</strong> Look and feel ends up with one representation, the running UI. That removes no check: tests cannot judge taste, a guide need not describe it, and a proposal that pins it only creates a second description that drifts. The independent check on look and feel is the human looking at it.</li>
+<li><strong>Vision: ceremony must earn its cost.</strong> Pico&rsquo;s revision rounds for look-and-feel changes produced proposal edits, status changes, and readiness reports that no later reader needs.</li>
+<li><strong>Vision: enforce mechanically or not at all.</strong> Telling look and feel from what the feature does is a judgement; a mechanical check such as flagging point sizes or colors in Detailed design would misfire on proposals where they are the requirement. The line therefore lives in the contract, the skills, and the template.</li>
+<li><strong>Workbench history: proposal 0002 was withdrawn</strong> in <a href="https://github.com/markmals/workbench/pull/6">PR #6</a> as &ldquo;Over-engineered — the ask was to soften absolutist ceremony language and let the agent judge, not to add a tier framework with its own vocabulary and enforcement.&rdquo; This change adds no tier, mode, status, label, or detection.</li>
+</ul>
+<h3 id="quality-bar">Quality bar <a class="heading-anchor" href="#quality-bar" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li>An agent writing a proposal for a UI feature specifies what the user can do, find out, and is told, and no layout, size, color, type, control, or label unless the human made that detail a requirement.</li>
+<li>During implementation and review, look-and-feel feedback produces commits on the feature branch and nothing else: no proposal edit, no status change, no readiness report, no adversarial review.</li>
+<li>Asked to polish between proposals, an agent starts without the proposal question, keeps the UI running where the human can see it, and stops to ask when a request would change what the feature does.</li>
+<li>The line fits in one sentence, and classifies each of Pico&rsquo;s revision-round changes without debate.</li>
+</ul>
+<h3 id="remaining-uncertainty">Remaining uncertainty <a class="heading-anchor" href="#remaining-uncertainty" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><strong>Edge cases between feel and flow.</strong> Whether removing a sidebar toggle or moving an action to another screen changes what a user can do is a judgement. The design resolves doubt by asking the human in one line; whether that produces too many questions is untested.</li>
+<li><strong>Wording.</strong> Treating wording as look and feel except where the exact words are a requirement may prove too wide for projects whose copy carries product decisions.</li>
+<li><strong>One project&rsquo;s evidence.</strong> The churn is observed in Pico. Trove&rsquo;s web proposals stayed at capability level without this guidance; its native prototype polish happened in commits outside any proposal.</li>
+</ul>
+<h2 id="existing-baseline">Existing baseline <a class="heading-anchor" href="#existing-baseline" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Workbench at <code>2d9e7b9</code>:</p>
+<ul>
+<li><code>AGENTS.md</code> L9–13 asks &ldquo;does this change decide something?&rdquo; and offers two paths, with &ldquo;If a small fix turns out to need a design decision, stop and ask the proposal question then.&rdquo; L34: &ldquo;Behavior it does not describe does not get built; if it should exist, revise the proposal with the human.&rdquo;</li>
+<li><code>writing-a-proposal</code> L12 makes proposals &ldquo;for changes that decide something&rdquo;; L31 requires Detailed design precise enough that &ldquo;someone who is not the author could implement it without asking questions&rdquo;. <code>guides/writing-a-good-proposal.md</code> L35 adds: &ldquo;If two reasonable implementations would expose different behavior and the proposal does not choose, the design is incomplete.&rdquo; For an interface, two reasonable implementations always look and operate differently, so read literally these demand the whole look and feel.</li>
+<li><code>implementing-a-proposal</code> L48: &ldquo;Add no behavior the proposal does not describe.&rdquo; <code>reviewing-an-implementation</code> L19 calls anything implemented that the proposal does not describe &ldquo;scope creep or a gap in the proposal&rdquo;. <code>adversarial-review</code> L53 routes such behavior &ldquo;back to the proposal&rdquo;. Its L24 excludes &ldquo;taste&rdquo; — meaning code style.</li>
+<li><code>PROCESS.md</code> L231, <code>README.md</code> L72, <code>guides/running-a-feature.md</code> L134 and L142, and <code>tools/status.ts</code> L151 route review feedback that &ldquo;changes the design&rdquo; through a proposal update. <code>tools/status.ts</code> L121 tells the agent on a pull request without a proposal to ask the proposal question.</li>
+</ul>
+<p>What expresses the problem well and stays: the proposal as the reviewed record of intent; the consent question for anything that decides what the software does or how it is built; human ownership of status; the coupled handoff into review; the independent review of behavior.</p>
+<p>What is incidental: the word &ldquo;design&rdquo; standing for both intent and look and feel; the absence of any path for work that is neither a correction nor a feature.</p>
+<p>Nearby baselines: Trove&rsquo;s <code>prototyping-apple-app-design</code> skill sanctions proposal-free design iteration, but only for exploration before implementation (&ldquo;Not for: … adding screens to an existing shipping app&rdquo;). The <code>writing-user-stories</code> skill holds the UI guidance this proposal adapts. Proposal 0002 is the closest prior attempt at a lighter path and shows what not to build.</p>
+<h2 id="proposed-solution">Proposed solution <a class="heading-anchor" href="#proposed-solution" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Draw one line and apply it everywhere the contract currently says &ldquo;design&rdquo;:</p>
+<blockquote>
+<p>A proposal specifies <strong>what the feature does</strong>. <strong>Look and feel</strong> — how the interface looks and how it is operated — is decided by the human on the running UI.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">&#34;Sign Out should be a red button on its own&#34;       → look and feel: commit it, no proposal edit
+</span></span><span class="line"><span class="cl">&#34;Signing out should keep the provider&#39;s models&#34;    → what it does: proposal revision, as today
+</span></span><span class="line"><span class="cl">&#34;Tighten the sidebar spacing&#34; (between features)   → polish: no proposal question</span></span></code></pre></div><p>Writing a proposal for an interface adapts the user-story guidance: say what the user does and finds out, not which control they press. Implementation chooses look and feel to fit the project and platform; the human refines it in the preview. Look-and-feel feedback during review is applied while the proposal stays in <code>active-review</code>. Between proposals, polish is a direct change. A new <code>polishing-a-ui</code> skill holds the loop and its boundaries.</p>
+<h2 id="detailed-design">Detailed design <a class="heading-anchor" href="#detailed-design" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<h3 id="the-line">The line <a class="heading-anchor" href="#the-line" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><strong>What the feature does</strong> is what a user can do, what they can find out, the states and outcomes they observe, the errors they are told about, and any guarantee the project makes — about their data, privacy, accessibility commitments, or platform requirements the human has chosen. Proposals specify it, tests encode it, and changing it needs the proposal path.</li>
+<li><strong>Look and feel</strong> is how the interface looks and how it is operated: layout, sizes, spacing, typography, color, iconography, motion, grouping and placement, which control presents a choice (a sheet, a menu, a toggle), what activating an element opens, and the wording of labels and messages. The human decides it on the running UI. It is never recorded in a proposal, and changing it never needs the proposal path.</li>
+<li><strong>Wording.</strong> What a message must convey is what the feature does (&ldquo;the user is told the file exceeds the size limit and what the limit is&rdquo;). Its words are look and feel, unless the exact words are themselves a requirement: legal or policy text, text a user must type or match, or a term the project&rsquo;s vocabulary fixes.</li>
+<li><strong>Accessibility.</strong> A commitment (&ldquo;every action is reachable from the keyboard&rdquo;, &ldquo;status is never conveyed by color alone&rdquo;) is what the feature does. How a screen meets it is look and feel. Polish never breaks a commitment.</li>
+<li><strong>Non-graphical interfaces.</strong> The same line applies to the human-facing side of a command-line or terminal interface: colors, alignment, progress display, and help-text wording are look and feel. Commands, flags, exit codes, machine-readable output, and a library&rsquo;s API are what the feature does.</li>
+<li><strong>The test.</strong> &ldquo;Would this sentence need to change if the screen were redesigned while the feature did the same thing?&rdquo; If yes, it is look and feel.</li>
+<li><strong>Doubt.</strong> When a change could be either, the agent asks the human which it is in one line before acting. A change that removes something a user could do or find out is what the feature does.</li>
+</ul>
+<h3 id="writing-proposals">Writing proposals <a class="heading-anchor" href="#writing-proposals" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><code>writing-a-proposal</code> gains a section, &ldquo;Describing a user interface&rdquo;, adapted from <code>writing-user-stories</code>: state the user&rsquo;s intent, not the mechanics (&ldquo;the user shares the document with a teammate&rdquo;, not &ldquo;clicks Share and types an email&rdquo;); outcomes are what the user sees, receives, or is told; no layout, sizes, colors, typefaces, control types, element names, or click-and-tap steps unless the human has made that detail a requirement; the redesign test above. It states that two implementations differing only in look and feel do not make Detailed design incomplete.</li>
+<li><code>writing-a-proposal</code>&rsquo;s opening section says that look and feel is decided by the human on the running UI, not in a proposal, and that polish is not a reason to ask the proposal question.</li>
+<li>The Detailed design comment in <code>.agents/templates/PROPOSAL.md</code> gains one sentence: for a user interface, specify what the user can do, find out, and is told, and leave look and feel to the running UI.</li>
+<li><code>guides/writing-a-good-proposal.md</code> gains a section, &ldquo;Leave look and feel to the running UI&rdquo;, with one before-and-after example drawn from a Pico-style settings pane, and a red-flags row: Detailed design names sizes, colors, controls, or labels → look and feel in the specification → state what the user can do and find out, and decide the rest on the running UI. Its &ldquo;two reasonable implementations&rdquo; paragraph is qualified the same way as the skill.</li>
+</ul>
+<h3 id="during-implementation">During implementation <a class="heading-anchor" href="#during-implementation" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><code>AGENTS.md</code>&rsquo;s &ldquo;Stay inside the proposal&rdquo; rule applies to what the feature does. It adds that look and feel is not behavior the proposal must describe: the agent chooses it to fit the project&rsquo;s existing interface and platform conventions, and the human refines it on the running UI.</li>
+<li><code>implementing-a-proposal</code>: tests for an interface assert what the user can do and observe, not its look and feel, so polish does not break them. A guide takes what the user does from the proposal; the names and placement of on-screen elements it mentions follow the running UI and are updated when polish changes them — this is not writing a guide from finished code. &ldquo;Add no behavior the proposal does not describe&rdquo; is qualified: look and feel the proposal leaves open is the agent&rsquo;s to choose and the human&rsquo;s to refine.</li>
+<li><code>reviewing-an-implementation</code>&rsquo;s self-check excludes look and feel from &ldquo;anything implemented that the proposal and guides do not describe is scope creep or a gap in the proposal&rdquo;.</li>
+<li><code>adversarial-review</code> lists look and feel beside style, naming, and formatting as out of scope, and lens 5 states that look-and-feel choices are not proposal gaps. Broken accessibility commitments and look-and-feel changes that alter what the feature does remain findings.</li>
+</ul>
+<h3 id="during-human-review">During human review <a class="heading-anchor" href="#during-human-review" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li>While a proposal is <code>active-review</code>, feedback that touches only look and feel is applied directly: the agent changes the code on the feature branch, runs <code>mise run check</code>, pushes, refreshes whatever the human is looking at (the pull-request preview, or a running build), and says what changed. The status stays <code>active-review</code>. The agent does not edit the proposal, post a readiness report, or run an adversarial review for it.</li>
+<li>Feedback that changes what the feature does, or a design decision the proposal records, follows the existing path: the human sets <code>returned-for-revisions</code>, the agent updates the proposal first, and the affected tests, guides, code, gates, self-check, and review are repeated.</li>
+<li>Feedback mixing both is split: the look-and-feel part is applied in review; the rest takes the existing path.</li>
+<li><code>PROCESS.md</code> (Human Review), <code>README.md</code>, and <code>guides/running-a-feature.md</code> (Phase 4) describe this, replacing &ldquo;changes the design&rdquo; with &ldquo;changes what the feature does or a design decision the proposal records&rdquo;. <code>reviewing-an-implementation</code> routes feedback the same way.</li>
+</ul>
+<h3 id="between-proposals">Between proposals <a class="heading-anchor" href="#between-proposals" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><code>AGENTS.md</code>&rsquo;s &ldquo;Does this change need a proposal?&rdquo; keeps its question, adds that look and feel is the exception, and gains a case: when the human is shaping look and feel, the agent makes the changes directly with <code>.agents/skills/polishing-a-ui/</code>, saying so in one line before starting. &ldquo;If a small fix turns out to need a design decision&rdquo; becomes &ldquo;If a small fix or polish turns out to change what the feature does&rdquo;. <code>PROCESS.md</code>&rsquo;s paragraphs on when the full loop applies and on the proposal question say the same.</li>
+<li>Polish lands the way the project lands other changes made without a proposal: a branch and pull request with a changeset where the project works through pull requests, otherwise commits. The agent chooses and states which in one line.</li>
+<li>Outside an approved proposal, the agent suggests look-and-feel changes but makes them only at the human&rsquo;s direction.</li>
+</ul>
+<h3 id="the-polishing-a-ui-skill">The <code>polishing-a-ui</code> skill <a class="heading-anchor" href="#the-polishing-a-ui-skill" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<p><code>.agents/skills/polishing-a-ui/SKILL.md</code>, at most about 80 lines, triggers on refining an interface&rsquo;s look and feel during implementation, review, or between proposals, and not on changing what a feature does. It contains:</p>
+<ul>
+<li><strong>The loop.</strong> Get the interface running where the human can see it — a development server, a simulator or installed build, or the pull-request preview — and keep it current after every change. Make one change, or one small coherent set, at a time and say what changed and where to look. When the human is weighing options, show them rather than describe them. The human keeps or reverts each change; continue until they are satisfied. Commit kept changes at natural points; the message names what changed and, when it is not obvious, why.</li>
+<li><strong>Boundaries.</strong> A request that would change what the feature does stops the loop: in review it takes the <code>returned-for-revisions</code> path; between proposals it gets the proposal question. In doubt, ask which it is. Never record look and feel in a proposal.</li>
+<li><strong>Keeping the other representations true.</strong> <code>mise run check</code> passes before every push. A test that breaks because it asserted look and feel is rewritten to assert behavior instead, never re-pinned to the new look; a behavior assertion is never weakened. Any guide that names, shows, or places an on-screen element that changed is updated. Accessibility commitments and platform requirements are never broken.</li>
+<li><strong>Conventions.</strong> When the human applies the same look-and-feel rule repeatedly — a spacing scale, a type ramp, sentence-case labels — suggest recording it as a policy; record it only after discussing it with the human.</li>
+<li><strong>Landing.</strong> Inside a proposal&rsquo;s pull request: commits on its branch with no status change, as in <em>During human review</em>. Between proposals: as in <em>Between proposals</em>.</li>
+<li>A short red-flags table covering: editing a proposal for look and feel; posting a readiness report or changing status for a polish round; asking the proposal question for polish; polishing without a running UI the human can see; re-pinning a test to new look and feel; changing what the feature does under the name of polish.</li>
+</ul>
+<p><code>AGENTS.md</code> names the skill in the case above; <code>PROCESS.md</code> names it where it describes polish.</p>
+<h3 id="toolsstatusts"><code>tools/status.ts</code> <a class="heading-anchor" href="#toolsstatusts" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<p>Wording only; phase derivation is unchanged.</p>
+<ul>
+<li>Default branch (L107): &ldquo;…otherwise handle the correction or polish directly.&rdquo;</li>
+<li>Branch without a pull request (L114): adds that corrections and look-and-feel polish need no proposal.</li>
+<li>Pull request without a proposal (L121): &ldquo;Corrections and look-and-feel polish continue without a proposal. Otherwise ask the human whether they want a proposal for this change before writing one, unless they already answered for this change. If yes, draft and publish it.&rdquo;</li>
+<li><code>active-review</code> (L144): &ldquo;Review the diff and the preview. Ask for look-and-feel changes as you go, comment on the pull request, or accept the work.&rdquo;</li>
+<li><code>returned-for-revisions</code> (L151): &ldquo;Process the feedback; update the proposal first if what the feature does, or a design decision it records, changed.&rdquo;</li>
+<li><code>guides/running-a-feature.md</code>&rsquo;s description of these messages matches.</li>
+</ul>
+<h3 id="supporting-changes">Supporting changes <a class="heading-anchor" href="#supporting-changes" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><code>PROCESS.md</code> gains a short &ldquo;Look and feel&rdquo; subsection under Feature Development that defines the line and describes polish in implementation, in review, and between proposals, naming <code>polishing-a-ui</code>. Its Artifacts description of proposals says they describe what a feature does, not its look and feel. Its self-check paragraph excludes look and feel from &ldquo;code that implements behavior the proposal does not describe&rdquo;.</li>
+<li><code>guides/running-a-feature.md</code>&rsquo;s &ldquo;Not every change needs all of this&rdquo; section describes polish between proposals for the human reader.</li>
+<li><code>.github/pull_request_template.md</code>&rsquo;s Proposal section says what to write when there is no proposal — a correction or look-and-feel polish — and that the phase checklist is checked only where it applies.</li>
+<li>The guides changed here add <code>proposal.0004</code> to their <code>describes</code> frontmatter.</li>
+<li>A changeset describes the change for adopters.</li>
+<li><code>mise run check</code> passes.</li>
+</ul>
+<h2 id="compatibility">Compatibility <a class="heading-anchor" href="#compatibility" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>No artifact, frontmatter field, validator rule, proposal status, or phase changes. Existing proposals keep their text. Look-and-feel details already written into a proposal describe what was decided at the time: an agent implementing such a proposal builds them as written, the human may change them afterward through polish without editing the proposal, and neither the self-check nor the adversarial review treats the resulting divergence as a defect. Proposals in flight need no edits.</p>
+<h2 id="implications-on-adoption">Implications on adoption <a class="heading-anchor" href="#implications-on-adoption" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Adopters update <code>AGENTS.md</code>, <code>PROCESS.md</code>, <code>README.md</code>, four skills, the proposal template, the pull-request template, <code>tools/status.ts</code>, and two guides, and add <code>polishing-a-ui</code>. Project-specific sections are untouched. A project with no user interface can still adopt it; the skill simply never triggers. Reversible by restoring the previous files and deleting the skill.</p>
+<h2 id="scope">Scope <a class="heading-anchor" href="#scope" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>Make the changes in <em>Detailed design</em> to <code>AGENTS.md</code>, <code>PROCESS.md</code>, <code>README.md</code>, <code>writing-a-proposal</code>, <code>implementing-a-proposal</code>, <code>reviewing-an-implementation</code>, <code>adversarial-review</code>, <code>.agents/templates/PROPOSAL.md</code>, <code>.github/pull_request_template.md</code>, <code>tools/status.ts</code>, <code>guides/writing-a-good-proposal.md</code>, and <code>guides/running-a-feature.md</code>.</li>
+<li>Add <code>.agents/skills/polishing-a-ui/SKILL.md</code>.</li>
+<li>Add a changeset.</li>
+<li>Exercise the revised contract in a Pico polish session, as described under <em>Preview</em>.</li>
+</ul>
+<h3 id="out-of-scope">Out of scope <a class="heading-anchor" href="#out-of-scope" aria-label="Link to this section" data-pagefind-ignore>#</a></h3>
+<ul>
+<li><strong>Small changes to what a feature does.</strong> &ldquo;Remember the last selected pane&rdquo; changes behavior, however small. The proposal question already handles it, and a &ldquo;no&rdquo; already lets the agent proceed; widening polish to cover behavior would erase the line this proposal draws.</li>
+<li><strong>Visual regression or screenshot testing, design systems, and design tokens.</strong> These are project and stack choices, which Workbench does not make. Polish may surface conventions worth a policy; recording them stays the human&rsquo;s choice.</li>
+<li><strong>A polish tier, mode, label, status, or detection in <code>tools/status.ts</code>.</strong> The lesson of proposal 0002.</li>
+<li><strong>Revising other projects&rsquo; proposals.</strong> Pico&rsquo;s proposal 0005 and Trove&rsquo;s proposals are history and keep their text.</li>
+<li><strong>The global <code>writing-user-stories</code> skill.</strong> This proposal adapts its UI guidance into Workbench; it does not change or vendor the skill.</li>
+<li><strong>The vision.</strong> Whether accepted work should add a revision-history line is decided at completion, as for every feature.</li>
+</ul>
+<h2 id="preview">Preview <a class="heading-anchor" href="#preview" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>Artifact: the pull request&rsquo;s documentation-site preview under <code>pr-preview/</code>, which publishes the revised <code>PROCESS.md</code> and guides, plus a Pico branch carrying the revised generic contract, skills, template, and status tool, on which the human runs one polish session on the settings panes that proposal 0005 left needing &ldquo;its own proposal&rdquo;.</li>
+<li>Reason: the change alters agent behavior, and reading prose is not exercising it. Asking an agent with the revised contract to refine a real pane, giving it look-and-feel feedback, and slipping in one request that changes what the feature does is the cheapest realistic exercise. Expected: no proposal question for the polish, commits only, and a one-line stop on the behavioral request.</li>
+<li>Cleanup: delete the Pico branch after acceptance, with explicit confirmation.</li>
+</ul>
+<h2 id="policies-and-decisions-checked">Policies and decisions checked <a class="heading-anchor" href="#policies-and-decisions-checked" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>None — <code>policies/</code> and <code>decisions/</code> contain only their READMEs. <code>VISION.md</code> was read; its principles are addressed under <em>Relevant constraints and principles</em>.</li>
+</ul>
+<h2 id="future-directions">Future directions <a class="heading-anchor" href="#future-directions" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>A lint that warns when Detailed design contains sizes or color values, if over-specification persists after this guidance. It was not chosen because such values are sometimes the requirement.</li>
+<li>A shared starting policy for common look-and-feel conventions, such as following the platform&rsquo;s interface guidelines, for projects to adopt or reject.</li>
+<li>Repeating the Pico comparison on a web project once one has proposal-driven UI work.</li>
+</ul>
+<h2 id="alternatives-considered">Alternatives considered <a class="heading-anchor" href="#alternatives-considered" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li><strong>Wording only, no skill.</strong> It is the smallest change, but the method would live as a paragraph in <code>PROCESS.md</code> and a line in <code>AGENTS.md</code>. The agent would have no procedure loaded when polish starts, and <code>AGENTS.md</code> would grow. Chosen against by the human.</li>
+<li><strong>A record of look and feel</strong> — a design-notes file per feature, or a Look and feel section the agent may update freely. It keeps a written history, but it is a second description of what the running UI already shows, and it drifts exactly as Pico&rsquo;s proposal did.</li>
+<li><strong>What it does versus appearance only.</strong> Only the look would leave the proposal, and interaction mechanics would stay. Pico&rsquo;s sheet-versus-pull-down and Set Up changes would still have revised the proposal, and the user-story guidance treats mechanics as interface design.</li>
+<li><strong>Leave it to each proposal.</strong> It is flexible, but agents would get no default, which is today&rsquo;s problem.</li>
+<li><strong>Return look-and-feel feedback through <code>returned-for-revisions</code>, more lightly.</strong> It keeps every round visible in the status, but it charges a status change and a report for each tweak — the churn this proposal removes.</li>
+<li><strong>Accept first, polish afterward.</strong> Review stays about behavior, but the human would accept an interface they have not finished shaping.</li>
+<li><strong>Always a pull request with a preview for polish between proposals.</strong> It is uniform, but it costs a pull request for a single spacing fix, where the project&rsquo;s normal direct-change path already applies.</li>
+<li><strong>A polish tier with status detection or a pull-request label.</strong> It is enforceable, but it is the tier framework with its own vocabulary and enforcement that proposal 0002 was withdrawn for.</li>
+<li><strong>Route only changes to what the feature does back through the proposal.</strong> The first implementation did this by replacing &ldquo;changes the design&rdquo; with &ldquo;changes what the feature does&rdquo;. It would let review feedback overturn a technical decision the proposal records, such as a storage approach, without revising the proposal. The adversarial review found the gap, and the human chose to keep recorded design decisions on the proposal path.</li>
+</ul>
+<h2 id="open-questions">Open questions <a class="heading-anchor" href="#open-questions" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>None.</li>
+</ul>
+<h2 id="acknowledgments">Acknowledgments <a class="heading-anchor" href="#acknowledgments" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ul>
+<li>Mark&rsquo;s <code>writing-user-stories</code> skill, whose UI guidance this adapts.</li>
+<li>Pico&rsquo;s proposal 0005 and PR #41, which showed the problem end to end.</li>
+<li>Basecamp&rsquo;s <em>Shape Up</em> and Cucumber&rsquo;s Gherkin guidance, for the level of abstraction.</li>
+</ul>
+
+<p class="source-link" data-pagefind-ignore><a href="https://github.com/markmals/workbench/blob/main/proposals/0004-make-room-for-ui-polish.md">View source</a></p>
+
+  </article>
+<aside class="toc" aria-label="On this page">
+  <p class="toc__title">On this page</p>
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#motivation">Motivation</a></li>
+    <li><a href="#domain-grounding">Domain grounding</a>
+      <ul>
+        <li><a href="#established-context">Established context</a></li>
+        <li><a href="#relevant-constraints-and-principles">Relevant constraints and principles</a></li>
+        <li><a href="#quality-bar">Quality bar</a></li>
+        <li><a href="#remaining-uncertainty">Remaining uncertainty</a></li>
+      </ul>
+    </li>
+    <li><a href="#existing-baseline">Existing baseline</a></li>
+    <li><a href="#proposed-solution">Proposed solution</a></li>
+    <li><a href="#detailed-design">Detailed design</a>
+      <ul>
+        <li><a href="#the-line">The line</a></li>
+        <li><a href="#writing-proposals">Writing proposals</a></li>
+        <li><a href="#during-implementation">During implementation</a></li>
+        <li><a href="#during-human-review">During human review</a></li>
+        <li><a href="#between-proposals">Between proposals</a></li>
+        <li><a href="#the-polishing-a-ui-skill">The <code>polishing-a-ui</code> skill</a></li>
+        <li><a href="#toolsstatusts"><code>tools/status.ts</code></a></li>
+        <li><a href="#supporting-changes">Supporting changes</a></li>
+      </ul>
+    </li>
+    <li><a href="#compatibility">Compatibility</a></li>
+    <li><a href="#implications-on-adoption">Implications on adoption</a></li>
+    <li><a href="#scope">Scope</a>
+      <ul>
+        <li><a href="#out-of-scope">Out of scope</a></li>
+      </ul>
+    </li>
+    <li><a href="#preview">Preview</a></li>
+    <li><a href="#policies-and-decisions-checked">Policies and decisions checked</a></li>
+    <li><a href="#future-directions">Future directions</a></li>
+    <li><a href="#alternatives-considered">Alternatives considered</a></li>
+    <li><a href="#open-questions">Open questions</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ul>
+</nav>
+</aside>
+
+</div>
+
+    </main><footer class="site-footer">
+  <span>Workbench</span>
+  <a href="https://github.com/markmals/workbench">Repository</a>
+</footer>
+<dialog class="search" aria-label="Search" data-search-base="/workbench/pr-preview/pr-16/" data-search-bundle="/workbench/pr-preview/pr-16/pagefind/">
+  <div class="search__ui" id="search-ui"></div>
+  <p class="search__unavailable" hidden>Search runs over a built site. Build it with <code>mise run docs:build</code> and serve <code>docs/public</code>.</p>
+</dialog>
+
+  </body>
+</html>

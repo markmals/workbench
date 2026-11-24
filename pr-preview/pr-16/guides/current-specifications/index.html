@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Keeping Current Specifications · Workbench</title>
+<meta name="description" content="A platform-agnostic, harness-agnostic agentic development process kit.">
+<link rel="icon" href="/workbench/pr-preview/pr-16/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/workbench/pr-preview/pr-16/css/site.min.6858dcfd9ef536c6838cfcac556c73c4c9472c5186119967c658c25bd331e2b8.css" integrity="sha256-aFjc/Z71NsaDjPysVWxzxMlHLFGGEZlnxljCW9Mx4rg=">
+<script src="/workbench/pr-preview/pr-16/js/search.min.91c03ab0618e873fdf0408644ae4cec995e27513bfe7aefce72be2867e757830.js" integrity="sha256-kcA6sGGOhz/fBAhkSuTOyZXidRO/56785yvihn51eDA=" defer></script>
+
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="site-header__brand" href="/workbench/pr-preview/pr-16/"><img src="/workbench/pr-preview/pr-16/workbench-icon.png" alt="" width="32" height="32"><span>Workbench</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Main">
+    <a href="/workbench/pr-preview/pr-16/vision/">Vision</a>
+    <a href="/workbench/pr-preview/pr-16/process/">Process</a>
+    <a href="/workbench/pr-preview/pr-16/guides/" class="is-active">Guides</a>
+    <a href="/workbench/pr-preview/pr-16/proposals/">Change history</a>
+    <a href="/workbench/pr-preview/pr-16/policies/">Policies</a>
+    <a href="/workbench/pr-preview/pr-16/decisions/">Decisions</a>
+  </nav>
+  <button class="site-header__search" type="button" data-search-open aria-haspopup="dialog">
+    <span>Search</span><kbd>/</kbd>
+  </button>
+</header>
+
+    <main id="main">
+<div class="layout">
+<nav class="sidebar" aria-label="Guides">
+  <a class="sidebar__section" href="/workbench/pr-preview/pr-16/guides/">Guides</a>
+  <ul>
+    <li><a href="/workbench/pr-preview/pr-16/guides/adopting-workbench/">Adopting Workbench</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/choosing-a-preview/">Choosing a Preview</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/cli-reference/">CLI Reference</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/getting-started/">Getting Started</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/current-specifications/" aria-current="page">Keeping Current Specifications</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/keeping-the-record/">Keeping the Record</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/record-validation/">Record Validation and Workflow Status</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/running-a-feature/">Running a Feature</a></li>
+    <li><a href="/workbench/pr-preview/pr-16/guides/writing-a-good-proposal/">Writing a Good Proposal</a></li>
+  </ul>
+</nav>
+
+  <article class="content" data-pagefind-body><h1 id="keeping-current-specifications">Keeping Current Specifications</h1>
+
+<h2 id="where-do-i-read-what-the-project-requires-now">Where do I read what the project requires now? <a class="heading-anchor" href="#where-do-i-read-what-the-project-requires-now" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Read the source that owns the surface. A library&rsquo;s contract lives in its public declarations and the documentation beside them, a protocol&rsquo;s in its schema, and an application workflow&rsquo;s in reference prose or a Gherkin feature file. Proposals explain how those requirements changed. A completed proposal is history: it never overrides the current source, and nobody should have to replay a chain of proposals to learn what applies today.</p>
+<p>Each normative fact has one current owner. A change edits that owner directly, on its branch, before production code. A feature branch holds the proposed end state, the default branch holds the integrated contract, and a release tag identifies the contract that shipped. Git keeps every earlier state, and the proposal keeps the reasons.</p>
+<h2 id="ten-roles-not-ten-documents">Ten roles, not ten documents <a class="heading-anchor" href="#ten-roles-not-ten-documents" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p><a href="/workbench/pr-preview/pr-16/process/#artifacts">The process</a> defines ten roles that together account for what a project needs to know about itself: behavioral specification, native contract, tests, guides, implementation, vision, domain references, policies, decisions, and proposals. The first five describe and realize the product. The next four give project context. A proposal records a change to whichever of the others it affects.</p>
+<p>The roles are conditional. One file can fill several of them, and a feature needs an artifact only for the roles it actually touches. Public declarations with semantic documentation can be both the behavioral specification and the native contract. A Gherkin rule can carry a product policy.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Role</th>
+					<th>How to write and keep it</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Behavioral specification</td>
+					<td>State observable behavior, defaults, failures, and guarantees, organized by capability or interface. Reuse the source that already owns the behavior.</td>
+			</tr>
+			<tr>
+					<td>Native contract</td>
+					<td>Keep declarations, schemas, protocol definitions, and persisted formats in their native form rather than copying them into Markdown.</td>
+			</tr>
+			<tr>
+					<td>Tests</td>
+					<td>Verify the current contract and the implementation risks that matter, in the project&rsquo;s own frameworks. Name each test after the behavior it checks.</td>
+			</tr>
+			<tr>
+					<td>Guides</td>
+					<td>Explain how to accomplish a task for the intended reader, including developers consuming an API. Link to the reference that states the contract rather than restating it.</td>
+			</tr>
+			<tr>
+					<td>Implementation</td>
+					<td>Code and executable configuration: build definitions, tasks, environment schemas, design tokens.</td>
+			</tr>
+			<tr>
+					<td>Vision</td>
+					<td>Purpose, audience, goals, principles, boundaries, and direction. Leave out the feature catalogue.</td>
+			</tr>
+			<tr>
+					<td>Domain references</td>
+					<td>A short explanation of a shared term, identity, relationship, or lifecycle, placed near the specifications that use it. Write one only when existing feature or interface documentation leaves a shared meaning ambiguous. It needs no ID, status, or frontmatter schema.</td>
+			</tr>
+			<tr>
+					<td>Policies and decisions</td>
+					<td>Current files, revised in place and deleted when they no longer apply. <a href="/workbench/pr-preview/pr-16/guides/keeping-the-record/">Keeping the Record</a> covers when to write one.</td>
+			</tr>
+			<tr>
+					<td>Proposals</td>
+					<td>One change, its scope, approach, and reasons. Revise it while the change is designed and reviewed; afterward it is the record of that change.</td>
+			</tr>
+	</tbody>
+</table>
+<p>None of this requires separate narrative, use-case, flow, error-catalogue, view-model, toolchain, or architecture-overview documents, and none of it introduces a registry, metadata schema, or pointer from code back to a specification. A useful diagram can sit in a domain reference or a decision. An entity diagram can be generated from a schema.</p>
+<h2 id="choose-the-representation-by-surface">Choose the representation by surface <a class="heading-anchor" href="#choose-the-representation-by-surface" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>One project can use several representations without choosing a project-wide mode:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Surface</th>
+					<th>Current specification</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Library or SDK</td>
+					<td>Public declarations and the contract documentation beside them: defaults, errors, side effects, ordering, lifecycle, compatibility.</td>
+			</tr>
+			<tr>
+					<td>Protocol, wire format, or stored data</td>
+					<td>The native schema, with semantic requirements next to it.</td>
+			</tr>
+			<tr>
+					<td>Application workflow</td>
+					<td>Gherkin rules and scenarios, or current reference prose.</td>
+			</tr>
+			<tr>
+					<td>Process or tooling</td>
+					<td>Reference prose and the tool&rsquo;s own documentation.</td>
+			</tr>
+	</tbody>
+</table>
+<p>Contract text and type expectations are written or revised before implementation. Documentation colocated with source can state intended behavior independently of the function body, and generated API reference publishes that source; it does not infer requirements from the code. Look and feel stays out of every representation, as it stays out of proposals.</p>
+<h2 id="where-workbenchs-own-requirements-live">Where Workbench&rsquo;s own requirements live <a class="heading-anchor" href="#where-workbenchs-own-requirements-live" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<table>
+	<thead>
+			<tr>
+					<th>Subject</th>
+					<th>Current owner</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>The workflow, its phases, roles, and approval points</td>
+					<td><a href="/workbench/pr-preview/pr-16/process/">The process</a></td>
+			</tr>
+			<tr>
+					<td>What <code>workbench records validate</code> and <code>workbench workflow status</code> detect and report</td>
+					<td><a href="/workbench/pr-preview/pr-16/guides/record-validation/">Record Validation and Workflow Status</a></td>
+			</tr>
+			<tr>
+					<td>What an agent must do in a session</td>
+					<td>The process contract, <a href="https://github.com/markmals/workbench/blob/main/plugin/rules/workbench.md"><code>plugin/rules/workbench.md</code></a>, and the rules and skills beside it in <code>plugin/</code></td>
+			</tr>
+			<tr>
+					<td>The shape of each record</td>
+					<td>The templates in <a href="https://github.com/markmals/workbench/blob/main/plugin/templates/README.md"><code>plugin/templates/</code></a></td>
+			</tr>
+			<tr>
+					<td>The <code>workbench</code> CLI&rsquo;s commands, arguments, results, and errors</td>
+					<td>The command registry in <code>src/</code>, published as the <a href="/workbench/pr-preview/pr-16/guides/cli-reference/">CLI reference</a>, and the Rust tests in <code>tests/</code></td>
+			</tr>
+			<tr>
+					<td>Purpose and direction</td>
+					<td><a href="/workbench/pr-preview/pr-16/vision/">The vision</a></td>
+			</tr>
+			<tr>
+					<td>Why any of these changed</td>
+					<td>The proposals and their pull requests</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="how-a-change-moves-through-the-sources">How a change moves through the sources <a class="heading-anchor" href="#how-a-change-moves-through-the-sources" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ol>
+<li>In the proposal, identify the current sources the change affects and any missing information. Link those owners and explain the delta, scope, alternatives, approach, and compatibility work. Detailed design describes the change; it does not maintain a second complete contract.</li>
+<li>After the human approves the proposal, revise the affected specifications and any agreed policies or decisions before production code. Reuse their representation, or add the smallest adequate source for a requirement with no home. A new substantive decision goes back to the human.</li>
+<li>Write failing tests against the revised contract and watch them fail. Write or revise guides from the intended contract and compare them with the tests. Then implement.</li>
+<li>Run the gate. Self-check the authorized delta against the specifications, tests, guides, and code, then give the independent reviewer the current sources and relevant unchanged constraints alongside the proposal.</li>
+<li>Post the preview and readiness report. After human acceptance, finalize the affected records and the vision, record <code>implemented</code>, and merge the sources with their implementation.</li>
+</ol>
+<p>When two current sources disagree, or a source disagrees with approved intent, raise it with the human. The proposal bounds what is authorized; the branch&rsquo;s specifications state the result. Documenting whatever the implementation happens to do does not approve it.</p>
+<h2 id="worked-example-a-library-contract">Worked example: a library contract <a class="heading-anchor" href="#worked-example-a-library-contract" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>An asset package exposes <code>getStylesheets()</code>. An approved proposal changes it to return stylesheets in dependency order and to reject an unknown module instead of returning an empty array. The contract lives in the declaration&rsquo;s documentation, which the generated API reference publishes, so that is the first edit:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-diff" data-lang="diff"><span class="line"><span class="cl"> /**
+</span></span><span class="line"><span class="cl"><span class="gd">- * Returns the URLs of the stylesheets a module needs. Returns an empty
+</span></span></span><span class="line"><span class="cl"><span class="gd">- * array when `moduleId` is not in the module graph.
+</span></span></span><span class="line"><span class="cl"><span class="gi">+ * Returns the URLs of the stylesheets a module needs, in dependency order:
+</span></span></span><span class="line"><span class="cl"><span class="gi">+ * a stylesheet imported by a dependency comes before those of the modules
+</span></span></span><span class="line"><span class="cl"><span class="gi">+ * that import it.
+</span></span></span><span class="line"><span class="cl">  *
+</span></span><span class="line"><span class="cl">  * Looking up stylesheets never compiles the module for the browser.
+</span></span><span class="line"><span class="cl"><span class="gi">+ *
+</span></span></span><span class="line"><span class="cl"><span class="gi">+ * @throws {UnknownModuleError} when `moduleId` is not in the module graph.
+</span></span></span><span class="line"><span class="cl">  */
+</span></span><span class="line"><span class="cl"> export function getStylesheets(moduleId: string): string[];
+</span></span></code></pre></div><p>The unchanged guarantee about compilation stays where it was; the delta is the ordering and the error. If the package README restates the contract, revise it in the same edit or replace the restatement with a link to the reference, so the fact keeps one owner.</p>
+<p>Next come failing tests named for the behavior: <code>returns a dependency's stylesheets before its importer's</code> and <code>throws UnknownModuleError for a module outside the graph</code>. The existing test that lookup never compiles the module stays as it is. Then the usage guide changes where a reader must now handle the error, and links to the reference instead of repeating it. Then the implementation.</p>
+<p>There is no <code>.feature</code> file in this change. Given/When/Then would restate the same promise in another form without making it clearer or better verified.</p>
+<h2 id="worked-example-an-application-workflow-in-gherkin">Worked example: an application workflow in Gherkin <a class="heading-anchor" href="#worked-example-an-application-workflow-in-gherkin" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>An application keeps its report export workflow in <code>specs/features/report-export.feature</code>. An approved proposal adds spreadsheet export beside CSV. The feature file is the current owner, so it changes first, turning the single scenario into an outline over both formats:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gherkin" data-lang="gherkin"><span class="line"><span class="cl"><span class="k">Feature:</span><span class="nf"> Export a report
+</span></span></span><span class="line"><span class="cl"><span class="nf">  Project members download a report&#39;s rows to use in other tools.
+</span></span></span><span class="line"><span class="cl"><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">  Rule: A member can export any report they can view
+</span></span></span><span class="line"><span class="cl"><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">    </span><span class="k">Scenario Outline:</span><span class="nf"> Export in a supported format
+</span></span></span><span class="line"><span class="cl"><span class="k">      Given </span><span class="nf">Dana can view the &#34;</span><span class="s">Q3 revenue</span><span class="nf">&#34; report
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">When </span><span class="nf">Dana exports &#34;</span><span class="s">Q3 revenue</span><span class="nf">&#34; as </span><span class="nv">&lt;format&gt;</span><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">Then </span><span class="nf">Dana receives a </span><span class="nv">&lt;format&gt;</span><span class="nf"> file containing the report&#39;s rows
+</span></span></span><span class="line"><span class="cl"><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">Examples:
+</span></span></span><span class="line"><span class="cl"><span class="k">        |</span><span class="nv"> format</span><span class="k"> |</span><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="k">        |</span><span class="s"> CSV</span><span class="k">    |</span><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="k">        |</span><span class="s"> XLSX</span><span class="k">   |
+</span></span></span><span class="line"><span class="cl"><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">  Rule: A report with no rows is not exported
+</span></span></span><span class="line"><span class="cl"><span class="nf">
+</span></span></span><span class="line"><span class="cl"><span class="nf">    </span><span class="k">Scenario:</span><span class="nf"> Export an empty report
+</span></span></span><span class="line"><span class="cl"><span class="k">      Given </span><span class="nf">the &#34;</span><span class="s">Q4 forecast</span><span class="nf">&#34; report has no rows
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">When </span><span class="nf">Dana exports &#34;</span><span class="s">Q4 forecast</span><span class="nf">&#34; as CSV
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">Then </span><span class="nf">Dana is told the report has no rows to export
+</span></span></span><span class="line"><span class="cl"><span class="nf">      </span><span class="k">And </span><span class="nf">no file is downloaded</span></span></span></code></pre></div><p>The scenarios describe what Dana can do and is told, not which button she presses. The project&rsquo;s existing Gherkin integration runs the new XLSX example through its bindings, and it fails until the implementation exists. The guide gains the new format, and the code follows.</p>
+<p>A project uses Gherkin only where rules and examples communicate a requirement well, and only with a real integration wired into its test task before it claims executable coverage. For syntax, file layout, bindings, and adopting an integration, use the <code>specifying-behavior-with-gherkin</code> skill. Workbench itself specifies its process in prose and its CLI in its command registry and Rust tests.</p>
+<h2 id="worked-example-revising-and-retiring-a-policy">Worked example: revising and retiring a policy <a class="heading-anchor" href="#worked-example-revising-and-retiring-a-policy" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p><code>policies/0003-document-exported-functions.md</code> requires a runnable example in the doc comment of every exported function. The human agrees to narrow it to <code>packages/core</code>. Edit the same file: its rule, its scope, and the lint configuration that enforces it change in one commit. The ID stays <code>policy.0003</code> and the status stays <code>active</code>. No replacement file and no <code>supersedes</code> entry are written; Git and the proposal hold the earlier wording and why it changed.</p>
+<p><code>policies/0001-use-yarn.md</code> no longer applies because the project moved to pnpm. Retire it by deleting the file:</p>
+<ol>
+<li>
+<p>Find every link to it, for example with <code>rg 'policies/0001-use-yarn'</code>.</p>
+</li>
+<li>
+<p>Repoint or remove current references. A guide that linked it now describes pnpm and links whatever owns that requirement today.</p>
+</li>
+<li>
+<p>Where a historical link must survive, such as a completed proposal that cited the policy, replace it with an immutable Git revision URL. Before the deletion, <code>git log -1 --format=%H -- policies/0001-use-yarn.md</code> prints a commit that still contains the file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-md" data-lang="md"><span class="line"><span class="cl">[<span class="nt">policy.0001</span>](<span class="na">https://github.com/acme/app/blob/4f2c9e1d7a3b5c6e8f9a0b1c2d3e4f5a6b7c8d9e/policies/0001-use-yarn.md</span>)</span></span></code></pre></div><p>A completed proposal receives no edit beyond that link repair.</p>
+</li>
+<li>
+<p>Delete the file in the same change, and do not reuse <code>policy.0001</code> for a different rule.</p>
+</li>
+<li>
+<p>Run <code>mise run check</code>. The documentation build reports any link the search missed.</p>
+</li>
+</ol>
+<h2 id="adopting-this-in-an-existing-project">Adopting this in an existing project <a class="heading-anchor" href="#adopting-this-in-an-existing-project" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<ol>
+<li>Find where each capability&rsquo;s current requirements are owned today: contract documentation, schemas, tests, guides, and the proposals that changed them.</li>
+<li>Reconcile approved intent with those sources. Reuse what is adequate, fill the gaps, and raise disagreements with the human instead of copying whichever source is easiest.</li>
+<li>Migrate policy and decision supersession chains into current records, following <a href="/workbench/pr-preview/pr-16/guides/keeping-the-record/">Keeping the Record</a>.</li>
+<li>Replace each guide&rsquo;s <code>describes</code> field with ordinary links to the sources it explains. Historical provenance, when useful, can be a sentence of prose.</li>
+<li>Verify with the existing gate.</li>
+</ol>
+<p>A large archive can migrate in stages tracked as work items. Any area that still needs proposal archaeology to understand is disclosed as unmigrated rather than presented as specified.</p>
+<h2 id="evidence">Evidence <a class="heading-anchor" href="#evidence" aria-label="Link to this section" data-pagefind-ignore>#</a></h2>
+<p>Native tests, type checks, executable examples, consumer fixtures, and other checks all count as evidence. Claims about security, convergence, performance, or human judgment need evidence suited to the claim. A test that only confirms a document exists, or that a test carries an identifier, establishes nothing about behavior. Readiness reports say what was exercised and what remains unverified. Workbench adds no scenario registry, coverage format, or state machine for automated, manual, and excluded checks.</p>
+
+<p class="source-link" data-pagefind-ignore><a href="https://github.com/markmals/workbench/blob/main/guides/current-specifications.md">View source</a></p>
+
+  </article>
+<aside class="toc" aria-label="On this page">
+  <p class="toc__title">On this page</p>
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#where-do-i-read-what-the-project-requires-now">Where do I read what the project requires now?</a></li>
+    <li><a href="#ten-roles-not-ten-documents">Ten roles, not ten documents</a></li>
+    <li><a href="#choose-the-representation-by-surface">Choose the representation by surface</a></li>
+    <li><a href="#where-workbenchs-own-requirements-live">Where Workbench&rsquo;s own requirements live</a></li>
+    <li><a href="#how-a-change-moves-through-the-sources">How a change moves through the sources</a></li>
+    <li><a href="#worked-example-a-library-contract">Worked example: a library contract</a></li>
+    <li><a href="#worked-example-an-application-workflow-in-gherkin">Worked example: an application workflow in Gherkin</a></li>
+    <li><a href="#worked-example-revising-and-retiring-a-policy">Worked example: revising and retiring a policy</a></li>
+    <li><a href="#adopting-this-in-an-existing-project">Adopting this in an existing project</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+  </ul>
+</nav>
+</aside>
+
+</div>
+
+    </main><footer class="site-footer">
+  <span>Workbench</span>
+  <a href="https://github.com/markmals/workbench">Repository</a>
+</footer>
+<dialog class="search" aria-label="Search" data-search-base="/workbench/pr-preview/pr-16/" data-search-bundle="/workbench/pr-preview/pr-16/pagefind/">
+  <div class="search__ui" id="search-ui"></div>
+  <p class="search__unavailable" hidden>Search runs over a built site. Build it with <code>mise run docs:build</code> and serve <code>docs/public</code>.</p>
+</dialog>
+
+  </body>
+</html>
