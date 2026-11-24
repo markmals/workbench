@@ -4,9 +4,9 @@
 
 ## Proposal
 
-<!-- Link the proposal and state whether its accepted behavior is FULLY or PARTIALLY implemented. -->
+<!-- Link the proposal on the feature branch, never at a commit, and state whether its accepted behavior is FULLY or PARTIALLY implemented. -->
 
-- Proposal: [<proposal-id>](proposal-url)
+- Proposal: [<proposal-id>](https://github.com/<owner>/<repo>/blob/<branch>/proposals/<NNNN>-<slug>.md)
 - Implementation: <FULLY | PARTIALLY> implemented
 
 ## What was built

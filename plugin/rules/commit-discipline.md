@@ -1,5 +1,5 @@
 ---
-description: When and how to commit, stage, push, and open pull requests in a Workbench project, including Scoped Commits subjects and change files.
+description: When and how to commit, stage, push, and open pull requests in a Workbench project, including Scoped Commits subjects, branch and pull-request names, and change files.
 ---
 
 # Commit Discipline
@@ -28,26 +28,33 @@ This repository uses [Scoped Commits](https://scopedcommits.com/), not Conventio
 <scope>: <imperative description>
 ```
 
+The scope names the feature area the change addresses, not the step of the process that produced it, so a reader scanning the log sees where each change landed. Work on a proposal takes the scope of the feature it changes.
+
 Write an imperative, present-tense description: `add`, `fix`, `remove` — not `added` or `adds`. Keep the subject under roughly 72 characters, specific, and without a trailing period. Use an optional body for motivation or non-obvious trade-offs; wrap it at roughly 72 characters.
 
 Do not write Conventional Commits `type(scope):` subjects. Scoped Commits lead with the area being changed.
 
 `workbench commits check` accepts three kinds of scope:
 
-- Workbench's process scopes: `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
+- Workbench's process scopes: `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
 - the project's product scopes, one per line in `.agents/commit-scopes`, which is optional and grows with the project;
-- `<NNNN>-<slug>` for work implementing that real proposal, such as `0007-export-queue`.
+- `<NNNN>-<slug>` for work on that real proposal, from its draft to its implementation, such as `0007-export-queue`.
 
 `workbench commits scopes` lists every accepted scope and where it comes from, and a rejected subject lists them too. Prefer the narrowest scope that accurately describes the change; use `treewide` only for a true sweep. A change that needs a product scope no list has adds it to `.agents/commit-scopes` in the same commit.
 
 Examples:
 
-- `proposal: clarify release preview ownership`
+- `exports: retry a failed report export`
 - `guides: explain the readiness report`
 - `ci: check change files on every pull request`
+- `0007-export-queue: propose queuing report exports`
 - `0007-export-queue: reject duplicate export jobs`
 
 Mechanical merge, revert, fixup, and squash commits are exempt. hk's `commit-msg` hook runs `workbench commits check`, so every commit is checked regardless of which harness, editor, or human made it, and CI checks every commit in a pull request.
+
+## Branches and pull requests
+
+A branch and a pull request name the feature area they change, as a commit scope does. Title the pull request as a Scoped Commits subject and name the branch for the same area and change in kebab case: `exports: queue report exports` on `export-queue`. A pull request that starts with a proposal is named for the feature it proposes, never `proposal`: that a change starts as a proposal says nothing about what it changes.
 
 ## Staging
 

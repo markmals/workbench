@@ -13,7 +13,7 @@ use serde_json::json;
 use crate::failure::Failure;
 
 /// The process scopes every Workbench project accepts without listing them.
-pub const BUILT_IN: [&str; 14] = [
+pub const BUILT_IN: [&str; 13] = [
     "agents",
     "ci",
     "decision",
@@ -21,7 +21,6 @@ pub const BUILT_IN: [&str; 14] = [
     "docs",
     "guides",
     "policy",
-    "proposal",
     "release",
     "rules",
     "skills",

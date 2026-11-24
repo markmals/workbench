@@ -2,14 +2,18 @@
 # are ignored.
 #
 # `workbench commits check` accepts Workbench's built-in process scopes (agents,
-# ci, decision, deps, docs, guides, policy, proposal, release, rules, skills,
-# templates, treewide, vision) and the name of any real proposal file —
+# ci, decision, deps, docs, guides, policy, release, rules, skills, templates,
+# treewide, vision) and the name of any real proposal file —
 # `proposals/<NNNN>-<slug>.md` is the scope `<NNNN>-<slug>` — without an entry
 # here. List only the scopes for parts of this repository the process does not
 # name. Prefer the narrowest scope that accurately describes the change.
+#
+# `proposal` is listed because proposals are a feature of Workbench. Work on one
+# proposal takes that proposal's `<NNNN>-<slug>`.
 
 cli
 hooks
+proposal
 readme
 site
 tools

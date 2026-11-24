@@ -46,7 +46,7 @@ Tell the agent: “Project members need to export a report.” Then do nothing w
 
 ### The agent
 
-The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. The PR becomes ready after the complete implementation is verified and pushed; agent review and the readiness report follow.
+The agent creates a branch, pushes it, and opens a draft pull request before writing the proposal. It names both for the part of the project the feature changes, such as a pull request titled `reports: export a report` on a branch named `report-export`, so a list of branches or pull requests shows what each one is about. The PR becomes ready after the complete implementation is verified and pushed; agent review and the readiness report follow.
 
 The pull request exists this early because it is the durable workspace for one feature: its proposal, implementation, review discussion, and readiness report accumulate there as one reviewable thing.
 
@@ -58,7 +58,7 @@ On the default branch, or on a branch without a pull request, it reports **Phase
 
 ### You
 
-React to the proposal until it represents the change you intend. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds. Spend it on what the feature does; how it looks is decided on the preview, not here.
+React to the proposal until it represents the change you intend. The link at the top of the pull request description opens the rendered proposal as it stands on the branch; refresh it after the agent pushes to read the latest revision. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds. Spend it on what the feature does; how it looks is decided on the preview, not here.
 
 Do not leave an uncertainty for the agent to infer. It records one as:
 

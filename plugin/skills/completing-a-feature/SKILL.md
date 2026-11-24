@@ -79,6 +79,8 @@ An accepted PR still in draft is an anomalous state. Verify its pushed implement
 
 Choose a merge strategy that retains the proposal and PR discussion. Do not squash the work into one opaque commit that discards that context.
 
+Once merged, repoint the proposal link at the top of the pull request description from the feature branch to the default branch, where the proposal now lives; the branch link breaks when the branch is deleted.
+
 ## 6. Release
 
 When release is required and separately authorized, use the project's existing CI/CD process. Merging accumulates change files on the default branch, and on every push to it Knope's prepare-release workflow keeps one release pull request open with the next version, its changelog entry, and the version-file changes. Merging that release pull request is what publishes: the release workflow builds the artifacts, tags `v<version>`, and creates the GitHub release. Run `mise tasks` and read `.github/workflows/` when the setup is unknown. Skip publication for approved merge-only delivery.

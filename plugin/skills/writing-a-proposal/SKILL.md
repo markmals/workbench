@@ -23,6 +23,8 @@ If the answer is no, do not write a proposal or open a draft pull request for it
 
 Only after an explicit yes for this change, confirm the change has a branch pushed to `origin` and an open draft pull request before writing the proposal. This consent covers later revisions of the same proposal; a different change needs a new answer.
 
+Name the branch and title the draft pull request for the feature area the proposal changes, as `.workbench/rules/commit-discipline.md` describes: `exports: queue report exports` on `export-queue`, never `proposal: …` or `proposal/…`. Commits on the branch take the same area's scope or, once the proposal file exists, its `<NNNN>-<slug>`.
+
 ## Output
 
 Create exactly one `proposals/<NNNN>-<slug>.md`. Copy the proposal template: `.agents/templates/PROPOSAL.md` when the project overrides it, otherwise `.workbench/templates/PROPOSAL.md`. Do not replace it with a folder or auxiliary planning files.
@@ -106,6 +108,8 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
     Fix clear defects. Count remaining clarification markers and present them to the human.
 
 11. **Publish the draft.** Commit the proposal and push it as soon as it is coherent enough to react to. Do not polish it privately first — the draft pull request exists so the human can read and edit the proposal in place, and a proposal held back is a proposal being decided by the agent alone.
+
+    Then link the proposal on the feature branch at the top of the pull request description: `https://github.com/<owner>/<repo>/blob/<branch>/proposals/<NNNN>-<slug>.md`. Link the branch, never a commit: the branch link opens the rendered proposal at the latest pushed revision, so the human rereads each revision by refreshing one page instead of finding the file among the pull request's changes. Keep the link at the top of the description until the merge.
 
 12. **Iterate on the pull request.** The human comments, requests changes, and may commit edits to the proposal directly. Read those commits before responding; they are instructions, not conflicts to resolve. Keep iterating — answering questions, revising the design, resolving markers — until the human is satisfied. This can take many rounds, and the proposal stays `draft` throughout.
 
