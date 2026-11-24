@@ -109,6 +109,8 @@ Choose the smallest independently useful slice. A proposal with a broad motivati
 
 11. **Publish the draft.** Commit the proposal and push it as soon as it is coherent enough to react to. Do not polish it privately first — the draft pull request exists so the human can read and edit the proposal in place, and a proposal held back is a proposal being decided by the agent alone.
 
+    Then link the proposal on the feature branch at the top of the pull request description: `https://github.com/<owner>/<repo>/blob/<branch>/proposals/<NNNN>-<slug>.md`. Link the branch, never a commit: the branch link opens the rendered proposal at the latest pushed revision, so the human rereads each revision by refreshing one page instead of finding the file among the pull request's changes. Keep the link at the top of the description until the merge.
+
 12. **Iterate on the pull request.** The human comments, requests changes, and may commit edits to the proposal directly. Read those commits before responding; they are instructions, not conflicts to resolve. Keep iterating — answering questions, revising the design, resolving markers — until the human is satisfied. This can take many rounds, and the proposal stays `draft` throughout.
 
 13. **Wait for the human to close the draft.** The human decides when the proposal is settled and moves it to `status: awaiting-implementation`. They may ask you to make that edit; making it when asked is fine, deciding it is not.

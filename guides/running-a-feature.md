@@ -58,7 +58,7 @@ On the default branch, or on a branch without a pull request, it reports **Phase
 
 ### You
 
-React to the proposal until it represents the change you intend. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds. Spend it on what the feature does; how it looks is decided on the preview, not here.
+React to the proposal until it represents the change you intend. The link at the top of the pull request description opens the rendered proposal as it stands on the branch; refresh it after the agent pushes to read the latest revision. Comment on the pull request, or edit `proposals/<NNNN>-<slug>.md` directly on the branch. Both work. This is where nearly all of the leverage is, and it can take many rounds. Spend it on what the feature does; how it looks is decided on the preview, not here.
 
 Do not leave an uncertainty for the agent to infer. It records one as:
 
