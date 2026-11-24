@@ -34,7 +34,7 @@ Do not write Conventional Commits `type(scope):` subjects. Scoped Commits lead w
 
 `workbench commits check` accepts three kinds of scope:
 
-- Workbench's process scopes: `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `proposal`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
+- Workbench's process scopes: `agents`, `ci`, `decision`, `deps`, `docs`, `guides`, `policy`, `release`, `rules`, `skills`, `templates`, `treewide`, and `vision`;
 - the project's product scopes, one per line in `.agents/commit-scopes`, which is optional and grows with the project;
 - `<NNNN>-<slug>` for work implementing that real proposal, such as `0007-export-queue`.
 

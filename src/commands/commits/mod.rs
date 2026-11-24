@@ -31,10 +31,11 @@ pub static COMMANDS: &[CommandSpec] = &[
         that is neither blank nor a `#` comment, and a message with no such line passes. \
         `<base> <head>` checks the subject of every commit reachable from head and not from base, \
         and reports every bad subject, not only the first. Accepted scopes are the built-in \
-        process scopes (agents, ci, decision, deps, docs, guides, policy, proposal, release, \
-        rules, skills, templates, treewide, vision); the scopes listed one per line in the \
-        optional `.agents/commit-scopes` (blank lines and `#` comments ignored); and \
-        `<NNNN>-<slug>` for every `proposals/<NNNN>-<slug>.md`. Merge, revert, `fixup!`, and \
+        process scopes (agents, ci, decision, deps, docs, guides, policy, release, rules, \
+        skills, templates, treewide, vision); the scopes listed one per line in the optional \
+        `.agents/commit-scopes` (blank lines and `#` comments ignored); and `<NNNN>-<slug>` for \
+        every `proposals/<NNNN>-<slug>.md`. `proposal` is not built in: work on a proposal takes \
+        the scope of the feature area it changes. Merge, revert, `fixup!`, and \
         `squash!` subjects are exempt; Conventional Commits `type(scope):` subjects are \
         rejected by name. The result lists each subject with its verdict, the violations, and \
         every accepted scope. Any violation fails with CHECK_FAILED after the result is \

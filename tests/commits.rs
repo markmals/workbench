@@ -5,7 +5,7 @@ mod support;
 use serde_json::Value;
 use support::{Fixture, Outcome, assert_matches_output_schema};
 
-const BUILT_IN_SCOPES: [&str; 14] = [
+const BUILT_IN_SCOPES: [&str; 13] = [
     "agents",
     "ci",
     "decision",
@@ -13,7 +13,6 @@ const BUILT_IN_SCOPES: [&str; 14] = [
     "docs",
     "guides",
     "policy",
-    "proposal",
     "release",
     "rules",
     "skills",

@@ -1,7 +1,7 @@
 # This project's commit scopes, one per line. Blank lines and # comments are ignored.
 #
 # `workbench commits check` also accepts Workbench's process scopes (agents, ci, decision, deps,
-# docs, guides, policy, proposal, release, rules, skills, templates, treewide, vision) and the
+# docs, guides, policy, release, rules, skills, templates, treewide, vision) and the
 # name of any proposal file: `proposals/<NNNN>-<slug>.md` is the scope `<NNNN>-<slug>`, so
 # feature work needs no entry here.
 #

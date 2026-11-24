@@ -81,6 +81,21 @@ fn a_scope_the_scopes_file_lists_passes() {
 }
 
 #[test]
+fn proposal_is_a_scope_only_where_the_scopes_file_lists_it() {
+    let fixture = Fixture::git();
+    fixture.write("proposals/0007-export-queue.md", "");
+    assert_rejected(
+        &fixture,
+        "proposal: draft the export queue\n",
+        "unknownScope",
+    );
+    assert_passes(&fixture, "0007-export-queue: draft the proposal\n");
+
+    fixture.write(".agents/commit-scopes", "proposal\n");
+    assert_passes(&fixture, "proposal: number proposals from one\n");
+}
+
+#[test]
 fn the_built_in_process_scopes_need_no_scopes_file() {
     let fixture = Fixture::git();
     for scope in BUILT_IN_SCOPES {
